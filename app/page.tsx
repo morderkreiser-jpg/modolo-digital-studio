@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink } from "lucide-react";
 
 export default function Home() {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -31,30 +31,10 @@ export default function Home() {
   };
 
   const services = [
-    {
-      icon: Code2,
-      title: "Web & Sviluppo",
-      desc: "Siti web moderni, performanti e ottimizzati per la SEO locale. Gestione Google Business per emergere sul territorio.",
-      tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"],
-    },
-    {
-      icon: Palette,
-      title: "Brand & Identità",
-      desc: "Costruiamo identità visive memorabili. Dal logo ai template Canva brandizzati, ogni dettaglio racconta il tuo brand.",
-      tags: ["Branding", "Identità Visiva", "Template Canva"],
-    },
-    {
-      icon: Camera,
-      title: "Contenuti & Visual",
-      desc: "Shooting fotografici professionali e gestione social in collaborazione con Project Visibility, specialisti in contenuti.",
-      tags: ["Shooting", "Social Media", "Project Visibility"],
-    },
-    {
-      icon: Mail,
-      title: "Email Marketing",
-      desc: "Newsletter ed email marketing che trasformano i contatti in clienti. Strategie che fanno crescere il tuo business.",
-      tags: ["Newsletter", "Email Marketing", "Automation"],
-    },
+    { icon: Code2, title: "Web & Sviluppo", desc: "Siti web moderni, performanti e ottimizzati per la SEO locale. Gestione Google Business per emergere sul territorio.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
+    { icon: Palette, title: "Brand & Identità", desc: "Costruiamo identità visive memorabili. Dal logo ai template Canva brandizzati, ogni dettaglio racconta il tuo brand.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
+    { icon: Camera, title: "Contenuti & Visual", desc: "Shooting fotografici professionali e gestione social in collaborazione con Project Visibility, specialisti in contenuti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
+    { icon: Mail, title: "Email Marketing", desc: "Newsletter ed email marketing che trasformano i contatti in clienti. Strategie che fanno crescere il tuo business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
   ];
 
   const steps = [
@@ -99,8 +79,8 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3 sm:gap-6">
             <a href="#servizi" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Servizi</a>
+            <a href="#portfolio" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Portfolio</a>
             <a href="#chi-siamo" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Chi siamo</a>
-            <a href="#metodo" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Metodo</a>
             <a href="#contatti" className="text-xs sm:text-sm tracking-wider border border-[#D4A574]/40 text-[#D4A574] px-4 sm:px-5 py-2 rounded-full hover:bg-[#D4A574] hover:text-black hover:border-[#D4A574] transition-all duration-300">
               Contattaci
             </a>
@@ -206,8 +186,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PORTFOLIO */}
+      <section id="portfolio" className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05] relative">
+        <div className="max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
+            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Portfolio</span>
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
+              Progetti che <span className="italic font-serif text-[#D4A574]">parlano da soli</span>
+            </h2>
+          </motion.div>
+
+          {/* Progetto in evidenza - SaporiVivi */}
+          <motion.a
+            href="https://saporivivi.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="group block relative rounded-3xl overflow-hidden border border-white/[0.08] hover:border-[#D4A574]/40 transition-all duration-500"
+          >
+            <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
+              <Image src="/portfolio-saporivivi.png" alt="SaporiVivi - Italian Luxury Bar Catering" fill className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                <div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-xs tracking-wider text-[#D4A574] border border-[#D4A574]/30 bg-[#D4A574]/10 px-3 py-1.5 rounded-full">Sito Web Completo</span>
+                    <span className="text-xs tracking-wider text-white/60 border border-white/20 px-3 py-1.5 rounded-full">Catering & Eventi</span>
+                    <span className="text-xs tracking-wider text-white/60 border border-white/20 px-3 py-1.5 rounded-full">SEO</span>
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2">SaporiVivi</h3>
+                  <p className="text-white/60 font-light max-w-xl">Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.</p>
+                </div>
+                <div className="flex items-center gap-2 text-[#D4A574] whitespace-nowrap group-hover:gap-3 transition-all">
+                  <span className="text-sm tracking-wider">Visita il sito</span>
+                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.a>
+
+          {/* Placeholder progetti futuri */}
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            {[
+              { cat: "Branding · Concept", title: "Il tuo prossimo progetto", desc: "C'è spazio per la tua storia. Costruiamo insieme qualcosa di memorabile." },
+              { cat: "Web Design · Concept", title: "Spazio disponibile", desc: "Stiamo cercando brand ambiziosi con cui collaborare. Potresti essere il prossimo." },
+            ].map((p, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative rounded-2xl border border-dashed border-white/[0.1] hover:border-[#D4A574]/30 p-10 flex flex-col items-center justify-center text-center min-h-[280px] transition-all duration-500">
+                <span className="text-xs tracking-wider text-[#D4A574]/70 uppercase mb-4">{p.cat}</span>
+                <h3 className="text-2xl font-light mb-3 text-white/80">{p.title}</h3>
+                <p className="text-white/40 font-light text-sm max-w-xs mb-6">{p.desc}</p>
+                <a href="#contatti" className="text-sm text-[#D4A574] tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Parliamone <ArrowRight className="w-4 h-4" />
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CHI SIAMO */}
-      <section id="chi-siamo" className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05] relative overflow-hidden">
+      <section id="chi-siamo" className="py-32 px-6 lg:px-12 relative overflow-hidden">
         <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#D4A574]/[0.05] rounded-full blur-[100px]" />
         <div className="max-w-7xl mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -248,7 +291,7 @@ export default function Home() {
       </section>
 
       {/* SETTORI */}
-      <section className="py-24 px-6 lg:px-12 relative">
+      <section className="py-24 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05]">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center mb-16">
             <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Per chi lavoriamo</span>
@@ -272,7 +315,7 @@ export default function Home() {
       </section>
 
       {/* METODO */}
-      <section id="metodo" className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05] relative">
+      <section id="metodo" className="py-32 px-6 lg:px-12 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
             <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Il nostro metodo</span>
@@ -295,7 +338,7 @@ export default function Home() {
       </section>
 
       {/* QUOTE */}
-      <section className="py-32 px-6 lg:px-12 relative">
+      <section className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05]">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto text-center">
           <Sparkles className="w-8 h-8 text-[#D4A574] mx-auto mb-8" strokeWidth={1.2} />
           <p className="text-2xl md:text-4xl font-light leading-relaxed italic font-serif">
@@ -306,7 +349,7 @@ export default function Home() {
       </section>
 
       {/* CONTATTI + FORM */}
-      <section id="contatti" className="py-32 px-6 lg:px-12 bg-black/40 border-t border-white/[0.05] relative overflow-hidden">
+      <section id="contatti" className="py-32 px-6 lg:px-12 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#D4A574]/[0.06] rounded-full blur-[120px]" />
 
         <div className="relative max-w-5xl mx-auto">
@@ -321,7 +364,6 @@ export default function Home() {
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-12">
-            {/* Info contatti */}
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
               <a href="mailto:info@modolodigitalstudio.ch" className="flex items-start gap-4 group">
                 <div className="inline-flex p-3 rounded-xl bg-[#D4A574]/10 group-hover:bg-[#D4A574]/20 transition-colors">
@@ -352,7 +394,6 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Form */}
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
               {formStatus === "success" ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#D4A574]/30 bg-[#D4A574]/[0.05]">
