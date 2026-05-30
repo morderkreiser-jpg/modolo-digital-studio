@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink } from "lucide-react";
+import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown } from "lucide-react";
 
 export default function Home() {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,6 +64,15 @@ export default function Home() {
     { icon: Zap, title: "Tecnologia moderna", desc: "Usiamo gli strumenti più avanzati per garantire siti veloci, sicuri e pronti per il futuro." },
   ];
 
+  const faqs = [
+    { q: "Quanto costa realizzare un sito web?", a: "Ogni progetto è su misura, quindi il prezzo dipende dalle tue esigenze: numero di pagine, funzionalità e contenuti da creare. Per questo offriamo una prima consulenza gratuita: ci racconti il tuo progetto e ti prepariamo un preventivo chiaro, senza sorprese." },
+    { q: "Quanto tempo serve per avere il sito online?", a: "Dipende dalla complessità, ma in genere un sito vetrina richiede dalle 2 alle 4 settimane dalla raccolta dei materiali. All'inizio definiamo insieme una tabella di marcia, così sai sempre a che punto siamo." },
+    { q: "Lavorate in tutta la Svizzera?", a: "Sì. Seguiamo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è mai un ostacolo: gran parte del lavoro avviene online, con call e aggiornamenti costanti." },
+    { q: "Vi occupate anche di testi e fotografie?", a: "Assolutamente. Possiamo curare i contenuti dall'inizio alla fine, con shooting fotografici professionali e creazione dei testi. Per i social collaboriamo con Project Visibility, specialisti in contenuti e gestione delle pagine." },
+    { q: "Il sito sarà ottimizzato per Google?", a: "Sì, ogni sito che realizziamo nasce ottimizzato per la SEO: struttura corretta, velocità di caricamento e configurazione di Google Business per farti trovare sul territorio. Una buona presenza online parte da qui." },
+    { q: "Cosa succede dopo che il sito è online?", a: "Non ti lasciamo solo. Offriamo assistenza e manutenzione per tenere il sito sicuro e aggiornato, e siamo sempre disponibili per modifiche o nuove idee. Costruiamo relazioni durature, non lavori 'usa e getta'." },
+  ];
+
   return (
     <main className="min-h-screen bg-[#0A0A0A] text-[#F5F1EA] overflow-x-hidden">
       {/* NAVBAR */}
@@ -81,6 +91,7 @@ export default function Home() {
             <a href="#servizi" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Servizi</a>
             <a href="#portfolio" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Portfolio</a>
             <a href="#chi-siamo" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Chi siamo</a>
+            <a href="#faq" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">FAQ</a>
             <a href="#contatti" className="text-xs sm:text-sm tracking-wider border border-[#D4A574]/40 text-[#D4A574] px-4 sm:px-5 py-2 rounded-full hover:bg-[#D4A574] hover:text-black hover:border-[#D4A574] transition-all duration-300">
               Contattaci
             </a>
@@ -196,7 +207,6 @@ export default function Home() {
             </h2>
           </motion.div>
 
-          {/* Progetto in evidenza - SaporiVivi */}
           <motion.a
             href="https://saporivivi.ch"
             target="_blank"
@@ -230,7 +240,6 @@ export default function Home() {
             </div>
           </motion.a>
 
-          {/* Placeholder progetti futuri */}
           <div className="grid md:grid-cols-2 gap-6 mt-6">
             {[
               { cat: "Branding · Concept", title: "Il tuo prossimo progetto", desc: "C'è spazio per la tua storia. Costruiamo insieme qualcosa di memorabile." },
@@ -346,6 +355,40 @@ export default function Home() {
             <span className="text-[#D4A574]">Il nostro lavoro è raccontarla con eleganza.</span>"
           </p>
         </motion.div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-32 px-6 lg:px-12 relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#D4A574]/[0.04] rounded-full blur-[120px]" />
+        <div className="max-w-3xl mx-auto relative">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-16 text-center">
+            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Domande frequenti</span>
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
+              Tutto quello che <span className="italic font-serif text-[#D4A574]">vuoi sapere</span>
+            </h2>
+          </motion.div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, i) => {
+              const isOpen = openFaq === i;
+              return (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+                  <button onClick={() => setOpenFaq(isOpen ? null : i)} className="w-full flex items-center justify-between gap-4 p-6 text-left hover:bg-white/[0.02] transition-colors">
+                    <span className="text-lg font-light">{faq.q}</span>
+                    <ChevronDown className={`w-5 h-5 text-[#D4A574] flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
+                        <p className="px-6 pb-6 text-white/50 font-light leading-relaxed">{faq.a}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* CONTATTI + FORM */}
