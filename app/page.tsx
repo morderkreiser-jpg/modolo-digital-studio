@@ -74,9 +74,9 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-[#F5F1EA] overflow-x-hidden">
+    <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#0A0A0A]/80 border-b border-white/[0.06]">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative w-9 h-9 flex items-center justify-center">
@@ -84,15 +84,15 @@ export default function Home() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
-              <span className="text-[10px] tracking-[0.3em] text-[#D4A574]/70 hidden sm:block">DIGITAL STUDIO</span>
+              <span className="text-[10px] tracking-[0.3em] text-[#B5893F] hidden sm:block">DIGITAL STUDIO</span>
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-6">
-            <a href="#servizi" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Servizi</a>
-            <a href="#portfolio" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Portfolio</a>
-            <a href="#chi-siamo" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">Chi siamo</a>
-            <a href="#faq" className="hidden md:block text-sm tracking-wider text-white/60 hover:text-white transition-colors">FAQ</a>
-            <a href="#contatti" className="text-xs sm:text-sm tracking-wider border border-[#D4A574]/40 text-[#D4A574] px-4 sm:px-5 py-2 rounded-full hover:bg-[#D4A574] hover:text-black hover:border-[#D4A574] transition-all duration-300">
+            <a href="#servizi" className="hidden md:block text-sm tracking-wider text-[#1F1B16]/60 hover:text-[#1F1B16] transition-colors">Servizi</a>
+            <a href="#portfolio" className="hidden md:block text-sm tracking-wider text-[#1F1B16]/60 hover:text-[#1F1B16] transition-colors">Portfolio</a>
+            <a href="#chi-siamo" className="hidden md:block text-sm tracking-wider text-[#1F1B16]/60 hover:text-[#1F1B16] transition-colors">Chi siamo</a>
+            <a href="#faq" className="hidden md:block text-sm tracking-wider text-[#1F1B16]/60 hover:text-[#1F1B16] transition-colors">FAQ</a>
+            <a href="#contatti" className="text-xs sm:text-sm tracking-wider border border-[#B5893F]/50 text-[#B5893F] px-4 sm:px-5 py-2 rounded-full hover:bg-[#B5893F] hover:text-white hover:border-[#B5893F] transition-all duration-300">
               Contattaci
             </a>
           </div>
@@ -101,18 +101,18 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center px-6 lg:px-12 pt-32 pb-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#141414] to-[#0A0A0A]" />
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #D4A574 1px, transparent 0)', backgroundSize: '60px 60px' }} />
-        <motion.div animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#D4A574]/[0.08] rounded-full blur-[120px]" />
-        <motion.div animate={{ opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#D4A574]/[0.06] rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F7F3EC] via-[#FFFFFF] to-[#EFE7D9]" />
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #B5893F 1px, transparent 0)', backgroundSize: '60px 60px' }} />
+        <motion.div animate={{ opacity: [0.25, 0.4, 0.25] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#B5893F]/[0.07] rounded-full blur-[120px]" />
+        <motion.div animate={{ opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[100px]" />
 
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="relative z-10 text-center max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#D4A574]/20 bg-[#D4A574]/[0.05] mb-10">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B5893F]/30 bg-[#B5893F]/[0.08] mb-10">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A574] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4A574]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B5893F] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B5893F]"></span>
             </span>
-            <span className="text-xs tracking-[0.2em] text-[#D4A574] uppercase">Digital Studio · Svizzera</span>
+            <span className="text-xs tracking-[0.2em] text-[#B5893F] uppercase">Digital Studio · Svizzera</span>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.2 }} className="mb-12 flex justify-center">
@@ -121,40 +121,40 @@ export default function Home() {
 
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }} className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1]">
             Design, codice e strategia<br />
-            <span className="text-[#D4A574] italic font-serif">per brand che vogliono distinguersi.</span>
+            <span className="text-[#B5893F] italic font-serif">per brand che vogliono distinguersi.</span>
           </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.8 }} className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.8 }} className="text-lg md:text-xl text-[#1F1B16]/55 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
             Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 1.1 }} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="#servizi" className="group bg-[#D4A574] text-black px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#E0B584] transition-all duration-300 flex items-center gap-2 shadow-[0_0_40px_rgba(212,165,116,0.3)] hover:shadow-[0_0_60px_rgba(212,165,116,0.5)]">
+            <a href="#servizi" className="group bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgba(31,27,22,0.12)] hover:shadow-[0_12px_40px_rgba(31,27,22,0.2)]">
               Scopri i servizi
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a href="#contatti" className="border border-white/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#D4A574]/60 hover:text-[#D4A574] transition-all duration-300">
+            <a href="#contatti" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
               Parla con noi
             </a>
           </motion.div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 2 }} className="absolute bottom-10 left-1/2 -translate-x-1/2">
-          <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#D4A574]/40 to-transparent" />
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#B5893F]/40 to-transparent" />
         </motion.div>
       </section>
 
       {/* STATS */}
-      <section className="py-20 px-6 lg:px-12 border-y border-white/[0.05] bg-black/40">
+      <section className="py-20 px-6 lg:px-12 border-y border-[#1F1B16]/[0.07] bg-[#EEE6D8]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => {
               const Icon = stat.icon;
               return (
                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="text-center group">
-                  <Icon className="w-6 h-6 text-[#D4A574] mx-auto mb-4 opacity-80 group-hover:scale-110 transition-transform" strokeWidth={1.2} />
+                  <Icon className="w-6 h-6 text-[#B5893F] mx-auto mb-4 group-hover:scale-110 transition-transform" strokeWidth={1.2} />
                   <div className="text-2xl md:text-3xl font-light mb-2">{stat.value}</div>
-                  <div className="text-xs md:text-sm text-white/40 tracking-wider">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-[#1F1B16]/50 tracking-wider">{stat.label}</div>
                 </motion.div>
               );
             })}
@@ -166,9 +166,9 @@ export default function Home() {
       <section id="servizi" className="py-32 px-6 lg:px-12 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Cosa facciamo</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Cosa facciamo</span>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              Servizi su misura, <span className="italic font-serif text-[#D4A574]">risultati concreti</span>
+              Servizi su misura, <span className="italic font-serif text-[#B5893F]">risultati concreti</span>
             </h2>
           </motion.div>
 
@@ -176,17 +176,17 @@ export default function Home() {
             {services.map((service, i) => {
               const Icon = service.icon;
               return (
-                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative p-8 lg:p-10 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.02] to-transparent hover:border-[#D4A574]/30 transition-all duration-500 overflow-hidden">
-                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4A574]/0 group-hover:bg-[#D4A574]/[0.08] rounded-full blur-2xl transition-all duration-700" />
+                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative p-8 lg:p-10 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)] transition-all duration-500 overflow-hidden">
+                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#B5893F]/0 group-hover:bg-[#B5893F]/[0.06] rounded-full blur-2xl transition-all duration-700" />
                   <div className="relative">
-                    <div className="inline-flex p-3 rounded-xl bg-[#D4A574]/10 mb-6 group-hover:bg-[#D4A574]/20 transition-colors">
-                      <Icon className="w-7 h-7 text-[#D4A574]" strokeWidth={1.3} />
+                    <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 mb-6 group-hover:bg-[#B5893F]/20 transition-colors">
+                      <Icon className="w-7 h-7 text-[#B5893F]" strokeWidth={1.3} />
                     </div>
                     <h3 className="text-2xl font-light mb-4">{service.title}</h3>
-                    <p className="text-white/50 mb-6 leading-relaxed font-light">{service.desc}</p>
+                    <p className="text-[#1F1B16]/55 mb-6 leading-relaxed font-light">{service.desc}</p>
                     <div className="flex flex-wrap gap-2">
                       {service.tags.map((tag) => (
-                        <span key={tag} className="text-xs tracking-wider text-white/40 border border-white/10 px-3 py-1.5 rounded-full group-hover:border-[#D4A574]/20 transition-colors">{tag}</span>
+                        <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/45 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -198,12 +198,12 @@ export default function Home() {
       </section>
 
       {/* PORTFOLIO */}
-      <section id="portfolio" className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05] relative">
+      <section id="portfolio" className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07] relative">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Portfolio</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Portfolio</span>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              Progetti che <span className="italic font-serif text-[#D4A574]">parlano da soli</span>
+              Progetti che <span className="italic font-serif text-[#B5893F]">parlano da soli</span>
             </h2>
           </motion.div>
 
@@ -215,7 +215,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="group block relative rounded-3xl overflow-hidden border border-white/[0.08] hover:border-[#D4A574]/40 transition-all duration-500"
+            className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500"
           >
             <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
               <Image src="/portfolio-saporivivi.png" alt="SaporiVivi - Italian Luxury Bar Catering" fill className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
@@ -225,14 +225,14 @@ export default function Home() {
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[#D4A574] border border-[#D4A574]/30 bg-[#D4A574]/10 px-3 py-1.5 rounded-full">Sito Web Completo</span>
-                    <span className="text-xs tracking-wider text-white/60 border border-white/20 px-3 py-1.5 rounded-full">Catering & Eventi</span>
-                    <span className="text-xs tracking-wider text-white/60 border border-white/20 px-3 py-1.5 rounded-full">SEO</span>
+                    <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-3 py-1.5 rounded-full">Sito Web Completo</span>
+                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">Catering & Eventi</span>
+                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">SEO</span>
                   </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2">SaporiVivi</h3>
-                  <p className="text-white/60 font-light max-w-xl">Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.</p>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-white">SaporiVivi</h3>
+                  <p className="text-white/70 font-light max-w-xl">Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.</p>
                 </div>
-                <div className="flex items-center gap-2 text-[#D4A574] whitespace-nowrap group-hover:gap-3 transition-all">
+                <div className="flex items-center gap-2 text-[#E8C98A] whitespace-nowrap group-hover:gap-3 transition-all">
                   <span className="text-sm tracking-wider">Visita il sito</span>
                   <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
                 </div>
@@ -245,11 +245,11 @@ export default function Home() {
               { cat: "Branding · Concept", title: "Il tuo prossimo progetto", desc: "C'è spazio per la tua storia. Costruiamo insieme qualcosa di memorabile." },
               { cat: "Web Design · Concept", title: "Spazio disponibile", desc: "Stiamo cercando brand ambiziosi con cui collaborare. Potresti essere il prossimo." },
             ].map((p, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative rounded-2xl border border-dashed border-white/[0.1] hover:border-[#D4A574]/30 p-10 flex flex-col items-center justify-center text-center min-h-[280px] transition-all duration-500">
-                <span className="text-xs tracking-wider text-[#D4A574]/70 uppercase mb-4">{p.cat}</span>
-                <h3 className="text-2xl font-light mb-3 text-white/80">{p.title}</h3>
-                <p className="text-white/40 font-light text-sm max-w-xs mb-6">{p.desc}</p>
-                <a href="#contatti" className="text-sm text-[#D4A574] tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all">
+              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative rounded-2xl border border-dashed border-[#1F1B16]/15 hover:border-[#B5893F]/40 bg-white/40 p-10 flex flex-col items-center justify-center text-center min-h-[280px] transition-all duration-500">
+                <span className="text-xs tracking-wider text-[#B5893F] uppercase mb-4">{p.cat}</span>
+                <h3 className="text-2xl font-light mb-3 text-[#1F1B16]/80">{p.title}</h3>
+                <p className="text-[#1F1B16]/45 font-light text-sm max-w-xs mb-6">{p.desc}</p>
+                <a href="#contatti" className="text-sm text-[#B5893F] tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all">
                   Parliamone <ArrowRight className="w-4 h-4" />
                 </a>
               </motion.div>
@@ -260,21 +260,21 @@ export default function Home() {
 
       {/* CHI SIAMO */}
       <section id="chi-siamo" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#D4A574]/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[100px]" />
         <div className="max-w-7xl mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
-              <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Chi siamo</span>
+              <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Chi siamo</span>
               <h2 className="text-4xl md:text-5xl font-light tracking-tight mb-8">
-                Uno studio, <span className="italic font-serif text-[#D4A574]">una visione precisa</span>
+                Uno studio, <span className="italic font-serif text-[#B5893F]">una visione precisa</span>
               </h2>
-              <p className="text-white/60 leading-relaxed font-light mb-6 text-lg">
+              <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6 text-lg">
                 Modolo Digital Studio nasce dalla convinzione che ogni attività, grande o piccola, meriti una presenza digitale all'altezza del proprio valore.
               </p>
-              <p className="text-white/50 leading-relaxed font-light mb-6">
+              <p className="text-[#1F1B16]/55 leading-relaxed font-light mb-6">
                 Uniamo design raffinato, sviluppo tecnico e strategia per costruire siti ed esperienze che non solo appaiono belli, ma funzionano davvero. Lavoriamo con professionisti e aziende in tutta la Svizzera, e collaboriamo con specialisti come Project Visibility per coprire ogni esigenza, dalla creazione di contenuti alla gestione social.
               </p>
-              <p className="text-white/50 leading-relaxed font-light">
+              <p className="text-[#1F1B16]/55 leading-relaxed font-light">
                 Crediamo nella qualità artigianale, nell'attenzione al dettaglio e in relazioni durature con i nostri clienti.
               </p>
             </motion.div>
@@ -283,13 +283,13 @@ export default function Home() {
               {values.map((value, i) => {
                 const Icon = value.icon;
                 return (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} className="flex gap-5 p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:border-[#D4A574]/20 transition-all duration-300">
-                    <div className="flex-shrink-0 inline-flex p-3 rounded-xl bg-[#D4A574]/10 h-fit">
-                      <Icon className="w-6 h-6 text-[#D4A574]" strokeWidth={1.3} />
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} className="flex gap-5 p-6 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/30 transition-all duration-300">
+                    <div className="flex-shrink-0 inline-flex p-3 rounded-xl bg-[#B5893F]/10 h-fit">
+                      <Icon className="w-6 h-6 text-[#B5893F]" strokeWidth={1.3} />
                     </div>
                     <div>
                       <h3 className="text-xl font-light mb-2">{value.title}</h3>
-                      <p className="text-white/50 font-light leading-relaxed text-sm">{value.desc}</p>
+                      <p className="text-[#1F1B16]/55 font-light leading-relaxed text-sm">{value.desc}</p>
                     </div>
                   </motion.div>
                 );
@@ -300,12 +300,12 @@ export default function Home() {
       </section>
 
       {/* SETTORI */}
-      <section className="py-24 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05]">
+      <section className="py-24 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07]">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center mb-16">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Per chi lavoriamo</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Per chi lavoriamo</span>
             <h2 className="text-3xl md:text-4xl font-light tracking-tight">
-              Settori in cui <span className="italic font-serif text-[#D4A574]">eccelliamo</span>
+              Settori in cui <span className="italic font-serif text-[#B5893F]">eccelliamo</span>
             </h2>
           </motion.div>
 
@@ -313,9 +313,9 @@ export default function Home() {
             {sectors.map((sector, i) => {
               const Icon = sector.icon;
               return (
-                <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="group p-6 rounded-xl border border-white/[0.06] hover:border-[#D4A574]/30 hover:bg-white/[0.02] transition-all duration-300 text-center">
-                  <Icon className="w-8 h-8 text-[#D4A574]/70 mx-auto mb-4 group-hover:text-[#D4A574] group-hover:scale-110 transition-all" strokeWidth={1.2} />
-                  <p className="text-sm text-white/60 font-light">{sector.name}</p>
+                <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="group p-6 rounded-xl border border-[#1F1B16]/[0.08] bg-white hover:border-[#B5893F]/40 hover:shadow-[0_8px_30px_rgba(31,27,22,0.06)] transition-all duration-300 text-center">
+                  <Icon className="w-8 h-8 text-[#B5893F] mx-auto mb-4 group-hover:scale-110 transition-all" strokeWidth={1.2} />
+                  <p className="text-sm text-[#1F1B16]/65 font-light">{sector.name}</p>
                 </motion.div>
               );
             })}
@@ -327,19 +327,19 @@ export default function Home() {
       <section id="metodo" className="py-32 px-6 lg:px-12 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Il nostro metodo</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Il nostro metodo</span>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              Tre fasi, <span className="italic font-serif text-[#D4A574]">una visione</span>
+              Tre fasi, <span className="italic font-serif text-[#B5893F]">una visione</span>
             </h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-12 relative">
-            <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-[1px] bg-gradient-to-r from-transparent via-[#D4A574]/20 to-transparent" />
+            <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-[1px] bg-gradient-to-r from-transparent via-[#B5893F]/30 to-transparent" />
             {steps.map((step, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.15 }} className="relative text-center md:text-left">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#D4A574]/30 bg-[#0A0A0A] text-[#D4A574] font-serif italic text-2xl mb-6 relative z-10">{step.num}</div>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#B5893F]/40 bg-[#F7F3EC] text-[#B5893F] font-serif italic text-2xl mb-6 relative z-10">{step.num}</div>
                 <h3 className="text-2xl font-light mb-4">{step.title}</h3>
-                <p className="text-white/50 font-light leading-relaxed">{step.desc}</p>
+                <p className="text-[#1F1B16]/55 font-light leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -347,24 +347,24 @@ export default function Home() {
       </section>
 
       {/* QUOTE */}
-      <section className="py-32 px-6 lg:px-12 bg-black/40 border-y border-white/[0.05]">
+      <section className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07]">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto text-center">
-          <Sparkles className="w-8 h-8 text-[#D4A574] mx-auto mb-8" strokeWidth={1.2} />
+          <Sparkles className="w-8 h-8 text-[#B5893F] mx-auto mb-8" strokeWidth={1.2} />
           <p className="text-2xl md:text-4xl font-light leading-relaxed italic font-serif">
             "Crediamo che ogni brand abbia una storia unica.<br />
-            <span className="text-[#D4A574]">Il nostro lavoro è raccontarla con eleganza.</span>"
+            <span className="text-[#B5893F]">Il nostro lavoro è raccontarla con eleganza.</span>"
           </p>
         </motion.div>
       </section>
 
       {/* FAQ */}
       <section id="faq" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#D4A574]/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#B5893F]/[0.04] rounded-full blur-[120px]" />
         <div className="max-w-3xl mx-auto relative">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-16 text-center">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-4 block">Domande frequenti</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4 block">Domande frequenti</span>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              Tutto quello che <span className="italic font-serif text-[#D4A574]">vuoi sapere</span>
+              Tutto quello che <span className="italic font-serif text-[#B5893F]">vuoi sapere</span>
             </h2>
           </motion.div>
 
@@ -372,15 +372,15 @@ export default function Home() {
             {faqs.map((faq, i) => {
               const isOpen = openFaq === i;
               return (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                  <button onClick={() => setOpenFaq(isOpen ? null : i)} className="w-full flex items-center justify-between gap-4 p-6 text-left hover:bg-white/[0.02] transition-colors">
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] overflow-hidden">
+                  <button onClick={() => setOpenFaq(isOpen ? null : i)} className="w-full flex items-center justify-between gap-4 p-6 text-left hover:bg-[#B5893F]/[0.03] transition-colors">
                     <span className="text-lg font-light">{faq.q}</span>
-                    <ChevronDown className={`w-5 h-5 text-[#D4A574] flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
+                    <ChevronDown className={`w-5 h-5 text-[#B5893F] flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
                   </button>
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
-                        <p className="px-6 pb-6 text-white/50 font-light leading-relaxed">{faq.a}</p>
+                        <p className="px-6 pb-6 text-[#1F1B16]/55 font-light leading-relaxed">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -393,15 +393,15 @@ export default function Home() {
 
       {/* CONTATTI + FORM */}
       <section id="contatti" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#D4A574]/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#B5893F]/[0.05] rounded-full blur-[120px]" />
 
         <div className="relative max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center mb-16">
-            <span className="text-[#D4A574] text-xs tracking-[0.3em] uppercase mb-6 block">Iniziamo</span>
+            <span className="text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-6 block">Iniziamo</span>
             <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6">
-              Pronto a <span className="italic font-serif text-[#D4A574]">distinguerti</span>?
+              Pronto a <span className="italic font-serif text-[#B5893F]">distinguerti</span>?
             </h2>
-            <p className="text-lg md:text-xl text-white/50 font-light max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-[#1F1B16]/55 font-light max-w-2xl mx-auto">
               Raccontaci il tuo progetto. Una consulenza iniziale gratuita per capire come possiamo aiutarti.
             </p>
           </motion.div>
@@ -409,65 +409,65 @@ export default function Home() {
           <div className="grid lg:grid-cols-5 gap-12">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
               <a href="mailto:info@modolodigitalstudio.ch" className="flex items-start gap-4 group">
-                <div className="inline-flex p-3 rounded-xl bg-[#D4A574]/10 group-hover:bg-[#D4A574]/20 transition-colors">
-                  <Mail className="w-5 h-5 text-[#D4A574]" strokeWidth={1.3} />
+                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
+                  <Mail className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 tracking-wider uppercase mb-1">Email</div>
-                  <div className="text-white/70 group-hover:text-[#D4A574] transition-colors">info@modolodigitalstudio.ch</div>
+                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">Email</div>
+                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">info@modolodigitalstudio.ch</div>
                 </div>
               </a>
               <a href="tel:+41772237900" className="flex items-start gap-4 group">
-                <div className="inline-flex p-3 rounded-xl bg-[#D4A574]/10 group-hover:bg-[#D4A574]/20 transition-colors">
-                  <Phone className="w-5 h-5 text-[#D4A574]" strokeWidth={1.3} />
+                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
+                  <Phone className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 tracking-wider uppercase mb-1">Telefono</div>
-                  <div className="text-white/70 group-hover:text-[#D4A574] transition-colors">+41 77 223 79 00</div>
+                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">Telefono</div>
+                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">+41 77 223 79 00</div>
                 </div>
               </a>
               <div className="flex items-start gap-4">
-                <div className="inline-flex p-3 rounded-xl bg-[#D4A574]/10">
-                  <MapPin className="w-5 h-5 text-[#D4A574]" strokeWidth={1.3} />
+                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10">
+                  <MapPin className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 tracking-wider uppercase mb-1">Area</div>
-                  <div className="text-white/70">Tutta la Svizzera</div>
+                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">Area</div>
+                  <div className="text-[#1F1B16]/75">Tutta la Svizzera</div>
                 </div>
               </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
               {formStatus === "success" ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#D4A574]/30 bg-[#D4A574]/[0.05]">
-                  <CheckCircle2 className="w-16 h-16 text-[#D4A574] mb-6" strokeWidth={1.2} />
+                <div className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#B5893F]/30 bg-[#B5893F]/[0.07]">
+                  <CheckCircle2 className="w-16 h-16 text-[#B5893F] mb-6" strokeWidth={1.2} />
                   <h3 className="text-2xl font-light mb-3">Messaggio inviato!</h3>
-                  <p className="text-white/50 font-light">Grazie per averci scritto. Ti risponderemo entro 24 ore.</p>
+                  <p className="text-[#1F1B16]/55 font-light">Grazie per averci scritto. Ti risponderemo entro 24 ore.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5 p-8 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+                <form onSubmit={handleSubmit} className="space-y-5 p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_8px_40px_rgba(31,27,22,0.06)]">
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
-                      <label className="text-xs text-white/40 tracking-wider uppercase mb-2 block">Nome *</label>
-                      <input type="text" name="nome" required className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:border-[#D4A574]/50 focus:outline-none transition-colors" placeholder="Il tuo nome" />
+                      <label className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">Nome *</label>
+                      <input type="text" name="nome" required className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none transition-colors" placeholder="Il tuo nome" />
                     </div>
                     <div>
-                      <label className="text-xs text-white/40 tracking-wider uppercase mb-2 block">Email *</label>
-                      <input type="email" name="email" required className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:border-[#D4A574]/50 focus:outline-none transition-colors" placeholder="la-tua@email.com" />
+                      <label className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">Email *</label>
+                      <input type="email" name="email" required className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none transition-colors" placeholder="la-tua@email.com" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-white/40 tracking-wider uppercase mb-2 block">Azienda</label>
-                    <input type="text" name="azienda" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:border-[#D4A574]/50 focus:outline-none transition-colors" placeholder="Nome azienda (opzionale)" />
+                    <label className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">Azienda</label>
+                    <input type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none transition-colors" placeholder="Nome azienda (opzionale)" />
                   </div>
                   <div>
-                    <label className="text-xs text-white/40 tracking-wider uppercase mb-2 block">Messaggio *</label>
-                    <textarea name="messaggio" required rows={4} className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:border-[#D4A574]/50 focus:outline-none transition-colors resize-none" placeholder="Raccontaci il tuo progetto..." />
+                    <label className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">Messaggio *</label>
+                    <textarea name="messaggio" required rows={4} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none transition-colors resize-none" placeholder="Raccontaci il tuo progetto..." />
                   </div>
                   {formStatus === "error" && (
-                    <p className="text-red-400/80 text-sm">Si è verificato un errore. Riprova o scrivici direttamente via email.</p>
+                    <p className="text-red-600/80 text-sm">Si è verificato un errore. Riprova o scrivici direttamente via email.</p>
                   )}
-                  <button type="submit" disabled={formStatus === "sending"} className="group w-full bg-[#D4A574] text-black px-8 py-4 rounded-xl font-medium tracking-wider hover:bg-[#E0B584] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <button type="submit" disabled={formStatus === "sending"} className="group w-full bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-xl font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                     {formStatus === "sending" ? "Invio in corso..." : "Invia messaggio"}
                     {formStatus !== "sending" && <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                   </button>
@@ -479,17 +479,17 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/[0.06] py-12 px-6 lg:px-12 bg-[#0A0A0A]">
+      <footer className="border-t border-[#1F1B16]/[0.08] py-12 px-6 lg:px-12 bg-[#ECE3D3]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={28} height={28} className="opacity-80" />
-            <span className="text-sm text-white/40 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
+            <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={28} height={28} />
+            <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
           </div>
           <div className="flex items-center gap-6">
-            <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#D4A574] transition-colors" aria-label="Instagram">
+            <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/45 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
               <Send className="w-5 h-5" strokeWidth={1.5} />
             </a>
-            <span className="text-xs text-white/30 tracking-[0.2em] uppercase">Made with care in Switzerland</span>
+            <span className="text-xs text-[#1F1B16]/35 tracking-[0.2em] uppercase">Made with care in Switzerland</span>
           </div>
         </div>
       </footer>
