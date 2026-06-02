@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown } from "lucide-react";
@@ -77,7 +78,7 @@ const translations = {
       successTitle: "Message sent!", successDesc: "Thanks for reaching out. We'll get back to you within 24 hours.",
       error: "Something went wrong. Please try again or write to us directly via email.",
     },
-    footer: { madeWith: "Made with care in Switzerland" },
+    footer: { madeWith: "Made with care in Switzerland", imprint: "Legal Notice", privacy: "Privacy Policy" },
   },
   de: {
     nav: { services: "Leistungen", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt" },
@@ -148,7 +149,7 @@ const translations = {
       successTitle: "Nachricht gesendet!", successDesc: "Danke für deine Nachricht. Wir melden uns innerhalb von 24 Stunden.",
       error: "Etwas ist schiefgelaufen. Bitte versuche es erneut oder schreib uns direkt eine E-Mail.",
     },
-    footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt" },
+    footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt", imprint: "Impressum", privacy: "Datenschutz" },
   },
   it: {
     nav: { services: "Servizi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci" },
@@ -219,7 +220,7 @@ const translations = {
       successTitle: "Messaggio inviato!", successDesc: "Grazie per averci scritto. Ti risponderemo entro 24 ore.",
       error: "Si è verificato un errore. Riprova o scrivici direttamente via email.",
     },
-    footer: { madeWith: "Made with care in Switzerland" },
+    footer: { madeWith: "Made with care in Switzerland", imprint: "Note legali", privacy: "Privacy" },
   },
 };
 
@@ -664,7 +665,9 @@ export default function Home() {
             <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={28} height={28} />
             <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5 sm:gap-6">
+            <Link href={`/impressum?lang=${lang}`} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
+            <Link href={`/privacy?lang=${lang}`} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
             <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/45 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
