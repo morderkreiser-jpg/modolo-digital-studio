@@ -84,6 +84,7 @@ export default function SiteNav({
   );
 
   return (
+    <>
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
@@ -139,8 +140,10 @@ export default function SiteNav({
           )}
         </div>
       </div>
+      </nav>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer (sibling of <nav>: the nav's backdrop-filter would otherwise
+          trap fixed-positioned children inside the navbar's height) */}
       <AnimatePresence>
         {open && hasMenu && (
           <motion.div
@@ -199,6 +202,6 @@ export default function SiteNav({
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 }
