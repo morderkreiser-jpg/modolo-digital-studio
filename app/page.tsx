@@ -25,7 +25,7 @@ const translations = {
       { value: "Free", label: "First consultation" },
       { value: "Premium", label: "Guaranteed quality" },
     ],
-    servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results" },
+    servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results", learnMore: "Learn more" },
     services: [
       { title: "Web & Development", desc: "Modern, high-performance websites optimized for local SEO. Google Business management to stand out in your area.", tags: ["Web Design", "Development", "Local SEO", "Google Business"] },
       { title: "Brand & Identity", desc: "We build memorable visual identities. From your logo to branded Canva templates, every detail tells your brand's story.", tags: ["Branding", "Visual Identity", "Canva Templates"] },
@@ -96,7 +96,7 @@ const translations = {
       { value: "Gratis", label: "Erstberatung" },
       { value: "Premium", label: "Garantierte Qualität" },
     ],
-    servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse" },
+    servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse", learnMore: "Mehr erfahren" },
     services: [
       { title: "Web & Entwicklung", desc: "Moderne, performante Websites, optimiert für lokales SEO. Google-Business-Verwaltung, um in deiner Region sichtbar zu werden.", tags: ["Webdesign", "Entwicklung", "Lokales SEO", "Google Business"] },
       { title: "Marke & Identität", desc: "Wir gestalten einprägsame visuelle Identitäten. Vom Logo bis zu gebrandeten Canva-Vorlagen erzählt jedes Detail die Geschichte deiner Marke.", tags: ["Branding", "Visuelle Identität", "Canva-Vorlagen"] },
@@ -167,7 +167,7 @@ const translations = {
       { value: "Gratis", label: "Prima consulenza" },
       { value: "Premium", label: "Qualità garantita" },
     ],
-    servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti" },
+    servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti", learnMore: "Scopri di più" },
     services: [
       { title: "Web & Sviluppo", desc: "Siti web moderni, performanti e ottimizzati per la SEO locale. Gestione Google Business per emergere sul territorio.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
       { title: "Brand & Identità", desc: "Costruiamo identità visive memorabili. Dal logo ai template Canva brandizzati, ogni dettaglio racconta il tuo brand.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
@@ -225,6 +225,7 @@ const translations = {
 };
 
 const serviceIcons = [Code2, Palette, Camera, Mail];
+const serviceSlugs = ["web", "brand", "content", "email"];
 const statIcons = [Globe2, Clock, Sparkles, Award];
 const sectorIcons = [Store, Briefcase, ShoppingBag, Building2];
 const valueIcons = [Target, Heart, Zap];
@@ -380,6 +381,10 @@ export default function Home() {
                         <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/45 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
                       ))}
                     </div>
+                    <Link href={`/servizi/${serviceSlugs[i]}?lang=${lang}`} className="mt-6 inline-flex items-center gap-2 text-sm text-[#B5893F] tracking-wider hover:gap-3 transition-all">
+                      {t.servicesSection.learnMore}
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </motion.div>
               );
