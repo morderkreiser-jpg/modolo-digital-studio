@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Code2, Palette, Camera, Mail } from "lucide-react";
+import SiteNav from "@/components/site-nav";
 
 export type Lang = "en" | "de" | "it";
 export type Slug = "web" | "brand" | "content" | "email";
@@ -319,25 +319,7 @@ export default function ServicePage({ slug, initialLang }: { slug: Slug; initial
   return (
     <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3">
-            <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={34} height={34} />
-            <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
-          </Link>
-          <div className="flex items-center gap-0.5 border border-[#1F1B16]/12 rounded-full p-0.5">
-            {(["en", "de", "it"] as const).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-2 py-1 rounded-full text-[11px] tracking-wider uppercase transition-colors ${lang === l ? "bg-[#B5893F] text-white" : "text-[#1F1B16]/45 hover:text-[#1F1B16]"}`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
+      <SiteNav lang={lang} setLang={setLang} ctaLabel={u.ctaButton} ctaHref="/#contatti" />
 
       {/* HERO */}
       <section className="relative max-w-5xl mx-auto px-6 lg:px-8 pt-36 pb-16">

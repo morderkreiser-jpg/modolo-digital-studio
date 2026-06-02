@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ServicePage, { type Lang, type Slug } from "@/components/service-page";
+import JsonLd from "@/components/json-ld";
+import { serviceGraph } from "@/lib/json-ld";
 
 const SLUGS: Slug[] = ["web", "brand", "content", "email"];
 const LANGS: Lang[] = ["en", "de", "it"];
@@ -40,7 +42,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const m = META[slug as Slug];
   if (!m) return {};
-  return { title: m.title, description: m.description };
+  return {
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: `/servizi/${slug}` },
+  };
 }
 
 export default async function Page({
@@ -57,5 +63,10 @@ export default async function Page({
   const raw = Array.isArray(sp.lang) ? sp.lang[0] : sp.lang;
   const lang: Lang = LANGS.includes(raw as Lang) ? (raw as Lang) : "en";
 
-  return <ServicePage slug={slug as Slug} initialLang={lang} />;
+  return (
+    <>
+      <JsonLd data={serviceGraph(slug as Slug)} />
+      <ServicePage slug={slug as Slug} initialLang={lang} />
+    </>
+  );
 }

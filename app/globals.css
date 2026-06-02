@@ -50,6 +50,12 @@
 }
 
 :root {
+  /* Brand palette (used via arbitrary values, e.g. text-[var(--color-gold-ink)]) */
+  --color-ivory: #f7f3ec;
+  --color-dark: #1f1b16;
+  --color-gold: #b5893f; /* large headings, icons, borders, decorative */
+  --color-gold-ink: #8f6b2f; /* small/body gold text on ivory — passes WCAG AA */
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -127,5 +133,28 @@
   }
   html {
     @apply font-sans;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-gold-ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* Respect users who prefer reduced motion: neutralize animations/transitions globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

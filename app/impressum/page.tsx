@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Legal Notice",
   description:
     "Legal notice and provider identification for Modolo Digital Studio, Scheideggstrasse 18, 8400 Winterthur, Switzerland.",
+  alternates: { canonical: "/impressum" },
 };
 
 const langs: Lang[] = ["en", "de", "it"];

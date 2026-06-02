@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Lora } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 // Poppins: font principale (navbar, body, titoli, UI)
@@ -80,7 +82,11 @@ export default function RootLayout({
       lang="en"
       className={`${poppins.variable} ${lora.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

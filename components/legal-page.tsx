@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import SiteNav from "@/components/site-nav";
 
 export type Lang = "en" | "de" | "it";
 export type LegalKind = "impressum" | "privacy";
@@ -149,7 +149,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Cookies and analytics",
           body: [
-            "This website does not use tracking cookies, advertising or web analytics services. No user profiles are created. Fonts are hosted directly on our server (via next/font), so no connection to external font providers such as Google Fonts is established when you load the page.",
+            "This website uses Vercel Analytics and Vercel Speed Insights to measure aggregate traffic and performance. These tools are privacy-friendly: they do not set cookies, do not track you across other websites and do not build personal profiles. We use no advertising or third-party tracking. Fonts are hosted directly on our server (via next/font), so no connection to external font providers such as Google Fonts is established when you load the page.",
           ],
         },
         {
@@ -210,7 +210,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Cookies und Analyse",
           body: [
-            "Diese Website verwendet keine Tracking-Cookies, keine Werbung und keine Webanalyse-Dienste. Es werden keine Nutzerprofile erstellt. Die Schriftarten werden direkt auf unserem Server gehostet (über next/font), sodass beim Laden der Seite keine Verbindung zu externen Schriftanbietern wie Google Fonts hergestellt wird.",
+            "Diese Website nutzt Vercel Analytics und Vercel Speed Insights, um aggregierte Zugriffe und die Performance zu messen. Diese Werkzeuge sind datenschutzfreundlich: Sie setzen keine Cookies, verfolgen dich nicht über andere Websites hinweg und erstellen keine persönlichen Profile. Wir verwenden keine Werbung und kein Tracking durch Dritte. Die Schriftarten werden direkt auf unserem Server gehostet (über next/font), sodass beim Laden der Seite keine Verbindung zu externen Schriftanbietern wie Google Fonts hergestellt wird.",
           ],
         },
         {
@@ -271,7 +271,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Cookie e statistiche",
           body: [
-            "Questo sito non utilizza cookie di tracciamento, pubblicità o servizi di analisi web. Non vengono creati profili utente. I caratteri tipografici sono ospitati direttamente sul nostro server (tramite next/font): di conseguenza, durante il caricamento della pagina non viene stabilita alcuna connessione con fornitori di font esterni come Google Fonts.",
+            "Questo sito utilizza Vercel Analytics e Vercel Speed Insights per misurare il traffico aggregato e le prestazioni. Questi strumenti rispettano la privacy: non utilizzano cookie, non ti tracciano su altri siti e non creano profili personali. Non utilizziamo pubblicità né tracciamento di terze parti. I caratteri tipografici sono ospitati direttamente sul nostro server (tramite next/font): di conseguenza, durante il caricamento della pagina non viene stabilita alcuna connessione con fornitori di font esterni come Google Fonts.",
           ],
         },
         {
@@ -312,25 +312,7 @@ export default function LegalPage({ kind, initialLang }: { kind: LegalKind; init
   return (
     <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16]">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
-        <div className="max-w-3xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3">
-            <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={34} height={34} />
-            <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
-          </Link>
-          <div className="flex items-center gap-0.5 border border-[#1F1B16]/12 rounded-full p-0.5">
-            {(["en", "de", "it"] as const).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-2 py-1 rounded-full text-[11px] tracking-wider uppercase transition-colors ${lang === l ? "bg-[#B5893F] text-white" : "text-[#1F1B16]/45 hover:text-[#1F1B16]"}`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
+      <SiteNav lang={lang} setLang={setLang} />
 
       {/* CONTENT */}
       <section className="max-w-3xl mx-auto px-6 lg:px-8 pt-32 pb-24">

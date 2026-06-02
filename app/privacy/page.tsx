@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How Modolo Digital Studio collects and processes personal data, in accordance with the Swiss FADP and the EU GDPR.",
+  alternates: { canonical: "/privacy" },
 };
 
 const langs: Lang[] = ["en", "de", "it"];
