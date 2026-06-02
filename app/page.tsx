@@ -666,7 +666,11 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-6">
             <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/45 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
-              <Send className="w-5 h-5" strokeWidth={1.5} />
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
             </a>
             <span className="text-xs text-[#1F1B16]/35 tracking-[0.2em] uppercase">{t.footer.madeWith}</span>
           </div>
