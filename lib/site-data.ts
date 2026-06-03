@@ -163,17 +163,17 @@ export const HOME_META: Record<Locale, { title: string; description: string }> =
   en: {
     title: "Modolo Digital Studio | Web Design & Development in Switzerland",
     description:
-      "We are a digital studio transforming the online presence of professionals and businesses across Switzerland. Design, code, and strategy for brands that want to stand out.",
+      "Swiss digital studio for web design, development and SEO. We help professionals and businesses across Switzerland build an online presence that stands out.",
   },
   de: {
     title: "Modolo Digital Studio | Webdesign & Entwicklung in der Schweiz",
     description:
-      "Wir sind ein Digital Studio, das die Online-Präsenz von Fachleuten und Unternehmen in der ganzen Schweiz transformiert. Design, Code und Strategie für Marken, die sich abheben wollen.",
+      "Digital Studio in der Schweiz für Webdesign, Entwicklung und SEO. Wir geben Fachleuten und Unternehmen eine Online-Präsenz, die sich abhebt.",
   },
   it: {
     title: "Modolo Digital Studio | Web Design & Sviluppo in Svizzera",
     description:
-      "Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera. Design, codice e strategia per brand che vogliono distinguersi.",
+      "Studio digitale in Svizzera per web design, sviluppo e SEO. Diamo a professionisti e aziende una presenza online che si distingue.",
   },
 };
 

@@ -5,8 +5,15 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { SITE } from "@/lib/site";
-import { LOCALES, OG_LOCALE, isLocale, localizedHref } from "@/lib/i18n";
+import { LOCALES, OG_LOCALE, isLocale, localizedHref, type Locale } from "@/lib/i18n";
 import { HOME_META } from "@/lib/site-data";
+
+// Localized label for the skip-to-content link (first focusable element on every page).
+const SKIP_LABEL: Record<Locale, string> = {
+  en: "Skip to content",
+  de: "Zum Inhalt springen",
+  it: "Vai al contenuto",
+};
 
 // Poppins: font principale (navbar, body, titoli, UI)
 const poppins = Poppins({
@@ -92,6 +99,12 @@ export default async function LangLayout({
       className={`${poppins.variable} ${lora.variable} h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[100] focus:rounded-full focus:bg-[#1F1B16] focus:px-5 focus:py-3 focus:text-sm focus:font-medium focus:text-[#F7F3EC] focus:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F7F3EC]"
+        >
+          {SKIP_LABEL[lang]}
+        </a>
         {children}
         <Analytics />
         <SpeedInsights />

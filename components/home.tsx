@@ -3,12 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown, AlertCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
+import { SITE } from "@/lib/site";
 
 type Lang = Locale;
 
@@ -248,7 +249,13 @@ export default function Home({ lang }: { lang: Lang }) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const reduce = useReducedMotion();
+  const successRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
+
+  // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
+  useEffect(() => {
+    if (formStatus === "success") successRef.current?.focus();
+  }, [formStatus]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -287,7 +294,7 @@ export default function Home({ lang }: { lang: Lang }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden">
+    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
       {/* NAVBAR */}
       <SiteNav
         lang={lang}
@@ -314,7 +321,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B5893F] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B5893F]"></span>
             </span>
-            <span className="text-xs tracking-[0.2em] text-[#B5893F] uppercase">{t.hero.badge}</span>
+            <span className="text-xs tracking-[0.2em] text-[var(--color-gold-ink)] uppercase">{t.hero.badge}</span>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.2 }} className="mb-12 flex justify-center">
@@ -356,7 +363,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="text-center group">
                   <Icon className="w-6 h-6 text-[#B5893F] mx-auto mb-4 group-hover:scale-110 transition-transform" strokeWidth={1.2} />
                   <div className="text-2xl md:text-3xl font-light mb-2">{stat.value}</div>
-                  <div className="text-xs md:text-sm text-[#1F1B16]/50 tracking-wider">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-[#1F1B16]/70 tracking-wider">{stat.label}</div>
                 </motion.div>
               );
             })}
@@ -388,7 +395,7 @@ export default function Home({ lang }: { lang: Lang }) {
                     <p className="text-[#1F1B16]/55 mb-6 leading-relaxed font-light">{service.desc}</p>
                     <div className="flex flex-wrap gap-2">
                       {service.tags.map((tag) => (
-                        <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/45 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
+                        <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
                       ))}
                     </div>
                     <Link href={localizedHref(lang, `/servizi/${serviceSlugs[i]}`)} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
@@ -424,7 +431,7 @@ export default function Home({ lang }: { lang: Lang }) {
             className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
           >
             <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
-              <Image src="/portfolio-saporivivi.png" alt="SaporiVivi - Italian Luxury Bar Catering" fill className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <Image src="/portfolio-saporivivi.png" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1216px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
@@ -451,7 +458,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative rounded-2xl border border-dashed border-[#1F1B16]/15 hover:border-[#B5893F]/40 bg-white/40 p-10 flex flex-col items-center justify-center text-center min-h-[280px] transition-all duration-500">
                 <span className="text-xs tracking-wider text-[var(--color-gold-ink)] uppercase mb-4">{p.cat}</span>
                 <h3 className="text-2xl font-light mb-3 text-[#1F1B16]/80">{p.title}</h3>
-                <p className="text-[#1F1B16]/45 font-light text-sm max-w-xs mb-6">{p.desc}</p>
+                <p className="text-[#1F1B16]/70 font-light text-sm max-w-xs mb-6">{p.desc}</p>
                 <a href="#contatti" className="text-sm text-[var(--color-gold-ink)] tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all">
                   {t.portfolioPlaceholderCta} <ArrowRight className="w-4 h-4" />
                 </a>
@@ -474,7 +481,7 @@ export default function Home({ lang }: { lang: Lang }) {
             </motion.div>
             <motion.div initial={reduce ? false : { opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
               <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.founder.eyebrow}</span>
-              <h3 className="text-3xl md:text-4xl font-light tracking-tight mb-1">{t.founder.name}</h3>
+              <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-1">{t.founder.name}</h2>
               <p className="text-[var(--color-gold-ink)] font-serif italic mb-6">{t.founder.role}</p>
               <p className="text-[#1F1B16]/65 font-light leading-relaxed mb-4 text-lg">{t.founder.bio1}</p>
               <p className="text-[#1F1B16]/55 font-light leading-relaxed">{t.founder.bio2}</p>
@@ -621,22 +628,22 @@ export default function Home({ lang }: { lang: Lang }) {
 
           <div className="grid lg:grid-cols-5 gap-12">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
-              <a href="mailto:info@modolodigitalstudio.ch" className="flex items-start gap-4 group">
+              <a href={`mailto:${SITE.email}`} className="flex items-start gap-4 group">
                 <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
                   <Mail className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">{t.contact.emailLabel}</div>
-                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">info@modolodigitalstudio.ch</div>
+                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.emailLabel}</div>
+                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">{SITE.email}</div>
                 </div>
               </a>
-              <a href="tel:+41772237900" className="flex items-start gap-4 group">
+              <a href={`tel:${SITE.phone}`} className="flex items-start gap-4 group">
                 <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
                   <Phone className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">{t.contact.phoneLabel}</div>
-                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">+41 77 223 79 00</div>
+                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.phoneLabel}</div>
+                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">{SITE.phoneDisplay}</div>
                 </div>
               </a>
               <div className="flex items-start gap-4">
@@ -644,7 +651,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   <MapPin className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-1">{t.contact.areaLabel}</div>
+                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.areaLabel}</div>
                   <div className="text-[#1F1B16]/75">{t.contact.areaValue}</div>
                 </div>
               </div>
@@ -652,7 +659,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
               {formStatus === "success" ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#B5893F]/30 bg-[#B5893F]/[0.07]">
+                <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#B5893F]/30 bg-[#B5893F]/[0.07] outline-none">
                   <CheckCircle2 className="w-16 h-16 text-[#B5893F] mb-6" strokeWidth={1.2} />
                   <h3 className="text-2xl font-light mb-3">{t.contact.successTitle}</h3>
                   <p className="text-[#1F1B16]/55 font-light">{t.contact.successDesc}</p>
@@ -664,22 +671,22 @@ export default function Home({ lang }: { lang: Lang }) {
                   <input type="hidden" name="_subject" value="New enquiry — Modolo Digital Studio" />
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
-                      <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
+                      <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
                       <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
-                      <label htmlFor="contact-email" className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">{t.contact.formEmail} *</label>
+                      <label htmlFor="contact-email" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formEmail} *</label>
                       <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="contact-company" className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">{t.contact.formCompany}</label>
+                    <label htmlFor="contact-company" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formCompany}</label>
                     <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
-                    <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/45 tracking-wider uppercase mb-2 block">{t.contact.formMessage} *</label>
+                    <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} *</label>
                     <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
                     {fieldErrors.message && <p id="contact-message-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.message}</p>}
                   </div>
@@ -705,19 +712,19 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={28} height={28} />
-            <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
+            <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
           </div>
           <div className="flex items-center gap-5 sm:gap-6">
-            <Link href={localizedHref(lang, "/impressum")} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
-            <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/45 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
+            <Link href={localizedHref(lang, "/impressum")} className="text-xs text-[#1F1B16]/70 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-xs text-[#1F1B16]/70 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
+            <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                 <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
-            <span className="text-xs text-[#1F1B16]/35 tracking-[0.2em] uppercase">{t.footer.madeWith}</span>
+            <span className="text-xs text-[#1F1B16]/65 tracking-[0.2em] uppercase">{t.footer.madeWith}</span>
           </div>
         </div>
       </footer>

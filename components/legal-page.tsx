@@ -309,7 +309,7 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
   const year = new Date().getFullYear();
 
   return (
-    <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16]">
+    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] outline-none">
       {/* NAVBAR */}
       <SiteNav lang={lang} />
 
@@ -321,7 +321,7 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
         </Link>
 
         <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-3">{doc.title}</h1>
-        <p className="text-sm text-[#1F1B16]/45 tracking-wider mb-14">
+        <p className="text-sm text-[#1F1B16]/70 tracking-wider mb-14">
           {u.updated}: {doc.date}
         </p>
 
@@ -345,11 +345,11 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
       {/* FOOTER */}
       <footer className="border-t border-[#1F1B16]/[0.08] py-10 px-6 lg:px-8 bg-[#ECE3D3]">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {year} Modolo Digital Studio</span>
+          <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {year} Modolo Digital Studio</span>
           <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
+            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.home}</Link>
+            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
           </div>
         </div>
       </footer>

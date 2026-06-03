@@ -16,6 +16,38 @@ function rememberLocale(locale: Locale) {
   document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }
 
+// Localized accessibility strings for the nav controls, so assistive tech matches <html lang>.
+// (Swiss German spelling: "ss" rather than "ß".)
+const NAV_A11Y: Record<
+  Locale,
+  { language: string; switchTo: (code: string) => string; openMenu: string; closeMenu: string; siteMenu: string; home: string }
+> = {
+  en: {
+    language: "Language",
+    switchTo: (c) => `Switch language to ${c}`,
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    siteMenu: "Site menu",
+    home: "Modolo Digital Studio — home",
+  },
+  de: {
+    language: "Sprache",
+    switchTo: (c) => `Sprache auf ${c} umstellen`,
+    openMenu: "Menü öffnen",
+    closeMenu: "Menü schliessen",
+    siteMenu: "Seitenmenü",
+    home: "Modolo Digital Studio — Startseite",
+  },
+  it: {
+    language: "Lingua",
+    switchTo: (c) => `Cambia lingua in ${c}`,
+    openMenu: "Apri menu",
+    closeMenu: "Chiudi menu",
+    siteMenu: "Menu del sito",
+    home: "Modolo Digital Studio — home",
+  },
+};
+
 export default function SiteNav({
   lang,
   links = [],
@@ -34,6 +66,7 @@ export default function SiteNav({
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hasMenu = links.length > 0;
+  const a = NAV_A11Y[lang];
 
   useEffect(() => {
     if (!open) return;
@@ -80,18 +113,18 @@ export default function SiteNav({
   };
 
   const langToggle = (variant: "sm" | "lg") => (
-    <div role="group" aria-label="Language" className="flex items-center gap-0.5 border border-[#1F1B16]/12 rounded-full p-0.5">
+    <div role="group" aria-label={a.language} className="flex items-center gap-1 border border-[#1F1B16]/12 rounded-full p-0.5">
       {LOCALES.map((l) => (
         <button
           key={l}
           type="button"
           onClick={() => switchLocale(l)}
-          aria-label={`Switch language to ${l.toUpperCase()}`}
+          aria-label={a.switchTo(l.toUpperCase())}
           aria-current={lang === l ? "true" : undefined}
           className={`${
-            variant === "lg" ? "px-3 py-1.5 text-xs" : "px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px]"
+            variant === "lg" ? "px-3 py-1.5 text-xs" : "px-2.5 py-1.5 text-[11px]"
           } rounded-full tracking-wider uppercase transition-colors ${
-            lang === l ? "bg-[#B5893F] text-white" : "text-[#1F1B16]/45 hover:text-[#1F1B16]"
+            lang === l ? "bg-[#8F6B2F] text-white" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
           }`}
         >
           {l}
@@ -105,7 +138,7 @@ export default function SiteNav({
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
-        <Link href={localizedHref(lang, "/")} aria-label="Modolo Digital Studio — home" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <Link href={localizedHref(lang, "/")} aria-label={a.home} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Image src="/logo-icon.png" alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
             <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
@@ -124,7 +157,7 @@ export default function SiteNav({
           {ctaLabel && (
             <a
               href={ctaHref}
-              className="text-sm tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-5 py-2 rounded-full hover:bg-[#B5893F] hover:text-white hover:border-[#B5893F] transition-all duration-300 whitespace-nowrap"
+              className="text-sm tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-5 py-2 rounded-full hover:bg-[#8F6B2F] hover:text-white hover:border-[#8F6B2F] transition-all duration-300 whitespace-nowrap"
             >
               {ctaLabel}
             </a>
@@ -136,7 +169,7 @@ export default function SiteNav({
           {ctaLabel && !hasMenu && (
             <a
               href={ctaHref}
-              className="text-[11px] tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-3 py-1.5 rounded-full hover:bg-[#B5893F] hover:text-white transition-all whitespace-nowrap"
+              className="text-[11px] tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-3 py-1.5 rounded-full hover:bg-[#8F6B2F] hover:text-white transition-all whitespace-nowrap"
             >
               {ctaLabel}
             </a>
@@ -146,7 +179,7 @@ export default function SiteNav({
             <button
               ref={triggerRef}
               type="button"
-              aria-label={open ? "Close menu" : "Open menu"}
+              aria-label={open ? a.closeMenu : a.openMenu}
               aria-expanded={open}
               aria-controls="mobile-menu"
               onClick={() => setOpen((v) => !v)}
@@ -176,7 +209,7 @@ export default function SiteNav({
               id="mobile-menu"
               role="dialog"
               aria-modal="true"
-              aria-label="Site menu"
+              aria-label={a.siteMenu}
               className="absolute top-0 right-0 h-full w-[82%] max-w-sm bg-[#F7F3EC] shadow-2xl flex flex-col p-6 overflow-y-auto"
               initial={reduce ? false : { x: "100%" }}
               animate={{ x: 0 }}
@@ -187,7 +220,7 @@ export default function SiteNav({
                 <span className="font-light tracking-[0.25em] text-sm">MODOLO</span>
                 <button
                   type="button"
-                  aria-label="Close menu"
+                  aria-label={a.closeMenu}
                   onClick={() => setOpen(false)}
                   className="inline-flex w-10 h-10 items-center justify-center rounded-full border border-[#1F1B16]/12"
                 >

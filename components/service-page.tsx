@@ -316,7 +316,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
   const year = new Date().getFullYear();
 
   return (
-    <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden">
+    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
       {/* NAVBAR */}
       <SiteNav lang={lang} ctaLabel={u.ctaButton} ctaHref={localizedHref(lang, "/#contatti")} />
 
@@ -331,7 +331,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
           <div className="inline-flex p-4 rounded-2xl bg-[#B5893F]/10 mb-8">
             <Icon className="w-8 h-8 text-[#B5893F]" strokeWidth={1.3} />
           </div>
-          <span className="block text-[#B5893F] text-xs tracking-[0.3em] uppercase mb-4">{u.label}</span>
+          <span className="block text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4">{u.label}</span>
           <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">{s.title}</h1>
           <p className="text-lg md:text-xl text-[#1F1B16]/60 font-light leading-relaxed max-w-3xl">{s.intro}</p>
         </div>
@@ -406,11 +406,11 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
       {/* FOOTER */}
       <footer className="border-t border-[#1F1B16]/[0.08] py-10 px-6 lg:px-8 bg-[#ECE3D3]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {year} Modolo Digital Studio</span>
+          <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {year} Modolo Digital Studio</span>
           <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
+            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.home}</Link>
+            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
           </div>
         </div>
       </footer>
