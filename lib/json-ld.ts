@@ -1,7 +1,13 @@
 // Builders for schema.org structured data graphs. Plain module (server-importable).
+// Each graph is emitted in the locale of the page it is rendered on, so the FAQ rich
+// results and entity URLs match what the visitor (and crawler) actually sees.
 import { SITE } from "./site";
-import { FAQ_EN, SERVICES_EN } from "./site-data";
+import { FAQS, SERVICE_META } from "./site-data";
 import type { ServiceSlug } from "./site";
+import { localizedHref, type Locale } from "./i18n";
+
+// Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
+const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
 
 const postalAddress = {
   "@type": "PostalAddress",
@@ -12,7 +18,14 @@ const postalAddress = {
   addressCountry: SITE.address.country,
 };
 
-export function homeGraph() {
+const SERVICES_LABEL: Record<Locale, string> = {
+  en: "Services",
+  de: "Leistungen",
+  it: "Servizi",
+};
+
+export function homeGraph(locale: Locale) {
+  const homeUrl = abs(localizedHref(locale, "/"));
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -44,15 +57,17 @@ export function homeGraph() {
       },
       {
         "@type": "WebSite",
-        "@id": `${SITE.url}/#website`,
-        url: SITE.url,
+        "@id": `${homeUrl}#website`,
+        url: homeUrl,
         name: SITE.name,
+        inLanguage: locale,
         publisher: { "@id": `${SITE.url}/#organization` },
       },
       {
         "@type": "FAQPage",
-        "@id": `${SITE.url}/#faq`,
-        mainEntity: FAQ_EN.map((f) => ({
+        "@id": `${homeUrl}#faq`,
+        inLanguage: locale,
+        mainEntity: FAQS[locale].map((f) => ({
           "@type": "Question",
           name: f.q,
           acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -62,9 +77,9 @@ export function homeGraph() {
   };
 }
 
-export function serviceGraph(slug: ServiceSlug) {
-  const s = SERVICES_EN[slug];
-  const url = `${SITE.url}/servizi/${slug}`;
+export function serviceGraph(slug: ServiceSlug, locale: Locale) {
+  const s = SERVICE_META[locale][slug];
+  const url = abs(localizedHref(locale, `/servizi/${slug}`));
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -75,14 +90,15 @@ export function serviceGraph(slug: ServiceSlug) {
         description: s.description,
         url,
         serviceType: s.title,
+        inLanguage: locale,
         provider: { "@id": `${SITE.url}/#organization` },
         areaServed: { "@type": "Country", name: "Switzerland" },
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
-          { "@type": "ListItem", position: 2, name: "Services", item: `${SITE.url}/#servizi` },
+          { "@type": "ListItem", position: 1, name: "Home", item: abs(localizedHref(locale, "/")) },
+          { "@type": "ListItem", position: 2, name: SERVICES_LABEL[locale], item: abs(localizedHref(locale, "/#servizi")) },
           { "@type": "ListItem", position: 3, name: s.title, item: url },
         ],
       },

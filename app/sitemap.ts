@@ -1,19 +1,42 @@
 import type { MetadataRoute } from "next";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
+import { LOCALES, localizedHref } from "@/lib/i18n";
+
+// Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
+const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
+
+type ChangeFrequency = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+
+// Locale-agnostic base paths with their crawl hints.
+const PAGES: { path: string; changeFrequency: ChangeFrequency; priority: number }[] = [
+  { path: "/", changeFrequency: "monthly", priority: 1 },
+  ...SERVICE_SLUGS.map((slug) => ({
+    path: `/servizi/${slug}`,
+    changeFrequency: "monthly" as ChangeFrequency,
+    priority: 0.8,
+  })),
+  { path: "/impressum", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+];
+
+function languagesFor(path: string) {
+  return {
+    en: abs(localizedHref("en", path)),
+    de: abs(localizedHref("de", path)),
+    it: abs(localizedHref("it", path)),
+    "x-default": abs(localizedHref("en", path)),
+  };
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const services: MetadataRoute.Sitemap = SERVICE_SLUGS.map((slug) => ({
-    url: `${SITE.url}/servizi/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
-
-  return [
-    { url: SITE.url, lastModified: now, changeFrequency: "monthly", priority: 1 },
-    ...services,
-    { url: `${SITE.url}/impressum`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${SITE.url}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-  ];
+  return PAGES.flatMap((p) =>
+    LOCALES.map((locale) => ({
+      url: abs(localizedHref(locale, p.path)),
+      lastModified: now,
+      changeFrequency: p.changeFrequency,
+      priority: p.priority,
+      alternates: { languages: languagesFor(p.path) },
+    }))
+  );
 }

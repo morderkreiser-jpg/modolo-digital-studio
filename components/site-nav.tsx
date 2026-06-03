@@ -3,33 +3,41 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { LOCALES, localizedHref, stripLocale, type Locale } from "@/lib/i18n";
 
-export type Lang = "en" | "de" | "it";
 type NavLink = { href: string; label: string };
+
+// Persist the chosen locale so proxy.ts keeps the visitor in it on later visits.
+// Module-level (not inside the component) so it stays a plain browser side effect.
+function rememberLocale(locale: Locale) {
+  document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+}
 
 export default function SiteNav({
   lang,
-  setLang,
   links = [],
   ctaHref = "/#contatti",
   ctaLabel,
 }: {
-  lang: Lang;
-  setLang: (l: Lang) => void;
+  lang: Locale;
   links?: NavLink[];
   ctaHref?: string;
   ctaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
+  const router = useRouter();
+  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hasMenu = links.length > 0;
 
   useEffect(() => {
     if (!open) return;
+    const trigger = triggerRef.current;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
@@ -58,17 +66,26 @@ export default function SiteNav({
     return () => {
       document.body.style.overflow = prevOverflow;
       document.removeEventListener("keydown", onKey);
-      triggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [open]);
 
+  // Switch language by navigating to the localized URL (lang is part of the route now).
+  // The cookie lets proxy.ts keep the visitor in this locale on later visits.
+  const switchLocale = (target: Locale) => {
+    setOpen(false);
+    if (target === lang) return;
+    rememberLocale(target);
+    router.push(localizedHref(target, stripLocale(pathname)));
+  };
+
   const langToggle = (variant: "sm" | "lg") => (
     <div role="group" aria-label="Language" className="flex items-center gap-0.5 border border-[#1F1B16]/12 rounded-full p-0.5">
-      {(["en", "de", "it"] as const).map((l) => (
+      {LOCALES.map((l) => (
         <button
           key={l}
           type="button"
-          onClick={() => setLang(l)}
+          onClick={() => switchLocale(l)}
           aria-label={`Switch language to ${l.toUpperCase()}`}
           aria-current={lang === l ? "true" : undefined}
           className={`${
@@ -88,7 +105,7 @@ export default function SiteNav({
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
-        <Link href="/" aria-label="Modolo Digital Studio — home" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <Link href={localizedHref(lang, "/")} aria-label="Modolo Digital Studio — home" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Image src="/logo-icon.png" alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
             <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>

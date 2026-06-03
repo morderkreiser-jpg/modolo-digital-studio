@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import SiteNav from "@/components/site-nav";
+import { localizedHref, type Locale } from "@/lib/i18n";
 
-export type Lang = "en" | "de" | "it";
+export type Lang = Locale;
 export type LegalKind = "impressum" | "privacy";
 
 type Section = { heading: string; body: string[] };
@@ -303,8 +303,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
   },
 };
 
-export default function LegalPage({ kind, initialLang }: { kind: LegalKind; initialLang: Lang }) {
-  const [lang, setLang] = useState<Lang>(initialLang);
+export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang }) {
   const doc = content[kind][lang];
   const u = ui[lang];
   const year = new Date().getFullYear();
@@ -312,11 +311,11 @@ export default function LegalPage({ kind, initialLang }: { kind: LegalKind; init
   return (
     <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16]">
       {/* NAVBAR */}
-      <SiteNav lang={lang} setLang={setLang} />
+      <SiteNav lang={lang} />
 
       {/* CONTENT */}
       <section className="max-w-3xl mx-auto px-6 lg:px-8 pt-32 pb-24">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/55 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
+        <Link href={localizedHref(lang, "/")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/55 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
           <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
           {u.back}
         </Link>
@@ -348,9 +347,9 @@ export default function LegalPage({ kind, initialLang }: { kind: LegalKind; init
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {year} Modolo Digital Studio</span>
           <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href="/" className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={`/impressum?lang=${lang}`} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={`/privacy?lang=${lang}`} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
+            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
+            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
           </div>
         </div>
       </footer>

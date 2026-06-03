@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Code2, Palette, Camera, Mail } from "lucide-react";
 import SiteNav from "@/components/site-nav";
+import { localizedHref, type Locale } from "@/lib/i18n";
 
-export type Lang = "en" | "de" | "it";
+export type Lang = Locale;
 export type Slug = "web" | "brand" | "content" | "email";
 
 export const SERVICE_SLUGS: Slug[] = ["web", "brand", "content", "email"];
@@ -308,8 +308,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
   },
 };
 
-export default function ServicePage({ slug, initialLang }: { slug: Slug; initialLang: Lang }) {
-  const [lang, setLang] = useState<Lang>(initialLang);
+export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) {
   const u = ui[lang];
   const s = content[slug][lang];
   const Icon = ICONS[slug];
@@ -319,12 +318,12 @@ export default function ServicePage({ slug, initialLang }: { slug: Slug; initial
   return (
     <main className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden">
       {/* NAVBAR */}
-      <SiteNav lang={lang} setLang={setLang} ctaLabel={u.ctaButton} ctaHref="/#contatti" />
+      <SiteNav lang={lang} ctaLabel={u.ctaButton} ctaHref={localizedHref(lang, "/#contatti")} />
 
       {/* HERO */}
       <section className="relative max-w-5xl mx-auto px-6 lg:px-8 pt-36 pb-16">
         <div className="absolute top-24 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[120px] -z-0" />
-        <Link href="/#servizi" className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/55 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
+        <Link href={localizedHref(lang, "/#servizi")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/55 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
           <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
           {u.back}
         </Link>
@@ -374,7 +373,7 @@ export default function ServicePage({ slug, initialLang }: { slug: Slug; initial
           <div className="relative">
             <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4">{u.ctaTitle}</h2>
             <p className="text-[#1F1B16]/60 font-light mb-8 max-w-xl mx-auto">{u.ctaText}</p>
-            <Link href="/#contatti" className="group inline-flex items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300">
+            <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300">
               {u.ctaButton}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -391,7 +390,7 @@ export default function ServicePage({ slug, initialLang }: { slug: Slug; initial
             return (
               <Link
                 key={o}
-                href={`/servizi/${o}?lang=${lang}`}
+                href={localizedHref(lang, `/servizi/${o}`)}
                 className="group flex items-center gap-4 p-6 rounded-2xl border border-[#1F1B16]/[0.08] bg-white hover:border-[#B5893F]/40 hover:shadow-[0_8px_30px_rgba(31,27,22,0.06)] transition-all duration-300"
               >
                 <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
@@ -409,9 +408,9 @@ export default function ServicePage({ slug, initialLang }: { slug: Slug; initial
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {year} Modolo Digital Studio</span>
           <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href="/" className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={`/impressum?lang=${lang}`} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={`/privacy?lang=${lang}`} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
+            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.home}</Link>
+            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/50 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
           </div>
         </div>
       </footer>

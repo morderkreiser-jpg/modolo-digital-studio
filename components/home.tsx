@@ -7,8 +7,10 @@ import { useState } from "react";
 import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown, AlertCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
+import { localizedHref, type Locale } from "@/lib/i18n";
+import { FAQS } from "@/lib/site-data";
 
-type Lang = "en" | "de" | "it";
+type Lang = Locale;
 
 const translations = {
   en: {
@@ -69,14 +71,6 @@ const translations = {
     ],
     quote: { line1: "We believe every brand has a unique story.", line2: "Our job is to tell it with elegance." },
     faqSection: { label: "Frequently asked questions", heading1: "Everything you ", headingAccent: "want to know" },
-    faqs: [
-      { q: "How much does a website cost?", a: "Every project is tailor-made, so the price depends on your needs: number of pages, features and content to create. That's why we offer a free initial consultation: you tell us about your project and we prepare a clear quote, with no surprises." },
-      { q: "How long does it take to get the website online?", a: "It depends on the complexity, but a showcase website usually takes 2 to 4 weeks from gathering the materials. At the start we define a roadmap together, so you always know where we stand." },
-      { q: "Do you work all over Switzerland?", a: "Yes. We work with clients across Switzerland, remotely and in person when needed. Distance is never an obstacle: most of the work happens online, with regular calls and updates." },
-      { q: "Do you also handle copy and photography?", a: "Absolutely. We can take care of content from start to finish, with professional photo shoots and copywriting. For social media we partner with Project Visibility, specialists in content and page management." },
-      { q: "Will the website be optimized for Google?", a: "Yes, every website we build is SEO-optimized from the start: correct structure, fast loading and Google Business setup to help you get found locally. A strong online presence starts here." },
-      { q: "What happens after the website goes live?", a: "We don't leave you on your own. We offer support and maintenance to keep your site secure and up to date, and we're always available for changes or new ideas. We build lasting relationships, not throwaway projects." },
-    ],
     contact: {
       label: "Let's start", heading1: "Ready to ", headingAccent: "stand out", headingEnd: "?",
       subtitle: "Tell us about your project. A free initial consultation to understand how we can help you.",
@@ -151,14 +145,6 @@ const translations = {
     ],
     quote: { line1: "Wir glauben, dass jede Marke eine einzigartige Geschichte hat.", line2: "Unsere Aufgabe ist es, sie mit Eleganz zu erzählen." },
     faqSection: { label: "Häufige Fragen", heading1: "Alles, was du ", headingAccent: "wissen möchtest" },
-    faqs: [
-      { q: "Was kostet eine Website?", a: "Jedes Projekt ist massgeschneidert, daher hängt der Preis von deinen Bedürfnissen ab: Anzahl der Seiten, Funktionen und zu erstellende Inhalte. Deshalb bieten wir eine kostenlose Erstberatung an: Du erzählst uns von deinem Projekt und wir erstellen ein klares Angebot, ohne Überraschungen." },
-      { q: "Wie lange dauert es, bis die Website online ist?", a: "Das hängt von der Komplexität ab, aber eine Präsentationswebsite dauert in der Regel 2 bis 4 Wochen ab dem Zusammenstellen der Materialien. Zu Beginn legen wir gemeinsam einen Fahrplan fest, damit du immer weisst, wo wir stehen." },
-      { q: "Arbeitet ihr in der ganzen Schweiz?", a: "Ja. Wir betreuen Kunden in der ganzen Schweiz, remote und bei Bedarf persönlich. Distanz ist nie ein Hindernis: Der grösste Teil der Arbeit findet online statt, mit regelmässigen Calls und Updates." },
-      { q: "Kümmert ihr euch auch um Texte und Fotos?", a: "Selbstverständlich. Wir können die Inhalte von Anfang bis Ende übernehmen, mit professionellen Fotoshootings und Texterstellung. Für Social Media arbeiten wir mit Project Visibility zusammen, Spezialisten für Content und Seitenbetreuung." },
-      { q: "Wird die Website für Google optimiert?", a: "Ja, jede Website, die wir erstellen, ist von Anfang an SEO-optimiert: korrekte Struktur, schnelle Ladezeiten und Google-Business-Einrichtung, damit du lokal gefunden wirst. Eine starke Online-Präsenz beginnt hier." },
-      { q: "Was passiert, nachdem die Website online ist?", a: "Wir lassen dich nicht allein. Wir bieten Support und Wartung, um deine Website sicher und aktuell zu halten, und stehen jederzeit für Änderungen oder neue Ideen zur Verfügung. Wir bauen langfristige Beziehungen auf, keine Wegwerfprojekte." },
-    ],
     contact: {
       label: "Los geht's", heading1: "Bereit, dich ", headingAccent: "abzuheben", headingEnd: "?",
       subtitle: "Erzähl uns von deinem Projekt. Eine kostenlose Erstberatung, um zu verstehen, wie wir dir helfen können.",
@@ -233,14 +219,6 @@ const translations = {
     ],
     quote: { line1: "Crediamo che ogni brand abbia una storia unica.", line2: "Il nostro lavoro è raccontarla con eleganza." },
     faqSection: { label: "Domande frequenti", heading1: "Tutto quello che ", headingAccent: "vuoi sapere" },
-    faqs: [
-      { q: "Quanto costa realizzare un sito web?", a: "Ogni progetto è su misura, quindi il prezzo dipende dalle tue esigenze: numero di pagine, funzionalità e contenuti da creare. Per questo offriamo una prima consulenza gratuita: ci racconti il tuo progetto e ti prepariamo un preventivo chiaro, senza sorprese." },
-      { q: "Quanto tempo serve per avere il sito online?", a: "Dipende dalla complessità, ma in genere un sito vetrina richiede dalle 2 alle 4 settimane dalla raccolta dei materiali. All'inizio definiamo insieme una tabella di marcia, così sai sempre a che punto siamo." },
-      { q: "Lavorate in tutta la Svizzera?", a: "Sì. Seguiamo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è mai un ostacolo: gran parte del lavoro avviene online, con call e aggiornamenti costanti." },
-      { q: "Vi occupate anche di testi e fotografie?", a: "Assolutamente. Possiamo curare i contenuti dall'inizio alla fine, con shooting fotografici professionali e creazione dei testi. Per i social collaboriamo con Project Visibility, specialisti in contenuti e gestione delle pagine." },
-      { q: "Il sito sarà ottimizzato per Google?", a: "Sì, ogni sito che realizziamo nasce ottimizzato per la SEO: struttura corretta, velocità di caricamento e configurazione di Google Business per farti trovare sul territorio. Una buona presenza online parte da qui." },
-      { q: "Cosa succede dopo che il sito è online?", a: "Non ti lasciamo solo. Offriamo assistenza e manutenzione per tenere il sito sicuro e aggiornato, e siamo sempre disponibili per modifiche o nuove idee. Costruiamo relazioni durature, non lavori 'usa e getta'." },
-    ],
     contact: {
       label: "Iniziamo", heading1: "Pronto a ", headingAccent: "distinguerti", headingEnd: "?",
       subtitle: "Raccontaci il tuo progetto. Una consulenza iniziale gratuita per capire come possiamo aiutarti.",
@@ -265,8 +243,7 @@ const statIcons = [Globe2, Clock, Sparkles, Award];
 const sectorIcons = [Store, Briefcase, ShoppingBag, Building2];
 const valueIcons = [Target, Heart, Zap];
 
-export default function Home() {
-  const [lang, setLang] = useState<Lang>("en");
+export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
@@ -314,7 +291,6 @@ export default function Home() {
       {/* NAVBAR */}
       <SiteNav
         lang={lang}
-        setLang={setLang}
         links={[
           { href: "#servizi", label: t.nav.services },
           { href: "#portfolio", label: t.nav.portfolio },
@@ -415,7 +391,7 @@ export default function Home() {
                         <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/45 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
                       ))}
                     </div>
-                    <Link href={`/servizi/${serviceSlugs[i]}?lang=${lang}`} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
+                    <Link href={localizedHref(lang, `/servizi/${serviceSlugs[i]}`)} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
                       {t.servicesSection.learnMore}
                       <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -588,8 +564,8 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto text-center">
           <Sparkles className="w-8 h-8 text-[#B5893F] mx-auto mb-8" strokeWidth={1.2} />
           <p className="text-2xl md:text-4xl font-light leading-relaxed italic font-serif">
-            "{t.quote.line1}<br />
-            <span className="text-[#B5893F]">{t.quote.line2}</span>"
+            &ldquo;{t.quote.line1}<br />
+            <span className="text-[#B5893F]">{t.quote.line2}</span>&rdquo;
           </p>
         </motion.div>
       </section>
@@ -606,7 +582,7 @@ export default function Home() {
           </motion.div>
 
           <div className="space-y-4">
-            {t.faqs.map((faq, i) => {
+            {FAQS[lang].map((faq, i) => {
               const isOpen = openFaq === i;
               return (
                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] overflow-hidden">
@@ -732,8 +708,8 @@ export default function Home() {
             <span className="text-sm text-[#1F1B16]/50 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
           </div>
           <div className="flex items-center gap-5 sm:gap-6">
-            <Link href={`/impressum?lang=${lang}`} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
-            <Link href={`/privacy?lang=${lang}`} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
+            <Link href={localizedHref(lang, "/impressum")} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
+            <Link href={localizedHref(lang, "/privacy")} className="text-xs text-[#1F1B16]/50 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
             <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/45 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
