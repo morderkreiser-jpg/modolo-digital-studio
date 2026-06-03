@@ -431,7 +431,7 @@ export default function Home({ lang }: { lang: Lang }) {
             className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
           >
             <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
-              <Image src="/portfolio-saporivivi.png" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1216px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1216px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
@@ -476,7 +476,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center mb-24">
             <motion.div initial={reduce ? false : { opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-gradient-to-b from-[#EFE7D9] to-[#F7F3EC] shadow-[0_10px_50px_rgba(31,27,22,0.08)]">
-                <Image src="/founder.png" alt="Francesco Modolo — Founder of Modolo Digital Studio" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain object-bottom" />
+                <Image src="/founder.webp" alt="Francesco Modolo — Founder of Modolo Digital Studio" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain object-bottom" />
               </div>
             </motion.div>
             <motion.div initial={reduce ? false : { opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
