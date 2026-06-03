@@ -15,7 +15,7 @@ type Lang = Locale;
 
 const translations = {
   en: {
-    nav: { services: "Services", portfolio: "Portfolio", about: "About", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
+    nav: { services: "Services", pricing: "Pricing", portfolio: "Portfolio", about: "About", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
     hero: {
       badge: "Digital Studio · Switzerland",
       titleLine1: "Design, code and strategy",
@@ -30,7 +30,7 @@ const translations = {
       { value: "Free", label: "First consultation" },
       { value: "Premium", label: "Guaranteed quality" },
     ],
-    servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results", learnMore: "Learn more" },
+    servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results", learnMore: "Learn more", viewPricing: "View pricing" },
     services: [
       { title: "Web & Development", desc: "Modern, high-performance websites optimized for local SEO. Google Business management to stand out in your area.", tags: ["Web Design", "Development", "Local SEO", "Google Business"] },
       { title: "Brand & Identity", desc: "We build memorable visual identities. From your logo to branded Canva templates, every detail tells your brand's story.", tags: ["Branding", "Visual Identity", "Canva Templates"] },
@@ -89,7 +89,7 @@ const translations = {
     footer: { madeWith: "Made with care in Switzerland", imprint: "Legal Notice", privacy: "Privacy Policy" },
   },
   de: {
-    nav: { services: "Leistungen", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
+    nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
     hero: {
       badge: "Digital Studio · Schweiz",
       titleLine1: "Design, Code und Strategie",
@@ -104,7 +104,7 @@ const translations = {
       { value: "Gratis", label: "Erstberatung" },
       { value: "Premium", label: "Garantierte Qualität" },
     ],
-    servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse", learnMore: "Mehr erfahren" },
+    servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse", learnMore: "Mehr erfahren", viewPricing: "Preise ansehen" },
     services: [
       { title: "Web & Entwicklung", desc: "Moderne, performante Websites, optimiert für lokales SEO. Google-Business-Verwaltung, um in deiner Region sichtbar zu werden.", tags: ["Webdesign", "Entwicklung", "Lokales SEO", "Google Business"] },
       { title: "Marke & Identität", desc: "Wir gestalten einprägsame visuelle Identitäten. Vom Logo bis zu gebrandeten Canva-Vorlagen erzählt jedes Detail die Geschichte deiner Marke.", tags: ["Branding", "Visuelle Identität", "Canva-Vorlagen"] },
@@ -163,7 +163,7 @@ const translations = {
     footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt", imprint: "Impressum", privacy: "Datenschutz" },
   },
   it: {
-    nav: { services: "Servizi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci", backToTop: "Torna su" },
+    nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci", backToTop: "Torna su" },
     hero: {
       badge: "Digital Studio · Svizzera",
       titleLine1: "Design, codice e strategia",
@@ -178,7 +178,7 @@ const translations = {
       { value: "Gratis", label: "Prima consulenza" },
       { value: "Premium", label: "Qualità garantita" },
     ],
-    servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti", learnMore: "Scopri di più" },
+    servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti", learnMore: "Scopri di più", viewPricing: "Vedi i prezzi" },
     services: [
       { title: "Web & Sviluppo", desc: "Siti web moderni, performanti e ottimizzati per la SEO locale. Gestione Google Business per emergere sul territorio.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
       { title: "Brand & Identità", desc: "Costruiamo identità visive memorabili. Dal logo ai template Canva brandizzati, ogni dettaglio racconta il tuo brand.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
@@ -300,6 +300,7 @@ export default function Home({ lang }: { lang: Lang }) {
         lang={lang}
         links={[
           { href: "#servizi", label: t.nav.services },
+          { href: localizedHref(lang, "/prezzi"), label: t.nav.pricing },
           { href: "#portfolio", label: t.nav.portfolio },
           { href: "#chi-siamo", label: t.nav.about },
           { href: "#faq", label: t.nav.faq },
@@ -406,6 +407,13 @@ export default function Home({ lang }: { lang: Lang }) {
                 </motion.div>
               );
             })}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
+              {t.servicesSection.viewPricing}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>

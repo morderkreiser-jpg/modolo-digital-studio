@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
+import { REGION_COOKIE, DEFAULT_REGION } from "@/lib/region";
 
 // Locale routing (Next 16 renamed "middleware" → "proxy").
 // URL scheme: default locale (en) is served WITHOUT a prefix at the root; de/it are prefixed.
@@ -14,6 +15,21 @@ import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 
 const COOKIE = "NEXT_LOCALE";
 const ONE_YEAR = 60 * 60 * 24 * 365;
+
+// Set the pricing-region cookie from the visitor's country (Vercel geo header) on first
+// visit, unless they already have one (an explicit currency-toggle choice persists).
+// IT visitors -> Italian/EUR prices; everyone else -> Swiss/CHF.
+function ensureRegion(request: NextRequest, res: NextResponse) {
+  if (!request.cookies.get(REGION_COOKIE)) {
+    const country = request.headers.get("x-vercel-ip-country");
+    res.cookies.set(REGION_COOKIE, country === "IT" ? "it" : DEFAULT_REGION, {
+      path: "/",
+      maxAge: ONE_YEAR,
+      sameSite: "lax",
+    });
+  }
+  return res;
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -32,7 +48,7 @@ export function proxy(request: NextRequest) {
   if (isLocale(firstSegment)) {
     const res = NextResponse.next();
     res.cookies.set(COOKIE, firstSegment, { path: "/", maxAge: ONE_YEAR, sameSite: "lax" });
-    return res;
+    return ensureRegion(request, res);
   }
 
   // 3) Unprefixed path = default-locale (en) territory.
@@ -47,7 +63,7 @@ export function proxy(request: NextRequest) {
   // Default: serve English on the clean URL by rewriting to the internal /en tree.
   const url = request.nextUrl.clone();
   url.pathname = `/${DEFAULT_LOCALE}${pathname === "/" ? "" : pathname}`;
-  return NextResponse.rewrite(url);
+  return ensureRegion(request, NextResponse.rewrite(url));
 }
 
 export const config = {

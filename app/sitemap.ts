@@ -10,6 +10,7 @@ type ChangeFrequency = NonNullable<MetadataRoute.Sitemap[number]["changeFrequenc
 // Locale-agnostic base paths with their crawl hints.
 const PAGES: { path: string; changeFrequency: ChangeFrequency; priority: number }[] = [
   { path: "/", changeFrequency: "monthly", priority: 1 },
+  { path: "/prezzi", changeFrequency: "monthly", priority: 0.9 },
   ...SERVICE_SLUGS.map((slug) => ({
     path: `/servizi/${slug}`,
     changeFrequency: "monthly" as ChangeFrequency,
