@@ -12,12 +12,21 @@ export const SITE = {
   phoneDisplay: "+41 77 223 79 00",
   instagram: "https://instagram.com/modolodigitalstudio",
   founder: "Francesco Modolo",
+  // Swiss address — registered/legal seat (used by Impressum and JSON-LD).
   address: {
     street: "Scheideggstrasse 18",
     postalCode: "8400",
     locality: "Winterthur",
     region: "Zürich",
     country: "CH",
+  },
+  // Italian local contact address (shown to Italy-region visitors).
+  addressIt: {
+    street: "Via Toniolo 17",
+    postalCode: "31020",
+    locality: "San Vendemiano",
+    region: "TV",
+    country: "IT",
   },
   // brand palette
   ivory: "#F7F3EC",

@@ -39,10 +39,10 @@ const COPY: Record<
   },
 };
 
-// Local street address shown per pricing region.
+// Local street address shown per pricing region (single source: lib/site.ts).
 const ADDRESS: Record<Region, string> = {
-  ch: "Scheideggstrasse 18 · 8400 Winterthur",
-  it: "Via Toniolo 17 · 31020 San Vendemiano (TV)",
+  ch: `${SITE.address.street} · ${SITE.address.postalCode} ${SITE.address.locality}`,
+  it: `${SITE.addressIt.street} · ${SITE.addressIt.postalCode} ${SITE.addressIt.locality}`,
 };
 // Country name per region, in the visitor's language.
 const COUNTRY: Record<Region, Record<Locale, string>> = {

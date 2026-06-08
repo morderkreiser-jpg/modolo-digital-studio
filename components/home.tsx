@@ -75,7 +75,7 @@ const translations = {
     contact: {
       label: "Let's start", heading1: "Ready to ", headingAccent: "stand out", headingEnd: "?",
       subtitle: "Tell us about your project. A free initial consultation to understand how we can help you.",
-      emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland",
+      emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
       phName: "Your name", phEmail: "your@email.com", phCompany: "Company name (optional)", phMessage: "Tell us about your project...",
       btnSend: "Send message", btnSending: "Sending...",
@@ -149,7 +149,7 @@ const translations = {
     contact: {
       label: "Los geht's", heading1: "Bereit, dich ", headingAccent: "abzuheben", headingEnd: "?",
       subtitle: "Erzähl uns von deinem Projekt. Eine kostenlose Erstberatung, um zu verstehen, wie wir dir helfen können.",
-      emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz",
+      emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
       phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname (optional)", phMessage: "Erzähl uns von deinem Projekt...",
       btnSend: "Nachricht senden", btnSending: "Wird gesendet...",
@@ -223,7 +223,7 @@ const translations = {
     contact: {
       label: "Iniziamo", heading1: "Pronto a ", headingAccent: "distinguerti", headingEnd: "?",
       subtitle: "Raccontaci il tuo progetto. Una consulenza iniziale gratuita per capire come possiamo aiutarti.",
-      emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera",
+      emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
       phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda (opzionale)", phMessage: "Raccontaci il tuo progetto...",
       btnSend: "Invia messaggio", btnSending: "Invio in corso...",
@@ -660,8 +660,13 @@ export default function Home({ lang }: { lang: Lang }) {
                   <MapPin className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.areaLabel}</div>
-                  <div className="text-[#1F1B16]/75">{t.contact.areaValue}</div>
+                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2">{t.contact.officesLabel}</div>
+                  <div className="text-[#1F1B16]/75 leading-relaxed text-sm">
+                    <span className="text-[var(--color-gold-ink)]">{t.contact.countryCh}</span> — {SITE.address.street}, {SITE.address.postalCode} {SITE.address.locality}
+                  </div>
+                  <div className="text-[#1F1B16]/75 leading-relaxed text-sm mt-1">
+                    <span className="text-[var(--color-gold-ink)]">{t.contact.countryIt}</span> — {SITE.addressIt.street}, {SITE.addressIt.postalCode} {SITE.addressIt.locality}
+                  </div>
                 </div>
               </div>
             </motion.div>
