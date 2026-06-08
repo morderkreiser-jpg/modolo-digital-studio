@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SITE } from "@/lib/site";
 import { isLocale, type Locale } from "@/lib/i18n";
+import { isRegion, DEFAULT_REGION, type Region } from "@/lib/region";
 import { contactAutoReply } from "@/lib/email";
 
 // Server-side contact handler. Sends the enquiry to SITE.email via Resend when configured
@@ -11,6 +12,14 @@ const FORMSPREE_FALLBACK = "https://formspree.io/f/xbdbwlvg";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Fields = { nome: string; email: string; messaggio: string; azienda: string; lang: string; gotcha: string };
+
+// Pricing region of the visitor: explicit cookie choice first, else the Vercel geo country.
+function regionFromRequest(request: Request): Region {
+  const cookie = request.headers.get("cookie") || "";
+  const m = cookie.match(/(?:^|;\s*)MDS_REGION=(ch|it)/);
+  if (m && isRegion(m[1])) return m[1];
+  return request.headers.get("x-vercel-ip-country") === "IT" ? "it" : DEFAULT_REGION;
+}
 
 async function sendEmail(apiKey: string, payload: Record<string, unknown>) {
   return fetch("https://api.resend.com/emails", {
@@ -55,6 +64,7 @@ export async function POST(request: Request) {
   const azienda = fields.azienda.trim();
   const messaggio = fields.messaggio.trim().slice(0, 5000);
   const locale: Locale = isLocale(fields.lang) ? fields.lang : "en";
+  const region: Region = regionFromRequest(request);
   if (!nome || !EMAIL_RE.test(email) || !messaggio) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
@@ -78,7 +88,7 @@ export async function POST(request: Request) {
     //    Best-effort: a failure here never fails the request.
     try {
       const replyFrom = `Modolo Digital Studio <${SITE.email}>`;
-      const ar = contactAutoReply(locale, nome);
+      const ar = contactAutoReply(locale, region, nome);
       await sendEmail(apiKey, { from: replyFrom, to: [email], reply_to: SITE.email, subject: ar.subject, text: ar.text, html: ar.html });
     } catch (e) {
       console.error("Auto-reply failed", e);

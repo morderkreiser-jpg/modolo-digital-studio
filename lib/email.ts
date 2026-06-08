@@ -1,14 +1,17 @@
 // Branded, email-client-safe HTML for the contact auto-reply (tables + inline styles, one
 // optimized logo, the rest text → good text-to-image ratio for deliverability). Server-only.
+// The footer address follows the visitor's pricing region: Italian visitors see the Italian
+// local address, everyone else the Swiss one. Text is in the visitor's locale.
 import { SITE } from "./site";
 import { localizedHref, type Locale } from "./i18n";
+import type { Region } from "./region";
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string);
 
 const COPY: Record<
   Locale,
-  { subject: string; greeting: string; intro: string; signoff: string; role: string; country: string; cta: string }
+  { subject: string; greeting: string; intro: string; signoff: string; role: string; cta: string }
 > = {
   en: {
     subject: "Thanks for reaching out — Modolo Digital Studio",
@@ -16,7 +19,6 @@ const COPY: Record<
     intro: "Thanks for contacting Modolo Digital Studio. We've received your message and will personally get back to you within 24 hours.",
     signoff: "Talk soon,",
     role: "Founder · Web Designer & Developer",
-    country: "Switzerland",
     cta: "See our work",
   },
   de: {
@@ -25,7 +27,6 @@ const COPY: Record<
     intro: "Danke für deine Nachricht an Modolo Digital Studio. Wir haben sie erhalten und melden uns innerhalb von 24 Stunden persönlich bei dir.",
     signoff: "Bis bald,",
     role: "Gründer · Webdesigner & Entwickler",
-    country: "Schweiz",
     cta: "Unsere Arbeiten ansehen",
   },
   it: {
@@ -34,23 +35,38 @@ const COPY: Record<
     intro: "Grazie per aver scritto a Modolo Digital Studio. Abbiamo ricevuto il tuo messaggio e ti risponderemo personalmente entro 24 ore.",
     signoff: "A presto,",
     role: "Fondatore · Web Designer & Sviluppatore",
-    country: "Svizzera",
     cta: "Vedi i nostri lavori",
   },
+};
+
+// Local street address shown per pricing region.
+const ADDRESS: Record<Region, string> = {
+  ch: "Scheideggstrasse 18 · 8400 Winterthur",
+  it: "Via Toniolo 17 · 31020 San Vendemiano (TV)",
+};
+// Country name per region, in the visitor's language.
+const COUNTRY: Record<Region, Record<Locale, string>> = {
+  ch: { en: "Switzerland", de: "Schweiz", it: "Svizzera" },
+  it: { en: "Italy", de: "Italien", it: "Italia" },
 };
 
 const LOGO = `${SITE.url}/email-logo.png`;
 const SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif";
 const SERIF = "Georgia,'Times New Roman',serif";
 
-export function contactAutoReply(locale: Locale, name: string): { subject: string; text: string; html: string } {
+export function contactAutoReply(
+  locale: Locale,
+  region: Region,
+  name: string,
+): { subject: string; text: string; html: string } {
   const c = COPY[locale];
   const safeName = escapeHtml(name);
   const portfolioUrl = SITE.url + localizedHref(locale, "/#portfolio");
+  const addr = `${ADDRESS[region]} · ${COUNTRY[region][locale]}`;
 
   const text =
     `${c.greeting} ${name},\n\n${c.intro}\n\n${c.cta}: ${portfolioUrl}\n\n${c.signoff}\n` +
-    `${SITE.founder} — ${c.role}\n${SITE.email} · ${SITE.phoneDisplay}\nmodolodigitalstudio.ch · ${SITE.instagram}`;
+    `${SITE.founder} — ${c.role}\n${SITE.email} · ${SITE.phoneDisplay}\nmodolodigitalstudio.ch · ${SITE.instagram}\n${addr}`;
 
   const html = `<!DOCTYPE html>
 <html lang="${locale}">
@@ -90,7 +106,7 @@ export function contactAutoReply(locale: Locale, name: string): { subject: strin
 </p>
 </td></tr>
 <tr><td align="center" style="padding:16px 24px 28px;font-family:${SANS};color:#a39c90;font-size:12px;line-height:1.6;">
-<strong style="color:#8a8478;">Modolo Digital Studio</strong> · Winterthur · ${c.country}
+<strong style="color:#8a8478;">Modolo Digital Studio</strong><br>${addr}
 </td></tr>
 </table>
 </td></tr>
