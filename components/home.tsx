@@ -262,6 +262,7 @@ export default function Home({ lang }: { lang: Lang }) {
     if (formStatus === "sending") return;
     const form = e.currentTarget;
     const data = new FormData(form);
+    data.set("lang", lang);
     const name = (data.get("nome") as string)?.trim();
     const email = (data.get("email") as string)?.trim();
     const message = (data.get("messaggio") as string)?.trim();

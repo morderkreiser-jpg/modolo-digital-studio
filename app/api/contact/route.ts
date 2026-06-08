@@ -1,13 +1,51 @@
 import { NextResponse } from "next/server";
 import { SITE } from "@/lib/site";
+import { isLocale, type Locale } from "@/lib/i18n";
 
 // Server-side contact handler. Sends the enquiry to SITE.email via Resend when configured
 // (set RESEND_API_KEY, and CONTACT_FROM once the domain is verified). Until then it falls
 // back to the existing Formspree form, so the form never regresses during the switch-over.
+// On the Resend path it also sends the visitor a localized auto-reply (best-effort).
 const FORMSPREE_FALLBACK = "https://formspree.io/f/xbdbwlvg";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type Fields = { nome: string; email: string; messaggio: string; azienda: string; gotcha: string };
+type Fields = { nome: string; email: string; messaggio: string; azienda: string; lang: string; gotcha: string };
+
+// Localized confirmation sent back to the person who submitted the form.
+const AUTOREPLY: Record<Locale, { subject: string; greeting: string; intro: string; echo: string; signoff: string }> = {
+  en: {
+    subject: "Thanks for reaching out — Modolo Digital Studio",
+    greeting: "Hi",
+    intro: "Thanks for contacting Modolo Digital Studio. We've received your message and will get back to you within 24 hours.",
+    echo: "For reference, here's what you sent us:",
+    signoff: "Talk soon,",
+  },
+  de: {
+    subject: "Danke für deine Nachricht — Modolo Digital Studio",
+    greeting: "Hallo",
+    intro: "Danke für deine Nachricht an Modolo Digital Studio. Wir haben sie erhalten und melden uns innerhalb von 24 Stunden bei dir.",
+    echo: "Zur Erinnerung, das hast du uns geschrieben:",
+    signoff: "Bis bald,",
+  },
+  it: {
+    subject: "Grazie per averci scritto — Modolo Digital Studio",
+    greeting: "Ciao",
+    intro: "Grazie per aver scritto a Modolo Digital Studio. Abbiamo ricevuto il tuo messaggio e ti risponderemo entro 24 ore.",
+    echo: "Per riferimento, ecco cosa ci hai scritto:",
+    signoff: "A presto,",
+  },
+};
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string);
+
+async function sendEmail(apiKey: string, payload: Record<string, unknown>) {
+  return fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
 
 async function readFields(request: Request): Promise<Fields> {
   const ct = request.headers.get("content-type") || "";
@@ -15,7 +53,7 @@ async function readFields(request: Request): Promise<Fields> {
   if (ct.includes("application/json")) {
     const b = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const s = (k: string) => (typeof b[k] === "string" ? (b[k] as string) : "");
-    return { nome: s("nome"), email: s("email"), messaggio: s("messaggio"), azienda: s("azienda"), gotcha: s("_gotcha") };
+    return { nome: s("nome"), email: s("email"), messaggio: s("messaggio"), azienda: s("azienda"), lang: s("lang"), gotcha: s("_gotcha") };
   }
   const f = await request.formData();
   return {
@@ -23,6 +61,7 @@ async function readFields(request: Request): Promise<Fields> {
     email: get(f.get("email")),
     messaggio: get(f.get("messaggio")),
     azienda: get(f.get("azienda")),
+    lang: get(f.get("lang")),
     gotcha: get(f.get("_gotcha")),
   };
 }
@@ -42,27 +81,44 @@ export async function POST(request: Request) {
   const email = fields.email.trim();
   const azienda = fields.azienda.trim();
   const messaggio = fields.messaggio.trim().slice(0, 5000);
+  const locale: Locale = isLocale(fields.lang) ? fields.lang : "en";
   if (!nome || !EMAIL_RE.test(email) || !messaggio) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
 
   const subject = `New enquiry — ${nome}${azienda ? ` (${azienda})` : ""}`;
-  const text = `Name: ${nome}\nEmail: ${email}\nCompany: ${azienda || "—"}\n\n${messaggio}`;
+  const text = `Name: ${nome}\nEmail: ${email}\nCompany: ${azienda || "—"}\nLanguage: ${locale}\n\n${messaggio}`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey) {
-    // Default from works out-of-the-box if the Resend account is registered with SITE.email;
-    // set CONTACT_FROM to a branded address (e.g. noreply@modolodigitalstudio.ch) after verifying the domain.
     const from = process.env.CONTACT_FROM || "Modolo Digital Studio <onboarding@resend.dev>";
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [SITE.email], reply_to: email, subject, text }),
-    });
-    if (res.ok) return NextResponse.json({ ok: true });
-    const detail = await res.text().catch(() => "");
-    console.error("Resend send failed", res.status, detail);
-    return NextResponse.json({ ok: false, error: "send-failed" }, { status: 502 });
+
+    // 1) Notify the studio (reply goes to the visitor).
+    const res = await sendEmail(apiKey, { from, to: [SITE.email], reply_to: email, subject, text });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error("Resend notify failed", res.status, detail);
+      return NextResponse.json({ ok: false, error: "send-failed" }, { status: 502 });
+    }
+
+    // 2) Localized auto-reply to the visitor (best-effort — never fail the request on this).
+    try {
+      const a = AUTOREPLY[locale];
+      const arText = `${a.greeting} ${nome},\n\n${a.intro}\n\n${a.echo}\n"${messaggio}"\n\n${a.signoff}\nModolo Digital Studio\nmodolodigitalstudio.ch`;
+      const arHtml =
+        `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1F1B16;font-size:15px;line-height:1.6;max-width:520px">` +
+        `<p>${a.greeting} ${escapeHtml(nome)},</p>` +
+        `<p>${a.intro}</p>` +
+        `<p style="color:#6b6b6b;margin-bottom:4px">${a.echo}</p>` +
+        `<blockquote style="border-left:3px solid #B5893F;margin:0 0 16px;padding:4px 14px;color:#555;white-space:pre-line">${escapeHtml(messaggio)}</blockquote>` +
+        `<p>${a.signoff}<br><strong>Modolo Digital Studio</strong><br>` +
+        `<a href="https://www.modolodigitalstudio.ch" style="color:#8F6B2F;text-decoration:none">modolodigitalstudio.ch</a></p></div>`;
+      await sendEmail(apiKey, { from, to: [email], reply_to: SITE.email, subject: a.subject, text: arText, html: arHtml });
+    } catch (e) {
+      console.error("Auto-reply failed", e);
+    }
+
+    return NextResponse.json({ ok: true });
   }
 
   // Fallback while Resend is not configured: forward to Formspree (current behaviour).
