@@ -277,7 +277,7 @@ export default function Home({ lang }: { lang: Lang }) {
     setFieldErrors({});
     setFormStatus("sending");
     try {
-      const res = await fetch("https://formspree.io/f/xbdbwlvg", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         body: data,
         headers: { Accept: "application/json" },
