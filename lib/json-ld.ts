@@ -19,6 +19,15 @@ const postalAddress = {
   addressCountry: SITE.address.country,
 };
 
+const postalAddressIt = {
+  "@type": "PostalAddress",
+  streetAddress: SITE.addressIt.street,
+  postalCode: SITE.addressIt.postalCode,
+  addressLocality: SITE.addressIt.locality,
+  addressRegion: SITE.addressIt.region,
+  addressCountry: SITE.addressIt.country,
+};
+
 const SERVICES_LABEL: Record<Locale, string> = {
   en: "Services",
   de: "Leistungen",
@@ -40,12 +49,13 @@ export function homeGraph(locale: Locale) {
         email: SITE.email,
         telephone: SITE.phone,
         address: postalAddress,
+        location: [{ "@id": `${SITE.url}/#business-ch` }, { "@id": `${SITE.url}/#business-it` }],
         sameAs: [SITE.instagram],
         founder: { "@type": "Person", name: SITE.founder },
       },
       {
         "@type": "ProfessionalService",
-        "@id": `${SITE.url}/#business`,
+        "@id": `${SITE.url}/#business-ch`,
         name: SITE.name,
         url: SITE.url,
         image: `${SITE.url}/og-image.png`,
@@ -53,6 +63,19 @@ export function homeGraph(locale: Locale) {
         email: SITE.email,
         address: postalAddress,
         areaServed: { "@type": "Country", name: "Switzerland" },
+        priceRange: "$$",
+        parentOrganization: { "@id": `${SITE.url}/#organization` },
+      },
+      {
+        "@type": "ProfessionalService",
+        "@id": `${SITE.url}/#business-it`,
+        name: SITE.name,
+        url: SITE.url,
+        image: `${SITE.url}/og-image.png`,
+        telephone: SITE.phone,
+        email: SITE.email,
+        address: postalAddressIt,
+        areaServed: { "@type": "Country", name: "Italy" },
         priceRange: "$$",
         parentOrganization: { "@id": `${SITE.url}/#organization` },
       },
