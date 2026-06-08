@@ -12,26 +12,23 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type Fields = { nome: string; email: string; messaggio: string; azienda: string; lang: string; gotcha: string };
 
 // Localized confirmation sent back to the person who submitted the form.
-const AUTOREPLY: Record<Locale, { subject: string; greeting: string; intro: string; echo: string; signoff: string }> = {
+const AUTOREPLY: Record<Locale, { subject: string; greeting: string; intro: string; signoff: string }> = {
   en: {
     subject: "Thanks for reaching out — Modolo Digital Studio",
     greeting: "Hi",
-    intro: "Thanks for contacting Modolo Digital Studio. We've received your message and will get back to you within 24 hours.",
-    echo: "For reference, here's what you sent us:",
+    intro: "Thanks for contacting Modolo Digital Studio. We've received your message and will personally get back to you within 24 hours.",
     signoff: "Talk soon,",
   },
   de: {
     subject: "Danke für deine Nachricht — Modolo Digital Studio",
     greeting: "Hallo",
-    intro: "Danke für deine Nachricht an Modolo Digital Studio. Wir haben sie erhalten und melden uns innerhalb von 24 Stunden bei dir.",
-    echo: "Zur Erinnerung, das hast du uns geschrieben:",
+    intro: "Danke für deine Nachricht an Modolo Digital Studio. Wir haben sie erhalten und melden uns innerhalb von 24 Stunden persönlich bei dir.",
     signoff: "Bis bald,",
   },
   it: {
     subject: "Grazie per averci scritto — Modolo Digital Studio",
     greeting: "Ciao",
-    intro: "Grazie per aver scritto a Modolo Digital Studio. Abbiamo ricevuto il tuo messaggio e ti risponderemo entro 24 ore.",
-    echo: "Per riferimento, ecco cosa ci hai scritto:",
+    intro: "Grazie per aver scritto a Modolo Digital Studio. Abbiamo ricevuto il tuo messaggio e ti risponderemo personalmente entro 24 ore.",
     signoff: "A presto,",
   },
 };
@@ -101,19 +98,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "send-failed" }, { status: 502 });
     }
 
-    // 2) Localized auto-reply to the visitor (best-effort — never fail the request on this).
+    // 2) Localized auto-reply to the visitor — sent from the monitored info@ address with a
+    //    lean, static body (no echoed user content) for cleaner deliverability. Best-effort:
+    //    a failure here never fails the request.
     try {
       const a = AUTOREPLY[locale];
-      const arText = `${a.greeting} ${nome},\n\n${a.intro}\n\n${a.echo}\n"${messaggio}"\n\n${a.signoff}\nModolo Digital Studio\nmodolodigitalstudio.ch`;
+      const replyFrom = `Modolo Digital Studio <${SITE.email}>`;
+      const arText = `${a.greeting} ${nome},\n\n${a.intro}\n\n${a.signoff}\nModolo Digital Studio\nmodolodigitalstudio.ch`;
       const arHtml =
         `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1F1B16;font-size:15px;line-height:1.6;max-width:520px">` +
         `<p>${a.greeting} ${escapeHtml(nome)},</p>` +
         `<p>${a.intro}</p>` +
-        `<p style="color:#6b6b6b;margin-bottom:4px">${a.echo}</p>` +
-        `<blockquote style="border-left:3px solid #B5893F;margin:0 0 16px;padding:4px 14px;color:#555;white-space:pre-line">${escapeHtml(messaggio)}</blockquote>` +
         `<p>${a.signoff}<br><strong>Modolo Digital Studio</strong><br>` +
         `<a href="https://www.modolodigitalstudio.ch" style="color:#8F6B2F;text-decoration:none">modolodigitalstudio.ch</a></p></div>`;
-      await sendEmail(apiKey, { from, to: [email], reply_to: SITE.email, subject: a.subject, text: arText, html: arHtml });
+      await sendEmail(apiKey, { from: replyFrom, to: [email], reply_to: SITE.email, subject: a.subject, text: arText, html: arHtml });
     } catch (e) {
       console.error("Auto-reply failed", e);
     }
