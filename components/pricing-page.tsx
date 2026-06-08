@@ -48,18 +48,37 @@ const FOOT: Record<Locale, { home: string; imprint: string; privacy: string }> =
   it: { home: "Home", imprint: "Note legali", privacy: "Privacy" },
 };
 
-export default function PricingPage({ lang }: { lang: Locale }) {
-  const region = useSyncExternalStore(subscribeRegion, readRegion, () => DEFAULT_REGION);
+// Thousands separator per display locale (English comma, Swiss German apostrophe, Italian dot)
+// so the separator is unambiguous in each language. Formatted manually rather than via Intl so
+// the result is byte-identical on server and client regardless of the runtime's ICU data.
+const THOUSANDS: Record<Locale, string> = { en: ",", de: "'", it: "." };
+function groupThousands(n: number, sep: string): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+}
+
+export default function PricingPage({
+  lang,
+  initialRegion = DEFAULT_REGION,
+}: {
+  lang: Locale;
+  initialRegion?: Region;
+}) {
+  // SSR uses initialRegion (resolved server-side from geo/cookie); the client then reflects the
+  // MDS_REGION cookie via the store — same value, so no hydration mismatch and no price flash.
+  const region = useSyncExternalStore(subscribeRegion, readRegion, () => initialRegion);
   const ui = PRICING_UI[lang];
   const foot = FOOT[lang];
   const year = new Date().getFullYear();
   const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}`;
+  const sep = THOUSANDS[lang];
+  const cur = CURRENCY[region];
+  const amount = (n: number) => `${cur} ${groupThousands(n, sep)}`;
+  const regionName = region === "it" ? ui.regionIt : ui.regionCh;
 
   const chooseRegion = (r: Region) => rememberRegion(r);
 
-  const cur = CURRENCY[region];
   const resolve = (s: string) =>
-    s.replace("{cur}", cur).replace("{hourly}", HOURLY[region]).replace("{vat}", VAT[region]);
+    s.replace("{cur}", cur).replace("{hourly}", groupThousands(HOURLY[region], sep)).replace("{vat}", VAT[region]);
 
   return (
     <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
@@ -81,7 +100,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             <span className="italic font-serif text-[#B5893F]">{ui.headingAccent}</span>
           </h1>
           <div className="flex flex-col items-start md:items-end gap-2">
-            <div role="group" aria-label="Currency" className="flex items-center gap-1 border border-[#1F1B16]/12 rounded-full p-0.5 bg-white">
+            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 border border-[#1F1B16]/12 rounded-full p-0.5 bg-white">
               {REGIONS.map((r) => (
                 <button
                   key={r}
@@ -97,6 +116,9 @@ export default function PricingPage({ lang }: { lang: Locale }) {
               ))}
             </div>
             <p className="text-xs text-[#1F1B16]/70">{resolve(ui.subtitle)}</p>
+            <p className="sr-only" role="status" aria-live="polite">
+              {ui.regionNote.replace("{region}", regionName)}
+            </p>
           </div>
         </div>
       </section>
@@ -120,10 +142,8 @@ export default function PricingPage({ lang }: { lang: Locale }) {
                   )}
                 </div>
                 <div className="text-right whitespace-nowrap">
-                  {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/60">{ui.from}</span>}
-                  <span className="text-2xl font-light">
-                    {cur} {it.price[region]}
-                  </span>
+                  {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/70">{ui.from}</span>}
+                  <span className="text-2xl font-light">{amount(it.price[region])}</span>
                 </div>
               </div>
               <p className="text-[#1F1B16]/70 font-light leading-relaxed text-sm mb-4">{it.desc[lang]}</p>
@@ -153,9 +173,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
               )}
               <h3 className="text-lg font-light mb-2">{p.name}</h3>
               <div className="mb-6 flex items-baseline gap-1">
-                <span className="text-3xl font-light">
-                  {cur} {p.price[region]}
-                </span>
+                <span className="text-3xl font-light">{amount(p.price[region])}</span>
                 <span className="text-sm text-[#1F1B16]/70">{ui.perMonth}</span>
               </div>
               <ul className="space-y-3">
@@ -176,17 +194,15 @@ export default function PricingPage({ lang }: { lang: Locale }) {
         <SectionHead num="03" title={BRANDING.title[lang]} tagline={BRANDING.tagline[lang]} />
         <div className="rounded-2xl border border-[#1F1B16]/[0.08] bg-white divide-y divide-[#1F1B16]/[0.06] shadow-[0_4px_30px_rgba(31,27,22,0.04)]">
           {BRANDING.items.map((it, i) => (
-            <div key={i} className="flex items-start justify-between gap-6 p-6">
-              <div>
+            <div key={i} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-6 p-6">
+              <div className="min-w-0">
                 <h3 className="font-light mb-1">{it.name[lang]}</h3>
                 <p className="text-sm text-[#1F1B16]/70 font-light max-w-xl leading-relaxed">{it.desc[lang]}</p>
                 {it.meta && <p className="text-xs text-[#1F1B16]/70 mt-1">{it.meta[lang]}</p>}
               </div>
-              <div className="text-right whitespace-nowrap">
-                {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/60">{ui.from}</span>}
-                <span className="text-lg font-light">
-                  {cur} {it.price[region]}
-                </span>
+              <div className="text-left sm:text-right whitespace-nowrap">
+                {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/70">{ui.from}</span>}
+                <span className="text-lg font-light">{amount(it.price[region])}</span>
               </div>
             </div>
           ))}
@@ -254,9 +270,9 @@ export default function PricingPage({ lang }: { lang: Locale }) {
 function SectionHead({ num, title, tagline }: { num: string; title: string; tagline: string }) {
   return (
     <div className="flex items-baseline gap-4 mb-10">
-      <span className="font-serif italic text-[#B5893F] text-2xl">{num}</span>
+      <span aria-hidden="true" className="font-serif italic text-[#B5893F] text-2xl">{num}</span>
       <h2 className="text-2xl md:text-3xl font-light tracking-tight">{title}</h2>
-      <span className="text-sm text-[#1F1B16]/60 hidden sm:block ml-auto font-serif italic">{tagline}</span>
+      <span className="text-sm text-[#1F1B16]/70 hidden sm:block ml-auto font-serif italic">{tagline}</span>
     </div>
   );
 }

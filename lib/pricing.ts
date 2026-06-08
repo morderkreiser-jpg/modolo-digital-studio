@@ -10,7 +10,9 @@ export { REGIONS, DEFAULT_REGION, REGION_COOKIE, isRegion, CURRENCY } from "./re
 export type { Region };
 
 type Tri = Record<Locale, string>;
-type Amount = Record<Region, string>;
+// Amounts are raw numbers, formatted per display locale at render time (Intl.NumberFormat)
+// so the thousands separator is unambiguous in each language.
+type Amount = Record<Region, number>;
 
 export type PriceItem = {
   name: Tri;
@@ -38,6 +40,7 @@ export const PRICING_UI: Record<
   Locale,
   {
     metaTitle: string;
+    currencyLabel: string;
     metaDescription: string;
     heading1: string;
     headingAccent: string;
@@ -56,7 +59,8 @@ export const PRICING_UI: Record<
   }
 > = {
   en: {
-    metaTitle: "Pricing",
+    metaTitle: "Website Pricing — Switzerland/Italy",
+    currencyLabel: "Currency",
     metaDescription:
       "Transparent pricing for websites, care plans and branding. Swiss (CHF) and Italian (EUR) rates — web design and development across Switzerland.",
     heading1: "Services & ",
@@ -75,7 +79,8 @@ export const PRICING_UI: Record<
     back: "Back to home",
   },
   de: {
-    metaTitle: "Preise",
+    metaTitle: "Website-Preise — Schweiz & Italien",
+    currencyLabel: "Währung",
     metaDescription:
       "Transparente Preise für Websites, Care-Pakete und Branding. Preise für die Schweiz (CHF) und Italien (EUR) — Webdesign und Entwicklung.",
     heading1: "Leistungen & ",
@@ -94,7 +99,8 @@ export const PRICING_UI: Record<
     back: "Zurück zur Startseite",
   },
   it: {
-    metaTitle: "Prezzi",
+    metaTitle: "Prezzi siti web — Svizzera e Italia",
+    currencyLabel: "Valuta",
     metaDescription:
       "Prezzi trasparenti per siti web, pacchetti care e branding. Tariffe per Svizzera (CHF) e Italia (EUR) — web design e sviluppo.",
     heading1: "Servizi e ",
@@ -137,7 +143,7 @@ export const WEBSITES = {
         it: "Consegna ~1–2 settimane · realizzato con Framer",
       },
       from: true,
-      price: { ch: "1'900", it: "900" },
+      price: { ch: 1900, it: 900 },
     },
     {
       name: { en: "Business", de: "Business", it: "Business" },
@@ -153,7 +159,7 @@ export const WEBSITES = {
         it: "Consegna ~3–4 settimane · realizzato con Framer",
       },
       from: true,
-      price: { ch: "3'900", it: "2.200" },
+      price: { ch: 3900, it: 2200 },
     },
     {
       name: { en: "Signature", de: "Signature", it: "Signature" },
@@ -169,7 +175,7 @@ export const WEBSITES = {
         it: "Consegna ~6+ settimane · sviluppo su misura",
       },
       from: true,
-      price: { ch: "8'500", it: "4.800" },
+      price: { ch: 8500, it: 4800 },
     },
     {
       name: { en: "E-Commerce", de: "E-Commerce", it: "E-Commerce" },
@@ -184,7 +190,7 @@ export const WEBSITES = {
         it: "Preventivo su misura",
       },
       from: true,
-      price: { ch: "6'500", it: "3.500" },
+      price: { ch: 6500, it: 3500 },
     },
   ] as PriceItem[],
 };
@@ -200,7 +206,7 @@ export const CARE = {
   plans: [
     {
       name: "Care · Light",
-      price: { ch: "49", it: "29" },
+      price: { ch: 49, it: 29 },
       features: [
         { en: "Hosting & domain management", de: "Hosting- & Domain-Verwaltung", it: "Gestione hosting & dominio" },
         { en: "Updates, backups & security", de: "Updates, Backups & Sicherheit", it: "Update, backup & sicurezza" },
@@ -211,7 +217,7 @@ export const CARE = {
     {
       name: "Care · Plus",
       featured: true,
-      price: { ch: "129", it: "69" },
+      price: { ch: 129, it: 69 },
       features: [
         { en: "Everything in Light", de: "Alles aus Light", it: "Tutto di Light" },
         { en: "Up to 2 h edits/month", de: "Bis zu 2 Std Änderungen/Monat", it: "Fino a 2 h modifiche/mese" },
@@ -221,7 +227,7 @@ export const CARE = {
     },
     {
       name: "Care · Pro",
-      price: { ch: "249", it: "129" },
+      price: { ch: 249, it: 129 },
       features: [
         { en: "Everything in Plus", de: "Alles aus Plus", it: "Tutto di Plus" },
         { en: "Up to 4 h edits/month", de: "Bis zu 4 Std Änderungen/Monat", it: "Fino a 4 h modifiche/mese" },
@@ -249,7 +255,7 @@ export const BRANDING = {
         it: "Un logo distintivo con marchio primario e secondario, consegnato in tutti i formati.",
       },
       from: true,
-      price: { ch: "1'200", it: "600" },
+      price: { ch: 1200, it: 600 },
     },
     {
       name: { en: "Brand Identity", de: "Markenidentität", it: "Identità di Marca" },
@@ -259,7 +265,7 @@ export const BRANDING = {
         it: "Identità visiva completa: logo, palette colori, tipografia e una mini brand guide.",
       },
       from: true,
-      price: { ch: "2'500", it: "1.400" },
+      price: { ch: 2500, it: 1400 },
     },
     {
       name: { en: "Photography & Content", de: "Fotografie & Inhalte", it: "Fotografia & Contenuti" },
@@ -270,7 +276,7 @@ export const BRANDING = {
       },
       meta: { en: "half day", de: "halber Tag", it: "a mezza giornata" },
       from: false,
-      price: { ch: "900", it: "450" },
+      price: { ch: 900, it: 450 },
     },
     {
       name: { en: "Copywriting", de: "Copywriting", it: "Copywriting" },
@@ -281,7 +287,7 @@ export const BRANDING = {
       },
       meta: { en: "per page", de: "pro Seite", it: "a pagina" },
       from: true,
-      price: { ch: "150", it: "80" },
+      price: { ch: 150, it: 80 },
     },
     {
       name: { en: "Email Marketing Setup", de: "E-Mail-Marketing-Setup", it: "Setup Email Marketing" },
@@ -291,15 +297,15 @@ export const BRANDING = {
         it: "Piattaforma newsletter, template brandizzato e automazioni per raccogliere contatti.",
       },
       from: true,
-      price: { ch: "900", it: "500" },
+      price: { ch: 900, it: 500 },
     },
   ] as PriceItem[],
 };
 
 // ---- Good to know (some values resolved per region) -------------------------
 // Region tokens: {cur} currency, {hourly} hourly rate, {vat} VAT rate.
-export const HOURLY: Amount = { ch: "120", it: "60" };
-export const VAT: Amount = { ch: "8.1%", it: "22%" };
+export const HOURLY: Amount = { ch: 120, it: 60 };
+export const VAT: Record<Region, string> = { ch: "8.1%", it: "22%" };
 
 export const GOOD_TO_KNOW: GoodToKnow[] = [
   {
@@ -346,7 +352,7 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
     label: { en: "Ownership", de: "Eigentum", it: "Proprietà" },
     value: {
       en: "rights transferred on final payment",
-      de: "Rechte nach Schlusszahlung",
+      de: "Rechte gehen mit der Schlusszahlung über",
       it: "diritti ceduti al saldo finale",
     },
   },
