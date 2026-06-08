@@ -1,14 +1,14 @@
 // Branded, email-client-safe HTML for the contact auto-reply (tables + inline styles, one
 // optimized logo, the rest text → good text-to-image ratio for deliverability). Server-only.
 import { SITE } from "./site";
-import type { Locale } from "./i18n";
+import { localizedHref, type Locale } from "./i18n";
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string);
 
 const COPY: Record<
   Locale,
-  { subject: string; greeting: string; intro: string; signoff: string; role: string; country: string }
+  { subject: string; greeting: string; intro: string; signoff: string; role: string; country: string; cta: string }
 > = {
   en: {
     subject: "Thanks for reaching out — Modolo Digital Studio",
@@ -17,6 +17,7 @@ const COPY: Record<
     signoff: "Talk soon,",
     role: "Founder · Web Designer & Developer",
     country: "Switzerland",
+    cta: "See our work",
   },
   de: {
     subject: "Danke für deine Nachricht — Modolo Digital Studio",
@@ -25,6 +26,7 @@ const COPY: Record<
     signoff: "Bis bald,",
     role: "Gründer · Webdesigner & Entwickler",
     country: "Schweiz",
+    cta: "Unsere Arbeiten ansehen",
   },
   it: {
     subject: "Grazie per averci scritto — Modolo Digital Studio",
@@ -33,6 +35,7 @@ const COPY: Record<
     signoff: "A presto,",
     role: "Fondatore · Web Designer & Sviluppatore",
     country: "Svizzera",
+    cta: "Vedi i nostri lavori",
   },
 };
 
@@ -43,10 +46,11 @@ const SERIF = "Georgia,'Times New Roman',serif";
 export function contactAutoReply(locale: Locale, name: string): { subject: string; text: string; html: string } {
   const c = COPY[locale];
   const safeName = escapeHtml(name);
+  const portfolioUrl = SITE.url + localizedHref(locale, "/#portfolio");
 
   const text =
-    `${c.greeting} ${name},\n\n${c.intro}\n\n${c.signoff}\n` +
-    `${SITE.founder} — ${c.role}\n${SITE.email} · ${SITE.phoneDisplay}\nmodolodigitalstudio.ch`;
+    `${c.greeting} ${name},\n\n${c.intro}\n\n${c.cta}: ${portfolioUrl}\n\n${c.signoff}\n` +
+    `${SITE.founder} — ${c.role}\n${SITE.email} · ${SITE.phoneDisplay}\nmodolodigitalstudio.ch · ${SITE.instagram}`;
 
   const html = `<!DOCTYPE html>
 <html lang="${locale}">
@@ -70,6 +74,9 @@ export function contactAutoReply(locale: Locale, name: string): { subject: strin
 <p style="margin:0 0 16px;">${c.greeting} ${safeName},</p>
 <p style="margin:0;">${c.intro}</p>
 </td></tr>
+<tr><td align="center" style="padding:22px 40px 6px;">
+<a href="${portfolioUrl}" style="display:inline-block;background-color:#1F1B16;color:#F7F3EC;font-family:${SANS};font-size:14px;font-weight:600;text-decoration:none;padding:13px 30px;border-radius:999px;letter-spacing:0.03em;">${c.cta}</a>
+</td></tr>
 <tr><td style="padding:18px 40px 32px;font-family:${SANS};color:#1F1B16;">
 <div style="height:1px;line-height:1px;font-size:1px;background-color:#ece3d3;margin:8px 0 20px;">&nbsp;</div>
 <p style="margin:0 0 4px;font-size:15px;color:#1F1B16;">${c.signoff}</p>
@@ -78,7 +85,8 @@ export function contactAutoReply(locale: Locale, name: string): { subject: strin
 <p style="margin:0;font-size:13px;line-height:1.9;color:#1F1B16;">
 <a href="mailto:${SITE.email}" style="color:#8F6B2F;text-decoration:none;">${SITE.email}</a><br>
 <a href="tel:${SITE.phone}" style="color:#1F1B16;text-decoration:none;">${SITE.phoneDisplay}</a><br>
-<a href="${SITE.url}" style="color:#8F6B2F;text-decoration:none;">modolodigitalstudio.ch</a>
+<a href="${SITE.url}" style="color:#8F6B2F;text-decoration:none;">modolodigitalstudio.ch</a><br>
+<a href="${SITE.instagram}" style="color:#8F6B2F;text-decoration:none;">Instagram</a>
 </p>
 </td></tr>
 <tr><td align="center" style="padding:16px 24px 28px;font-family:${SANS};color:#a39c90;font-size:12px;line-height:1.6;">
