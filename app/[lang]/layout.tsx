@@ -80,6 +80,7 @@ export async function generateMetadata({
       images: ["/og-image.png"],
     },
     robots: { index: true, follow: true },
+    verification: { google: "0w87FfEDbhXnZEhQt5J_MfS05dlYnG08oTs0zzuej4U" },
   };
 }
 
