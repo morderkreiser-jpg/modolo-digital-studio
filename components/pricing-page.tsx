@@ -69,7 +69,7 @@ export default function PricingPage({
   const ui = PRICING_UI[lang];
   const foot = FOOT[lang];
   const year = new Date().getFullYear();
-  const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}`;
+  const whatsapp = `https://wa.me/${(region === "it" ? SITE.phoneIt : SITE.phone).replace(/[^0-9]/g, "")}`;
   const sep = THOUSANDS[lang];
   const cur = CURRENCY[region];
   const amount = (n: number) => `${cur} ${groupThousands(n, sep)}`;

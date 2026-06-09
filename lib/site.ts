@@ -10,6 +10,8 @@ export const SITE = {
   email: "info@modolodigitalstudio.ch",
   phone: "+41772237900", // E.164 — for tel: and schema.org telephone
   phoneDisplay: "+41 77 223 79 00",
+  phoneIt: "+393505842579", // Italian WhatsApp/contact number (shown to IT-region visitors)
+  phoneItDisplay: "+39 350 584 2579",
   instagram: "https://instagram.com/modolodigitalstudio",
   founder: "Francesco Modolo",
   // Swiss address — registered/legal seat (used by Impressum and JSON-LD).
