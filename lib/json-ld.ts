@@ -107,6 +107,7 @@ export function serviceGraph(slug: ServiceSlug, locale: Locale) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      { "@type": "Organization", "@id": `${SITE.url}/#organization`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-icon.png` },
       {
         "@type": "Service",
         "@id": `${url}#service`,
@@ -168,6 +169,7 @@ export function pricingGraph(locale: Locale) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      { "@type": "Organization", "@id": `${SITE.url}/#organization`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-icon.png` },
       {
         "@type": "OfferCatalog",
         "@id": `${url}#pricing`,

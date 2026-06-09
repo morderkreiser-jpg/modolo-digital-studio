@@ -149,7 +149,7 @@ export default function SiteNav({
         {/* Desktop cluster */}
         <div className="hidden md:flex items-center gap-5">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm tracking-wider text-[#1F1B16]/60 hover:text-[#1F1B16] transition-colors">
+            <a key={l.href} href={l.href} className="text-sm tracking-wider text-[#1F1B16]/65 hover:text-[#1F1B16] transition-colors">
               {l.label}
             </a>
           ))}

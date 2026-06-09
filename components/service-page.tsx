@@ -323,7 +323,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
       {/* HERO */}
       <section className="relative max-w-5xl mx-auto px-6 lg:px-8 pt-36 pb-16">
         <div className="absolute top-24 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[120px] -z-0" />
-        <Link href={localizedHref(lang, "/#servizi")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/55 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
+        <Link href={localizedHref(lang, "/#servizi")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/65 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
           <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
           {u.back}
         </Link>
@@ -360,7 +360,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
                 {String(i + 1).padStart(2, "0")}
               </div>
               <h3 className="text-xl font-light mb-3">{step.title}</h3>
-              <p className="text-[#1F1B16]/55 font-light leading-relaxed text-sm">{step.desc}</p>
+              <p className="text-[#1F1B16]/65 font-light leading-relaxed text-sm">{step.desc}</p>
             </div>
           ))}
         </div>

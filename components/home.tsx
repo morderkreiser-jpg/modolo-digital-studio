@@ -327,7 +327,7 @@ export default function Home({ lang }: { lang: Lang }) {
           </div>
 
           <div className="mb-12 flex justify-center mds-in-scale" style={{ animationDelay: "0.12s" }}>
-            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={250} priority />
+            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={213} priority />
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1] mds-in" style={{ animationDelay: "0.18s" }}>
@@ -335,7 +335,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="text-[#B5893F] italic font-serif">{t.hero.titleAccent}</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-[#1F1B16]/55 max-w-2xl mx-auto mb-12 font-light leading-relaxed mds-in" style={{ animationDelay: "0.26s" }}>
+          <p className="text-lg md:text-xl text-[#1F1B16]/65 max-w-2xl mx-auto mb-12 font-light leading-relaxed mds-in" style={{ animationDelay: "0.26s" }}>
             {t.hero.subtitle}
           </p>
 
@@ -394,7 +394,7 @@ export default function Home({ lang }: { lang: Lang }) {
                       <Icon className="w-7 h-7 text-[#B5893F]" strokeWidth={1.3} />
                     </div>
                     <h3 className="text-2xl font-light mb-4">{service.title}</h3>
-                    <p className="text-[#1F1B16]/55 mb-6 leading-relaxed font-light">{service.desc}</p>
+                    <p className="text-[#1F1B16]/65 mb-6 leading-relaxed font-light">{service.desc}</p>
                     <div className="flex flex-wrap gap-2">
                       {service.tags.map((tag) => (
                         <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
@@ -440,7 +440,7 @@ export default function Home({ lang }: { lang: Lang }) {
             className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
           >
             <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
-              <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1216px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
@@ -493,7 +493,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-1">{t.founder.name}</h2>
               <p className="text-[var(--color-gold-ink)] font-serif italic mb-6">{t.founder.role}</p>
               <p className="text-[#1F1B16]/65 font-light leading-relaxed mb-4 text-lg">{t.founder.bio1}</p>
-              <p className="text-[#1F1B16]/55 font-light leading-relaxed">{t.founder.bio2}</p>
+              <p className="text-[#1F1B16]/65 font-light leading-relaxed">{t.founder.bio2}</p>
             </motion.div>
           </div>
 
@@ -504,8 +504,8 @@ export default function Home({ lang }: { lang: Lang }) {
                 {t.about.heading1}<span className="italic font-serif text-[#B5893F]">{t.about.headingAccent}</span>
               </h2>
               <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6 text-lg">{t.about.p1}</p>
-              <p className="text-[#1F1B16]/55 leading-relaxed font-light mb-6">{t.about.p2}</p>
-              <p className="text-[#1F1B16]/55 leading-relaxed font-light">{t.about.p3}</p>
+              <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6">{t.about.p2}</p>
+              <p className="text-[#1F1B16]/65 leading-relaxed font-light">{t.about.p3}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="space-y-6">
@@ -518,7 +518,7 @@ export default function Home({ lang }: { lang: Lang }) {
                     </div>
                     <div>
                       <h3 className="text-xl font-light mb-2">{value.title}</h3>
-                      <p className="text-[#1F1B16]/55 font-light leading-relaxed text-sm">{value.desc}</p>
+                      <p className="text-[#1F1B16]/65 font-light leading-relaxed text-sm">{value.desc}</p>
                     </div>
                   </motion.div>
                 );
@@ -568,7 +568,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.15 }} className="relative text-center md:text-left">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#B5893F]/40 bg-[#F7F3EC] text-[#B5893F] font-serif italic text-2xl mb-6 relative z-10">{step.num}</div>
                 <h3 className="text-2xl font-light mb-4">{step.title}</h3>
-                <p className="text-[#1F1B16]/55 font-light leading-relaxed">{step.desc}</p>
+                <p className="text-[#1F1B16]/65 font-light leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -611,7 +611,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: "easeInOut" }}>
-                        <p className="px-6 pb-6 text-[#1F1B16]/55 font-light leading-relaxed">{faq.a}</p>
+                        <p className="px-6 pb-6 text-[#1F1B16]/65 font-light leading-relaxed">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -632,7 +632,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6">
               {t.contact.heading1}<span className="italic font-serif text-[#B5893F]">{t.contact.headingAccent}</span>{t.contact.headingEnd}
             </h2>
-            <p className="text-lg md:text-xl text-[#1F1B16]/55 font-light max-w-2xl mx-auto">{t.contact.subtitle}</p>
+            <p className="text-lg md:text-xl text-[#1F1B16]/65 font-light max-w-2xl mx-auto">{t.contact.subtitle}</p>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-12">
@@ -676,7 +676,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#B5893F]/30 bg-[#B5893F]/[0.07] outline-none">
                   <CheckCircle2 className="w-16 h-16 text-[#B5893F] mb-6" strokeWidth={1.2} />
                   <h3 className="text-2xl font-light mb-3">{t.contact.successTitle}</h3>
-                  <p className="text-[#1F1B16]/55 font-light">{t.contact.successDesc}</p>
+                  <p className="text-[#1F1B16]/65 font-light">{t.contact.successDesc}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-5 p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_8px_40px_rgba(31,27,22,0.06)]">
@@ -686,22 +686,22 @@ export default function Home({ lang }: { lang: Lang }) {
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
                       <label htmlFor="contact-email" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
                     <label htmlFor="contact-company" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formCompany}</label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
+                    <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
                     <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} *</label>
-                    <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/35 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
+                    <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
                     {fieldErrors.message && <p id="contact-message-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.message}</p>}
                   </div>
                   {formStatus === "error" && (

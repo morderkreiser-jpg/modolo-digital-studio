@@ -54,7 +54,7 @@
   --color-ivory: #f7f3ec;
   --color-dark: #1f1b16;
   --color-gold: #b5893f; /* large headings, icons, borders, decorative */
-  --color-gold-ink: #8f6b2f; /* small/body gold text on ivory — passes WCAG AA */
+  --color-gold-ink: #7e5d24; /* small/body gold text — AA (≥4.5:1) on ivory and #EEE6D8 sections */
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
