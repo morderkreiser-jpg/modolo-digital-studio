@@ -317,29 +317,29 @@ export default function Home({ lang }: { lang: Lang }) {
         <motion.div animate={reduce ? undefined : { opacity: [0.25, 0.4, 0.25] }} transition={reduce ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#B5893F]/[0.07] rounded-full blur-[120px]" />
         <motion.div animate={reduce ? undefined : { opacity: [0.15, 0.3, 0.15] }} transition={reduce ? undefined : { duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[100px]" />
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="relative z-10 text-center max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B5893F]/30 bg-[#B5893F]/[0.08] mb-10">
+        <div className="relative z-10 text-center max-w-5xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B5893F]/30 bg-[#B5893F]/[0.08] mb-10 mds-in" style={{ animationDelay: "0.05s" }}>
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B5893F] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B5893F]"></span>
             </span>
             <span className="text-xs tracking-[0.2em] text-[var(--color-gold-ink)] uppercase">{t.hero.badge}</span>
-          </motion.div>
+          </div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.2 }} className="mb-12 flex justify-center">
+          <div className="mb-12 flex justify-center mds-in-scale" style={{ animationDelay: "0.12s" }}>
             <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={250} priority />
-          </motion.div>
+          </div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }} className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1] mds-in" style={{ animationDelay: "0.18s" }}>
             {t.hero.titleLine1}<br />
             <span className="text-[#B5893F] italic font-serif">{t.hero.titleAccent}</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.8 }} className="text-lg md:text-xl text-[#1F1B16]/55 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
+          <p className="text-lg md:text-xl text-[#1F1B16]/55 max-w-2xl mx-auto mb-12 font-light leading-relaxed mds-in" style={{ animationDelay: "0.26s" }}>
             {t.hero.subtitle}
-          </motion.p>
+          </p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 1.1 }} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mds-in" style={{ animationDelay: "0.34s" }}>
             <a href="#servizi" className="group bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgba(31,27,22,0.12)] hover:shadow-[0_12px_40px_rgba(31,27,22,0.2)]">
               {t.hero.ctaPrimary}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -347,12 +347,12 @@ export default function Home({ lang }: { lang: Lang }) {
             <a href="#contatti" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
               {t.hero.ctaSecondary}
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 2 }} className="absolute bottom-10 left-1/2 -translate-x-1/2">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 mds-in-fade" style={{ animationDelay: "0.6s" }}>
           <motion.div animate={reduce ? undefined : { y: [0, 8, 0] }} transition={reduce ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#B5893F]/40 to-transparent" />
-        </motion.div>
+        </div>
       </section>
 
       {/* STATS */}
