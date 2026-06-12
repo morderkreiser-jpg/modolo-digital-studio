@@ -23,12 +23,27 @@ avorio/dark/gold, font Helvetica + Georgia corsivo per il ruolo.
    **Apply Changes**.
    - *Se non trovi "Insert HTML"*: apri il file `.html` in Chrome, **Ctrl+A → Ctrl+C**,
      torna nel campo firma e **Ctrl+V** (incolli il render, non il codice).
-4. Associa la firma all'indirizzo `info@modolodigitalstudio.ch` e, se vuoi,
+4. **Il logo va inserito a parte** (vedi sotto: Zoho strippa il `<img>` incollato via HTML).
+5. Associa la firma all'indirizzo `info@modolodigitalstudio.ch` e, se vuoi,
    spunta l'aggiunta automatica anche alle risposte.
-5. **Save**.
+6. **Save**.
 
 Ripeti per la firma IT come seconda firma: in composizione potrai sceglierla
 caso per caso (clienti italiani → firma IT).
+
+## Il logo (importante)
+
+Zoho **rimuove il `src` del `<img>` incollato nella casella HTML** in fase di
+invio: nell'anteprima dell'editor il logo si vede (usa la tua sessione loggata),
+ma nell'email spedita sparisce. Per questo il nome studio è anche in **testo**
+(`<strong>Modolo Digital Studio</strong>`): così il brand c'è comunque.
+
+Per avere **anche il logo** in modo affidabile, non affidarti al `<img>` del
+sorgente: dopo aver incollato l'HTML, nell'editor **cancella il logo** e
+**re-inseriscilo col pulsante Immagine** della toolbar → opzione **per URL/Link**
+→ `https://www.modolodigitalstudio.ch/email-logo.png` (larghezza 170). Così Zoho
+lo tiene come riferimento pubblico e non lo strippa. (Upload da disco = funziona
+ma può diventare un URL interno autenticato che i destinatari non vedono.)
 
 ## Verificare (importante)
 
@@ -39,6 +54,7 @@ remota dal dominio) e che il layout regga.
 ## Note tecniche
 
 - HTML **table-based, stili inline**: l'editor Zoho rimuove `<style>`/CSS esterno.
-- Niente immagini `data:`/base64 (Zoho le strippa) — il logo è un URL pubblico HTTPS.
+- Zoho **strippa il `src` del `<img>` incollato via HTML** in invio → logo inserito
+  col pulsante Immagine (per URL) e nome studio anche in testo. Niente `data:`/base64.
 - Contrasto verificato WCAG AA (indirizzo `#787061` = 4.90:1; gold `#8F6B2F` = 4.87:1).
 - Reset Outlook (`mso-table-lspace/rspace`, `mso-line-height-rule:exactly`, divisori a `<div>`).
