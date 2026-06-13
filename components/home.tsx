@@ -9,7 +9,7 @@ import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
-import { SITE } from "@/lib/site";
+import { SITE, SERVICE_SLUGS } from "@/lib/site";
 import { useRegion, whatsappHref } from "@/components/use-region";
 
 type Lang = Locale;
@@ -61,6 +61,7 @@ const translations = {
       { title: "Modern technology", desc: "We use the most advanced tools to ensure fast, secure and future-ready websites." },
     ],
     sectorsSection: { label: "Who we work for", heading1: "Sectors we ", headingAccent: "excel in" },
+    toolsLabel: "Tools & technologies",
     sectors: ["Restaurants & Hospitality", "Professional Firms", "E-commerce & Retail", "B&B & Accommodation"],
     method: { label: "Our method", heading1: "Three phases, ", headingAccent: "one vision" },
     steps: [
@@ -133,6 +134,7 @@ const translations = {
       { title: "Moderne Technologie", desc: "Wir nutzen modernste Werkzeuge für schnelle, sichere und zukunftsfähige Websites." },
     ],
     sectorsSection: { label: "Für wen wir arbeiten", heading1: "Branchen, in denen wir ", headingAccent: "glänzen" },
+    toolsLabel: "Tools & Technologien",
     sectors: ["Restaurants & Hospitality", "Kanzleien & Praxen", "E-Commerce & Retail", "B&B & Unterkünfte"],
     method: { label: "Unsere Methode", heading1: "Drei Phasen, ", headingAccent: "eine Vision" },
     steps: [
@@ -205,6 +207,7 @@ const translations = {
       { title: "Tecnologia moderna", desc: "Usiamo gli strumenti più avanzati per garantire siti veloci, sicuri e pronti per il futuro." },
     ],
     sectorsSection: { label: "Per chi lavoriamo", heading1: "Settori in cui ", headingAccent: "eccelliamo" },
+    toolsLabel: "Strumenti & tecnologie",
     sectors: ["Ristoranti & Hospitality", "Studi Professionali", "E-commerce & Retail", "B&B & Strutture Ricettive"],
     method: { label: "Il nostro metodo", heading1: "Tre fasi, ", headingAccent: "una visione" },
     steps: [
@@ -234,10 +237,10 @@ const translations = {
 };
 
 const serviceIcons = [Code2, Palette, Camera, Mail];
-const serviceSlugs = ["web", "brand", "content", "email"];
 const statIcons = [Globe2, Clock, Sparkles, Award];
 const sectorIcons = [Store, Briefcase, ShoppingBag, Building2];
 const valueIcons = [Target, Heart, Zap];
+const TOOLS = ["Next.js", "React", "Tailwind CSS", "WordPress", "Framer", "Figma", "SEO", "Google Business"];
 
 export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -324,7 +327,7 @@ export default function Home({ lang }: { lang: Lang }) {
           </div>
 
           <div className="mb-12 flex justify-center mds-in-scale" style={{ animationDelay: "0.12s" }}>
-            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={213} priority />
+            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={213} preload />
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1] mds-in" style={{ animationDelay: "0.18s" }}>
@@ -397,7 +400,7 @@ export default function Home({ lang }: { lang: Lang }) {
                         <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
                       ))}
                     </div>
-                    <Link href={localizedHref(lang, `/servizi/${serviceSlugs[i]}`)} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
+                    <Link href={localizedHref(lang, `/servizi/${SERVICE_SLUGS[i]}`)} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
                       {t.servicesSection.learnMore}
                       <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -586,6 +589,18 @@ export default function Home({ lang }: { lang: Lang }) {
                 </motion.div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* TOOLS */}
+      <section className="py-20 px-6 lg:px-12">
+        <div className="max-w-5xl mx-auto text-center">
+          <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-8 block">{t.toolsLabel}</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+            {TOOLS.map((tool) => (
+              <span key={tool} className="text-lg md:text-xl font-light text-[#1F1B16]/65 tracking-wide">{tool}</span>
+            ))}
           </div>
         </div>
       </section>
