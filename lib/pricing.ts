@@ -19,6 +19,7 @@ export type PriceItem = {
   badge?: Tri;
   desc: Tri;
   meta?: Tri; // delivery / unit line
+  featured?: boolean; // highlight as the recommended tier
   from: boolean; // show the "from" word before the amount
   price: Amount;
 };
@@ -55,6 +56,7 @@ export const PRICING_UI: Record<
     ctaText: string;
     ctaContact: string;
     ctaWhatsapp: string;
+    notSure: string;
     back: string;
   }
 > = {
@@ -76,6 +78,7 @@ export const PRICING_UI: Record<
     ctaText: "Let's talk about your project — we'll prepare a tailored offer.",
     ctaContact: "Talk to us",
     ctaWhatsapp: "Message us on WhatsApp",
+    notSure: "Not sure which package fits? Let's talk.",
     back: "Back to home",
   },
   de: {
@@ -96,6 +99,7 @@ export const PRICING_UI: Record<
     ctaText: "Sprich mit uns über dein Projekt — wir erstellen ein massgeschneidertes Angebot.",
     ctaContact: "Sprich mit uns",
     ctaWhatsapp: "Schreib uns auf WhatsApp",
+    notSure: "Unsicher, welches Paket passt? Sprich mit uns.",
     back: "Zurück zur Startseite",
   },
   it: {
@@ -116,6 +120,7 @@ export const PRICING_UI: Record<
     ctaText: "Parliamo del tuo progetto — ti prepariamo un'offerta su misura.",
     ctaContact: "Parla con noi",
     ctaWhatsapp: "Scrivici su WhatsApp",
+    notSure: "Non sai quale pacchetto scegliere? Parliamone.",
     back: "Torna alla home",
   },
 };
@@ -148,6 +153,7 @@ export const WEBSITES = {
     {
       name: { en: "Business", de: "Business", it: "Business" },
       badge: { en: "Multi-page", de: "Mehrseitig", it: "Multi-pagina" },
+      featured: true,
       desc: {
         en: "Up to 6 pages with content management for blog/news, SEO setup, refined animations and two revisions. The standard for growing businesses.",
         de: "Bis zu 6 Seiten mit Content-Management für Blog/News, SEO-Setup, sorgfältige Animationen und zwei Revisionen. Der Standard für wachsende Unternehmen.",

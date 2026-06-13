@@ -6,6 +6,7 @@ import { FAQS, SERVICE_META } from "./site-data";
 import type { ServiceSlug } from "./site";
 import { localizedHref, type Locale } from "./i18n";
 import { WEBSITES, CARE, BRANDING } from "./pricing";
+import { DEFAULT_REGION, type Region } from "./region";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -63,7 +64,7 @@ export function homeGraph(locale: Locale) {
         email: SITE.email,
         address: postalAddress,
         areaServed: { "@type": "Country", name: "Switzerland" },
-        priceRange: "$$",
+        priceRange: "CHF 1900-8500",
         parentOrganization: { "@id": `${SITE.url}/#organization` },
       },
       {
@@ -76,7 +77,7 @@ export function homeGraph(locale: Locale) {
         email: SITE.email,
         address: postalAddressIt,
         areaServed: { "@type": "Country", name: "Italy" },
-        priceRange: "$$",
+        priceRange: "EUR 900-4800",
         parentOrganization: { "@id": `${SITE.url}/#organization` },
       },
       {
@@ -136,10 +137,10 @@ export function serviceGraph(slug: ServiceSlug, locale: Locale) {
 
 const PRICING_LABEL: Record<Locale, string> = { en: "Pricing", de: "Preise", it: "Prezzi" };
 
-function priceSpec(price: number, from: boolean, recurring: boolean) {
+function priceSpec(price: number, from: boolean, recurring: boolean, region: Region) {
   const spec: Record<string, unknown> = {
     "@type": "UnitPriceSpecification",
-    priceCurrency: "CHF",
+    priceCurrency: region === "it" ? "EUR" : "CHF",
     valueAddedTaxIncluded: false,
   };
   if (from) spec.minPrice = price;
@@ -148,13 +149,13 @@ function priceSpec(price: number, from: boolean, recurring: boolean) {
   return spec;
 }
 
-function offer(name: string, description: string | undefined, price: number, from: boolean, recurring: boolean) {
+function offer(name: string, description: string | undefined, price: number, from: boolean, recurring: boolean, region: Region) {
   return {
     "@type": "Offer",
     name,
     ...(description ? { description } : {}),
     itemOffered: { "@type": "Service", name, ...(description ? { description } : {}) },
-    priceSpecification: priceSpec(price, from, recurring),
+    priceSpecification: priceSpec(price, from, recurring, region),
     availability: "https://schema.org/InStock",
     seller: { "@id": `${SITE.url}/#organization` },
   };
@@ -162,12 +163,12 @@ function offer(name: string, description: string | undefined, price: number, fro
 
 // Structured data for the /prezzi page. Emits the canonical Swiss/CHF region (what crawlers
 // see in the server-rendered HTML); amounts are plain Numbers (the page formats per locale).
-export function pricingGraph(locale: Locale) {
+export function pricingGraph(locale: Locale, region: Region = DEFAULT_REGION) {
   const url = abs(localizedHref(locale, "/prezzi"));
   const items = [
-    ...WEBSITES.items.map((it) => offer(it.name[locale], it.desc[locale], it.price.ch, it.from, false)),
-    ...CARE.plans.map((p) => offer(p.name, undefined, p.price.ch, false, true)),
-    ...BRANDING.items.map((it) => offer(it.name[locale], it.desc[locale], it.price.ch, it.from, false)),
+    ...WEBSITES.items.map((it) => offer(it.name[locale], it.desc[locale], it.price[region], it.from, false, region)),
+    ...CARE.plans.map((p) => offer(p.name, undefined, p.price[region], false, true, region)),
+    ...BRANDING.items.map((it) => offer(it.name[locale], it.desc[locale], it.price[region], it.from, false, region)),
   ];
   return {
     "@context": "https://schema.org",

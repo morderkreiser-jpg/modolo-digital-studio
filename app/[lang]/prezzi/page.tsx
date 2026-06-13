@@ -42,7 +42,7 @@ export default async function Page({
 
   return (
     <>
-      <JsonLd data={pricingGraph(lang)} />
+      <JsonLd data={pricingGraph(lang, region)} />
       <PricingPage lang={lang} initialRegion={region} />
     </>
   );

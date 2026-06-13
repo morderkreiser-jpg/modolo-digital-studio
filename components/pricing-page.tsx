@@ -130,8 +130,17 @@ export default function PricingPage({
           {WEBSITES.items.map((it, i) => (
             <div
               key={i}
-              className="group relative p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)] transition-all duration-300 flex flex-col"
+              className={`group relative p-8 rounded-2xl border bg-white transition-all duration-300 flex flex-col ${
+                it.featured
+                  ? "border-[#B5893F]/50 shadow-[0_10px_40px_rgba(31,27,22,0.10)]"
+                  : "border-[#1F1B16]/[0.08] shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)]"
+              }`}
             >
+              {it.featured && (
+                <span className="absolute -top-3 left-8 text-[10px] tracking-wider uppercase bg-[#8F6B2F] text-white px-3 py-1 rounded-full">
+                  {POPULAR[lang]}
+                </span>
+              )}
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className="text-xl font-light">{it.name[lang]}</h3>
@@ -150,6 +159,13 @@ export default function PricingPage({
               {it.meta && <p className="text-xs text-[#1F1B16]/70 mt-auto pt-2">{it.meta[lang]}</p>}
             </div>
           ))}
+        </div>
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+          <p className="text-sm text-[#1F1B16]/70 font-light">{ui.notSure}</p>
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
+            <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+            {ui.ctaWhatsapp}
+          </a>
         </div>
       </section>
 

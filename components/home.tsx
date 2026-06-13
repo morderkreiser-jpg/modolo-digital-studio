@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown, AlertCircle } from "lucide-react";
+import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown, AlertCircle, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE } from "@/lib/site";
+import { useRegion, whatsappHref } from "@/components/use-region";
 
 type Lang = Locale;
 
@@ -72,6 +73,7 @@ const translations = {
     contact: {
       label: "Let's start", heading1: "Ready to ", headingAccent: "stand out", headingEnd: "?",
       subtitle: "Tell us about your project. A free initial consultation to understand how we can help you.",
+      whatsapp: "Message us on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
       phName: "Your name", phEmail: "your@email.com", phCompany: "Company name (optional)", phMessage: "Tell us about your project...",
@@ -143,6 +145,7 @@ const translations = {
     contact: {
       label: "Los geht's", heading1: "Bereit, dich ", headingAccent: "abzuheben", headingEnd: "?",
       subtitle: "Erzähl uns von deinem Projekt. Eine kostenlose Erstberatung, um zu verstehen, wie wir dir helfen können.",
+      whatsapp: "Schreib uns auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
       phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname (optional)", phMessage: "Erzähl uns von deinem Projekt...",
@@ -214,6 +217,7 @@ const translations = {
     contact: {
       label: "Iniziamo", heading1: "Pronto a ", headingAccent: "distinguerti", headingEnd: "?",
       subtitle: "Raccontaci il tuo progetto. Una consulenza iniziale gratuita per capire come possiamo aiutarti.",
+      whatsapp: "Scrivici su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
       phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda (opzionale)", phMessage: "Raccontaci il tuo progetto...",
@@ -242,6 +246,8 @@ export default function Home({ lang }: { lang: Lang }) {
   const reduce = useReducedMotion();
   const successRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
+  const region = useRegion();
+  const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, t.contact.whatsappMsg);
 
   // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
   useEffect(() => {
@@ -669,6 +675,10 @@ export default function Home({ lang }: { lang: Lang }) {
 
           <div className="grid lg:grid-cols-5 gap-12">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-6 py-3.5 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 shadow-[0_8px_30px_rgba(31,27,22,0.12)]">
+                <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
+                {t.contact.whatsapp}
+              </a>
               <a href={`mailto:${SITE.email}`} className="flex items-start gap-4 group">
                 <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
                   <Mail className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />

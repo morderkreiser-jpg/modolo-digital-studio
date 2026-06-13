@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2, Code2, Palette, Camera, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Code2, Palette, Camera, Mail, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import { localizedHref, type Locale } from "@/lib/i18n";
+import { SITE } from "@/lib/site";
+import { useRegion, whatsappHref } from "@/components/use-region";
 
 export type Lang = Locale;
 export type Slug = "web" | "brand" | "content" | "email";
@@ -28,6 +30,9 @@ const ui: Record<
     ctaTitle: string;
     ctaText: string;
     ctaButton: string;
+    ctaWhatsapp: string;
+    whatsappMsg: string;
+    ctaPricing: string;
     home: string;
     imprint: string;
     privacy: string;
@@ -42,6 +47,9 @@ const ui: Record<
     ctaTitle: "Ready to stand out?",
     ctaText: "Tell us about your project — the first consultation is free.",
     ctaButton: "Talk to us",
+    ctaWhatsapp: "WhatsApp",
+    whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
+    ctaPricing: "See pricing",
     home: "Home",
     imprint: "Legal Notice",
     privacy: "Privacy Policy",
@@ -55,6 +63,9 @@ const ui: Record<
     ctaTitle: "Bereit, dich abzuheben?",
     ctaText: "Erzähl uns von deinem Projekt – die Erstberatung ist kostenlos.",
     ctaButton: "Sprich mit uns",
+    ctaWhatsapp: "WhatsApp",
+    whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
+    ctaPricing: "Preise ansehen",
     home: "Home",
     imprint: "Impressum",
     privacy: "Datenschutz",
@@ -68,6 +79,9 @@ const ui: Record<
     ctaTitle: "Pronto a distinguerti?",
     ctaText: "Raccontaci il tuo progetto – la prima consulenza è gratuita.",
     ctaButton: "Parla con noi",
+    ctaWhatsapp: "WhatsApp",
+    whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
+    ctaPricing: "Vedi i prezzi",
     home: "Home",
     imprint: "Note legali",
     privacy: "Privacy",
@@ -312,6 +326,8 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
   const u = ui[lang];
   const s = content[slug][lang];
   const Icon = ICONS[slug];
+  const region = useRegion();
+  const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, u.whatsappMsg);
   const others = SERVICE_SLUGS.filter((x) => x !== slug);
   const year = new Date().getFullYear();
 
@@ -373,9 +389,19 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
           <div className="relative">
             <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4">{u.ctaTitle}</h2>
             <p className="text-[#1F1B16]/60 font-light mb-8 max-w-xl mx-auto">{u.ctaText}</p>
-            <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300">
-              {u.ctaButton}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center justify-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300">
+                {u.ctaButton}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
+                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+                {u.ctaWhatsapp}
+              </a>
+            </div>
+            <Link href={localizedHref(lang, "/prezzi")} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
+              {u.ctaPricing}
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
