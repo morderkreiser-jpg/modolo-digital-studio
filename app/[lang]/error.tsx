@@ -48,7 +48,7 @@ export default function Error({
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#F7F3EC] text-[#1F1B16] px-6 text-center">
       <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4">{t.eyebrow}</span>
       <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4">{t.title}</h1>
-      <p className="text-[#1F1B16]/55 font-light max-w-md mb-10">{t.body}</p>
+      <p className="text-[#1F1B16]/65 font-light max-w-md mb-10">{t.body}</p>
       <div className="flex flex-col sm:flex-row gap-4">
         <button
           onClick={reset}

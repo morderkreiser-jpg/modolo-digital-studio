@@ -21,14 +21,14 @@ const translations = {
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
       subtitle: "We are a digital studio that transforms the online presence of professionals and businesses across Switzerland.",
-      ctaPrimary: "Discover our services",
-      ctaSecondary: "Talk to us",
+      ctaPrimary: "Book a free consultation",
+      ctaSecondary: "Discover our services",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
       { value: "24h", label: "Response time" },
       { value: "Free", label: "First consultation" },
-      { value: "Premium", label: "Guaranteed quality" },
+      { value: "4+", label: "Years of experience" },
     ],
     servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results", learnMore: "Learn more", viewPricing: "View pricing" },
     services: [
@@ -39,11 +39,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves" },
     saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], desc: "Complete website for a premium Italian bar catering service. Elegant design, refined user experience and SEO optimization.", cta: "Visit site" },
-    portfolioPlaceholders: [
-      { cat: "Branding · Concept", title: "Your next project", desc: "There's room for your story. Let's build something memorable together." },
-      { cat: "Web Design · Concept", title: "Space available", desc: "We're looking for ambitious brands to collaborate with. You could be next." },
-    ],
-    portfolioPlaceholderCta: "Let's talk",
+    zurikey: { tags: ["Web App", "Product Design", "Development"], desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site" },
+    bjstudio: { tags: ["Website", "WhatsApp Booking"], desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site" },
     about: {
       label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
       p1: "Modolo Digital Studio was born from the belief that every business, big or small, deserves a digital presence worthy of its value.",
@@ -95,14 +92,14 @@ const translations = {
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
       subtitle: "Wir sind ein Digital Studio, das die Online-Präsenz von Fachleuten und Unternehmen in der ganzen Schweiz transformiert.",
-      ctaPrimary: "Leistungen entdecken",
-      ctaSecondary: "Sprich mit uns",
+      ctaPrimary: "Kostenlose Beratung buchen",
+      ctaSecondary: "Leistungen entdecken",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
       { value: "24h", label: "Reaktionszeit" },
       { value: "Gratis", label: "Erstberatung" },
-      { value: "Premium", label: "Garantierte Qualität" },
+      { value: "4+", label: "Jahre Erfahrung" },
     ],
     servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse", learnMore: "Mehr erfahren", viewPricing: "Preise ansehen" },
     services: [
@@ -113,11 +110,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen" },
     saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], desc: "Komplette Website für einen Premium-Service für italienisches Bar-Catering. Elegantes Design, durchdachte Nutzererfahrung und SEO-Optimierung.", cta: "Website besuchen" },
-    portfolioPlaceholders: [
-      { cat: "Branding · Concept", title: "Dein nächstes Projekt", desc: "Hier ist Platz für deine Geschichte. Lass uns gemeinsam etwas Unvergessliches schaffen." },
-      { cat: "Web Design · Concept", title: "Platz verfügbar", desc: "Wir suchen ambitionierte Marken für eine Zusammenarbeit. Du könntest die nächste sein." },
-    ],
-    portfolioPlaceholderCta: "Sprechen wir",
+    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen" },
+    bjstudio: { tags: ["Website", "WhatsApp-Termine"], desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
       p1: "Modolo Digital Studio entstand aus der Überzeugung, dass jedes Unternehmen, ob gross oder klein, eine digitale Präsenz verdient, die seinem Wert gerecht wird.",
@@ -169,14 +163,14 @@ const translations = {
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
       subtitle: "Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera.",
-      ctaPrimary: "Scopri i servizi",
-      ctaSecondary: "Parla con noi",
+      ctaPrimary: "Prenota una consulenza gratuita",
+      ctaSecondary: "Scopri i servizi",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
       { value: "24h", label: "Tempo di risposta" },
       { value: "Gratis", label: "Prima consulenza" },
-      { value: "Premium", label: "Qualità garantita" },
+      { value: "4+", label: "Anni di esperienza" },
     ],
     servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti", learnMore: "Scopri di più", viewPricing: "Vedi i prezzi" },
     services: [
@@ -187,11 +181,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli" },
     saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], desc: "Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.", cta: "Visita il sito" },
-    portfolioPlaceholders: [
-      { cat: "Branding · Concept", title: "Il tuo prossimo progetto", desc: "C'è spazio per la tua storia. Costruiamo insieme qualcosa di memorabile." },
-      { cat: "Web Design · Concept", title: "Spazio disponibile", desc: "Stiamo cercando brand ambiziosi con cui collaborare. Potresti essere il prossimo." },
-    ],
-    portfolioPlaceholderCta: "Parliamone",
+    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito" },
+    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito" },
     about: {
       label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
       p1: "Modolo Digital Studio nasce dalla convinzione che ogni attività, grande o piccola, meriti una presenza digitale all'altezza del proprio valore.",
@@ -340,11 +331,11 @@ export default function Home({ lang }: { lang: Lang }) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mds-in" style={{ animationDelay: "0.34s" }}>
-            <a href="#servizi" className="group bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgba(31,27,22,0.12)] hover:shadow-[0_12px_40px_rgba(31,27,22,0.2)]">
+            <a href="#contatti" className="group bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgba(31,27,22,0.12)] hover:shadow-[0_12px_40px_rgba(31,27,22,0.2)]">
               {t.hero.ctaPrimary}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a href="#contatti" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
+            <a href="#servizi" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
               {t.hero.ctaSecondary}
             </a>
           </div>
@@ -430,7 +421,7 @@ export default function Home({ lang }: { lang: Lang }) {
           </motion.div>
 
           <motion.a
-            href="https://saporivivi.ch"
+            href="https://zurikey.ch"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 40 }}
@@ -439,23 +430,23 @@ export default function Home({ lang }: { lang: Lang }) {
             transition={{ duration: 0.8 }}
             className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
           >
-            <div className="relative aspect-[16/10] md:aspect-[21/9] overflow-hidden">
-              <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi - Italian Luxury Bar Catering" fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+            <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden">
+              <Image src="/portfolio-zurikey.png" alt="ZüriKey — Mietdossier web app for renting in Zürich" fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-3 py-1.5 rounded-full">{t.saporivivi.tags[0]}</span>
-                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.saporivivi.tags[1]}</span>
-                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.saporivivi.tags[2]}</span>
+                    <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
+                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
+                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
                   </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-white">SaporiVivi</h3>
-                  <p className="text-white/70 font-light max-w-xl">{t.saporivivi.desc}</p>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-white">ZüriKey</h3>
+                  <p className="text-white/70 font-light max-w-xl">{t.zurikey.desc}</p>
                 </div>
                 <div className="flex items-center gap-2 text-[#E8C98A] whitespace-nowrap group-hover:gap-3 transition-all">
-                  <span className="text-sm tracking-wider">{t.saporivivi.cta}</span>
+                  <span className="text-sm tracking-wider">{t.zurikey.cta}</span>
                   <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
                 </div>
               </div>
@@ -463,16 +454,57 @@ export default function Home({ lang }: { lang: Lang }) {
           </motion.a>
 
           <div className="grid md:grid-cols-2 gap-6 mt-6">
-            {t.portfolioPlaceholders.map((p, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative rounded-2xl border border-dashed border-[#1F1B16]/15 hover:border-[#B5893F]/40 bg-white/40 p-10 flex flex-col items-center justify-center text-center min-h-[280px] transition-all duration-500">
-                <span className="text-xs tracking-wider text-[var(--color-gold-ink)] uppercase mb-4">{p.cat}</span>
-                <h3 className="text-2xl font-light mb-3 text-[#1F1B16]/80">{p.title}</h3>
-                <p className="text-[#1F1B16]/70 font-light text-sm max-w-xs mb-6">{p.desc}</p>
-                <a href="#contatti" className="text-sm text-[var(--color-gold-ink)] tracking-wider flex items-center gap-2 group-hover:gap-3 transition-all">
-                  {t.portfolioPlaceholderCta} <ArrowRight className="w-4 h-4" />
-                </a>
-              </motion.div>
-            ))}
+            <motion.a
+              href="https://saporivivi.ch"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="group block relative rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
+            >
+              <div className="relative aspect-[16/11] overflow-hidden">
+                <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-2.5 py-1 rounded-full">{t.saporivivi.tags[0]}</span>
+                  <span className="text-xs tracking-wider text-white/80 border border-white/30 px-2.5 py-1 rounded-full">{t.saporivivi.tags[1]}</span>
+                </div>
+                <div className="flex items-end justify-between gap-3">
+                  <h3 className="text-2xl font-light text-white">SaporiVivi</h3>
+                  <span className="flex items-center gap-1.5 text-[#E8C98A] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.saporivivi.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                </div>
+              </div>
+            </motion.a>
+
+            <motion.a
+              href="https://bjstudiodebelleza.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="group block relative rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
+            >
+              <div className="relative aspect-[16/11] overflow-hidden">
+                <Image src="/portfolio-bjstudio.png" alt="BJ Studio de Belleza — beauty studio in Zürich" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-2.5 py-1 rounded-full">{t.bjstudio.tags[0]}</span>
+                  <span className="text-xs tracking-wider text-white/80 border border-white/30 px-2.5 py-1 rounded-full">{t.bjstudio.tags[1]}</span>
+                </div>
+                <div className="flex items-end justify-between gap-3">
+                  <h3 className="text-2xl font-light text-white">BJ Studio</h3>
+                  <span className="flex items-center gap-1.5 text-[#E8C98A] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.bjstudio.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                </div>
+              </div>
+            </motion.a>
           </div>
         </div>
       </section>
@@ -680,28 +712,27 @@ export default function Home({ lang }: { lang: Lang }) {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-5 p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_8px_40px_rgba(31,27,22,0.06)]">
-                  {/* anti-spam honeypot (hidden from users; Formspree ignores submissions that fill it) */}
+                  {/* anti-spam honeypot (hidden from users; the server rejects submissions that fill it — see /api/contact) */}
                   <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-                  <input type="hidden" name="_subject" value="New enquiry — Modolo Digital Studio" />
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
                       <label htmlFor="contact-email" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
                     <label htmlFor="contact-company" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formCompany}</label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
+                    <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
                     <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} *</label>
-                    <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/60 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
+                    <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
                     {fieldErrors.message && <p id="contact-message-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.message}</p>}
                   </div>
                   {formStatus === "error" && (

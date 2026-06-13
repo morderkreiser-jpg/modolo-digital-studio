@@ -59,9 +59,9 @@ export async function POST(request: Request) {
   // Anti-spam honeypot: a filled hidden field means a bot — pretend success, send nothing.
   if (fields.gotcha.trim()) return NextResponse.json({ ok: true });
 
-  const nome = fields.nome.trim();
-  const email = fields.email.trim();
-  const azienda = fields.azienda.trim();
+  const nome = fields.nome.trim().slice(0, 120);
+  const email = fields.email.trim().slice(0, 254);
+  const azienda = fields.azienda.trim().slice(0, 200);
   const messaggio = fields.messaggio.trim().slice(0, 5000);
   const locale: Locale = isLocale(fields.lang) ? fields.lang : "en";
   const region: Region = regionFromRequest(request);

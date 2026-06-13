@@ -7,6 +7,7 @@ import "../globals.css";
 import { SITE } from "@/lib/site";
 import { LOCALES, OG_LOCALE, isLocale, localizedHref, type Locale } from "@/lib/i18n";
 import { HOME_META } from "@/lib/site-data";
+import MotionProvider from "@/components/motion-provider";
 
 // Localized label for the skip-to-content link (first focusable element on every page).
 const SKIP_LABEL: Record<Locale, string> = {
@@ -106,7 +107,7 @@ export default async function LangLayout({
         >
           {SKIP_LABEL[lang]}
         </a>
-        {children}
+        <MotionProvider>{children}</MotionProvider>
         <Analytics />
         <SpeedInsights />
       </body>

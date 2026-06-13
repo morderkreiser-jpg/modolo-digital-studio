@@ -117,7 +117,10 @@ export function serviceGraph(slug: ServiceSlug, locale: Locale) {
         serviceType: s.title,
         inLanguage: locale,
         provider: { "@id": `${SITE.url}/#organization` },
-        areaServed: { "@type": "Country", name: "Switzerland" },
+        areaServed: [
+          { "@type": "Country", name: "Switzerland" },
+          { "@type": "Country", name: "Italy" },
+        ],
       },
       {
         "@type": "BreadcrumbList",
