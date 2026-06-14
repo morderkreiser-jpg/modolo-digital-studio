@@ -437,24 +437,23 @@ export default function Home({ lang }: { lang: Lang }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
+            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
           >
-            <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden">
-              <Image src="/portfolio-zurikey.png" alt={t.zurikey.alt} fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
-              <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+            <div className="relative aspect-[16/9] overflow-hidden bg-[#EEE6D8]">
+              <Image src="/portfolio-zurikey.png" alt={t.zurikey.alt} fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
             </div>
-            <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="p-6 md:p-10">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
                 <div>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
-                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
-                    <span className="text-xs tracking-wider text-white/80 border border-white/30 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
+                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
+                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
+                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
                   </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-white">ZüriKey</h3>
-                  <p className="text-white/70 font-light max-w-xl">{t.zurikey.desc}</p>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">ZüriKey</h3>
+                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.zurikey.desc}</p>
                 </div>
-                <div className="flex items-center gap-2 text-[#E8C98A] whitespace-nowrap group-hover:gap-3 transition-all">
+                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
                   <span className="text-sm tracking-wider">{t.zurikey.cta}</span>
                   <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
                 </div>
@@ -471,20 +470,19 @@ export default function Home({ lang }: { lang: Lang }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="group block relative rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
+              className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
             >
-              <div className="relative aspect-[16/11] overflow-hidden">
-                <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
+                <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-2.5 py-1 rounded-full">{t.saporivivi.tags[0]}</span>
-                  <span className="text-xs tracking-wider text-white/80 border border-white/30 px-2.5 py-1 rounded-full">{t.saporivivi.tags[1]}</span>
+                  <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-2.5 py-1 rounded-full">{t.saporivivi.tags[0]}</span>
+                  <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-2.5 py-1 rounded-full">{t.saporivivi.tags[1]}</span>
                 </div>
-                <div className="flex items-end justify-between gap-3">
-                  <h3 className="text-2xl font-light text-white">SaporiVivi</h3>
-                  <span className="flex items-center gap-1.5 text-[#E8C98A] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.saporivivi.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-2xl font-light text-[#1F1B16]">SaporiVivi</h3>
+                  <span className="flex items-center gap-1.5 text-[var(--color-gold-ink)] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.saporivivi.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
                 </div>
               </div>
             </motion.a>
@@ -497,20 +495,19 @@ export default function Home({ lang }: { lang: Lang }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="group block relative rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
+              className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
             >
-              <div className="relative aspect-[16/11] overflow-hidden">
-                <Image src="/portfolio-bjstudio.png" alt={t.bjstudio.alt} fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
+                <Image src="/portfolio-bjstudio.png" alt={t.bjstudio.alt} fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-xs tracking-wider text-[#E8C98A] border border-[#E8C98A]/40 bg-[#B5893F]/20 px-2.5 py-1 rounded-full">{t.bjstudio.tags[0]}</span>
-                  <span className="text-xs tracking-wider text-white/80 border border-white/30 px-2.5 py-1 rounded-full">{t.bjstudio.tags[1]}</span>
+                  <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-2.5 py-1 rounded-full">{t.bjstudio.tags[0]}</span>
+                  <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-2.5 py-1 rounded-full">{t.bjstudio.tags[1]}</span>
                 </div>
-                <div className="flex items-end justify-between gap-3">
-                  <h3 className="text-2xl font-light text-white">BJ Studio</h3>
-                  <span className="flex items-center gap-1.5 text-[#E8C98A] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.bjstudio.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-2xl font-light text-[#1F1B16]">BJ Studio</h3>
+                  <span className="flex items-center gap-1.5 text-[var(--color-gold-ink)] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.bjstudio.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
                 </div>
               </div>
             </motion.a>
