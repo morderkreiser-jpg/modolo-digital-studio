@@ -467,57 +467,68 @@ export default function Home({ lang }: { lang: Lang }) {
             </div>
           </motion.a>
 
-          <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <motion.a
-              href="https://saporivivi.ch"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-            >
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#1F1B16]">
-                <video src="/portfolio-saporivivi-v2.mp4" poster="/portfolio-saporivivi-v2-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className="absolute inset-0 w-full h-full object-cover" />
-              </div>
-              <div className="p-6">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-2.5 py-1 rounded-full">{t.saporivivi.tags[0]}</span>
-                  <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-2.5 py-1 rounded-full">{t.saporivivi.tags[1]}</span>
+          <motion.a
+            href="https://saporivivi.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500 mt-6"
+          >
+            <div className="relative aspect-[1280/646] overflow-hidden bg-[#1F1B16]">
+              <video src="/portfolio-saporivivi-v3.mp4" poster="/portfolio-saporivivi-v3-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className="absolute inset-0 w-full h-full object-cover" />
+            </div>
+            <div className="p-6 md:p-10">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                <div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.saporivivi.tags[0]}</span>
+                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[1]}</span>
+                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[2]}</span>
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">SaporiVivi</h3>
+                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.saporivivi.desc}</p>
                 </div>
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-2xl font-light text-[#1F1B16]">SaporiVivi</h3>
-                  <span className="flex items-center gap-1.5 text-[var(--color-gold-ink)] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.saporivivi.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
+                  <span className="text-sm tracking-wider">{t.saporivivi.cta}</span>
+                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
                 </div>
               </div>
-            </motion.a>
+            </div>
+          </motion.a>
 
-            <motion.a
-              href="https://bjstudiodebelleza.vercel.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-            >
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
-                <Image src="/portfolio-bjstudio-poster.webp" alt={t.bjstudio.alt} fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
-              </div>
-              <div className="p-6">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-2.5 py-1 rounded-full">{t.bjstudio.tags[0]}</span>
-                  <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-2.5 py-1 rounded-full">{t.bjstudio.tags[1]}</span>
+          <motion.a
+            href="https://bjstudiodebelleza.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500 mt-6"
+          >
+            <div className="relative aspect-[16/9] overflow-hidden bg-[#EEE6D8]">
+              <Image src="/portfolio-bjstudio-poster.webp" alt={t.bjstudio.alt} fill sizes="(max-width: 1024px) 100vw, 1100px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
+            </div>
+            <div className="p-6 md:p-10">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                <div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.bjstudio.tags[0]}</span>
+                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.bjstudio.tags[1]}</span>
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">BJ Studio</h3>
+                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.bjstudio.desc}</p>
                 </div>
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-2xl font-light text-[#1F1B16]">BJ Studio</h3>
-                  <span className="flex items-center gap-1.5 text-[var(--color-gold-ink)] text-sm tracking-wider whitespace-nowrap group-hover:gap-2.5 transition-all">{t.bjstudio.cta} <ExternalLink className="w-4 h-4" strokeWidth={1.5} /></span>
+                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
+                  <span className="text-sm tracking-wider">{t.bjstudio.cta}</span>
+                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
                 </div>
               </div>
-            </motion.a>
-          </div>
+            </div>
+          </motion.a>
         </div>
       </section>
 
