@@ -44,9 +44,9 @@ const translations = {
     bjstudio: { tags: ["Website", "WhatsApp Booking"], desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
       label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
-      p1: "Modolo Digital Studio was born from the belief that every business, big or small, deserves a digital presence worthy of its value.",
+      p1: "Modolo Digital Studio is an independent studio — not an agency juggling a hundred clients. A few projects at a time, each followed one by one. Because every business deserves a site worthy of its value, not a recycled template.",
       p2: "We combine refined design, technical development and strategy to build websites and experiences that not only look beautiful, but truly work. We work with professionals and businesses across Switzerland, and partner with specialists like Project Visibility to cover every need, from content creation to social media management.",
-      p3: "We believe in craftsmanship, attention to detail and lasting relationships with our clients.",
+      p3: "No inflated promises: clean code, real attention to detail and a direct relationship. Work with us and you always talk to the person who actually builds your site.",
     },
     founder: {
       eyebrow: "The founder",
@@ -117,9 +117,9 @@ const translations = {
     bjstudio: { tags: ["Website", "WhatsApp-Termine"], desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
-      p1: "Modolo Digital Studio entstand aus der Überzeugung, dass jedes Unternehmen, ob gross oder klein, eine digitale Präsenz verdient, die seinem Wert gerecht wird.",
+      p1: "Modolo Digital Studio ist ein unabhängiges Studio – keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
       p2: "Wir verbinden raffiniertes Design, technische Entwicklung und Strategie, um Websites und Erlebnisse zu schaffen, die nicht nur schön aussehen, sondern wirklich funktionieren. Wir arbeiten mit Fachleuten und Unternehmen in der ganzen Schweiz und kooperieren mit Spezialisten wie Project Visibility, um jeden Bedarf abzudecken, von der Content-Erstellung bis zur Social-Media-Betreuung.",
-      p3: "Wir glauben an handwerkliche Qualität, Liebe zum Detail und langfristige Beziehungen zu unseren Kunden.",
+      p3: "Keine aufgeblasenen Versprechen: sauberer Code, echte Liebe zum Detail und ein direkter Draht. Bei uns sprichst du immer mit der Person, die deine Website tatsächlich baut.",
     },
     founder: {
       eyebrow: "Der Gründer",
@@ -190,9 +190,9 @@ const translations = {
     bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
       label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
-      p1: "Modolo Digital Studio nasce dalla convinzione che ogni attività, grande o piccola, meriti una presenza digitale all'altezza del proprio valore.",
+      p1: "Modolo Digital Studio è uno studio indipendente, non un'agenzia con mille clienti: pochi progetti alla volta, seguiti uno per uno. Perché ogni attività merita un sito all'altezza del suo valore — non un modello riciclato.",
       p2: "Uniamo design raffinato, sviluppo tecnico e strategia per costruire siti ed esperienze che non solo appaiono belli, ma funzionano davvero. Lavoriamo con professionisti e aziende in tutta la Svizzera, e collaboriamo con specialisti come Project Visibility per coprire ogni esigenza, dalla creazione di contenuti alla gestione social.",
-      p3: "Crediamo nella qualità artigianale, nell'attenzione al dettaglio e in relazioni durature con i nostri clienti.",
+      p3: "Niente promesse gonfiate: codice pulito, cura vera del dettaglio e un rapporto diretto. Lavorando con noi parli sempre con chi il tuo sito lo costruisce davvero.",
     },
     founder: {
       eyebrow: "Il fondatore",
