@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, Fraunces } from "next/font/google";
+import { Poppins, Lora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
@@ -16,20 +16,19 @@ const SKIP_LABEL: Record<Locale, string> = {
   it: "Vai al contenuto",
 };
 
-// Hanken Grotesk: clean, modern grotesque for body and UI.
-const hanken = Hanken_Grotesk({
-  variable: "--font-hanken",
+// Poppins: font principale (navbar, body, titoli, UI)
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-// Fraunces: high-contrast editorial serif for display headings and elegant italic accents.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Lora: SOLO in corsivo, come accento elegante (tagline, citazioni, frasi speciali)
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
+  style: ["italic"],
   display: "swap",
 });
 
@@ -99,7 +98,7 @@ export default async function LangLayout({
   return (
     <html
       lang={lang}
-      className={`${hanken.variable} ${fraunces.variable} h-full antialiased scroll-smooth`}
+      className={`${poppins.variable} ${lora.variable} h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col">
         <a
@@ -109,7 +108,6 @@ export default async function LangLayout({
           {SKIP_LABEL[lang]}
         </a>
         <MotionProvider>{children}</MotionProvider>
-        <div className="mds-grain" aria-hidden="true" />
         <Analytics />
         <SpeedInsights />
       </body>

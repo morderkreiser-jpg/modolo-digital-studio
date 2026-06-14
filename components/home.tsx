@@ -24,7 +24,6 @@ const translations = {
       subtitle: "We are a digital studio that transforms the online presence of professionals and businesses across Switzerland.",
       ctaPrimary: "Book a free consultation",
       ctaSecondary: "Discover our services",
-      trust: ["Free consultation", "24h response", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -98,7 +97,6 @@ const translations = {
       subtitle: "Wir sind ein Digital Studio, das die Online-Präsenz von Fachleuten und Unternehmen in der ganzen Schweiz transformiert.",
       ctaPrimary: "Kostenlose Beratung buchen",
       ctaSecondary: "Leistungen entdecken",
-      trust: ["Gratis Beratung", "Antwort in 24 Std", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -172,7 +170,6 @@ const translations = {
       subtitle: "Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera.",
       ctaPrimary: "Prenota una consulenza gratuita",
       ctaSecondary: "Scopri i servizi",
-      trust: ["Consulenza gratuita", "Risposta in 24h", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -329,9 +326,13 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="text-xs tracking-[0.2em] text-[var(--color-gold-ink)] uppercase">{t.hero.badge}</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-[6.5rem] font-normal tracking-[-0.02em] mb-8 leading-[1.02] mds-in" style={{ animationDelay: "0.14s" }}>
+          <div className="mb-12 flex justify-center mds-in-scale" style={{ animationDelay: "0.12s" }}>
+            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={213} preload />
+          </div>
+
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1] mds-in" style={{ animationDelay: "0.18s" }}>
             {t.hero.titleLine1}<br />
-            <span className="text-[#B5893F] italic">{t.hero.titleAccent}</span>
+            <span className="text-[#B5893F] italic font-serif">{t.hero.titleAccent}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-[#1F1B16]/65 max-w-2xl mx-auto mb-12 font-light leading-relaxed mds-in" style={{ animationDelay: "0.26s" }}>
@@ -346,15 +347,6 @@ export default function Home({ lang }: { lang: Lang }) {
             <a href="#servizi" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
               {t.hero.ctaSecondary}
             </a>
-          </div>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mds-in" style={{ animationDelay: "0.42s" }}>
-            {t.hero.trust.map((item) => (
-              <span key={item} className="inline-flex items-center gap-1.5 text-xs tracking-wider text-[#1F1B16]/65">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#8F6B2F]" strokeWidth={2} aria-hidden="true" />
-                {item}
-              </span>
-            ))}
           </div>
         </div>
 
@@ -386,7 +378,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
             <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.servicesSection.label}</span>
-            <h2 className="text-4xl md:text-6xl font-normal tracking-[-0.02em]">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
               {t.servicesSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.servicesSection.headingAccent}</span>
             </h2>
           </motion.div>
@@ -432,7 +424,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
             <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.portfolioSection.label}</span>
-            <h2 className="text-4xl md:text-6xl font-normal tracking-[-0.02em]">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
               {t.portfolioSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.portfolioSection.headingAccent}</span>
             </h2>
           </motion.div>
@@ -549,7 +541,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
               <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.about.label}</span>
-              <h2 className="text-4xl md:text-6xl font-normal tracking-[-0.02em] mb-8">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight mb-8">
                 {t.about.heading1}<span className="italic font-serif text-[#B5893F]">{t.about.headingAccent}</span>
               </h2>
               <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6 text-lg">{t.about.p1}</p>
@@ -618,7 +610,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
             <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.method.label}</span>
-            <h2 className="text-4xl md:text-6xl font-normal tracking-[-0.02em]">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
               {t.method.heading1}<span className="italic font-serif text-[#B5893F]">{t.method.headingAccent}</span>
             </h2>
           </motion.div>
@@ -636,15 +628,13 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      {/* QUOTE — dark dramatic band */}
-      <section className="relative py-40 px-6 lg:px-12 bg-[#1F1B16] text-[#F7F3EC] overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[760px] h-[760px] bg-[#B5893F]/[0.13] rounded-full blur-[150px]" />
-        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #E8C98A 1px, transparent 0)', backgroundSize: '70px 70px' }} />
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="relative max-w-4xl mx-auto text-center">
-          <Sparkles className="w-8 h-8 text-[#D9B36C] mx-auto mb-10" strokeWidth={1.2} />
-          <p className="text-3xl md:text-5xl lg:text-6xl font-normal leading-[1.18] italic font-serif">
+      {/* QUOTE */}
+      <section className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07]">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto text-center">
+          <Sparkles className="w-8 h-8 text-[#B5893F] mx-auto mb-8" strokeWidth={1.2} />
+          <p className="text-2xl md:text-4xl font-light leading-relaxed italic font-serif">
             &ldquo;{t.quote.line1}<br />
-            <span className="text-[#D9B36C]">{t.quote.line2}</span>&rdquo;
+            <span className="text-[#B5893F]">{t.quote.line2}</span>&rdquo;
           </p>
         </motion.div>
       </section>
@@ -655,7 +645,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="max-w-3xl mx-auto relative">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-16 text-center">
             <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.faqSection.label}</span>
-            <h2 className="text-4xl md:text-6xl font-normal tracking-[-0.02em]">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
               {t.faqSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.faqSection.headingAccent}</span>
             </h2>
           </motion.div>
