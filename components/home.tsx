@@ -24,6 +24,7 @@ const translations = {
       subtitle: "We are a digital studio that transforms the online presence of professionals and businesses across Switzerland.",
       ctaPrimary: "Book a free consultation",
       ctaSecondary: "Discover our services",
+      trust: ["Free consultation", "24h response", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -97,6 +98,7 @@ const translations = {
       subtitle: "Wir sind ein Digital Studio, das die Online-Präsenz von Fachleuten und Unternehmen in der ganzen Schweiz transformiert.",
       ctaPrimary: "Kostenlose Beratung buchen",
       ctaSecondary: "Leistungen entdecken",
+      trust: ["Gratis Beratung", "Antwort in 24 Std", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -170,6 +172,7 @@ const translations = {
       subtitle: "Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera.",
       ctaPrimary: "Prenota una consulenza gratuita",
       ctaSecondary: "Scopri i servizi",
+      trust: ["Consulenza gratuita", "Risposta in 24h", "Made in Switzerland"],
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -347,6 +350,15 @@ export default function Home({ lang }: { lang: Lang }) {
             <a href="#servizi" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
               {t.hero.ctaSecondary}
             </a>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mds-in" style={{ animationDelay: "0.42s" }}>
+            {t.hero.trust.map((item) => (
+              <span key={item} className="inline-flex items-center gap-1.5 text-xs tracking-wider text-[#1F1B16]/65">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#8F6B2F]" strokeWidth={2} aria-hidden="true" />
+                {item}
+              </span>
+            ))}
           </div>
         </div>
 
