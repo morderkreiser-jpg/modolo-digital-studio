@@ -478,8 +478,8 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.6 }}
               className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
-                <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#1F1B16]">
+                <video src="/portfolio-saporivivi.mp4" poster="/portfolio-saporivivi-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className="absolute inset-0 w-full h-full object-cover" />
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
