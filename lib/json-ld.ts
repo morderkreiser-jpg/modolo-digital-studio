@@ -73,7 +73,7 @@ export function homeGraph(locale: Locale) {
         name: SITE.name,
         url: SITE.url,
         image: `${SITE.url}/og-image.png`,
-        telephone: SITE.phone,
+        telephone: SITE.phoneIt,
         email: SITE.email,
         address: postalAddressIt,
         areaServed: { "@type": "Country", name: "Italy" },
@@ -161,8 +161,8 @@ function offer(name: string, description: string | undefined, price: number, fro
   };
 }
 
-// Structured data for the /prezzi page. Emits the canonical Swiss/CHF region (what crawlers
-// see in the server-rendered HTML); amounts are plain Numbers (the page formats per locale).
+// Structured data for the /prezzi page. Emits the visitor's resolved pricing region (CHF/EUR;
+// defaults to CH), matching the server-rendered HTML; amounts are plain Numbers (page formats).
 export function pricingGraph(locale: Locale, region: Region = DEFAULT_REGION) {
   const url = abs(localizedHref(locale, "/prezzi"));
   const items = [

@@ -40,8 +40,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves" },
     saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], desc: "Complete website for a premium Italian bar catering service. Elegant design, refined user experience and SEO optimization.", cta: "Visit site" },
-    zurikey: { tags: ["Web App", "Product Design", "Development"], desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site" },
-    bjstudio: { tags: ["Website", "WhatsApp Booking"], desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site" },
+    zurikey: { tags: ["Web App", "Product Design", "Development"], desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp Booking"], desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
       label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
       p1: "Modolo Digital Studio was born from the belief that every business, big or small, deserves a digital presence worthy of its value.",
@@ -113,8 +113,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen" },
     saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], desc: "Komplette Website für einen Premium-Service für italienisches Bar-Catering. Elegantes Design, durchdachte Nutzererfahrung und SEO-Optimierung.", cta: "Website besuchen" },
-    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen" },
-    bjstudio: { tags: ["Website", "WhatsApp-Termine"], desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen" },
+    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp-Termine"], desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
       p1: "Modolo Digital Studio entstand aus der Überzeugung, dass jedes Unternehmen, ob gross oder klein, eine digitale Präsenz verdient, die seinem Wert gerecht wird.",
@@ -186,8 +186,8 @@ const translations = {
     ],
     portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli" },
     saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], desc: "Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.", cta: "Visita il sito" },
-    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito" },
-    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito" },
+    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
+    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
       label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
       p1: "Modolo Digital Studio nasce dalla convinzione che ogni attività, grande o piccola, meriti una presenza digitale all'altezza del proprio valore.",
@@ -440,7 +440,7 @@ export default function Home({ lang }: { lang: Lang }) {
             className="group block relative rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
           >
             <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden">
-              <Image src="/portfolio-zurikey.png" alt="ZüriKey — Mietdossier web app for renting in Zürich" fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <Image src="/portfolio-zurikey.png" alt={t.zurikey.alt} fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="relative md:absolute md:bottom-0 md:left-0 md:right-0 p-6 md:p-12 bg-[#1F1B16] md:bg-transparent">
@@ -475,7 +475,7 @@ export default function Home({ lang }: { lang: Lang }) {
             >
               <div className="relative aspect-[16/11] overflow-hidden">
                 <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -500,8 +500,8 @@ export default function Home({ lang }: { lang: Lang }) {
               className="group block relative rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 transition-all duration-500 bg-[#1F1B16]"
             >
               <div className="relative aspect-[16/11] overflow-hidden">
-                <Image src="/portfolio-bjstudio.png" alt="BJ Studio de Belleza — beauty studio in Zürich" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+                <Image src="/portfolio-bjstudio.png" alt={t.bjstudio.alt} fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -690,7 +690,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
           <div className="grid lg:grid-cols-5 gap-12">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-6 py-3.5 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 shadow-[0_8px_30px_rgba(31,27,22,0.12)]">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-6 py-3.5 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 shadow-[0_8px_30px_rgba(31,27,22,0.12)]">
                 <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
                 {t.contact.whatsapp}
               </a>

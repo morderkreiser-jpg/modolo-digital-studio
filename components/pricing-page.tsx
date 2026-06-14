@@ -132,7 +132,7 @@ export default function PricingPage({
               key={i}
               className={`group relative p-8 rounded-2xl border bg-white transition-all duration-300 flex flex-col ${
                 it.featured
-                  ? "border-[#B5893F]/50 shadow-[0_10px_40px_rgba(31,27,22,0.10)]"
+                  ? "border-[#B5893F]/50 shadow-[0_10px_40px_rgba(31,27,22,0.10)] hover:shadow-[0_14px_50px_rgba(31,27,22,0.14)]"
                   : "border-[#1F1B16]/[0.08] shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)]"
               }`}
             >
