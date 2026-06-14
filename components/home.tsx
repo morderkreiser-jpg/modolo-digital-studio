@@ -18,10 +18,10 @@ const translations = {
   en: {
     nav: { services: "Services", pricing: "Pricing", portfolio: "Portfolio", about: "About", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
     hero: {
-      badge: "Digital Studio · Switzerland",
+      badge: "Independent studio · Winterthur, CH",
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
-      subtitle: "We are a digital studio that transforms the online presence of professionals and businesses across Switzerland.",
+      subtitle: "An independent studio in Winterthur — websites, brands and content tailored to each business, for professionals and small companies across Switzerland. Built by hand, cared for as if they were our own.",
       ctaPrimary: "Book a free consultation",
       ctaSecondary: "Discover our services",
     },
@@ -91,10 +91,10 @@ const translations = {
   de: {
     nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
     hero: {
-      badge: "Digital Studio · Schweiz",
+      badge: "Unabhängiges Studio · Winterthur",
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
-      subtitle: "Wir sind ein Digital Studio, das die Online-Präsenz von Fachleuten und Unternehmen in der ganzen Schweiz transformiert.",
+      subtitle: "Ein unabhängiges Studio in Winterthur — massgeschneiderte Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz. Von Hand gebaut, gepflegt, als wären es unsere eigenen.",
       ctaPrimary: "Kostenlose Beratung buchen",
       ctaSecondary: "Leistungen entdecken",
     },
@@ -164,10 +164,10 @@ const translations = {
   it: {
     nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci", backToTop: "Torna su" },
     hero: {
-      badge: "Digital Studio · Svizzera",
+      badge: "Studio indipendente · Winterthur",
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
-      subtitle: "Siamo uno studio digitale che trasforma la presenza online di professionisti e aziende in tutta la Svizzera.",
+      subtitle: "Uno studio indipendente a Winterthur — siti, brand e contenuti su misura per professionisti e piccole attività in tutta la Svizzera. Fatti a mano, curati come se fossero nostri.",
       ctaPrimary: "Prenota una consulenza gratuita",
       ctaSecondary: "Scopri i servizi",
     },
