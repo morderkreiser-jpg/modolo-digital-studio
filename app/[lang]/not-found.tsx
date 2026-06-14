@@ -31,7 +31,7 @@ export default function NotFound() {
   const t = T[lang];
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#F7F3EC] text-[#1F1B16] px-6 text-center">
-      <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={56} height={56} className="mb-8" />
+      <Image src="/logo-mark.png" alt="Modolo Digital Studio" width={56} height={56} className="mb-8" />
       <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4">{t.eyebrow}</span>
       <h1 className="text-5xl md:text-7xl font-light tracking-tight mb-4">{t.title}</h1>
       <p className="text-[#1F1B16]/65 font-light max-w-md mb-10">{t.body}</p>

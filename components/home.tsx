@@ -781,7 +781,7 @@ export default function Home({ lang }: { lang: Lang }) {
       <footer className="border-t border-[#1F1B16]/[0.08] py-12 px-6 lg:px-12 bg-[#ECE3D3]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <Image src="/logo-icon.png" alt="Modolo Digital Studio" width={28} height={28} />
+            <Image src="/logo-mark.png" alt="Modolo Digital Studio" width={28} height={28} />
             <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
           </div>
           <div className="flex items-center gap-5 sm:gap-6">

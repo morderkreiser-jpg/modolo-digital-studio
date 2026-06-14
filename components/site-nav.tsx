@@ -139,7 +139,7 @@ export default function SiteNav({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
         <Link href={localizedHref(lang, "/")} aria-label={a.home} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <Image src="/logo-icon.png" alt="" width={36} height={36} />
+          <Image src="/logo-mark.png" alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
             <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
             <span className="text-[10px] tracking-[0.3em] text-[var(--color-gold-ink)] hidden sm:block">DIGITAL STUDIO</span>
