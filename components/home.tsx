@@ -77,8 +77,9 @@ const translations = {
       whatsapp: "Message us on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
-      phName: "Your name", phEmail: "your@email.com", phCompany: "Company name (optional)", phMessage: "Tell us about your project...",
-      btnSend: "Send message", btnSending: "Sending...",
+      phName: "Your name", phEmail: "your@email.com", phCompany: "Company name (optional)", phMessage: "Two lines about your project (optional)…",
+      needsLabel: "What do you need?", needs: ["Website", "Brand & logo", "Content & social", "Email marketing", "Other"], optional: "optional", reassurance: "Reply within 24h · No obligation",
+      btnSend: "Request a free consultation", btnSending: "Sending...",
       successTitle: "Message sent!", successDesc: "Thanks for reaching out. We'll get back to you within 24 hours.",
       error: "Something went wrong. Please try again or write to us directly via email.",
       errName: "Please enter your name.",
@@ -150,8 +151,9 @@ const translations = {
       whatsapp: "Schreib uns auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
-      phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname (optional)", phMessage: "Erzähl uns von deinem Projekt...",
-      btnSend: "Nachricht senden", btnSending: "Wird gesendet...",
+      phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname (optional)", phMessage: "Zwei Zeilen zu deinem Projekt (optional)…",
+      needsLabel: "Was brauchst du?", needs: ["Website", "Marke & Logo", "Content & Social", "E-Mail-Marketing", "Anderes"], optional: "optional", reassurance: "Antwort in 24 Std · Unverbindlich",
+      btnSend: "Kostenlose Beratung anfragen", btnSending: "Wird gesendet...",
       successTitle: "Nachricht gesendet!", successDesc: "Danke für deine Nachricht. Wir melden uns innerhalb von 24 Stunden.",
       error: "Etwas ist schiefgelaufen. Bitte versuche es erneut oder schreib uns direkt eine E-Mail.",
       errName: "Bitte gib deinen Namen ein.",
@@ -223,8 +225,9 @@ const translations = {
       whatsapp: "Scrivici su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
-      phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda (opzionale)", phMessage: "Raccontaci il tuo progetto...",
-      btnSend: "Invia messaggio", btnSending: "Invio in corso...",
+      phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda (opzionale)", phMessage: "Due righe sul tuo progetto (facoltativo)…",
+      needsLabel: "Di cosa hai bisogno?", needs: ["Sito web", "Brand & logo", "Contenuti & social", "Email marketing", "Altro"], optional: "facoltativo", reassurance: "Risposta entro 24h · Senza impegno",
+      btnSend: "Richiedi la consulenza gratuita", btnSending: "Invio in corso...",
       successTitle: "Messaggio inviato!", successDesc: "Grazie per averci scritto. Ti risponderemo entro 24 ore.",
       error: "Si è verificato un errore. Riprova o scrivici direttamente via email.",
       errName: "Inserisci il tuo nome.",
@@ -257,20 +260,22 @@ export default function Home({ lang }: { lang: Lang }) {
     if (formStatus === "success") successRef.current?.focus();
   }, [formStatus]);
 
+  const [needs, setNeeds] = useState<string[]>([]);
+  const toggleNeed = (n: string) => setNeeds((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formStatus === "sending") return;
     const form = e.currentTarget;
     const data = new FormData(form);
     data.set("lang", lang);
+    data.set("servizi", needs.join(", "));
     const name = (data.get("nome") as string)?.trim();
     const email = (data.get("email") as string)?.trim();
-    const message = (data.get("messaggio") as string)?.trim();
-    const errs: { name?: string; email?: string; message?: string } = {};
+    const errs: { name?: string; email?: string } = {};
     if (!name) errs.name = t.contact.errName;
     if (!email) errs.email = t.contact.errEmailRequired;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t.contact.errEmailInvalid;
-    if (!message) errs.message = t.contact.errMessage;
     if (Object.keys(errs).length > 0) {
       setFieldErrors(errs);
       return;
@@ -286,6 +291,7 @@ export default function Home({ lang }: { lang: Lang }) {
       if (res.ok) {
         setFormStatus("success");
         form.reset();
+        setNeeds([]);
       } else {
         setFormStatus("error");
       }
@@ -736,6 +742,17 @@ export default function Home({ lang }: { lang: Lang }) {
                 <form onSubmit={handleSubmit} noValidate className="space-y-5 p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_8px_40px_rgba(31,27,22,0.06)]">
                   {/* anti-spam honeypot (hidden from users; the server rejects submissions that fill it — see /api/contact) */}
                   <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+                  <div>
+                    <span className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-3 block">{t.contact.needsLabel}</span>
+                    <div className="flex flex-wrap gap-2">
+                      {t.contact.needs.map((n) => {
+                        const active = needs.includes(n);
+                        return (
+                          <button key={n} type="button" aria-pressed={active} onClick={() => toggleNeed(n)} className={`text-sm tracking-wide px-4 py-2 rounded-full border transition-all ${active ? "bg-[#1F1B16] text-[#F7F3EC] border-[#1F1B16]" : "bg-[#F7F3EC] text-[#1F1B16]/75 border-[#1F1B16]/15 hover:border-[#B5893F]/60 hover:text-[#1F1B16]"}`}>{n}</button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
@@ -753,9 +770,8 @@ export default function Home({ lang }: { lang: Lang }) {
                     <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
-                    <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} *</label>
-                    <textarea id="contact-message" name="messaggio" required rows={4} aria-invalid={fieldErrors.message ? true : undefined} aria-describedby={fieldErrors.message ? "contact-message-err" : undefined} onChange={() => fieldErrors.message && setFieldErrors((p) => ({ ...p, message: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
-                    {fieldErrors.message && <p id="contact-message-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.message}</p>}
+                    <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} <span className="text-[#1F1B16]/45 normal-case">({t.contact.optional})</span></label>
+                    <textarea id="contact-message" name="messaggio" rows={4} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
                     <div role="alert" className="flex items-start gap-3 p-4 rounded-2xl border border-red-300 bg-red-50 text-red-800">
@@ -767,6 +783,7 @@ export default function Home({ lang }: { lang: Lang }) {
                     {formStatus === "sending" ? t.contact.btnSending : t.contact.btnSend}
                     {formStatus !== "sending" && <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                   </button>
+                  <p className="text-center text-xs text-[#1F1B16]/65 tracking-wider">{t.contact.reassurance}</p>
                 </form>
               )}
             </motion.div>

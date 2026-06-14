@@ -11,7 +11,7 @@ import { contactAutoReply } from "@/lib/email";
 const FORMSPREE_FALLBACK = "https://formspree.io/f/xbdbwlvg";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type Fields = { nome: string; email: string; messaggio: string; azienda: string; lang: string; gotcha: string };
+type Fields = { nome: string; email: string; messaggio: string; azienda: string; servizi: string; lang: string; gotcha: string };
 
 // Pricing region of the visitor: explicit cookie choice first, else the Vercel geo country.
 function regionFromRequest(request: Request): Region {
@@ -35,7 +35,7 @@ async function readFields(request: Request): Promise<Fields> {
   if (ct.includes("application/json")) {
     const b = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const s = (k: string) => (typeof b[k] === "string" ? (b[k] as string) : "");
-    return { nome: s("nome"), email: s("email"), messaggio: s("messaggio"), azienda: s("azienda"), lang: s("lang"), gotcha: s("_gotcha") };
+    return { nome: s("nome"), email: s("email"), messaggio: s("messaggio"), azienda: s("azienda"), servizi: s("servizi"), lang: s("lang"), gotcha: s("_gotcha") };
   }
   const f = await request.formData();
   return {
@@ -43,6 +43,7 @@ async function readFields(request: Request): Promise<Fields> {
     email: get(f.get("email")),
     messaggio: get(f.get("messaggio")),
     azienda: get(f.get("azienda")),
+    servizi: get(f.get("servizi")),
     lang: get(f.get("lang")),
     gotcha: get(f.get("_gotcha")),
   };
@@ -62,15 +63,17 @@ export async function POST(request: Request) {
   const nome = fields.nome.trim().slice(0, 120);
   const email = fields.email.trim().slice(0, 254);
   const azienda = fields.azienda.trim().slice(0, 200);
+  const servizi = fields.servizi.trim().slice(0, 300);
   const messaggio = fields.messaggio.trim().slice(0, 5000);
   const locale: Locale = isLocale(fields.lang) ? fields.lang : "en";
   const region: Region = regionFromRequest(request);
-  if (!nome || !EMAIL_RE.test(email) || !messaggio) {
+  // Message is optional now (the form's service chips capture intent); name + valid email required.
+  if (!nome || !EMAIL_RE.test(email)) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
 
-  const subject = `New enquiry — ${nome}${azienda ? ` (${azienda})` : ""}`;
-  const text = `Name: ${nome}\nEmail: ${email}\nCompany: ${azienda || "—"}\nLanguage: ${locale}\n\n${messaggio}`;
+  const subject = `New enquiry — ${nome}${azienda ? ` (${azienda})` : ""}${servizi ? ` — ${servizi}` : ""}`;
+  const text = `Name: ${nome}\nEmail: ${email}\nCompany: ${azienda || "—"}\nServices: ${servizi || "—"}\nLanguage: ${locale}\n\n${messaggio || "(no message)"}`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey) {
@@ -102,6 +105,7 @@ export async function POST(request: Request) {
   fd.set("nome", nome);
   fd.set("email", email);
   fd.set("azienda", azienda);
+  fd.set("servizi", servizi);
   fd.set("messaggio", messaggio);
   fd.set("_subject", subject);
   const fs = await fetch(FORMSPREE_FALLBACK, { method: "POST", body: fd, headers: { Accept: "application/json" } });
