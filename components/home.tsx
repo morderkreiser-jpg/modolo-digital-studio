@@ -526,7 +526,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center mb-24">
             <motion.div initial={reduce ? false : { opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-gradient-to-b from-[#EFE7D9] to-[#F7F3EC] shadow-[0_10px_50px_rgba(31,27,22,0.08)]">
-                <Image src="/founder.webp" alt="Francesco Modolo — Founder of Modolo Digital Studio" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain object-bottom" />
+                <Image src="/founder.webp" alt="Francesco Modolo — Founder of Modolo Digital Studio" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain object-bottom scale-[0.88] origin-bottom" />
               </div>
             </motion.div>
             <motion.div initial={reduce ? false : { opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
