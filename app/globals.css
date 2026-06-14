@@ -180,3 +180,22 @@
   .mds-in-scale { opacity: 0; animation: mds-fade-scale 0.7s ease-out both; }
   .mds-in-fade { opacity: 0; animation: mds-fade 0.8s ease-out both; }
 }
+
+/* Portfolio "scroll-preview": a tall full-page screenshot that scrolls through the
+   site on hover (desktop) and auto-loops on touch devices. --scroll = end offset and
+   --dur = duration are set per card. Respects reduced-motion. */
+.mds-shot {
+  transition: transform var(--dur, 10s) linear;
+  will-change: transform;
+}
+.group:hover .mds-shot { transform: translateY(var(--scroll, -80%)); }
+@media (hover: none) and (prefers-reduced-motion: no-preference) {
+  .mds-shot { animation: mds-scroll var(--dur, 10s) ease-in-out infinite alternate; }
+}
+@keyframes mds-scroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(var(--scroll, -80%)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mds-shot { animation: none !important; transition: none !important; }
+}

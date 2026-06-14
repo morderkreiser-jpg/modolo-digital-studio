@@ -446,7 +446,8 @@ export default function Home({ lang }: { lang: Lang }) {
             className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
           >
             <div className="relative aspect-[16/9] overflow-hidden bg-[#EEE6D8]">
-              <Image src="/portfolio-zurikey.png" alt={t.zurikey.alt} fill sizes="(max-width: 1280px) 100vw, 1184px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/portfolio-zurikey-full.webp" alt={t.zurikey.alt} loading="lazy" decoding="async" className="mds-shot absolute inset-x-0 top-0 w-full h-auto" style={{ ["--scroll"]: "-91%", ["--dur"]: "16s" } as React.CSSProperties} />
             </div>
             <div className="p-6 md:p-10">
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
@@ -479,7 +480,8 @@ export default function Home({ lang }: { lang: Lang }) {
               className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
-                <Image src="/portfolio-saporivivi.webp" alt="SaporiVivi — Italian Luxury Bar Catering" fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/portfolio-saporivivi-full.webp" alt="SaporiVivi — Italian Luxury Bar Catering" loading="lazy" decoding="async" className="mds-shot absolute inset-x-0 top-0 w-full h-auto" style={{ ["--scroll"]: "-83%", ["--dur"]: "11s" } as React.CSSProperties} />
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -504,7 +506,8 @@ export default function Home({ lang }: { lang: Lang }) {
               className="group block rounded-2xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE6D8]">
-                <Image src="/portfolio-bjstudio.png" alt={t.bjstudio.alt} fill sizes="(max-width: 768px) 100vw, 580px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/portfolio-bjstudio-full.webp" alt={t.bjstudio.alt} loading="lazy" decoding="async" className="mds-shot absolute inset-x-0 top-0 w-full h-auto" style={{ ["--scroll"]: "-37%", ["--dur"]: "6s" } as React.CSSProperties} />
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
