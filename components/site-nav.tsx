@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type MouseEvent as ReactMouseEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -103,6 +103,18 @@ export default function SiteNav({
     };
   }, [open]);
 
+  // Logo click: on the home page the link points to the route we're already on, and
+  // Next.js <Link> keeps the scroll position when the Page is still in the viewport — so the
+  // tap feels dead (it never returns to the top, as reported on mobile). Intercept it and
+  // smooth-scroll to the top ourselves. On any other page, fall through and let the Link
+  // navigate home (Next scrolls to the top there, since the home Page isn't yet in view).
+  const handleLogoClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (stripLocale(pathname) !== "/") return;
+    e.preventDefault();
+    setOpen(false);
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  };
+
   // Switch language by navigating to the localized URL (lang is part of the route now).
   // The cookie lets proxy.ts keep the visitor in this locale on later visits.
   const switchLocale = (target: Locale) => {
@@ -138,7 +150,7 @@ export default function SiteNav({
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
-        <Link href={localizedHref(lang, "/")} aria-label={a.home} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <Link href={localizedHref(lang, "/")} aria-label={a.home} onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Image src="/logo-mark.png" alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
             <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
