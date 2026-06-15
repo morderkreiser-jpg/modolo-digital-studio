@@ -18,7 +18,7 @@ const translations = {
   en: {
     nav: { services: "Services", pricing: "Pricing", portfolio: "Portfolio", about: "About", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
     hero: {
-      badge: "Independent studio · Winterthur, CH",
+      badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
       subtitle: "An independent studio in Winterthur — websites, brands and content tailored to each business, for professionals and small companies across Switzerland. Built by hand, cared for as if they were our own.",
@@ -92,7 +92,7 @@ const translations = {
   de: {
     nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
     hero: {
-      badge: "Unabhängiges Studio · Winterthur",
+      badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
       subtitle: "Ein unabhängiges Studio in Winterthur — massgeschneiderte Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz. Von Hand gebaut, gepflegt, als wären es unsere eigenen.",
@@ -166,7 +166,7 @@ const translations = {
   it: {
     nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci", backToTop: "Torna su" },
     hero: {
-      badge: "Studio indipendente · Winterthur",
+      badge: "Studio digitale · Web · Brand · SEO",
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
       subtitle: "Uno studio indipendente a Winterthur — siti, brand e contenuti su misura per professionisti e piccole attività in tutta la Svizzera. Fatti a mano, curati come se fossero nostri.",
