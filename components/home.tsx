@@ -38,10 +38,10 @@ const translations = {
       { title: "Content & Visual", desc: "Professional photo shoots and social media management in collaboration with Project Visibility, content specialists.", tags: ["Photo Shooting", "Social Media", "Project Visibility"] },
       { title: "Email Marketing", desc: "Newsletters and email marketing that turn contacts into customers. Strategies that grow your business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves" },
-    saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], desc: "Complete website for a premium Italian bar catering service. Elegant design, refined user experience and SEO optimization.", cta: "Visit site" },
-    zurikey: { tags: ["Web App", "Product Design", "Development"], desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
-    bjstudio: { tags: ["Website", "WhatsApp Booking"], desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
+    portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves", indexLabel: "Selected work", closingLine: "A few projects at a time, each followed one by one.", closingCta: "Start your project" },
+    saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], meta: "Complete Website · Catering", desc: "Complete website for a premium Italian bar catering service. Elegant design, refined user experience and SEO optimization.", cta: "Visit site" },
+    zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp Booking"], meta: "Website · Zürich", desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
       label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
       p1: "Modolo Digital Studio is an independent studio — not an agency juggling a hundred clients. A few projects at a time, each followed one by one. Because every business deserves a site worthy of its value, not a recycled template.",
@@ -112,10 +112,10 @@ const translations = {
       { title: "Content & Visual", desc: "Professionelle Fotoshootings und Social-Media-Betreuung in Zusammenarbeit mit Project Visibility, Spezialisten für Content.", tags: ["Fotoshooting", "Social Media", "Project Visibility"] },
       { title: "E-Mail-Marketing", desc: "Newsletter und E-Mail-Marketing, die Kontakte in Kunden verwandeln. Strategien, die dein Geschäft wachsen lassen.", tags: ["Newsletter", "E-Mail-Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen" },
-    saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], desc: "Komplette Website für einen Premium-Service für italienisches Bar-Catering. Elegantes Design, durchdachte Nutzererfahrung und SEO-Optimierung.", cta: "Website besuchen" },
-    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
-    bjstudio: { tags: ["Website", "WhatsApp-Termine"], desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
+    portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen", indexLabel: "Ausgewählte Arbeiten", closingLine: "Wenige Projekte auf einmal, eines nach dem anderen begleitet.", closingCta: "Starten wir dein Projekt" },
+    saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], meta: "Komplette Website · Catering", desc: "Komplette Website für einen Premium-Service für italienisches Bar-Catering. Elegantes Design, durchdachte Nutzererfahrung und SEO-Optimierung.", cta: "Website besuchen" },
+    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp-Termine"], meta: "Website · Zürich", desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
       p1: "Modolo Digital Studio ist ein unabhängiges Studio – keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
@@ -186,10 +186,10 @@ const translations = {
       { title: "Contenuti & Visual", desc: "Shooting fotografici professionali e gestione social in collaborazione con Project Visibility, specialisti in contenuti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
       { title: "Email Marketing", desc: "Newsletter ed email marketing che trasformano i contatti in clienti. Strategie che fanno crescere il tuo business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli" },
-    saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], desc: "Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.", cta: "Visita il sito" },
-    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
-    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
+    portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli", indexLabel: "Lavori selezionati", closingLine: "Pochi progetti alla volta, seguiti uno per uno.", closingCta: "Iniziamo il tuo progetto" },
+    saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], meta: "Sito Web Completo · Catering", desc: "Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.", cta: "Visita il sito" },
+    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
+    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], meta: "Sito Web · Zurigo", desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
       label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
       p1: "Modolo Digital Studio è uno studio indipendente, non un'agenzia con mille clienti: pochi progetti alla volta, seguiti uno per uno. Perché ogni attività merita un sito all'altezza del suo valore — non un modello riciclato.",
@@ -428,107 +428,143 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* PORTFOLIO */}
       <section id="portfolio" className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07] relative">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
+          <motion.div initial={reduce ? false : { opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-10 text-center">
             <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.portfolioSection.label}</span>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">
               {t.portfolioSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.portfolioSection.headingAccent}</span>
             </h2>
           </motion.div>
 
-          <motion.a
-            href="https://zurikey.ch"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-          >
-            <div className="relative aspect-[16/9] overflow-hidden bg-[#1F1B16]">
-              <video src="/portfolio-zurikey.mp4" poster="/portfolio-zurikey-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="ZüriKey — rental-dossier web app for Zürich" className="absolute inset-0 w-full h-full object-cover" />
-            </div>
-            <div className="p-6 md:p-10">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                <div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
-                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
-                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">ZüriKey</h3>
-                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.zurikey.desc}</p>
-                </div>
-                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                  <span className="text-sm tracking-wider">{t.zurikey.cta}</span>
-                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.a>
+          {/* Index header — frames the three projects as a finite, curated set */}
+          <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex items-center justify-between border-t border-[#1F1B16]/[0.10] pt-4 mb-10 md:mb-14 text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">
+            <span>{t.portfolioSection.indexLabel}</span>
+            <span className="tabular-nums">01 — 03</span>
+          </motion.div>
 
-          <motion.a
-            href="https://saporivivi.ch"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500 mt-6"
-          >
-            <div className="relative aspect-[1280/674] overflow-hidden bg-[#1F1B16]">
-              <video src="/portfolio-saporivivi-v4.mp4" poster="/portfolio-saporivivi-v4-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className="absolute inset-0 w-full h-full object-cover" />
-            </div>
-            <div className="p-6 md:p-10">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                <div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.saporivivi.tags[0]}</span>
-                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[1]}</span>
-                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[2]}</span>
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">SaporiVivi</h3>
-                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.saporivivi.desc}</p>
+          <div className="space-y-6 md:space-y-8">
+            {/* 01 — ZüriKey */}
+            <motion.a
+              href="https://zurikey.ch"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={reduce ? false : { opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
+            >
+              <div className="relative aspect-[1280/674] overflow-hidden bg-[#1F1B16]">
+                <video src="/portfolio-zurikey.mp4" poster="/portfolio-zurikey-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="ZüriKey — rental-dossier web app for Zürich" className={`absolute inset-0 w-full h-full object-cover ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
+              </div>
+              <div className="p-6 md:p-10">
+                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
+                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">01</span>
+                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
+                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.zurikey.meta}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                  <span className="text-sm tracking-wider">{t.saporivivi.cta}</span>
-                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                  <div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
+                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
+                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">ZüriKey</h3>
+                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.zurikey.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
+                    <span className="text-sm tracking-wider">{t.zurikey.cta}</span>
+                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.a>
+            </motion.a>
 
-          <motion.a
-            href="https://bjstudiodebelleza.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500 mt-6"
-          >
-            <div className="relative aspect-[16/9] overflow-hidden bg-[#EEE6D8]">
-              <Image src="/portfolio-bjstudio-poster.webp" alt={t.bjstudio.alt} fill sizes="(max-width: 1024px) 100vw, 1100px" className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700" />
-            </div>
-            <div className="p-6 md:p-10">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                <div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.bjstudio.tags[0]}</span>
-                    <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.bjstudio.tags[1]}</span>
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">BJ Studio</h3>
-                  <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.bjstudio.desc}</p>
+            {/* 02 — SaporiVivi */}
+            <motion.a
+              href="https://saporivivi.ch"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={reduce ? false : { opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
+            >
+              {/* aspect MUST stay <= 1280/674 (1.898): a wider box crops SaporiVivi's left-edge logo via object-cover. Do not normalise to aspect-video. */}
+              <div className="relative aspect-[1280/674] overflow-hidden bg-[#1F1B16]">
+                <video src="/portfolio-saporivivi-v4.mp4" poster="/portfolio-saporivivi-v4-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className={`absolute inset-0 w-full h-full object-cover ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
+              </div>
+              <div className="p-6 md:p-10">
+                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
+                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">02</span>
+                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
+                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.saporivivi.meta}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                  <span className="text-sm tracking-wider">{t.bjstudio.cta}</span>
-                  <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                  <div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.saporivivi.tags[0]}</span>
+                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[1]}</span>
+                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[2]}</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">SaporiVivi</h3>
+                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.saporivivi.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
+                    <span className="text-sm tracking-wider">{t.saporivivi.cta}</span>
+                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.a>
+            </motion.a>
+
+            {/* 03 — BJ Studio */}
+            <motion.a
+              href="https://bjstudiodebelleza.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={reduce ? false : { opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
+            >
+              <div className="relative aspect-[1280/674] overflow-hidden bg-[#EEE6D8]">
+                <Image src="/portfolio-bjstudio-poster.webp" alt={t.bjstudio.alt} fill sizes="(max-width: 1024px) 100vw, 1100px" className={`object-cover object-top ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
+              </div>
+              <div className="p-6 md:p-10">
+                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
+                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">03</span>
+                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
+                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.bjstudio.meta}</span>
+                </div>
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                  <div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.bjstudio.tags[0]}</span>
+                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.bjstudio.tags[1]}</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">BJ Studio</h3>
+                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.bjstudio.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
+                    <span className="text-sm tracking-wider">{t.bjstudio.cta}</span>
+                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
+                  </div>
+                </div>
+              </div>
+            </motion.a>
+          </div>
+
+          {/* Closing bookend — a deliberate end that routes intent to contact */}
+          <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-16 md:mt-20 pt-10 border-t border-[#1F1B16]/[0.10] text-center">
+            <p className="text-[#1F1B16]/60 font-light max-w-xl mx-auto">{t.portfolioSection.closingLine}</p>
+            <a href="#contatti" className="group mt-4 inline-flex items-center gap-2 text-[var(--color-gold-ink)] text-sm tracking-wider hover:text-[#B5893F] transition-colors">
+              <span>{t.portfolioSection.closingCta}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </motion.div>
         </div>
       </section>
 
