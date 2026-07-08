@@ -9,6 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
   --font-serif: var(--font-lora);
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -55,6 +56,15 @@
   --color-dark: #1f1b16;
   --color-gold: #b5893f; /* large headings, icons, borders, decorative */
   --color-gold-ink: #7e5d24; /* small/body gold text — AA (≥4.5:1) on ivory and #EEE6D8 sections */
+
+  /* "The Measure" redesign palette — near-white Paper, Espresso ink rooms, gold strictly as line.
+     Ratio target ~ Paper 86% / Espresso 10% / Bone+metal ~4%. Gold is never a fill or button. */
+  --paper: #fbf8f2;      /* primary near-white field */
+  --bone: #eee6d8;       /* recessed / alternating warm panel */
+  --espresso: #17130e;   /* display ink + full-bleed Night surfaces */
+  --gilt: #c9a25a;       /* gold ON espresso (lighter leaf, stays warm on near-black) */
+  --line: rgba(31, 27, 22, 0.12);      /* hairline on light */
+  --line-strong: rgba(31, 27, 22, 0.2);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -179,4 +189,69 @@
   .mds-in { opacity: 0; animation: mds-fade-up 0.6s ease-out both; }
   .mds-in-scale { opacity: 0; animation: mds-fade-scale 0.7s ease-out both; }
   .mds-in-fade { opacity: 0; animation: mds-fade 0.8s ease-out both; }
+}
+
+/* ============================================================================
+   "THE MEASURE" redesign — design-system primitives
+   ========================================================================== */
+
+/* Display voice: variable Fraunces, optically sized, tight — never font-light. */
+.display-type {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.03em;
+  line-height: 0.94;
+  text-wrap: balance;
+  font-weight: 500;
+}
+.display-type em,
+.display-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Tracked micro-caps kicker — the single most reliable "expensive" cue.
+   Pair with a running index number, e.g. <span class="micro-caps">01 · Servizi</span> */
+.micro-caps {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  font-feature-settings: "tnum";
+}
+.tnum { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+/* Analog grain — fixed, subtle, warms the near-white paper. Below the nav (z-50). */
+.mds-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Discipline marquee — seamless auto-scroll (content is duplicated for the -50% loop). */
+@keyframes mds-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: mds-marquee 42s linear infinite;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Hero line-mask reveal — each display line rises out of an overflow-hidden wrapper.
+   CSS-driven so the LCP headline isn't gated behind JS hydration. */
+@keyframes mds-rise { from { transform: translateY(110%); } to { transform: translateY(0); } }
+.mds-line { display: block; overflow: hidden; padding-bottom: 0.1em; }
+.mds-line > * { display: block; }
+@media (prefers-reduced-motion: no-preference) {
+  .mds-line > * { transform: translateY(110%); animation: mds-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
 }

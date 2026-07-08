@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Code2, Palette, Camera, Mail, MapPin, Phone, Send, Sparkles, Clock, Award, Globe2, Store, Briefcase, ShoppingBag, Building2, Target, Heart, Zap, CheckCircle2, ExternalLink, ChevronDown, AlertCircle, MessageCircle } from "lucide-react";
+import { ArrowRight, Send, CheckCircle2, ExternalLink, AlertCircle, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
+import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -23,7 +24,13 @@ const translations = {
       titleAccent: "for brands that want to stand out.",
       subtitle: "An independent studio in Winterthur — websites, brands and content tailored to each business, for professionals and small companies across Switzerland. Built by hand, cared for as if they were our own.",
       ctaPrimary: "Book a free consultation",
-      ctaSecondary: "Discover our services",
+      ctaSecondary: "See the work",
+      meta: "Digital studio · Winterthur",
+      line1: "Websites, brands",
+      line2: "and stories,",
+      line3pre: "built ",
+      line3accent: "by hand",
+      line3post: ".",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -97,7 +104,13 @@ const translations = {
       titleAccent: "für Marken, die sich abheben wollen.",
       subtitle: "Ein unabhängiges Studio in Winterthur — massgeschneiderte Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz. Von Hand gebaut, gepflegt, als wären es unsere eigenen.",
       ctaPrimary: "Kostenlose Beratung buchen",
-      ctaSecondary: "Leistungen entdecken",
+      ctaSecondary: "Arbeiten ansehen",
+      meta: "Digital Studio · Winterthur",
+      line1: "Websites, Marken",
+      line2: "und Inhalte,",
+      line3pre: "",
+      line3accent: "von Hand",
+      line3post: " gebaut.",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -171,7 +184,13 @@ const translations = {
       titleAccent: "per brand che vogliono distinguersi.",
       subtitle: "Uno studio indipendente a Winterthur — siti, brand e contenuti su misura per professionisti e piccole attività in tutta la Svizzera. Fatti a mano, curati come se fossero nostri.",
       ctaPrimary: "Prenota una consulenza gratuita",
-      ctaSecondary: "Scopri i servizi",
+      ctaSecondary: "Guarda i lavori",
+      meta: "Studio digitale · Winterthur",
+      line1: "Siti, marchi",
+      line2: "e contenuti,",
+      line3pre: "costruiti ",
+      line3accent: "a mano",
+      line3post: ".",
     },
     stats: [
       { value: "100%", label: "Made in Switzerland" },
@@ -239,11 +258,8 @@ const translations = {
   },
 };
 
-const serviceIcons = [Code2, Palette, Camera, Mail];
-const statIcons = [Globe2, Clock, Sparkles, Award];
-const sectorIcons = [Store, Briefcase, ShoppingBag, Building2];
-const valueIcons = [Target, Heart, Zap];
 const TOOLS = ["Next.js", "React", "Tailwind CSS", "WordPress", "Framer", "Figma", "SEO", "Google Business"];
+const DISCIPLINES = ["Websites", "Branding", "Content", "Foto", "Video", "Reels", "Social", "SEO", "Ads"];
 
 export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -254,6 +270,16 @@ export default function Home({ lang }: { lang: Lang }) {
   const t = translations[lang];
   const region = useRegion();
   const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, t.contact.whatsappMsg);
+
+  // Portfolio as a curated monograph — real, borderless site captures.
+  const PROJECTS = [
+    { num: "01", name: "ZüriKey", href: "https://zurikey.ch", data: t.zurikey,
+      media: { kind: "video" as const, src: "/portfolio-zurikey.mp4", poster: "/portfolio-zurikey-poster.webp", aria: t.zurikey.alt } },
+    { num: "02", name: "SaporiVivi", href: "https://saporivivi.ch", data: t.saporivivi,
+      media: { kind: "video" as const, src: "/portfolio-saporivivi-v4.mp4", poster: "/portfolio-saporivivi-v4-poster.webp", aria: "SaporiVivi — Italian luxury bar catering website" } },
+    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.vercel.app", data: t.bjstudio,
+      media: { kind: "image" as const, src: "/portfolio-bjstudio-poster.webp", aria: t.bjstudio.alt } },
+  ];
 
   // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
   useEffect(() => {
@@ -301,7 +327,7 @@ export default function Home({ lang }: { lang: Lang }) {
   };
 
   return (
-    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] overflow-x-hidden outline-none">
       {/* NAVBAR */}
       <SiteNav
         lang={lang}
@@ -316,546 +342,533 @@ export default function Home({ lang }: { lang: Lang }) {
         ctaLabel={t.nav.contact}
       />
 
-      {/* HERO */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 lg:px-12 pt-32 pb-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#F7F3EC] via-[#FFFFFF] to-[#EFE7D9]" />
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #B5893F 1px, transparent 0)', backgroundSize: '60px 60px' }} />
-        <motion.div animate={reduce ? undefined : { opacity: [0.25, 0.4, 0.25] }} transition={reduce ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#B5893F]/[0.07] rounded-full blur-[120px]" />
-        <motion.div animate={reduce ? undefined : { opacity: [0.15, 0.3, 0.15] }} transition={reduce ? undefined : { duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[100px]" />
+      {/* Redesign signature + analog grain */}
+      <div className="mds-grain" aria-hidden />
+      <Measure />
 
-        <div className="relative z-10 text-center max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#B5893F]/30 bg-[#B5893F]/[0.08] mb-10 mds-in" style={{ animationDelay: "0.05s" }}>
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B5893F] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B5893F]"></span>
+      {/* HERO — type-led, left-aligned; the Measure runs down the left margin */}
+      <section className="relative flex min-h-svh flex-col justify-center px-6 sm:px-10 lg:px-16 pt-36 pb-20">
+        <div className="mx-auto w-full max-w-[1400px]">
+          <div className="mb-9 flex items-baseline justify-between mds-in" style={{ animationDelay: "0.05s" }}>
+            <span className="micro-caps text-[var(--color-gold-ink)]">{t.hero.meta}</span>
+            <span className="micro-caps tnum text-[#1F1B16]/40">01 / 09</span>
+          </div>
+
+          <h1 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(2.6rem, 8.6vw, 8rem)" }}>
+            <span className="mds-line"><span style={{ animationDelay: "0.12s" }}>{t.hero.line1}</span></span>
+            <span className="mds-line"><span style={{ animationDelay: "0.21s" }}>{t.hero.line2}</span></span>
+            <span className="mds-line">
+              <span style={{ animationDelay: "0.3s" }}>
+                {t.hero.line3pre}
+                <em className="text-[var(--color-gold)]" style={{ fontVariationSettings: '"opsz" 64, "SOFT" 45' }}>{t.hero.line3accent}</em>
+                {t.hero.line3post}
+              </span>
             </span>
-            <span className="text-xs tracking-[0.2em] text-[var(--color-gold-ink)] uppercase">{t.hero.badge}</span>
-          </div>
-
-          <div className="mb-12 flex justify-center mds-in-scale" style={{ animationDelay: "0.12s" }}>
-            <Image src="/logo-full.png" alt="Modolo Digital Studio" width={500} height={213} preload />
-          </div>
-
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-8 leading-[1.1] mds-in" style={{ animationDelay: "0.18s" }}>
-            {t.hero.titleLine1}<br />
-            <span className="text-[#B5893F] italic font-serif">{t.hero.titleAccent}</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-[#1F1B16]/65 max-w-2xl mx-auto mb-12 font-light leading-relaxed mds-in" style={{ animationDelay: "0.26s" }}>
-            {t.hero.subtitle}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mds-in" style={{ animationDelay: "0.34s" }}>
-            <a href="#contatti" className="group bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center gap-2 shadow-[0_8px_30px_rgba(31,27,22,0.12)] hover:shadow-[0_12px_40px_rgba(31,27,22,0.2)]">
-              {t.hero.ctaPrimary}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a href="#servizi" className="border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
-              {t.hero.ctaSecondary}
-            </a>
-          </div>
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 mds-in-fade" style={{ animationDelay: "0.6s" }}>
-          <motion.div animate={reduce ? undefined : { y: [0, 8, 0] }} transition={reduce ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#B5893F]/40 to-transparent" />
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="py-20 px-6 lg:px-12 border-y border-[#1F1B16]/[0.07] bg-[#EEE6D8]">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {t.stats.map((stat, i) => {
-              const Icon = statIcons[i];
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="text-center group">
-                  <Icon className="w-6 h-6 text-[#B5893F] mx-auto mb-4 group-hover:scale-110 transition-transform" strokeWidth={1.2} />
-                  <div className="text-2xl md:text-3xl font-light mb-2">{stat.value}</div>
-                  <div className="text-xs md:text-sm text-[#1F1B16]/70 tracking-wider">{stat.label}</div>
-                </motion.div>
-              );
-            })}
+          <div className="mt-9 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+            <p className="max-w-xl text-base font-light leading-relaxed text-[#1F1B16]/70 sm:text-lg mds-in" style={{ animationDelay: "0.5s" }}>
+              {t.hero.subtitle}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-7 gap-y-4 mds-in" style={{ animationDelay: "0.58s" }}>
+              <a href="#contatti" className="group inline-flex items-center gap-2 rounded-full bg-[#1F1B16] px-7 py-3.5 text-sm font-medium tracking-wide text-[var(--paper)] transition-colors duration-300 hover:bg-[#33291E]">
+                {t.hero.ctaPrimary}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </a>
+              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#1F1B16]/75 transition-colors hover:text-[#1F1B16]">
+                <span className="relative">
+                  {t.hero.ctaSecondary}
+                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)] transition-transform duration-300 group-hover:scale-x-100" />
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 rotate-90 transition-transform group-hover:translate-y-0.5" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SERVIZI */}
-      <section id="servizi" className="py-32 px-6 lg:px-12 relative">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.servicesSection.label}</span>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              {t.servicesSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.servicesSection.headingAccent}</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {t.services.map((service, i) => {
-              const Icon = serviceIcons[i];
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }} className="group relative p-8 lg:p-10 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)] transition-all duration-500 overflow-hidden">
-                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#B5893F]/0 group-hover:bg-[#B5893F]/[0.06] rounded-full blur-2xl transition-all duration-700" />
-                  <div className="relative">
-                    <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 mb-6 group-hover:bg-[#B5893F]/20 transition-colors">
-                      <Icon className="w-7 h-7 text-[#B5893F]" strokeWidth={1.3} />
-                    </div>
-                    <h3 className="text-2xl font-light mb-4">{service.title}</h3>
-                    <p className="text-[#1F1B16]/65 mb-6 leading-relaxed font-light">{service.desc}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {service.tags.map((tag) => (
-                        <span key={tag} className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full group-hover:border-[#B5893F]/30 transition-colors">{tag}</span>
-                      ))}
-                    </div>
-                    <Link href={localizedHref(lang, `/servizi/${SERVICE_SLUGS[i]}`)} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
-                      {t.servicesSection.learnMore}
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 text-center">
-            <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
-              {t.servicesSection.viewPricing}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+      {/* DISCIPLINE MARQUEE — oversized Fraunces ticker; proves the full range */}
+      <section aria-hidden className="marquee-mask select-none overflow-hidden border-y border-[color:var(--line)] py-5 md:py-7">
+        <div className="marquee-track">
+          {[0, 1].map((dup) => (
+            <div key={dup} className="flex shrink-0 items-center">
+              {DISCIPLINES.map((d, i) => (
+                <span key={`${dup}-${i}`} className="flex items-center">
+                  <span className="display-type px-6 text-[#1F1B16]/85 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
+                  <span className="inline-block h-1.5 w-1.5 shrink-0 rotate-45" style={{ background: "var(--color-gold)" }} />
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* PORTFOLIO */}
-      <section id="portfolio" className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07] relative">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={reduce ? false : { opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-10 text-center">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.portfolioSection.label}</span>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              {t.portfolioSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.portfolioSection.headingAccent}</span>
-            </h2>
-          </motion.div>
-
-          {/* Index header — frames the three projects as a finite, curated set */}
-          <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex items-center justify-between border-t border-[#1F1B16]/[0.10] pt-4 mb-10 md:mb-14 text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">
-            <span>{t.portfolioSection.indexLabel}</span>
-            <span className="tabular-nums">01 — 03</span>
-          </motion.div>
-
-          <div className="space-y-6 md:space-y-8">
-            {/* 01 — ZüriKey */}
-            <motion.a
-              href="https://zurikey.ch"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={reduce ? false : { opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-            >
-              <div className="relative aspect-[1280/674] overflow-hidden bg-[#1F1B16]">
-                <video src="/portfolio-zurikey.mp4" poster="/portfolio-zurikey-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="ZüriKey — rental-dossier web app for Zürich" className={`absolute inset-0 w-full h-full object-cover ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
-              </div>
-              <div className="p-6 md:p-10">
-                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
-                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">01</span>
-                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
-                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.zurikey.meta}</span>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                  <div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.zurikey.tags[0]}</span>
-                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[1]}</span>
-                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.zurikey.tags[2]}</span>
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">ZüriKey</h3>
-                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.zurikey.desc}</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                    <span className="text-sm tracking-wider">{t.zurikey.cta}</span>
-                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
-                  </div>
-                </div>
-              </div>
-            </motion.a>
-
-            {/* 02 — SaporiVivi */}
-            <motion.a
-              href="https://saporivivi.ch"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={reduce ? false : { opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-            >
-              {/* aspect MUST stay <= 1280/674 (1.898): a wider box crops SaporiVivi's left-edge logo via object-cover. Do not normalise to aspect-video. */}
-              <div className="relative aspect-[1280/674] overflow-hidden bg-[#1F1B16]">
-                <video src="/portfolio-saporivivi-v4.mp4" poster="/portfolio-saporivivi-v4-poster.webp" autoPlay muted loop playsInline preload="metadata" aria-label="SaporiVivi — Italian luxury bar catering website" className={`absolute inset-0 w-full h-full object-cover ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
-              </div>
-              <div className="p-6 md:p-10">
-                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
-                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">02</span>
-                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
-                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.saporivivi.meta}</span>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                  <div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.saporivivi.tags[0]}</span>
-                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[1]}</span>
-                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.saporivivi.tags[2]}</span>
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">SaporiVivi</h3>
-                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.saporivivi.desc}</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                    <span className="text-sm tracking-wider">{t.saporivivi.cta}</span>
-                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
-                  </div>
-                </div>
-              </div>
-            </motion.a>
-
-            {/* 03 — BJ Studio */}
-            <motion.a
-              href="https://bjstudiodebelleza.vercel.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={reduce ? false : { opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="group block rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-white shadow-[0_10px_50px_rgba(31,27,22,0.08)] hover:border-[#B5893F]/40 hover:shadow-[0_16px_60px_rgba(31,27,22,0.12)] transition-all duration-500"
-            >
-              <div className="relative aspect-[1280/674] overflow-hidden bg-[#EEE6D8]">
-                <Image src="/portfolio-bjstudio-poster.webp" alt={t.bjstudio.alt} fill sizes="(max-width: 1024px) 100vw, 1100px" className={`object-cover object-top ${reduce ? "" : "group-hover:scale-[1.03] transition-transform duration-700"}`} />
-              </div>
-              <div className="p-6 md:p-10">
-                <div className="flex items-center flex-wrap gap-3 md:gap-4 mb-5">
-                  <span aria-hidden="true" className="font-serif italic text-xl md:text-2xl leading-none text-[var(--color-gold-ink)] group-hover:text-[#B5893F] transition-colors duration-500">03</span>
-                  <span aria-hidden="true" className="hidden sm:block h-px w-8 md:w-10 bg-[#B5893F]/40 group-hover:w-16 transition-all duration-500" />
-                  <span className="md:ml-auto text-xs tracking-[0.25em] uppercase text-[var(--color-gold-ink)]">{t.bjstudio.meta}</span>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                  <div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="text-xs tracking-wider text-[var(--color-gold-ink)] border border-[#B5893F]/40 bg-[#B5893F]/10 px-3 py-1.5 rounded-full">{t.bjstudio.tags[0]}</span>
-                      <span className="text-xs tracking-wider text-[#1F1B16]/70 border border-[#1F1B16]/12 px-3 py-1.5 rounded-full">{t.bjstudio.tags[1]}</span>
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-light mb-2 text-[#1F1B16]">BJ Studio</h3>
-                    <p className="text-[#1F1B16]/65 font-light max-w-xl">{t.bjstudio.desc}</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-[var(--color-gold-ink)] whitespace-nowrap group-hover:gap-3 transition-all">
-                    <span className="text-sm tracking-wider">{t.bjstudio.cta}</span>
-                    <ExternalLink className="w-4 h-4" strokeWidth={1.5} />
-                  </div>
-                </div>
-              </div>
-            </motion.a>
-          </div>
-
-          {/* Closing bookend — a deliberate end that routes intent to contact */}
-          <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-16 md:mt-20 pt-10 border-t border-[#1F1B16]/[0.10] text-center">
-            <p className="text-[#1F1B16]/60 font-light max-w-xl mx-auto">{t.portfolioSection.closingLine}</p>
-            <a href="#contatti" className="group mt-4 inline-flex items-center gap-2 text-[var(--color-gold-ink)] text-sm tracking-wider hover:text-[#B5893F] transition-colors">
-              <span>{t.portfolioSection.closingCta}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CHI SIAMO */}
-      <section id="chi-siamo" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[100px]" />
-        <div className="max-w-7xl mx-auto relative">
-          {/* FOUNDER */}
-          <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center mb-24">
-            <motion.div initial={reduce ? false : { opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2">
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#1F1B16]/[0.08] bg-gradient-to-b from-[#EFE7D9] to-[#F7F3EC] shadow-[0_10px_50px_rgba(31,27,22,0.08)]">
-                <Image src="/founder-2.webp" alt="Francesco Modolo — Founder of Modolo Digital Studio" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain object-bottom scale-[0.92] origin-bottom" />
-              </div>
-            </motion.div>
-            <motion.div initial={reduce ? false : { opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
-              <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.founder.eyebrow}</span>
-              <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-1">{t.founder.name}</h2>
-              <p className="text-[var(--color-gold-ink)] font-serif italic mb-6">{t.founder.role}</p>
-              <p className="text-[#1F1B16]/65 font-light leading-relaxed mb-4 text-lg">{t.founder.bio1}</p>
-              <p className="text-[#1F1B16]/65 font-light leading-relaxed">{t.founder.bio2}</p>
-            </motion.div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
-              <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.about.label}</span>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight mb-8">
-                {t.about.heading1}<span className="italic font-serif text-[#B5893F]">{t.about.headingAccent}</span>
-              </h2>
-              <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6 text-lg">{t.about.p1}</p>
-              <p className="text-[#1F1B16]/65 leading-relaxed font-light mb-6">{t.about.p2}</p>
-              <p className="text-[#1F1B16]/65 leading-relaxed font-light">{t.about.p3}</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="space-y-6">
-              {t.values.map((value, i) => {
-                const Icon = valueIcons[i];
-                return (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} className="flex gap-5 p-6 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/30 transition-all duration-300">
-                    <div className="flex-shrink-0 inline-flex p-3 rounded-xl bg-[#B5893F]/10 h-fit">
-                      <Icon className="w-6 h-6 text-[#B5893F]" strokeWidth={1.3} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-light mb-2">{value.title}</h3>
-                      <p className="text-[#1F1B16]/65 font-light leading-relaxed text-sm">{value.desc}</p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* SETTORI */}
-      <section className="py-24 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07]">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center mb-16">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.sectorsSection.label}</span>
-            <h2 className="text-3xl md:text-4xl font-light tracking-tight">
-              {t.sectorsSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.sectorsSection.headingAccent}</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {t.sectors.map((name, i) => {
-              const Icon = sectorIcons[i];
-              return (
-                <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="group p-6 rounded-xl border border-[#1F1B16]/[0.08] bg-white hover:border-[#B5893F]/40 hover:shadow-[0_8px_30px_rgba(31,27,22,0.06)] transition-all duration-300 text-center">
-                  <Icon className="w-8 h-8 text-[#B5893F] mx-auto mb-4 group-hover:scale-110 transition-all" strokeWidth={1.2} />
-                  <p className="text-sm text-[#1F1B16]/65 font-light">{name}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* TOOLS */}
-      <section className="py-20 px-6 lg:px-12">
-        <div className="max-w-5xl mx-auto text-center">
-          <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-8 block">{t.toolsLabel}</span>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-            {TOOLS.map((tool) => (
-              <span key={tool} className="text-lg md:text-xl font-light text-[#1F1B16]/65 tracking-wide">{tool}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* METODO */}
-      <section id="metodo" className="py-32 px-6 lg:px-12 relative">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-20 text-center">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.method.label}</span>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              {t.method.heading1}<span className="italic font-serif text-[#B5893F]">{t.method.headingAccent}</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-12 relative">
-            <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-[1px] bg-gradient-to-r from-transparent via-[#B5893F]/30 to-transparent" />
-            {t.steps.map((step, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.15 }} className="relative text-center md:text-left">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#B5893F]/40 bg-[#F7F3EC] text-[#B5893F] font-serif italic text-2xl mb-6 relative z-10">{step.num}</div>
-                <h3 className="text-2xl font-light mb-4">{step.title}</h3>
-                <p className="text-[#1F1B16]/65 font-light leading-relaxed">{step.desc}</p>
+      {/* STATS — editorial data row on Bone; tabular figures, hairline dividers, no icon boxes */}
+      <section className="bg-[var(--bone)] px-6 sm:px-10 lg:px-16 py-14 md:py-20">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {t.stats.map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className={`py-4 md:px-8 ${i % 2 === 1 ? "border-l border-[color:var(--line)] pl-5" : ""} ${i >= 2 ? "mt-6 md:mt-0" : ""} ${i === 2 ? "md:border-l md:pl-8" : ""}`}
+              >
+                <div className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)" }}>{stat.value}</div>
+                <div className="micro-caps mt-2.5 text-[#1F1B16]/55">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* QUOTE */}
-      <section className="py-32 px-6 lg:px-12 bg-[#EEE6D8] border-y border-[#1F1B16]/[0.07]">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto text-center">
-          <Sparkles className="w-8 h-8 text-[#B5893F] mx-auto mb-8" strokeWidth={1.2} />
-          <p className="text-2xl md:text-4xl font-light leading-relaxed italic font-serif">
-            &ldquo;{t.quote.line1}<br />
-            <span className="text-[#B5893F]">{t.quote.line2}</span>&rdquo;
-          </p>
-        </motion.div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#B5893F]/[0.04] rounded-full blur-[120px]" />
-        <div className="max-w-3xl mx-auto relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="mb-16 text-center">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4 block">{t.faqSection.label}</span>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-              {t.faqSection.heading1}<span className="italic font-serif text-[#B5893F]">{t.faqSection.headingAccent}</span>
-            </h2>
+      {/* SERVIZI — numbered index table (Klim/Order register), not cards */}
+      <section id="servizi" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+        <div className="mx-auto max-w-[1400px]">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-12%" }}
+            transition={{ duration: 0.7 }}
+            className="mb-12 flex flex-col gap-6 md:mb-16 md:flex-row md:items-end md:justify-between"
+          >
+            <div>
+              <span className="micro-caps text-[var(--color-gold-ink)]">01 · {t.servicesSection.label}</span>
+              <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+                {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
+              </h2>
+            </div>
+            <span className="micro-caps tnum text-[#1F1B16]/40">01 — 04</span>
           </motion.div>
 
-          <div className="space-y-4">
+          <div className="border-b border-[color:var(--line)]">
+            {t.services.map((service, i) => (
+              <motion.div
+                key={i}
+                initial={reduce ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-8%" }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+              >
+                <Link
+                  href={localizedHref(lang, `/servizi/${SERVICE_SLUGS[i]}`)}
+                  className="group flex flex-col gap-3 border-t border-[color:var(--line)] py-6 transition-colors hover:bg-[var(--bone)]/40 md:flex-row md:items-baseline md:gap-8 md:px-2 md:py-8"
+                >
+                  <span className="micro-caps tnum text-[var(--color-gold-ink)] md:w-10">0{i + 1}</span>
+                  <h3 className="display-type text-[#1F1B16] transition-colors duration-300 group-hover:text-[var(--color-gold-ink)] md:flex-1" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{service.title}</h3>
+                  <div className="micro-caps flex flex-wrap gap-x-3 gap-y-1 text-[#1F1B16]/45 md:max-w-[18rem] md:justify-end md:text-right">
+                    {service.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                  <ArrowRight className="hidden h-5 w-5 shrink-0 text-[var(--color-gold-ink)] transition-transform duration-300 group-hover:translate-x-1 md:block" strokeWidth={1.4} />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10">
+            <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+              <span className="relative">
+                {t.servicesSection.viewPricing}
+                <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)] transition-transform duration-300 group-hover:scale-x-100" />
+              </span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* PORTFOLIO — monograph; the Measure motif becomes the row rules */}
+      <section id="portfolio" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-36">
+        <div className="mx-auto max-w-[1400px]">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-12%" }}
+            transition={{ duration: 0.7 }}
+            className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between"
+          >
+            <div>
+              <span className="micro-caps text-[var(--color-gold-ink)]">02 · {t.portfolioSection.label}</span>
+              <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+                {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
+              </h2>
+            </div>
+            <span className="micro-caps tnum text-[#1F1B16]/40">{t.portfolioSection.indexLabel} — 01/03</span>
+          </motion.div>
+
+          <div className="space-y-16 md:space-y-24">
+            {PROJECTS.map((p) => (
+              <motion.a
+                key={p.num}
+                href={p.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={reduce ? false : { opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="group block border-t border-[var(--color-gold)]/25 pt-6 md:pt-8"
+              >
+                <div className="mb-6 flex items-baseline justify-between gap-4 md:mb-8">
+                  <div className="flex items-baseline gap-4 md:gap-7">
+                    <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.75rem)" }}>{p.num}</span>
+                    <h3 className="display-type leading-none text-[#1F1B16] transition-colors duration-500 group-hover:text-[var(--color-gold-ink)]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
+                  </div>
+                  <span className="micro-caps hidden text-[var(--color-gold-ink)] sm:block">{p.data.meta}</span>
+                </div>
+
+                <div className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
+                  {p.media.kind === "video" ? (
+                    <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
+                  ) : (
+                    <Image src={p.media.src} alt={p.media.aria} fill sizes="(max-width: 1024px) 100vw, 1300px" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
+                  )}
+                  <span className="pointer-events-none absolute bottom-4 right-4 flex translate-y-2 items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide text-[#1F1B16] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" style={{ background: "rgba(251,248,242,0.94)" }}>
+                    {p.data.cta} <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.6} />
+                  </span>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <p className="max-w-xl font-light leading-relaxed text-[#1F1B16]/65">{p.data.desc}</p>
+                  <div className="micro-caps flex flex-wrap gap-x-4 gap-y-1 text-[#1F1B16]/45">
+                    {p.data.tags.map((tag, ti) => (
+                      <span key={ti} className={ti === 0 ? "text-[var(--color-gold-ink)]" : ""}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </motion.a>
+            ))}
+          </div>
+
+          {/* Closing bookend — routes intent to contact */}
+          <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-20 border-t border-[color:var(--line)] pt-10">
+            <p className="max-w-xl font-light text-[#1F1B16]/60">{t.portfolioSection.closingLine}</p>
+            <a href="#contatti" className="group mt-4 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+              <span>{t.portfolioSection.closingCta}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CHI SIAMO — the ESPRESSO Night room: the one dark surface, the emotional peak */}
+      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+        <div className="mx-auto max-w-[1400px]">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-12%" }}
+            transition={{ duration: 0.7 }}
+            className="mb-14 max-w-3xl md:mb-20"
+          >
+            <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
+            <h2 className="display-type mt-5" style={{ fontSize: "clamp(2rem, 5.2vw, 4.5rem)", color: "var(--paper)" }}>
+              {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
+            </h2>
+            <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(251,248,242,0.68)" }}>{t.about.p1}</p>
+          </motion.div>
+
+          <div className="grid gap-10 md:grid-cols-12 md:gap-16">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8 }}
+              className="md:col-span-4"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[4px]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
+                <Image src="/founder-2.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain object-bottom" />
+              </div>
+              <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
+                <span className="display-type text-lg" style={{ color: "var(--paper)" }}>{t.founder.name}</span>
+                <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.founder.eyebrow}</span>
+              </div>
+              <div className="micro-caps mt-2" style={{ color: "rgba(251,248,242,0.48)" }}>{t.founder.role}</div>
+            </motion.div>
+
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="md:col-span-8"
+            >
+              <div className="grid gap-6 text-base font-light leading-relaxed md:grid-cols-2" style={{ color: "rgba(251,248,242,0.66)" }}>
+                <p>{t.founder.bio1}</p>
+                <p>{t.founder.bio2}</p>
+              </div>
+
+              <div className="mt-12 border-t" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
+                {t.values.map((value, i) => (
+                  <div key={i} className="flex gap-6 border-b py-5" style={{ borderColor: "rgba(201,162,90,0.14)" }}>
+                    <span aria-hidden="true" className="display-italic leading-none" style={{ color: "var(--gilt)", fontSize: "1.5rem" }}>0{i + 1}</span>
+                    <div>
+                      <h3 className="display-type text-lg" style={{ color: "var(--paper)" }}>{value.title}</h3>
+                      <p className="mt-1 text-sm font-light" style={{ color: "rgba(251,248,242,0.5)" }}>{value.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="display-type mt-12" style={{ fontSize: "clamp(1.35rem, 2.4vw, 2rem)", lineHeight: 1.3, color: "var(--paper)" }}>{t.about.p3}</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SETTORI — ticked index of sectors, no icon-cards */}
+      <section className="bg-[var(--bone)] px-6 sm:px-10 lg:px-16 py-20 md:py-28">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="mb-10 md:mb-12">
+            <span className="micro-caps text-[var(--color-gold-ink)]">04 · {t.sectorsSection.label}</span>
+            <h2 className="display-type mt-3 text-[#1F1B16]" style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}>
+              {t.sectorsSection.heading1}<em className="text-[var(--color-gold)]">{t.sectorsSection.headingAccent}</em>
+            </h2>
+          </div>
+          <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
+            {t.sectors.map((name, i) => (
+              <motion.div
+                key={i}
+                initial={reduce ? false : { opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-8%" }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="flex items-baseline gap-4 border-t border-[color:var(--line-strong)] py-5"
+              >
+                <span className="micro-caps tnum text-[var(--color-gold-ink)]">0{i + 1}</span>
+                <span className="text-lg font-light text-[#1F1B16]/80">{name}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TOOLS — editorial inline list in the display face */}
+      <section className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-16 md:py-20">
+        <div className="mx-auto max-w-[1400px]">
+          <span className="micro-caps text-[var(--color-gold-ink)]">{t.toolsLabel}</span>
+          <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2">
+            {TOOLS.map((tool) => (
+              <span key={tool} className="display-type text-[#1F1B16]/70" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{tool}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* METODO — three phases as ticked stations measured by the ruler */}
+      <section id="metodo" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="mb-12 md:mb-16">
+            <span className="micro-caps text-[var(--color-gold-ink)]">05 · {t.method.label}</span>
+            <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+              {t.method.heading1}<em className="text-[var(--color-gold)]">{t.method.headingAccent}</em>
+            </h2>
+          </div>
+          <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
+            {t.steps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={reduce ? false : { opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-8%" }}
+                transition={{ duration: 0.6, delay: i * 0.12 }}
+                className="border-t border-[var(--color-gold)]/30 pt-6"
+              >
+                <div className="flex items-baseline gap-4">
+                  <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)" }}>{step.num}</span>
+                  <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}>{step.title}</h3>
+                </div>
+                <p className="mt-4 font-light leading-relaxed text-[#1F1B16]/65">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* QUOTE — large Fraunces pull-quote, pure type */}
+      <section className="bg-[var(--bone)] px-6 sm:px-10 lg:px-16 py-28 md:py-40">
+        <motion.blockquote
+          initial={reduce ? false : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-15%" }}
+          transition={{ duration: 0.8 }}
+          className="mx-auto max-w-[1100px]"
+        >
+          <span className="mb-8 block h-px w-16 bg-[var(--color-gold)]" aria-hidden="true" />
+          <p className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.75rem, 4.4vw, 3.5rem)", lineHeight: 1.16 }}>
+            {t.quote.line1} <em className="text-[var(--color-gold)]">{t.quote.line2}</em>
+          </p>
+        </motion.blockquote>
+      </section>
+
+      {/* FAQ — hairline-divided index accordion */}
+      <section id="faq" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+        <div className="mx-auto max-w-[920px]">
+          <header className="mb-12 md:mb-16">
+            <span className="micro-caps text-[var(--color-gold-ink)]">06 · {t.faqSection.label}</span>
+            <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+              {t.faqSection.heading1}<em className="text-[var(--color-gold)]">{t.faqSection.headingAccent}</em>
+            </h2>
+          </header>
+
+          <div className="border-b border-[color:var(--line)]">
             {FAQS[lang].map((faq, i) => {
               const isOpen = openFaq === i;
               return (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)] overflow-hidden">
+                <div key={i} className="border-t border-[color:var(--line)]">
                   <h3>
-                    <button type="button" id={`faq-q-${i}`} aria-expanded={isOpen} aria-controls={`faq-a-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)} className="w-full flex items-center justify-between gap-4 p-6 text-left hover:bg-[#B5893F]/[0.03] transition-colors">
-                      <span className="text-lg font-light">{faq.q}</span>
-                      <ChevronDown className={`w-5 h-5 text-[#B5893F] flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} strokeWidth={1.5} aria-hidden="true" />
+                    <button type="button" id={`faq-q-${i}`} aria-expanded={isOpen} aria-controls={`faq-a-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)} className="group flex w-full items-center justify-between gap-6 py-6 text-left">
+                      <span className="text-lg font-light text-[#1F1B16] transition-colors group-hover:text-[var(--color-gold-ink)] md:text-xl">{faq.q}</span>
+                      <span aria-hidden="true" className="relative block h-3.5 w-3.5 shrink-0">
+                        <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2" style={{ background: "var(--color-gold-ink)" }} />
+                        <span className={`absolute left-1/2 top-0 h-full w-px -translate-x-1/2 transition-transform duration-300 ${isOpen ? "scale-y-0" : "scale-y-100"}`} style={{ background: "var(--color-gold-ink)" }} />
+                      </span>
                     </button>
                   </h3>
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: "easeInOut" }}>
-                        <p className="px-6 pb-6 text-[#1F1B16]/65 font-light leading-relaxed">{faq.a}</p>
+                        <p className="max-w-2xl pb-7 pr-8 font-light leading-relaxed text-[#1F1B16]/65">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* CONTATTI + FORM */}
-      <section id="contatti" className="py-32 px-6 lg:px-12 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#B5893F]/[0.05] rounded-full blur-[120px]" />
-
-        <div className="relative max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center mb-16">
-            <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-6 block">{t.contact.label}</span>
-            <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6">
-              {t.contact.heading1}<span className="italic font-serif text-[#B5893F]">{t.contact.headingAccent}</span>{t.contact.headingEnd}
+      {/* CONTATTI — restyled to the system; the working form/Resend pipeline is preserved */}
+      <section id="contatti" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+        <div className="mx-auto max-w-[1400px]">
+          <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.7 }} className="mb-14 max-w-3xl md:mb-20">
+            <span className="micro-caps text-[var(--color-gold-ink)]">07 · {t.contact.label}</span>
+            <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+              {t.contact.heading1}<em className="text-[var(--color-gold)]">{t.contact.headingAccent}</em>{t.contact.headingEnd}
             </h2>
-            <p className="text-lg md:text-xl text-[#1F1B16]/65 font-light max-w-2xl mx-auto">{t.contact.subtitle}</p>
+            <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#1F1B16]/70">{t.contact.subtitle}</p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-5 gap-12">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-2 space-y-8">
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-6 py-3.5 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 shadow-[0_8px_30px_rgba(31,27,22,0.12)]">
-                <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
-                {t.contact.whatsapp}
+          <div className="grid gap-12 md:grid-cols-12 md:gap-16">
+            <div className="md:col-span-5">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 text-[#1F1B16]">
+                <MessageCircle className="h-5 w-5 text-[var(--color-gold-ink)]" strokeWidth={1.5} />
+                <span className="relative text-base tracking-wide">
+                  {t.contact.whatsapp}
+                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left bg-[var(--color-gold)]/50 transition-transform duration-300 group-hover:scale-x-0" />
+                </span>
               </a>
-              <a href={`mailto:${SITE.email}`} className="flex items-start gap-4 group">
-                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
-                  <Mail className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.emailLabel}</div>
-                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">{SITE.email}</div>
-                </div>
-              </a>
-              <a href={`tel:${SITE.phone}`} className="flex items-start gap-4 group">
-                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
-                  <Phone className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-1">{t.contact.phoneLabel}</div>
-                  <div className="text-[#1F1B16]/75 group-hover:text-[#B5893F] transition-colors">{SITE.phoneDisplay}</div>
-                </div>
-              </a>
-              <div className="flex items-start gap-4">
-                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10">
-                  <MapPin className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <div className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2">{t.contact.officesLabel}</div>
-                  <div className="text-[#1F1B16]/75 leading-relaxed text-sm">
-                    <span className="text-[var(--color-gold-ink)]">{t.contact.countryCh}</span> — {SITE.address.street}, {SITE.address.postalCode} {SITE.address.locality}
-                  </div>
-                  <div className="text-[#1F1B16]/75 leading-relaxed text-sm mt-1">
-                    <span className="text-[var(--color-gold-ink)]">{t.contact.countryIt}</span> — {SITE.addressIt.street}, {SITE.addressIt.postalCode} {SITE.addressIt.locality}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
 
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="lg:col-span-3">
+              <dl className="mt-10 space-y-7 border-t border-[color:var(--line)] pt-8">
+                <div>
+                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.emailLabel}</dt>
+                  <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-[#1F1B16]/85 transition-colors hover:text-[var(--color-gold-ink)]">{SITE.email}</a></dd>
+                </div>
+                <div>
+                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.phoneLabel}</dt>
+                  <dd className="mt-1"><a href={`tel:${SITE.phone}`} className="tnum text-[#1F1B16]/85 transition-colors hover:text-[var(--color-gold-ink)]">{SITE.phoneDisplay}</a></dd>
+                </div>
+                <div>
+                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.officesLabel}</dt>
+                  <dd className="mt-2 space-y-1 text-sm leading-relaxed text-[#1F1B16]/70">
+                    <div><span className="text-[var(--color-gold-ink)]">{t.contact.countryCh}</span> — {SITE.address.street}, {SITE.address.postalCode} {SITE.address.locality}</div>
+                    <div><span className="text-[var(--color-gold-ink)]">{t.contact.countryIt}</span> — {SITE.addressIt.street}, {SITE.addressIt.postalCode} {SITE.addressIt.locality}</div>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="md:col-span-7">
               {formStatus === "success" ? (
-                <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="h-full flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-[#B5893F]/30 bg-[#B5893F]/[0.07] outline-none">
-                  <CheckCircle2 className="w-16 h-16 text-[#B5893F] mb-6" strokeWidth={1.2} />
-                  <h3 className="text-2xl font-light mb-3">{t.contact.successTitle}</h3>
-                  <p className="text-[#1F1B16]/65 font-light">{t.contact.successDesc}</p>
+                <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="flex h-full flex-col items-center justify-center rounded-[4px] border border-[var(--color-gold)]/30 bg-[var(--bone)]/50 p-12 text-center outline-none">
+                  <CheckCircle2 className="mb-6 h-14 w-14 text-[var(--color-gold-ink)]" strokeWidth={1.2} />
+                  <h3 className="display-type text-2xl text-[#1F1B16]">{t.contact.successTitle}</h3>
+                  <p className="mt-3 font-light text-[#1F1B16]/65">{t.contact.successDesc}</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate className="space-y-5 p-8 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_8px_40px_rgba(31,27,22,0.06)]">
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
                   {/* anti-spam honeypot (hidden from users; the server rejects submissions that fill it — see /api/contact) */}
                   <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
                   <div>
-                    <span className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-3 block">{t.contact.needsLabel}</span>
+                    <span className="micro-caps mb-3 block text-[#1F1B16]/45">{t.contact.needsLabel}</span>
                     <div className="flex flex-wrap gap-2">
                       {t.contact.needs.map((n) => {
                         const active = needs.includes(n);
                         return (
-                          <button key={n} type="button" aria-pressed={active} onClick={() => toggleNeed(n)} className={`text-sm tracking-wide px-4 py-2 rounded-full border transition-all ${active ? "bg-[#1F1B16] text-[#F7F3EC] border-[#1F1B16]" : "bg-[#F7F3EC] text-[#1F1B16]/75 border-[#1F1B16]/15 hover:border-[#B5893F]/60 hover:text-[#1F1B16]"}`}>{n}</button>
+                          <button key={n} type="button" aria-pressed={active} onClick={() => toggleNeed(n)} className={`rounded-full border px-4 py-2 text-sm tracking-wide transition-all ${active ? "border-[#1F1B16] bg-[#1F1B16] text-[var(--paper)]" : "border-[#1F1B16]/15 text-[#1F1B16]/75 hover:border-[var(--color-gold)]/60 hover:text-[#1F1B16]"}`}>{n}</button>
                         );
                       })}
                     </div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-5">
+                  <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="contact-name" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phName} />
+                      <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formName} *</label>
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
-                      <label htmlFor="contact-email" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phEmail} />
+                      <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formEmail} *</label>
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="contact-company" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formCompany}</label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors" placeholder={t.contact.phCompany} />
+                    <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formCompany}</label>
+                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
-                    <label htmlFor="contact-message" className="text-xs text-[#1F1B16]/70 tracking-wider uppercase mb-2 block">{t.contact.formMessage} <span className="text-[#1F1B16]/45 normal-case">({t.contact.optional})</span></label>
-                    <textarea id="contact-message" name="messaggio" rows={4} className="w-full bg-[#F7F3EC] border border-[#1F1B16]/12 rounded-xl px-4 py-3 text-[#1F1B16] placeholder-[#1F1B16]/70 focus:border-[#B5893F]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F6B2F] transition-colors resize-none" placeholder={t.contact.phMessage} />
+                    <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#1F1B16]/35">({t.contact.optional})</span></label>
+                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
-                    <div role="alert" className="flex items-start gap-3 p-4 rounded-2xl border border-red-300 bg-red-50 text-red-800">
-                      <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" strokeWidth={1.5} aria-hidden="true" />
+                    <div role="alert" className="flex items-start gap-3 rounded-[4px] border border-red-300 bg-red-50 p-4 text-red-800">
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
                       <p className="text-sm font-light">{t.contact.error}</p>
                     </div>
                   )}
-                  <button type="submit" disabled={formStatus === "sending"} className="group w-full bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-xl font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                    {formStatus === "sending" ? t.contact.btnSending : t.contact.btnSend}
-                    {formStatus !== "sending" && <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
-                  </button>
-                  <p className="text-center text-xs text-[#1F1B16]/65 tracking-wider">{t.contact.reassurance}</p>
+                  <div className="flex flex-wrap items-center gap-6 pt-2">
+                    <button type="submit" disabled={formStatus === "sending"} className="group inline-flex items-center gap-2 rounded-full bg-[#1F1B16] px-8 py-4 text-sm font-medium tracking-wide text-[var(--paper)] transition-colors duration-300 hover:bg-[#33291E] disabled:cursor-not-allowed disabled:opacity-60">
+                      {formStatus === "sending" ? t.contact.btnSending : t.contact.btnSend}
+                      {formStatus !== "sending" && <Send className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+                    </button>
+                    <p className="micro-caps text-[#1F1B16]/45">{t.contact.reassurance}</p>
+                  </div>
                 </form>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-[#1F1B16]/[0.08] py-12 px-6 lg:px-12 bg-[#ECE3D3]">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <Image src="/logo-mark.png" alt="Modolo Digital Studio" width={28} height={28} />
-            <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {new Date().getFullYear()} Modolo Digital Studio</span>
+      {/* FOOTER — the Espresso bookend; the Measure terminates in a final tick */}
+      <footer className="px-6 sm:px-10 lg:px-16 py-14 md:py-16" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-center gap-3 border-t pt-8" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
+            <span aria-hidden="true" className="h-px w-8" style={{ background: "var(--gilt)" }} />
+            <span className="micro-caps" style={{ color: "var(--gilt)" }}>Fin — 08</span>
           </div>
-          <div className="flex items-center gap-5 sm:gap-6">
-            <Link href={localizedHref(lang, "/impressum")} className="text-xs text-[#1F1B16]/70 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-xs text-[#1F1B16]/70 hover:text-[#B5893F] tracking-wider transition-colors">{t.footer.privacy}</Link>
-            <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors" aria-label="Instagram">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-              </svg>
-            </a>
-            <span className="text-xs text-[#1F1B16]/65 tracking-[0.2em] uppercase">{t.footer.madeWith}</span>
+          <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="flex items-center gap-3">
+              <Image src="/logo-mark.png" alt="Modolo Digital Studio" width={30} height={30} />
+              <span className="micro-caps tnum" style={{ color: "rgba(251,248,242,0.55)" }}>© {new Date().getFullYear()} Modolo Digital Studio</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors" style={{ color: "rgba(251,248,242,0.6)" }}>{t.footer.imprint}</Link>
+              <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors" style={{ color: "rgba(251,248,242,0.6)" }}>{t.footer.privacy}</Link>
+              <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(251,248,242,0.6)" }}>
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+              </a>
+              <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.footer.madeWith}</span>
+            </div>
           </div>
         </div>
       </footer>

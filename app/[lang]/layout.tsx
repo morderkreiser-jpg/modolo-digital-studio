@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Lora } from "next/font/google";
+import { Poppins, Lora, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
@@ -24,11 +24,21 @@ const poppins = Poppins({
   display: "swap",
 });
 
-// Lora: SOLO in corsivo, come accento elegante (tagline, citazioni, frasi speciali)
+// Lora: legacy display accent (still used by inner pages). Homepage display voice is Fraunces.
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
   style: ["italic"],
+  display: "swap",
+});
+
+// Fraunces: variable editorial serif — the display voice ("The Measure" redesign).
+// Kept for ALL headings + the italic craft accent; kinetic via opsz/wght axes.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -98,7 +108,7 @@ export default async function LangLayout({
   return (
     <html
       lang={lang}
-      className={`${poppins.variable} ${lora.variable} h-full antialiased scroll-smooth`}
+      className={`${poppins.variable} ${lora.variable} ${fraunces.variable} h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col">
         <a
