@@ -8,6 +8,13 @@ import { ArrowRight, Send, CheckCircle2, ExternalLink, AlertCircle, MessageCircl
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import Measure from "@/components/measure";
+import Magnetic from "@/components/magnetic";
+import Reveal from "@/components/reveal";
+import Marquee from "@/components/marquee";
+import dynamic from "next/dynamic";
+
+// The gold-ink WebGL signature — code-split + client-only so it never touches SSR/LCP.
+const GoldInk = dynamic(() => import("@/components/gold-ink"), { ssr: false });
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -58,7 +65,7 @@ const translations = {
     founder: {
       eyebrow: "The founder",
       name: "Francesco Modolo",
-      role: "Founder · Web Designer & Developer",
+      role: "Web Designer & Developer",
       bio1: "Technology has been my passion since childhood — I started out building PCs from scratch, sourcing every single component myself. That curiosity grew into a craft: for over four years I have been designing and building websites for businesses across Switzerland.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
@@ -84,7 +91,7 @@ const translations = {
       whatsapp: "Message us on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
-      phName: "Your name", phEmail: "your@email.com", phCompany: "Company name (optional)", phMessage: "Two lines about your project (optional)…",
+      phName: "Your name", phEmail: "your@email.com", phCompany: "Company name", phMessage: "Two lines about your project…",
       needsLabel: "What do you need?", needs: ["Website", "Brand & logo", "Content & social", "Email marketing", "Other"], optional: "optional", reassurance: "Reply within 24h · No obligation",
       btnSend: "Request a free consultation", btnSending: "Sending...",
       successTitle: "Message sent!", successDesc: "Thanks for reaching out. We'll get back to you within 24 hours.",
@@ -131,16 +138,16 @@ const translations = {
     bjstudio: { tags: ["Website", "WhatsApp-Termine"], meta: "Website · Zürich", desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
-      p1: "Modolo Digital Studio ist ein unabhängiges Studio – keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
+      p1: "Modolo Digital Studio ist ein unabhängiges Studio — keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
       p2: "Wir verbinden raffiniertes Design, technische Entwicklung und Strategie, um Websites und Erlebnisse zu schaffen, die nicht nur schön aussehen, sondern wirklich funktionieren. Wir arbeiten mit Fachleuten und Unternehmen in der ganzen Schweiz und kooperieren mit Spezialisten wie Project Visibility, um jeden Bedarf abzudecken, von der Content-Erstellung bis zur Social-Media-Betreuung.",
       p3: "Keine aufgeblasenen Versprechen: sauberer Code, echte Liebe zum Detail und ein direkter Draht. Bei uns sprichst du immer mit der Person, die deine Website tatsächlich baut.",
     },
     founder: {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
-      role: "Gründer · Webdesigner & Entwickler",
-      bio1: "Technologie ist seit meiner Kindheit meine Leidenschaft – angefangen habe ich damit, PCs von Grund auf selbst zu bauen und jedes einzelne Bauteil zu bestellen. Aus dieser Neugier wurde ein Handwerk: Seit über vier Jahren gestalte und entwickle ich Websites für Unternehmen in der ganzen Schweiz.",
-      bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit – von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
+      role: "Webdesigner & Entwickler",
+      bio1: "Technologie ist seit meiner Kindheit meine Leidenschaft — angefangen habe ich damit, PCs von Grund auf selbst zu bauen und jedes einzelne Bauteil zu bestellen. Aus dieser Neugier wurde ein Handwerk: Seit über vier Jahren gestalte und entwickle ich Websites für Unternehmen in der ganzen Schweiz.",
+      bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
     values: [
       { title: "Strategie zuerst", desc: "Wir machen nicht nur schöne Websites. Wir bauen Werkzeuge, die deinem Unternehmen konkrete Ergebnisse bringen." },
@@ -164,7 +171,7 @@ const translations = {
       whatsapp: "Schreib uns auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
-      phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname (optional)", phMessage: "Zwei Zeilen zu deinem Projekt (optional)…",
+      phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname", phMessage: "Zwei Zeilen zu deinem Projekt…",
       needsLabel: "Was brauchst du?", needs: ["Website", "Marke & Logo", "Content & Social", "E-Mail-Marketing", "Anderes"], optional: "optional", reassurance: "Antwort in 24 Std · Unverbindlich",
       btnSend: "Kostenlose Beratung anfragen", btnSending: "Wird gesendet...",
       successTitle: "Nachricht gesendet!", successDesc: "Danke für deine Nachricht. Wir melden uns innerhalb von 24 Stunden.",
@@ -218,9 +225,9 @@ const translations = {
     founder: {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
-      role: "Fondatore · Web Designer & Sviluppatore",
+      role: "Web Designer & Sviluppatore",
       bio1: "La tecnologia è la mia passione fin da bambino: ho iniziato costruendo PC da zero, ordinando ogni singolo componente. Da quella curiosità è nato un mestiere: da oltre quattro anni progetto e realizzo siti web per aziende in tutta la Svizzera.",
-      bio2: "Seguo l'intero processo in prima persona – dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
+      bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
     values: [
       { title: "Strategia prima di tutto", desc: "Non facciamo siti belli e basta. Costruiamo strumenti che portano risultati concreti al tuo business." },
@@ -244,7 +251,7 @@ const translations = {
       whatsapp: "Scrivici su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
-      phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda (opzionale)", phMessage: "Due righe sul tuo progetto (facoltativo)…",
+      phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda", phMessage: "Due righe sul tuo progetto…",
       needsLabel: "Di cosa hai bisogno?", needs: ["Sito web", "Brand & logo", "Contenuti & social", "Email marketing", "Altro"], optional: "facoltativo", reassurance: "Risposta entro 24h · Senza impegno",
       btnSend: "Richiedi la consulenza gratuita", btnSending: "Invio in corso...",
       successTitle: "Messaggio inviato!", successDesc: "Grazie per averci scritto. Ti risponderemo entro 24 ore.",
@@ -254,7 +261,7 @@ const translations = {
       errEmailInvalid: "Inserisci un indirizzo email valido.",
       errMessage: "Inserisci un messaggio.",
     },
-    footer: { madeWith: "Made with care in Switzerland", imprint: "Note legali", privacy: "Privacy" },
+    footer: { madeWith: "Fatto con cura in Svizzera", imprint: "Note legali", privacy: "Privacy" },
   },
 };
 
@@ -346,15 +353,16 @@ export default function Home({ lang }: { lang: Lang }) {
       <div className="mds-grain" aria-hidden />
       <Measure />
 
-      {/* HERO — type-led, left-aligned; the Measure runs down the left margin */}
-      <section className="relative flex min-h-svh flex-col justify-center px-6 sm:px-10 lg:px-16 pt-36 pb-20">
-        <div className="mx-auto w-full max-w-[1400px]">
+      {/* HERO — type-led; the gold-ink WebGL field blooms behind the wordmark */}
+      <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-36 pb-20">
+        <GoldInk />
+        <div className="relative z-10 mx-auto w-full max-w-[1400px]">
           <div className="mb-9 flex items-baseline justify-between mds-in" style={{ animationDelay: "0.05s" }}>
             <span className="micro-caps text-[var(--color-gold-ink)]">{t.hero.meta}</span>
-            <span className="micro-caps tnum text-[#1F1B16]/40">01 / 09</span>
+            <span className="micro-caps tnum text-[#1F1B16]/40">47.50° N</span>
           </div>
 
-          <h1 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(2.6rem, 8.6vw, 8rem)" }}>
+          <h1 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(2.1rem, 8.6vw, 8rem)" }}>
             <span className="mds-line"><span style={{ animationDelay: "0.12s" }}>{t.hero.line1}</span></span>
             <span className="mds-line"><span style={{ animationDelay: "0.21s" }}>{t.hero.line2}</span></span>
             <span className="mds-line">
@@ -371,10 +379,12 @@ export default function Home({ lang }: { lang: Lang }) {
               {t.hero.subtitle}
             </p>
             <div className="flex flex-wrap items-center gap-x-7 gap-y-4 mds-in" style={{ animationDelay: "0.58s" }}>
-              <a href="#contatti" className="group inline-flex items-center gap-2 rounded-full bg-[#1F1B16] px-7 py-3.5 text-sm font-medium tracking-wide text-[var(--paper)] transition-colors duration-300 hover:bg-[#33291E]">
-                {t.hero.ctaPrimary}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </a>
+              <Magnetic strength={0.4}>
+                <a href="#contatti" className="group inline-flex items-center gap-2 rounded-full bg-[#1F1B16] px-7 py-3.5 text-sm font-medium tracking-wide text-[var(--paper)] transition-colors duration-300 hover:bg-[#33291E]">
+                  {t.hero.ctaPrimary}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              </Magnetic>
               <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#1F1B16]/75 transition-colors hover:text-[#1F1B16]">
                 <span className="relative">
                   {t.hero.ctaSecondary}
@@ -387,21 +397,8 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      {/* DISCIPLINE MARQUEE — oversized Fraunces ticker; proves the full range */}
-      <section aria-hidden className="marquee-mask select-none overflow-hidden border-y border-[color:var(--line)] py-5 md:py-7">
-        <div className="marquee-track">
-          {[0, 1].map((dup) => (
-            <div key={dup} className="flex shrink-0 items-center">
-              {DISCIPLINES.map((d, i) => (
-                <span key={`${dup}-${i}`} className="flex items-center">
-                  <span className="display-type px-6 text-[#1F1B16]/85 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rotate-45" style={{ background: "var(--color-gold)" }} />
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* DISCIPLINE MARQUEE — Fraunces ticker, coupled to Lenis scroll velocity */}
+      <Marquee items={DISCIPLINES} />
 
       {/* STATS — editorial data row on Bone; tabular figures, hairline dividers, no icon boxes */}
       <section className="bg-[var(--bone)] px-6 sm:px-10 lg:px-16 py-14 md:py-20">
@@ -410,11 +407,11 @@ export default function Home({ lang }: { lang: Lang }) {
             {t.stats.map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 18 }}
+                initial={reduce ? false : { opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                className={`py-4 md:px-8 ${i % 2 === 1 ? "border-l border-[color:var(--line)] pl-5" : ""} ${i >= 2 ? "mt-6 md:mt-0" : ""} ${i === 2 ? "md:border-l md:pl-8" : ""}`}
+                className={`py-4 md:px-8 ${i % 2 === 1 ? "border-l border-[color:var(--line)] pl-5" : ""} ${i >= 2 ? "mt-6 md:mt-0" : ""} ${i === 2 ? "md:border-l md:pl-8" : ""}${i === 0 ? " md:pl-0" : ""}${i === t.stats.length - 1 ? " md:pr-0" : ""}`}
               >
                 <div className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)" }}>{stat.value}</div>
                 <div className="micro-caps mt-2.5 text-[#1F1B16]/55">{stat.label}</div>
@@ -440,7 +437,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
               </h2>
             </div>
-            <span className="micro-caps tnum text-[#1F1B16]/40">01 — 04</span>
+            <span className="micro-caps tnum text-[#1F1B16]/40">01 / 04</span>
           </motion.div>
 
           <div className="border-b border-[color:var(--line)]">
@@ -458,9 +455,12 @@ export default function Home({ lang }: { lang: Lang }) {
                 >
                   <span className="micro-caps tnum text-[var(--color-gold-ink)] md:w-10">0{i + 1}</span>
                   <h3 className="display-type text-[#1F1B16] transition-colors duration-300 group-hover:text-[var(--color-gold-ink)] md:flex-1" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{service.title}</h3>
-                  <div className="micro-caps flex flex-wrap gap-x-3 gap-y-1 text-[#1F1B16]/45 md:max-w-[18rem] md:justify-end md:text-right">
-                    {service.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
+                  <div className="micro-caps flex flex-wrap gap-y-1 text-[#1F1B16]/65 md:max-w-[18rem] md:justify-end md:text-right">
+                    {service.tags.map((tag, ti) => (
+                      <span key={tag} className="inline-flex items-center">
+                        {tag}
+                        {ti < service.tags.length - 1 && <span aria-hidden="true" className="mx-2.5 text-[var(--color-gold)]/50">·</span>}
+                      </span>
                     ))}
                   </div>
                   <ArrowRight className="hidden h-5 w-5 shrink-0 text-[var(--color-gold-ink)] transition-transform duration-300 group-hover:translate-x-1 md:block" strokeWidth={1.4} />
@@ -484,21 +484,15 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* PORTFOLIO — monograph; the Measure motif becomes the row rules */}
       <section id="portfolio" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-36">
         <div className="mx-auto max-w-[1400px]">
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-12%" }}
-            transition={{ duration: 0.7 }}
-            className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between"
-          >
+          <Reveal className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between">
             <div>
-              <span className="micro-caps text-[var(--color-gold-ink)]">02 · {t.portfolioSection.label}</span>
-              <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+              <span data-reveal-fade className="micro-caps inline-block text-[var(--color-gold-ink)]">02 · {t.portfolioSection.label}</span>
+              <h2 data-reveal-heading className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
                 {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
               </h2>
             </div>
-            <span className="micro-caps tnum text-[#1F1B16]/40">{t.portfolioSection.indexLabel} — 01/03</span>
-          </motion.div>
+            <span data-reveal-fade className="micro-caps tnum inline-block text-[#1F1B16]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
+          </Reveal>
 
           <div className="space-y-16 md:space-y-24">
             {PROJECTS.map((p) => (
@@ -521,7 +515,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   <span className="micro-caps hidden text-[var(--color-gold-ink)] sm:block">{p.data.meta}</span>
                 </div>
 
-                <div className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
+                <div data-cursor="view" data-cursor-label={p.data.cta} className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
                   {p.media.kind === "video" ? (
                     <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
                   ) : (
@@ -534,9 +528,12 @@ export default function Home({ lang }: { lang: Lang }) {
 
                 <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                   <p className="max-w-xl font-light leading-relaxed text-[#1F1B16]/65">{p.data.desc}</p>
-                  <div className="micro-caps flex flex-wrap gap-x-4 gap-y-1 text-[#1F1B16]/45">
+                  <div className="micro-caps flex flex-wrap gap-y-1 text-[#1F1B16]/65">
                     {p.data.tags.map((tag, ti) => (
-                      <span key={ti} className={ti === 0 ? "text-[var(--color-gold-ink)]" : ""}>{tag}</span>
+                      <span key={ti} className="inline-flex items-center">
+                        <span className={ti === 0 ? "text-[var(--color-gold-ink)]" : ""}>{tag}</span>
+                        {ti < p.data.tags.length - 1 && <span aria-hidden="true" className="mx-2.5 text-[var(--color-gold)]/50">·</span>}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -566,19 +563,19 @@ export default function Home({ lang }: { lang: Lang }) {
             className="mb-14 max-w-3xl md:mb-20"
           >
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
-            <h2 className="display-type mt-5" style={{ fontSize: "clamp(2rem, 5.2vw, 4.5rem)", color: "var(--paper)" }}>
+            <h2 className="display-type mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "var(--paper)" }}>
               {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
             </h2>
             <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(251,248,242,0.68)" }}>{t.about.p1}</p>
           </motion.div>
 
-          <div className="grid gap-10 md:grid-cols-12 md:gap-16">
+          <div className="grid gap-10 mds-split-4-8">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8 }}
-              className="md:col-span-4"
+              className="min-w-0"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-[4px]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
                 <Image src="/founder-2.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain object-bottom" />
@@ -595,7 +592,7 @@ export default function Home({ lang }: { lang: Lang }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="md:col-span-8"
+              className="min-w-0"
             >
               <div className="grid gap-6 text-base font-light leading-relaxed md:grid-cols-2" style={{ color: "rgba(251,248,242,0.66)" }}>
                 <p>{t.founder.bio1}</p>
@@ -650,7 +647,7 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* TOOLS — editorial inline list in the display face */}
       <section className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-16 md:py-20">
         <div className="mx-auto max-w-[1400px]">
-          <span className="micro-caps text-[var(--color-gold-ink)]">{t.toolsLabel}</span>
+          <span className="micro-caps text-[#1F1B16]/55">{t.toolsLabel}</span>
           <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2">
             {TOOLS.map((tool) => (
               <span key={tool} className="display-type text-[#1F1B16]/70" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{tool}</span>
@@ -662,7 +659,7 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* METODO — three phases as ticked stations measured by the ruler */}
       <section id="metodo" className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
-          <div className="mb-12 md:mb-16">
+          <div className="mb-16 md:mb-24">
             <span className="micro-caps text-[var(--color-gold-ink)]">05 · {t.method.label}</span>
             <h2 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
               {t.method.heading1}<em className="text-[var(--color-gold)]">{t.method.headingAccent}</em>
@@ -679,7 +676,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 className="border-t border-[var(--color-gold)]/30 pt-6"
               >
                 <div className="flex items-baseline gap-4">
-                  <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)" }}>{step.num}</span>
+                  <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.1rem, 2.5vw, 2rem)" }}>{step.num}</span>
                   <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}>{step.title}</h3>
                 </div>
                 <p className="mt-4 font-light leading-relaxed text-[#1F1B16]/65">{step.desc}</p>
@@ -721,9 +718,9 @@ export default function Home({ lang }: { lang: Lang }) {
               return (
                 <div key={i} className="border-t border-[color:var(--line)]">
                   <h3>
-                    <button type="button" id={`faq-q-${i}`} aria-expanded={isOpen} aria-controls={`faq-a-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)} className="group flex w-full items-center justify-between gap-6 py-6 text-left">
+                    <button type="button" id={`faq-q-${i}`} aria-expanded={isOpen} aria-controls={`faq-a-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)} className="group flex w-full items-start justify-between gap-6 py-6 text-left">
                       <span className="text-lg font-light text-[#1F1B16] transition-colors group-hover:text-[var(--color-gold-ink)] md:text-xl">{faq.q}</span>
-                      <span aria-hidden="true" className="relative block h-3.5 w-3.5 shrink-0">
+                      <span aria-hidden="true" className="relative mt-[7px] block h-3.5 w-3.5 shrink-0">
                         <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2" style={{ background: "var(--color-gold-ink)" }} />
                         <span className={`absolute left-1/2 top-0 h-full w-px -translate-x-1/2 transition-transform duration-300 ${isOpen ? "scale-y-0" : "scale-y-100"}`} style={{ background: "var(--color-gold-ink)" }} />
                       </span>
@@ -754,28 +751,28 @@ export default function Home({ lang }: { lang: Lang }) {
             <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#1F1B16]/70">{t.contact.subtitle}</p>
           </motion.div>
 
-          <div className="grid gap-12 md:grid-cols-12 md:gap-16">
-            <div className="md:col-span-5">
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 text-[#1F1B16]">
+          <div className="grid gap-12 mds-split-5-7">
+            <div className="min-w-0">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 text-[#1F1B16] transition-colors hover:text-[var(--color-gold-ink)]">
                 <MessageCircle className="h-5 w-5 text-[var(--color-gold-ink)]" strokeWidth={1.5} />
                 <span className="relative text-base tracking-wide">
                   {t.contact.whatsapp}
-                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left bg-[var(--color-gold)]/50 transition-transform duration-300 group-hover:scale-x-0" />
+                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)]/60 transition-transform duration-300 group-hover:scale-x-100" />
                 </span>
               </a>
 
               <dl className="mt-10 space-y-7 border-t border-[color:var(--line)] pt-8">
                 <div>
-                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.emailLabel}</dt>
+                  <dt className="micro-caps text-[#1F1B16]/70">{t.contact.emailLabel}</dt>
                   <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-[#1F1B16]/85 transition-colors hover:text-[var(--color-gold-ink)]">{SITE.email}</a></dd>
                 </div>
                 <div>
-                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.phoneLabel}</dt>
+                  <dt className="micro-caps text-[#1F1B16]/70">{t.contact.phoneLabel}</dt>
                   <dd className="mt-1"><a href={`tel:${SITE.phone}`} className="tnum text-[#1F1B16]/85 transition-colors hover:text-[var(--color-gold-ink)]">{SITE.phoneDisplay}</a></dd>
                 </div>
                 <div>
-                  <dt className="micro-caps text-[#1F1B16]/45">{t.contact.officesLabel}</dt>
-                  <dd className="mt-2 space-y-1 text-sm leading-relaxed text-[#1F1B16]/70">
+                  <dt className="micro-caps text-[#1F1B16]/70">{t.contact.officesLabel}</dt>
+                  <dd className="mt-1 space-y-1 text-sm leading-relaxed text-[#1F1B16]/70">
                     <div><span className="text-[var(--color-gold-ink)]">{t.contact.countryCh}</span> — {SITE.address.street}, {SITE.address.postalCode} {SITE.address.locality}</div>
                     <div><span className="text-[var(--color-gold-ink)]">{t.contact.countryIt}</span> — {SITE.addressIt.street}, {SITE.addressIt.postalCode} {SITE.addressIt.locality}</div>
                   </dd>
@@ -783,7 +780,7 @@ export default function Home({ lang }: { lang: Lang }) {
               </dl>
             </div>
 
-            <div className="md:col-span-7">
+            <div className="min-w-0">
               {formStatus === "success" ? (
                 <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="flex h-full flex-col items-center justify-center rounded-[4px] border border-[var(--color-gold)]/30 bg-[var(--bone)]/50 p-12 text-center outline-none">
                   <CheckCircle2 className="mb-6 h-14 w-14 text-[var(--color-gold-ink)]" strokeWidth={1.2} />
@@ -795,7 +792,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   {/* anti-spam honeypot (hidden from users; the server rejects submissions that fill it — see /api/contact) */}
                   <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
                   <div>
-                    <span className="micro-caps mb-3 block text-[#1F1B16]/45">{t.contact.needsLabel}</span>
+                    <span className="micro-caps mb-3 block text-[#1F1B16]/70">{t.contact.needsLabel}</span>
                     <div className="flex flex-wrap gap-2">
                       {t.contact.needs.map((n) => {
                         const active = needs.includes(n);
@@ -807,22 +804,22 @@ export default function Home({ lang }: { lang: Lang }) {
                   </div>
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formName} *</label>
+                      <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#1F1B16]/70">{t.contact.formName} *</label>
                       <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
-                      <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formEmail} *</label>
+                      <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#1F1B16]/70">{t.contact.formEmail} *</label>
                       <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formCompany}</label>
+                    <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#1F1B16]/70">{t.contact.formCompany} <span className="normal-case tracking-normal text-[#1F1B16]/60">({t.contact.optional})</span></label>
                     <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
-                    <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#1F1B16]/45">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#1F1B16]/35">({t.contact.optional})</span></label>
+                    <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#1F1B16]/70">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#1F1B16]/60">({t.contact.optional})</span></label>
                     <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#1F1B16]/20 bg-transparent py-2.5 text-[#1F1B16] placeholder-[#1F1B16]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
@@ -836,7 +833,7 @@ export default function Home({ lang }: { lang: Lang }) {
                       {formStatus === "sending" ? t.contact.btnSending : t.contact.btnSend}
                       {formStatus !== "sending" && <Send className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
                     </button>
-                    <p className="micro-caps text-[#1F1B16]/45">{t.contact.reassurance}</p>
+                    <p className="micro-caps text-[#1F1B16]/70">{t.contact.reassurance}</p>
                   </div>
                 </form>
               )}
@@ -858,15 +855,16 @@ export default function Home({ lang }: { lang: Lang }) {
               <span className="micro-caps tnum" style={{ color: "rgba(251,248,242,0.55)" }}>© {new Date().getFullYear()} Modolo Digital Studio</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors" style={{ color: "rgba(251,248,242,0.6)" }}>{t.footer.imprint}</Link>
-              <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors" style={{ color: "rgba(251,248,242,0.6)" }}>{t.footer.privacy}</Link>
-              <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(251,248,242,0.6)" }}>
+              <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors text-[color:rgba(251,248,242,0.6)] hover:text-[var(--paper)]">{t.footer.imprint}</Link>
+              <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors text-[color:rgba(251,248,242,0.6)] hover:text-[var(--paper)]">{t.footer.privacy}</Link>
+              <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[color:rgba(251,248,242,0.6)] transition-colors hover:text-[var(--paper)]">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                 </svg>
               </a>
+              <span aria-hidden="true" className="hidden h-3 w-px md:inline-block" style={{ background: "rgba(251,248,242,0.2)" }} />
               <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.footer.madeWith}</span>
             </div>
           </div>

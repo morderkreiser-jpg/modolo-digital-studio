@@ -136,7 +136,7 @@ export default function SiteNav({
           className={`${
             variant === "lg" ? "px-3 py-1.5 text-xs" : "px-2.5 py-1.5 text-[11px]"
           } rounded-full tracking-wider uppercase transition-colors ${
-            lang === l ? "bg-[#8F6B2F] text-white" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
+            lang === l ? "bg-[#1F1B16] text-[var(--paper)]" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
           }`}
         >
           {l}
@@ -148,7 +148,7 @@ export default function SiteNav({
   return (
     <>
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between gap-2">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
         <Link href={localizedHref(lang, "/")} aria-label={a.home} onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Image src="/logo-mark.png" alt="" width={36} height={36} />
@@ -169,7 +169,7 @@ export default function SiteNav({
           {ctaLabel && (
             <a
               href={ctaHref}
-              className="text-sm tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-5 py-2 rounded-full hover:bg-[#8F6B2F] hover:text-white hover:border-[#8F6B2F] transition-all duration-300 whitespace-nowrap"
+              className="text-sm tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-5 py-2 rounded-full hover:bg-[#1F1B16] hover:text-[var(--paper)] hover:border-[#1F1B16] transition-all duration-300 whitespace-nowrap"
             >
               {ctaLabel}
             </a>
@@ -181,7 +181,7 @@ export default function SiteNav({
           {ctaLabel && !hasMenu && (
             <a
               href={ctaHref}
-              className="text-[11px] tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-3 py-1.5 rounded-full hover:bg-[#8F6B2F] hover:text-white transition-all whitespace-nowrap"
+              className="text-[11px] tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-3 py-1.5 rounded-full hover:bg-[#1F1B16] hover:text-[var(--paper)] hover:border-[#1F1B16] transition-all whitespace-nowrap"
             >
               {ctaLabel}
             </a>

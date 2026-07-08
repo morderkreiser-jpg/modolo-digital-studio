@@ -8,6 +8,8 @@ import { SITE } from "@/lib/site";
 import { LOCALES, OG_LOCALE, isLocale, localizedHref, type Locale } from "@/lib/i18n";
 import { HOME_META } from "@/lib/site-data";
 import MotionProvider from "@/components/motion-provider";
+import SmoothScroll from "@/components/smooth-scroll";
+import Cursor from "@/components/cursor";
 
 // Localized label for the skip-to-content link (first focusable element on every page).
 const SKIP_LABEL: Record<Locale, string> = {
@@ -108,7 +110,7 @@ export default async function LangLayout({
   return (
     <html
       lang={lang}
-      className={`${poppins.variable} ${lora.variable} ${fraunces.variable} h-full antialiased scroll-smooth`}
+      className={`${poppins.variable} ${lora.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <a
@@ -117,7 +119,10 @@ export default async function LangLayout({
         >
           {SKIP_LABEL[lang]}
         </a>
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          <SmoothScroll>{children}</SmoothScroll>
+          <Cursor />
+        </MotionProvider>
         <Analytics />
         <SpeedInsights />
       </body>

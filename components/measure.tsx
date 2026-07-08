@@ -23,6 +23,11 @@ export default function Measure() {
     >
       {/* ruler track (faint, full height) */}
       <div className="absolute inset-y-0 left-0 w-px" style={{ background: "var(--color-gold)", opacity: 0.2 }} />
+      {/* ruler gradations — a real measure, not just a progress line */}
+      <div
+        className="absolute inset-y-0 -left-[3px] w-[7px]"
+        style={{ backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 63px, var(--color-gold) 63px 64px)", opacity: 0.22 }}
+      />
       {/* the drawn measure (fills top→down with page progress) */}
       <motion.div
         className="absolute left-0 top-0 w-px origin-top"

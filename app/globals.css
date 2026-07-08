@@ -233,6 +233,15 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Two-column editorial splits. Authored directly because this project's Tailwind build does
+   NOT emit grid-cols-12 / col-span-* (nor arbitrary grid-template-columns utilities), so the
+   founder (Chi siamo) and contact layouts would silently collapse to a single stacked column.
+   Applied at the md breakpoint on top of a base `grid` (which Tailwind does emit). */
+@media (min-width: 768px) {
+  .mds-split-4-8 { grid-template-columns: 4fr 8fr; column-gap: 4rem; }
+  .mds-split-5-7 { grid-template-columns: 5fr 7fr; column-gap: 4rem; }
+}
+
 /* Discipline marquee — seamless auto-scroll (content is duplicated for the -50% loop). */
 @keyframes mds-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .marquee-track {
