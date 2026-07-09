@@ -163,17 +163,17 @@ export const HOME_META: Record<Locale, { title: string; description: string }> =
   en: {
     title: "Modolo Digital Studio | Web Design & Development in Switzerland",
     description:
-      "Swiss digital studio for web design, development and SEO. We help professionals and businesses across Switzerland build an online presence that stands out.",
+      "Independent web studio in Winterthur. Websites, brands and content built by hand for professionals and small businesses across Switzerland — one project at a time.",
   },
   de: {
     title: "Modolo Digital Studio | Webdesign & Entwicklung in der Schweiz",
     description:
-      "Digital Studio in der Schweiz für Webdesign, Entwicklung und SEO. Wir geben Fachleuten und Unternehmen eine Online-Präsenz, die sich abhebt.",
+      "Unabhängiges Web-Studio in Winterthur. Von Hand gebaute Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz — ein Projekt nach dem anderen.",
   },
   it: {
     title: "Modolo Digital Studio | Web Design & Sviluppo in Svizzera",
     description:
-      "Studio digitale in Svizzera per web design, sviluppo e SEO. Diamo a professionisti e aziende una presenza online che si distingue.",
+      "Studio web indipendente a Winterthur. Siti, brand e contenuti costruiti a mano per professionisti e piccole attività in tutta la Svizzera — un progetto alla volta.",
   },
 };
 
