@@ -52,10 +52,10 @@ const translations = {
       { title: "Content & Visual", desc: "Professional photo shoots and social media management in collaboration with Project Visibility, content specialists.", tags: ["Photo Shooting", "Social Media", "Project Visibility"] },
       { title: "Email Marketing", desc: "Newsletters and email marketing that turn contacts into customers. Strategies that grow your business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves", indexLabel: "Selected work", closingLine: "A few projects at a time, each followed one by one.", closingCta: "Start your project" },
-    saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], meta: "Complete Website · Catering", desc: "Complete website for a premium Italian bar catering service. Elegant design, refined user experience and SEO optimization.", cta: "Visit site" },
-    zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", desc: "A web app that helps Zürich renters build a standout rental application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
-    bjstudio: { tags: ["Website", "WhatsApp Booking"], meta: "Website · Zürich", desc: "Multilingual website (4 languages) for a Zürich beauty studio, with WhatsApp booking, a before/after gallery and local SEO.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
+    portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves", indexLabel: "Selected work", closingLine: "Every project here was built by hand, from start to finish.", closingCta: "Let's start yours" },
+    saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], meta: "Complete Website · Catering", outcome: "A bar-catering service that feels online as premium as it tastes live.", desc: "A complete website for a premium Italian bar-catering service: a cinematic home, a clear menu of services and events, all tuned to be found on Google.", cta: "Visit site" },
+    zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", outcome: "The Zürich flat hunt, turned into a dossier landlords actually notice.", desc: "A web app that walks renters through a standout application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp Booking", "Local SEO"], meta: "Website · Zürich", outcome: "A Zürich beauty studio you book on WhatsApp — in four languages.", desc: "A multilingual website for a beauty studio: direct WhatsApp booking, a before/after gallery and local SEO to get found nearby.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
       label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
       p1: "Modolo Digital Studio is an independent studio — not an agency juggling a hundred clients. A few projects at a time, each followed one by one. Because every business deserves a site worthy of its value, not a recycled template.",
@@ -75,13 +75,12 @@ const translations = {
       { title: "Modern technology", desc: "We use the most advanced tools to ensure fast, secure and future-ready websites." },
     ],
     sectorsSection: { label: "Who we work for", heading1: "Sectors we ", headingAccent: "excel in" },
-    toolsLabel: "Tools & technologies",
     sectors: ["Restaurants & Hospitality", "Professional Firms", "E-commerce & Retail", "B&B & Accommodation"],
     method: { label: "Our method", heading1: "Three phases, ", headingAccent: "one vision" },
     steps: [
-      { num: "01", title: "Strategy", desc: "We analyze your brand, the market and your goals. Every project starts with a clear direction." },
-      { num: "02", title: "Design", desc: "We turn strategy into visual identity. Elegance, consistency and personality in every detail." },
-      { num: "03", title: "Development", desc: "We launch the project with modern, optimized technologies. Performance, SEO and care for the user experience." },
+      { num: "01", title: "Strategy", desc: "We start with a call and concrete questions: who you want to reach and what sets you apart. No jargon, just a clear direction." },
+      { num: "02", title: "Design", desc: "We turn strategy into a bespoke design, never a template. You see the drafts and we decide together, detail by detail." },
+      { num: "03", title: "Development", desc: "We build it with clean, fast, secure code. And we stay by your side: updates, SEO and one single person to write to." },
     ],
     quote: { line1: "We believe every brand has a unique story.", line2: "Our job is to tell it with elegance." },
     faqSection: { label: "Frequently asked questions", heading1: "Everything you ", headingAccent: "want to know" },
@@ -132,10 +131,10 @@ const translations = {
       { title: "Content & Visual", desc: "Professionelle Fotoshootings und Social-Media-Betreuung in Zusammenarbeit mit Project Visibility, Spezialisten für Content.", tags: ["Fotoshooting", "Social Media", "Project Visibility"] },
       { title: "E-Mail-Marketing", desc: "Newsletter und E-Mail-Marketing, die Kontakte in Kunden verwandeln. Strategien, die dein Geschäft wachsen lassen.", tags: ["Newsletter", "E-Mail-Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen", indexLabel: "Ausgewählte Arbeiten", closingLine: "Wenige Projekte auf einmal, eines nach dem anderen begleitet.", closingCta: "Starten wir dein Projekt" },
-    saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], meta: "Komplette Website · Catering", desc: "Komplette Website für einen Premium-Service für italienisches Bar-Catering. Elegantes Design, durchdachte Nutzererfahrung und SEO-Optimierung.", cta: "Website besuchen" },
-    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", desc: "Eine Web-App, die Wohnungssuchenden in Zürich hilft, ein überzeugendes Mietdossier zu erstellen — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
-    bjstudio: { tags: ["Website", "WhatsApp-Termine"], meta: "Website · Zürich", desc: "Mehrsprachige Website (4 Sprachen) für ein Beauty-Studio in Zürich, mit Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokalem SEO.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
+    portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen", indexLabel: "Ausgewählte Arbeiten", closingLine: "Jedes Projekt hier ist von Hand gebaut — von Anfang bis Ende.", closingCta: "Starten wir deins" },
+    saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], meta: "Komplette Website · Catering", outcome: "Ein Bar-Catering, das online so edel wirkt wie live am Glas.", desc: "Eine komplette Website für einen Premium-Service für italienisches Bar-Catering: eine cinematische Startseite, ein klares Menü aus Leistungen und Events – auf Google-Sichtbarkeit getrimmt.", cta: "Website besuchen" },
+    zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", outcome: "Die Wohnungssuche in Zürich — als Dossier, das Vermieter wirklich beachten.", desc: "Eine Web-App, die Wohnungssuchende Schritt für Schritt zu einem überzeugenden Dossier führt — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
+    bjstudio: { tags: ["Website", "WhatsApp-Termine", "Lokales SEO"], meta: "Website · Zürich", outcome: "Ein Zürcher Beauty-Studio, das man per WhatsApp bucht — in vier Sprachen.", desc: "Eine mehrsprachige Website für ein Beauty-Studio: direkte Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokales SEO, um in der Nähe gefunden zu werden.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
       label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
       p1: "Modolo Digital Studio ist ein unabhängiges Studio — keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
@@ -155,13 +154,12 @@ const translations = {
       { title: "Moderne Technologie", desc: "Wir nutzen modernste Werkzeuge für schnelle, sichere und zukunftsfähige Websites." },
     ],
     sectorsSection: { label: "Für wen wir arbeiten", heading1: "Branchen, in denen wir ", headingAccent: "glänzen" },
-    toolsLabel: "Tools & Technologien",
     sectors: ["Restaurants & Hospitality", "Kanzleien & Praxen", "E-Commerce & Retail", "B&B & Unterkünfte"],
     method: { label: "Unsere Methode", heading1: "Drei Phasen, ", headingAccent: "eine Vision" },
     steps: [
-      { num: "01", title: "Strategie", desc: "Wir analysieren deine Marke, den Markt und deine Ziele. Jedes Projekt beginnt mit einer klaren Richtung." },
-      { num: "02", title: "Design", desc: "Wir verwandeln Strategie in visuelle Identität. Eleganz, Konsistenz und Persönlichkeit in jedem Detail." },
-      { num: "03", title: "Entwicklung", desc: "Wir starten das Projekt mit modernen, optimierten Technologien. Performance, SEO und Sorgfalt für die Nutzererfahrung." },
+      { num: "01", title: "Strategie", desc: "Wir starten mit einem Gespräch und konkreten Fragen: wen du erreichen willst und was dich auszeichnet. Kein Fachjargon, nur eine klare Richtung." },
+      { num: "02", title: "Design", desc: "Wir verwandeln Strategie in ein massgeschneidertes Design, nie eine Vorlage. Du siehst die Entwürfe, und wir entscheiden gemeinsam, Detail für Detail." },
+      { num: "03", title: "Entwicklung", desc: "Wir bauen es mit sauberem, schnellem, sicherem Code. Und wir bleiben an deiner Seite: Updates, SEO und eine einzige Ansprechperson." },
     ],
     quote: { line1: "Wir glauben, dass jede Marke eine einzigartige Geschichte hat.", line2: "Unsere Aufgabe ist es, sie mit Eleganz zu erzählen." },
     faqSection: { label: "Häufige Fragen", heading1: "Alles, was du ", headingAccent: "wissen möchtest" },
@@ -212,10 +210,10 @@ const translations = {
       { title: "Contenuti & Visual", desc: "Shooting fotografici professionali e gestione social in collaborazione con Project Visibility, specialisti in contenuti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
       { title: "Email Marketing", desc: "Newsletter ed email marketing che trasformano i contatti in clienti. Strategie che fanno crescere il tuo business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli", indexLabel: "Lavori selezionati", closingLine: "Pochi progetti alla volta, seguiti uno per uno.", closingCta: "Iniziamo il tuo progetto" },
-    saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], meta: "Sito Web Completo · Catering", desc: "Sito web completo per un servizio premium di bar catering italiano. Design elegante, esperienza utente curata e ottimizzazione SEO.", cta: "Visita il sito" },
-    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", desc: "Web app che aiuta chi cerca casa a Zurigo a creare un dossier d'affitto impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
-    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp"], meta: "Sito Web · Zurigo", desc: "Sito multilingua (4 lingue) per uno studio beauty a Zurigo, con prenotazione via WhatsApp, galleria prima/dopo e SEO locale.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
+    portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli", indexLabel: "Lavori selezionati", closingLine: "Ogni progetto qui è stato costruito a mano, dall'inizio alla fine.", closingCta: "Iniziamo il tuo" },
+    saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], meta: "Sito Web Completo · Catering", outcome: "Un bar catering che online trasmette la stessa classe che serve nel bicchiere.", desc: "Sito completo per un servizio di bar catering italiano premium: home cinematografica, menu di servizi ed eventi, tutto ottimizzato per farsi trovare su Google.", cta: "Visita il sito" },
+    zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", outcome: "La ricerca casa a Zurigo, trasformata in un dossier che i proprietari notano.", desc: "Web app che guida chi cerca casa a costruire una candidatura impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
+    bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp", "SEO Locale"], meta: "Sito Web · Zurigo", outcome: "Uno studio beauty di Zurigo che si prenota su WhatsApp, in quattro lingue.", desc: "Sito multilingua per uno studio beauty: prenotazione diretta via WhatsApp, galleria prima/dopo e SEO locale per farsi trovare in zona.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
       label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
       p1: "Modolo Digital Studio è uno studio indipendente, non un'agenzia con mille clienti: pochi progetti alla volta, seguiti uno per uno. Perché ogni attività merita un sito all'altezza del suo valore — non un modello riciclato.",
@@ -235,13 +233,12 @@ const translations = {
       { title: "Tecnologia moderna", desc: "Usiamo gli strumenti più avanzati per garantire siti veloci, sicuri e pronti per il futuro." },
     ],
     sectorsSection: { label: "Per chi lavoriamo", heading1: "Settori in cui ", headingAccent: "eccelliamo" },
-    toolsLabel: "Strumenti & tecnologie",
     sectors: ["Ristoranti & Hospitality", "Studi Professionali", "E-commerce & Retail", "B&B & Strutture Ricettive"],
     method: { label: "Il nostro metodo", heading1: "Tre fasi, ", headingAccent: "una visione" },
     steps: [
-      { num: "01", title: "Strategia", desc: "Analizziamo il tuo brand, il mercato e gli obiettivi. Ogni progetto inizia con una direzione chiara." },
-      { num: "02", title: "Design", desc: "Trasformiamo la strategia in identità visiva. Eleganza, coerenza e personalità in ogni dettaglio." },
-      { num: "03", title: "Sviluppo", desc: "Lanciamo il progetto con tecnologie moderne e ottimizzate. Performance, SEO e cura per l'esperienza utente." },
+      { num: "01", title: "Strategia", desc: "Partiamo da una chiamata e da domande concrete: chi vuoi raggiungere e cosa ti distingue. Niente gergo, solo una direzione chiara." },
+      { num: "02", title: "Design", desc: "Trasformiamo la strategia in un design su misura, mai un template. Vedi le bozze e decidiamo insieme, dettaglio per dettaglio." },
+      { num: "03", title: "Sviluppo", desc: "Lo costruiamo con codice pulito, veloce e sicuro. E restiamo al tuo fianco: aggiornamenti, SEO e una sola persona a cui scrivere." },
     ],
     quote: { line1: "Crediamo che ogni brand abbia una storia unica.", line2: "Il nostro lavoro è raccontarla con eleganza." },
     faqSection: { label: "Domande frequenti", heading1: "Tutto quello che ", headingAccent: "vuoi sapere" },
@@ -265,7 +262,6 @@ const translations = {
   },
 };
 
-const TOOLS = ["Next.js", "React", "Tailwind CSS", "WordPress", "Framer", "Figma", "SEO", "Google Business"];
 const DISCIPLINES = ["Websites", "Branding", "Content", "Foto", "Video", "Reels", "Social", "SEO", "Ads"];
 
 export default function Home({ lang }: { lang: Lang }) {
@@ -494,7 +490,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span data-reveal-fade className="micro-caps tnum inline-block text-[#1F1B16]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
           </Reveal>
 
-          <div className="space-y-16 md:space-y-24">
+          <div className="space-y-24 md:space-y-36">
             {PROJECTS.map((p) => (
               <motion.a
                 key={p.num}
@@ -505,36 +501,45 @@ export default function Home({ lang }: { lang: Lang }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="group block border-t border-[var(--color-gold)]/25 pt-6 md:pt-8"
+                className="group block border-t border-[var(--color-gold)]/25 pt-8 md:pt-10"
               >
-                <div className="mb-6 flex items-baseline justify-between gap-4 md:mb-8">
+                <div className="flex items-baseline justify-between gap-4">
                   <div className="flex items-baseline gap-4 md:gap-7">
                     <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.75rem)" }}>{p.num}</span>
-                    <h3 className="display-type leading-none text-[#1F1B16] transition-colors duration-500 group-hover:text-[var(--color-gold-ink)]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
+                    <h3 className="display-type leading-none text-[#1F1B16]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
                   </div>
                   <span className="micro-caps hidden text-[var(--color-gold-ink)] sm:block">{p.data.meta}</span>
                 </div>
 
-                <div className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
+                {/* the cinematic hook — the one line that sells the project */}
+                <p className="display-type mt-5 max-w-3xl text-[#1F1B16] md:mt-7" style={{ fontSize: "clamp(1.3rem, 2.8vw, 2.2rem)", lineHeight: 1.16 }}>{p.data.outcome}</p>
+
+                <div className="relative mt-8 aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E] md:mt-10">
                   {p.media.kind === "video" ? (
-                    <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
+                    <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"}`} />
                   ) : (
-                    <Image src={p.media.src} alt={p.media.aria} fill sizes="(max-width: 1024px) 100vw, 1300px" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
+                    <Image src={p.media.src} alt={p.media.aria} fill sizes="(max-width: 1024px) 100vw, 1300px" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"}`} />
                   )}
                   <span className="pointer-events-none absolute bottom-4 right-4 flex translate-y-2 items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide text-[#1F1B16] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" style={{ background: "rgba(251,248,242,0.94)" }}>
                     {p.data.cta} <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.6} />
                   </span>
                 </div>
 
-                <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                  <p className="max-w-xl font-light leading-relaxed text-[#1F1B16]/65">{p.data.desc}</p>
-                  <div className="micro-caps flex flex-wrap gap-y-1 text-[#1F1B16]/65">
-                    {p.data.tags.map((tag, ti) => (
-                      <span key={ti} className="inline-flex items-center">
-                        <span className={ti === 0 ? "text-[var(--color-gold-ink)]" : ""}>{tag}</span>
-                        {ti < p.data.tags.length - 1 && <span aria-hidden="true" className="mx-2.5 text-[var(--color-gold)]/50">·</span>}
-                      </span>
-                    ))}
+                <div className="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  <p className="max-w-lg text-sm font-light leading-relaxed text-[#1F1B16]/60">{p.data.desc}</p>
+                  <div className="flex flex-col items-start gap-3 md:items-end">
+                    <div className="micro-caps flex flex-wrap gap-y-1 text-[#1F1B16]/60">
+                      {p.data.tags.map((tag, ti) => (
+                        <span key={ti} className="inline-flex items-center">
+                          <span className={ti === 0 ? "text-[var(--color-gold-ink)]" : ""}>{tag}</span>
+                          {ti < p.data.tags.length - 1 && <span aria-hidden="true" className="mx-2.5 text-[var(--color-gold)]/50">·</span>}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors group-hover:text-[var(--color-gold)]">
+                      {p.data.cta}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
+                    </span>
                   </div>
                 </div>
               </motion.a>
@@ -639,18 +644,6 @@ export default function Home({ lang }: { lang: Lang }) {
                 <span className="micro-caps tnum text-[var(--color-gold-ink)]">0{i + 1}</span>
                 <span className="text-lg font-light text-[#1F1B16]/80">{name}</span>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TOOLS — editorial inline list in the display face */}
-      <section className="bg-[var(--paper)] px-6 sm:px-10 lg:px-16 py-16 md:py-20">
-        <div className="mx-auto max-w-[1400px]">
-          <span className="micro-caps text-[#1F1B16]/55">{t.toolsLabel}</span>
-          <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2">
-            {TOOLS.map((tool) => (
-              <span key={tool} className="display-type text-[#1F1B16]/70" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{tool}</span>
             ))}
           </div>
         </div>
