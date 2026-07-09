@@ -362,7 +362,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="micro-caps tnum text-[#1F1B16]/40">47.50° N</span>
           </div>
 
-          <h1 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(2.1rem, 8.6vw, 8rem)" }}>
+          <h1 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(2.1rem, 6.4vw, 5.25rem)" }}>
             <span className="mds-line"><span style={{ animationDelay: "0.12s" }}>{t.hero.line1}</span></span>
             <span className="mds-line"><span style={{ animationDelay: "0.21s" }}>{t.hero.line2}</span></span>
             <span className="mds-line">
