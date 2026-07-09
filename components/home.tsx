@@ -515,7 +515,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   <span className="micro-caps hidden text-[var(--color-gold-ink)] sm:block">{p.data.meta}</span>
                 </div>
 
-                <div data-cursor="view" data-cursor-label={p.data.cta} className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
+                <div className="relative aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E]">
                   {p.media.kind === "video" ? (
                     <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"}`} />
                   ) : (

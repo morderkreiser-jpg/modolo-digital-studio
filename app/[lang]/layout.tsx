@@ -9,7 +9,6 @@ import { LOCALES, OG_LOCALE, isLocale, localizedHref, type Locale } from "@/lib/
 import { HOME_META } from "@/lib/site-data";
 import MotionProvider from "@/components/motion-provider";
 import SmoothScroll from "@/components/smooth-scroll";
-import Cursor from "@/components/cursor";
 
 // Localized label for the skip-to-content link (first focusable element on every page).
 const SKIP_LABEL: Record<Locale, string> = {
@@ -121,7 +120,6 @@ export default async function LangLayout({
         </a>
         <MotionProvider>
           <SmoothScroll>{children}</SmoothScroll>
-          <Cursor />
         </MotionProvider>
         <Analytics />
         <SpeedInsights />

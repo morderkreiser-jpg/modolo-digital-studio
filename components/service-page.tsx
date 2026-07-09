@@ -328,7 +328,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
 
       {/* HERO */}
       <section className={`${container} pt-36 pb-14 md:pb-20`}>
-        <Link href={localizedHref(lang, "/#servizi")} data-cursor="link" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+        <Link href={localizedHref(lang, "/#servizi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
@@ -405,7 +405,6 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
             <Link
               key={o}
               href={localizedHref(lang, `/servizi/${o}`)}
-              data-cursor="link"
               className="group flex items-baseline justify-between gap-6 border-t border-[color:var(--line)] py-6 transition-colors hover:bg-[var(--bone)]/40 md:px-2"
             >
               <div className="flex items-baseline gap-4 md:gap-7">

@@ -92,7 +92,6 @@ export default function PricingPage({
       <section className={`${container} pt-36 pb-14 md:pb-16`}>
         <Link
           href={localizedHref(lang, "/")}
-          data-cursor="link"
           className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />

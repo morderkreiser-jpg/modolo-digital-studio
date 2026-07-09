@@ -317,7 +317,7 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
 
       {/* CONTENT */}
       <section className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16 pt-36 pb-20 md:pb-28">
-        <Link href={localizedHref(lang, "/")} data-cursor="link" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+        <Link href={localizedHref(lang, "/")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
