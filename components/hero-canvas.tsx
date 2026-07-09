@@ -24,11 +24,11 @@ function Blob() {
   return (
     <Icosahedron ref={ref} args={[1.6, 28]} position={[0.7, 0, 0]}>
       <MeshDistortMaterial
-        color="#3a4bd8"
-        emissive="#3b2ea8"
-        emissiveIntensity={0.9}
-        roughness={0.25}
-        metalness={0.35}
+        color="#3a2c0d"
+        emissive="#8a6418"
+        emissiveIntensity={0.55}
+        roughness={0.22}
+        metalness={0.6}
         distort={0.42}
         speed={1.3}
       />
@@ -40,15 +40,15 @@ export default function HeroCanvas() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}>
       <ambientLight intensity={0.35} />
-      <pointLight position={[5, 3, 4]} intensity={90} color="#5b8cff" />
-      <pointLight position={[-5, -2, 3]} intensity={70} color="#b14bff" />
-      <pointLight position={[0, 3, -4]} intensity={45} color="#22d3ee" />
-      <pointLight position={[2, -3, 2]} intensity={40} color="#ff5bb0" />
+      <pointLight position={[5, 3, 4]} intensity={125} color="#e6c060" />
+      <pointLight position={[-5, -2, 3]} intensity={100} color="#d4a344" />
+      <pointLight position={[0, 3, -4]} intensity={70} color="#c9a25a" />
+      <pointLight position={[2, -3, 2]} intensity={80} color="#fff2d8" />
       <Blob />
-      <Sparkles count={90} scale={[11, 7, 6]} size={5} speed={0.35} opacity={0.7} color="#9ab8ff" />
-      <Sparkles count={40} scale={[9, 6, 5]} size={7} speed={0.2} opacity={0.6} color="#c98bff" />
+      <Sparkles count={90} scale={[11, 7, 6]} size={5} speed={0.35} opacity={0.7} color="#e8c877" />
+      <Sparkles count={40} scale={[9, 6, 5]} size={7} speed={0.2} opacity={0.6} color="#c9a25a" />
       <EffectComposer>
-        <Bloom intensity={1.25} luminanceThreshold={0.1} luminanceSmoothing={0.9} mipmapBlur />
+        <Bloom intensity={1.35} luminanceThreshold={0.13} luminanceSmoothing={0.9} mipmapBlur />
       </EffectComposer>
     </Canvas>
   );

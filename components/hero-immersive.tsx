@@ -16,12 +16,12 @@ const space = { fontFamily: "var(--font-space)" } as const;
 export default function HeroImmersive() {
   const reduce = useReducedMotion();
   return (
-    <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16" style={{ background: "#07070E" }}>
-      {/* ambient neon glow — present even without WebGL */}
+    <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16" style={{ background: "#0B0805" }}>
+      {/* ambient gold glow — present even without WebGL */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(55% 55% at 72% 42%, rgba(90,110,255,0.28), transparent 70%), radial-gradient(45% 45% at 86% 72%, rgba(177,75,255,0.20), transparent 72%)" }}
+        style={{ background: "radial-gradient(55% 55% at 72% 42%, rgba(181,137,63,0.32), transparent 70%), radial-gradient(45% 45% at 86% 72%, rgba(201,162,90,0.20), transparent 72%)" }}
       />
       {/* the 3D spectacle */}
       {!reduce && (
@@ -33,14 +33,14 @@ export default function HeroImmersive() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ background: "linear-gradient(90deg, rgba(7,7,14,0.88) 0%, rgba(7,7,14,0.45) 42%, rgba(7,7,14,0) 66%)" }}
+        style={{ background: "linear-gradient(90deg, rgba(11,8,5,0.90) 0%, rgba(11,8,5,0.5) 42%, rgba(11,8,5,0) 66%)" }}
       />
       {/* subtle grain to kill banding on the dark gradient */}
       <div className="mds-grain absolute inset-0 opacity-[0.06]" aria-hidden />
 
       <div className="relative z-10 mx-auto w-full max-w-[1400px] pt-28">
         <div className="mb-9 flex items-center gap-3">
-          <span className="h-2 w-2 rounded-full" style={{ background: "#6f8bff", boxShadow: "0 0 14px #6f8bff" }} />
+          <span className="h-2 w-2 rounded-full" style={{ background: "#C9A25A", boxShadow: "0 0 14px #C9A25A" }} />
           <span className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-white/55" style={space}>Studio digitale · Winterthur</span>
         </div>
 
@@ -49,7 +49,7 @@ export default function HeroImmersive() {
           <br />
           e contenuti,
           <br />
-          <span style={{ background: "linear-gradient(100deg, #6f8bff, #b14bff 46%, #22d3ee)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+          <span style={{ background: "linear-gradient(100deg, #f0d089, #b5893f 48%, #c9a25a)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
             costruiti a mano.
           </span>
         </h1>
@@ -61,8 +61,8 @@ export default function HeroImmersive() {
         <div className="mt-11 flex flex-wrap items-center gap-x-8 gap-y-4">
           <a
             href="#contatti"
-            className="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-medium text-white transition-transform duration-300 hover:scale-[1.03]"
-            style={{ ...space, background: "linear-gradient(100deg, #4f7bff, #b14bff)", boxShadow: "0 0 34px rgba(120,90,255,0.55)" }}
+            className="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-[#17130E] transition-transform duration-300 hover:scale-[1.03]"
+            style={{ ...space, background: "linear-gradient(100deg, #e8c877, #b5893f)", boxShadow: "0 0 34px rgba(181,137,63,0.55)" }}
           >
             Prenota una consulenza
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
