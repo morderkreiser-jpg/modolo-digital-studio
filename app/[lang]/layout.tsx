@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Lora, Fraunces } from "next/font/google";
+import { Poppins, Lora, Fraunces, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
@@ -40,6 +40,14 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   axes: ["opsz", "SOFT"],
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Space Grotesk: modern techy grotesk — the display voice for the "immersive" direction.
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -109,7 +117,7 @@ export default async function LangLayout({
   return (
     <html
       lang={lang}
-      className={`${poppins.variable} ${lora.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${poppins.variable} ${lora.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <a
