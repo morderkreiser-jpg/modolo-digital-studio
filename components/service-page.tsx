@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2, Code2, Palette, Camera, Mail, MessageCircle } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
+import SiteFooter from "@/components/site-footer";
+import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import { useRegion, whatsappHref } from "@/components/use-region";
@@ -11,13 +14,6 @@ export type Lang = Locale;
 export type Slug = "web" | "brand" | "content" | "email";
 
 export const SERVICE_SLUGS: Slug[] = ["web", "brand", "content", "email"];
-
-const ICONS: Record<Slug, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
-  web: Code2,
-  brand: Palette,
-  content: Camera,
-  email: Mail,
-};
 
 const ui: Record<
   Lang,
@@ -33,9 +29,6 @@ const ui: Record<
     ctaWhatsapp: string;
     whatsappMsg: string;
     ctaPricing: string;
-    home: string;
-    imprint: string;
-    privacy: string;
   }
 > = {
   en: {
@@ -50,9 +43,6 @@ const ui: Record<
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
     ctaPricing: "See pricing",
-    home: "Home",
-    imprint: "Legal Notice",
-    privacy: "Privacy Policy",
   },
   de: {
     label: "Leistung",
@@ -66,9 +56,6 @@ const ui: Record<
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
     ctaPricing: "Preise ansehen",
-    home: "Home",
-    imprint: "Impressum",
-    privacy: "Datenschutz",
   },
   it: {
     label: "Servizio",
@@ -82,9 +69,6 @@ const ui: Record<
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
     ctaPricing: "Vedi i prezzi",
-    home: "Home",
-    imprint: "Note legali",
-    privacy: "Privacy",
   },
 };
 
@@ -322,124 +306,119 @@ const content: Record<Slug, Record<Lang, Service>> = {
   },
 };
 
+const container = "mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16";
+const pad = (n: number) => String(n).padStart(2, "0");
+
 export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) {
   const u = ui[lang];
   const s = content[slug][lang];
-  const Icon = ICONS[slug];
+  const reduce = useReducedMotion();
   const region = useRegion();
   const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, u.whatsappMsg);
   const others = SERVICE_SLUGS.filter((x) => x !== slug);
-  const year = new Date().getFullYear();
+  const num = pad(SERVICE_SLUGS.indexOf(slug) + 1);
+
+  const rise = reduce ? {} : { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
 
   return (
-    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
-      {/* NAVBAR */}
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] overflow-x-hidden outline-none">
       <SiteNav lang={lang} ctaLabel={u.ctaButton} ctaHref={localizedHref(lang, "/#contatti")} />
+      <div className="mds-grain" aria-hidden />
+      <Measure />
 
       {/* HERO */}
-      <section className="relative max-w-5xl mx-auto px-6 lg:px-8 pt-36 pb-16">
-        <div className="absolute top-24 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[120px] -z-0" />
-        <Link href={localizedHref(lang, "/#servizi")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/65 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+      <section className={`${container} pt-36 pb-14 md:pb-20`}>
+        <Link href={localizedHref(lang, "/#servizi")} data-cursor="link" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
-        <div className="relative">
-          <div className="inline-flex p-4 rounded-2xl bg-[#B5893F]/10 mb-8">
-            <Icon className="w-8 h-8 text-[#B5893F]" strokeWidth={1.3} />
-          </div>
-          <span className="block text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-4">{u.label}</span>
-          <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">{s.title}</h1>
-          <p className="text-lg md:text-xl text-[#1F1B16]/60 font-light leading-relaxed max-w-3xl">{s.intro}</p>
+        <div className="mt-12 flex items-baseline justify-between gap-4">
+          <span className="micro-caps text-[var(--color-gold-ink)]">{num} · {u.label}</span>
+          <span className="micro-caps tnum text-[#1F1B16]/40">{num} / {pad(SERVICE_SLUGS.length)}</span>
         </div>
+        <h1 className="display-type mt-5 text-[#1F1B16]" style={{ fontSize: "clamp(2.5rem, 6.4vw, 5.5rem)" }}>{s.title}</h1>
+        <p className="mt-7 max-w-3xl text-lg font-light leading-relaxed text-[#1F1B16]/65 md:text-xl">{s.intro}</p>
       </section>
 
       {/* INCLUDES */}
-      <section className="max-w-5xl mx-auto px-6 lg:px-8 py-12">
-        <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-10">{u.includes}</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
+      <section className={`${container} py-12 md:py-16`}>
+        <div className="mb-10 flex items-baseline gap-4 md:mb-12">
+          <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>—</span>
+          <h2 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.includes}</h2>
+        </div>
+        <div className="grid border-b border-[color:var(--line)] sm:grid-cols-2 sm:gap-x-12">
           {s.includes.map((item, i) => (
-            <div key={i} className="flex items-start gap-4 p-5 rounded-2xl border border-[#1F1B16]/[0.08] bg-white shadow-[0_4px_30px_rgba(31,27,22,0.04)]">
-              <CheckCircle2 className="w-5 h-5 text-[#B5893F] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-              <span className="text-[#1F1B16]/70 font-light leading-relaxed">{item}</span>
-            </div>
+            <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.45, delay: (i % 2) * 0.05 }} className="flex items-start gap-4 border-t border-[color:var(--line)] py-5">
+              <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={1.6} />
+              <span className="font-light leading-relaxed text-[#1F1B16]/80">{item}</span>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* APPROACH */}
-      <section className="max-w-5xl mx-auto px-6 lg:px-8 py-12">
-        <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-10">{u.approach}</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+      <section className={`${container} py-12 md:py-16`}>
+        <div className="mb-10 flex items-baseline gap-4 md:mb-14">
+          <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>—</span>
+          <h2 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.approach}</h2>
+        </div>
+        <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
           {s.approach.map((step, i) => (
-            <div key={i}>
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-[#B5893F]/40 text-[#B5893F] font-serif italic text-lg mb-5">
-                {String(i + 1).padStart(2, "0")}
+            <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.6, delay: i * 0.1 }} className="border-t border-[var(--color-gold)]/30 pt-6">
+              <div className="flex items-baseline gap-4">
+                <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{pad(i + 1)}</span>
+                <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.9rem)" }}>{step.title}</h3>
               </div>
-              <h3 className="text-xl font-light mb-3">{step.title}</h3>
-              <p className="text-[#1F1B16]/65 font-light leading-relaxed text-sm">{step.desc}</p>
-            </div>
+              <p className="mt-4 font-light leading-relaxed text-[#1F1B16]/65">{step.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-5xl mx-auto px-6 lg:px-8 py-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[#1F1B16]/[0.08] bg-[#EEE6D8] px-8 py-14 text-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#B5893F]/[0.06] rounded-full blur-[120px]" />
-          <div className="relative">
-            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4">{u.ctaTitle}</h2>
-            <p className="text-[#1F1B16]/60 font-light mb-8 max-w-xl mx-auto">{u.ctaText}</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center justify-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300">
-                {u.ctaButton}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300">
-                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
-                {u.ctaWhatsapp}
-              </a>
-            </div>
-            <Link href={localizedHref(lang, "/prezzi")} className="mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
-              {u.ctaPricing}
-              <ArrowRight className="w-4 h-4" />
+      {/* CTA — the Espresso dark room */}
+      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+        <div className="mx-auto max-w-[1400px] text-center">
+          <h2 className="display-type mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{u.ctaTitle}</h2>
+          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(251,248,242,0.68)" }}>{u.ctaText}</p>
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--paper)] px-8 py-4 text-sm font-medium tracking-wide text-[#1F1B16] transition-colors duration-300 hover:bg-[var(--bone)]">
+              {u.ctaButton}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
+            <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-medium tracking-wide transition-colors duration-300" style={{ borderColor: "rgba(201,162,90,0.4)", color: "var(--gilt)" }}>
+              <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+              {u.ctaWhatsapp}
+            </a>
           </div>
+          <Link href={localizedHref(lang, "/prezzi")} className="group mt-8 inline-flex items-center gap-2 text-sm tracking-wide" style={{ color: "var(--gilt)" }}>
+            {u.ctaPricing}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </section>
 
-      {/* OTHER SERVICES */}
-      <section className="max-w-5xl mx-auto px-6 lg:px-8 py-12 pb-24">
-        <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-10">{u.other}</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {others.map((o) => {
-            const OIcon = ICONS[o];
-            return (
-              <Link
-                key={o}
-                href={localizedHref(lang, `/servizi/${o}`)}
-                className="group flex items-center gap-4 p-6 rounded-2xl border border-[#1F1B16]/[0.08] bg-white hover:border-[#B5893F]/40 hover:shadow-[0_8px_30px_rgba(31,27,22,0.06)] transition-all duration-300"
-              >
-                <div className="inline-flex p-3 rounded-xl bg-[#B5893F]/10 group-hover:bg-[#B5893F]/20 transition-colors">
-                  <OIcon className="w-5 h-5 text-[#B5893F]" strokeWidth={1.3} />
-                </div>
-                <span className="font-light leading-tight">{content[o][lang].title}</span>
-              </Link>
-            );
-          })}
+      {/* OTHER SERVICES — hairline index */}
+      <section className={`${container} py-16 md:py-20`}>
+        <span className="micro-caps text-[var(--color-gold-ink)]">{u.other}</span>
+        <div className="mt-6 border-b border-[color:var(--line)]">
+          {others.map((o) => (
+            <Link
+              key={o}
+              href={localizedHref(lang, `/servizi/${o}`)}
+              data-cursor="link"
+              className="group flex items-baseline justify-between gap-6 border-t border-[color:var(--line)] py-6 transition-colors hover:bg-[var(--bone)]/40 md:px-2"
+            >
+              <div className="flex items-baseline gap-4 md:gap-7">
+                <span className="micro-caps tnum text-[var(--color-gold-ink)]">{pad(SERVICE_SLUGS.indexOf(o) + 1)}</span>
+                <h3 className="display-type text-[#1F1B16] transition-colors group-hover:text-[var(--color-gold-ink)]" style={{ fontSize: "clamp(1.35rem, 2.6vw, 2rem)" }}>{content[o][lang].title}</h3>
+              </div>
+              <ArrowRight className="h-5 w-5 flex-shrink-0 text-[var(--color-gold-ink)] transition-transform group-hover:translate-x-1" strokeWidth={1.4} />
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-[#1F1B16]/[0.08] py-10 px-6 lg:px-8 bg-[#ECE3D3]">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {year} Modolo Digital Studio</span>
-          <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter lang={lang} marker={u.label} />
     </main>
   );
 }

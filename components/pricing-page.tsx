@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
+import SiteFooter from "@/components/site-footer";
+import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import {
@@ -42,11 +45,7 @@ function rememberRegion(r: Region) {
 }
 
 const POPULAR: Record<Locale, string> = { en: "Popular", de: "Beliebt", it: "Consigliato" };
-const FOOT: Record<Locale, { home: string; imprint: string; privacy: string }> = {
-  en: { home: "Home", imprint: "Legal Notice", privacy: "Privacy Policy" },
-  de: { home: "Home", imprint: "Impressum", privacy: "Datenschutz" },
-  it: { home: "Home", imprint: "Note legali", privacy: "Privacy" },
-};
+const KICKER: Record<Locale, string> = { en: "Pricing", de: "Preise", it: "Listino" };
 
 // Thousands separator per display locale (English comma, Swiss German apostrophe, Italian dot)
 // so the separator is unambiguous in each language. Formatted manually rather than via Intl so
@@ -55,6 +54,8 @@ const THOUSANDS: Record<Locale, string> = { en: ",", de: "'", it: "." };
 function groupThousands(n: number, sep: string): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep);
 }
+
+const container = "mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16";
 
 export default function PricingPage({
   lang,
@@ -66,9 +67,8 @@ export default function PricingPage({
   // SSR uses initialRegion (resolved server-side from geo/cookie); the client then reflects the
   // MDS_REGION cookie via the store — same value, so no hydration mismatch and no price flash.
   const region = useSyncExternalStore(subscribeRegion, readRegion, () => initialRegion);
+  const reduce = useReducedMotion();
   const ui = PRICING_UI[lang];
-  const foot = FOOT[lang];
-  const year = new Date().getFullYear();
   const whatsapp = `https://wa.me/${(region === "it" ? SITE.phoneIt : SITE.phone).replace(/[^0-9]/g, "")}`;
   const sep = THOUSANDS[lang];
   const cur = CURRENCY[region];
@@ -80,158 +80,166 @@ export default function PricingPage({
   const resolve = (s: string) =>
     s.replace("{cur}", cur).replace("{hourly}", groupThousands(HOURLY[region], sep)).replace("{vat}", VAT[region]);
 
-  return (
-    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] overflow-x-hidden outline-none">
-      <SiteNav lang={lang} ctaLabel={ui.ctaContact} ctaHref={localizedHref(lang, "/#contatti")} />
+  const rise = reduce ? {} : { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
 
-      {/* HERO + currency toggle */}
-      <section className="relative max-w-6xl mx-auto px-6 lg:px-8 pt-36 pb-10">
-        <div className="absolute top-24 right-0 w-[400px] h-[400px] bg-[#B5893F]/[0.05] rounded-full blur-[120px] -z-0" />
+  return (
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] overflow-x-hidden outline-none">
+      <SiteNav lang={lang} ctaLabel={ui.ctaContact} ctaHref={localizedHref(lang, "/#contatti")} />
+      <div className="mds-grain" aria-hidden />
+      <Measure />
+
+      {/* HERO — currency toggle */}
+      <section className={`${container} pt-36 pb-14 md:pb-16`}>
         <Link
           href={localizedHref(lang, "/")}
-          className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/70 hover:text-[#B5893F] tracking-wider transition-colors mb-10"
+          data-cursor="link"
+          className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]"
         >
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {ui.back}
         </Link>
-        <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <h1 className="text-4xl md:text-6xl font-light tracking-tight">
-            {ui.heading1}
-            <span className="italic font-serif text-[#B5893F]">{ui.headingAccent}</span>
-          </h1>
-          <div className="flex flex-col items-start md:items-end gap-2">
-            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 border border-[#1F1B16]/12 rounded-full p-0.5 bg-white">
+
+        <div className="mt-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="micro-caps text-[var(--color-gold-ink)]">{KICKER[lang]} · {regionName}</span>
+            <h1 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+              {ui.heading1}<em className="text-[var(--color-gold)]">{ui.headingAccent}</em>
+            </h1>
+          </div>
+          <div className="flex flex-col items-start gap-3 md:items-end">
+            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 rounded-full border border-[#1F1B16]/12 p-0.5">
               {REGIONS.map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => chooseRegion(r)}
                   aria-pressed={region === r}
-                  className={`px-4 py-2 text-xs tracking-wider uppercase rounded-full transition-colors ${
-                    region === r ? "bg-[#8F6B2F] text-white" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
+                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-wider transition-colors ${
+                    region === r ? "bg-[#1F1B16] text-[var(--paper)]" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
                   }`}
                 >
                   {r === "ch" ? "CHF" : "EUR"}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-[#1F1B16]/70">{resolve(ui.subtitle)}</p>
-            <p className="sr-only" role="status" aria-live="polite">
-              {ui.regionNote.replace("{region}", regionName)}
-            </p>
+            <p className="micro-caps text-[#1F1B16]/55">{resolve(ui.subtitle)}</p>
+            <p className="sr-only" role="status" aria-live="polite">{ui.regionNote.replace("{region}", regionName)}</p>
           </div>
         </div>
       </section>
 
       {/* 01 · WEBSITES */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-10">
+      <section className={`${container} py-12 md:py-16`}>
         <SectionHead num="01" title={WEBSITES.title[lang]} tagline={WEBSITES.tagline[lang]} />
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-5 md:grid-cols-2">
           {WEBSITES.items.map((it, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`group relative p-8 rounded-2xl border bg-white transition-all duration-300 flex flex-col ${
-                it.featured
-                  ? "border-[#B5893F]/50 shadow-[0_10px_40px_rgba(31,27,22,0.10)] hover:shadow-[0_14px_50px_rgba(31,27,22,0.14)]"
-                  : "border-[#1F1B16]/[0.08] shadow-[0_4px_30px_rgba(31,27,22,0.04)] hover:border-[#B5893F]/40 hover:shadow-[0_10px_40px_rgba(31,27,22,0.08)]"
+              {...rise}
+              transition={reduce ? undefined : { duration: 0.55, delay: (i % 2) * 0.06 }}
+              className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
+                it.featured ? "border-[var(--color-gold)]/55 bg-[var(--bone)]/40" : "border-[color:var(--line)] bg-[var(--paper)]"
               }`}
             >
               {it.featured && (
-                <span className="absolute -top-3 left-8 text-[10px] tracking-wider uppercase bg-[#8F6B2F] text-white px-3 py-1 rounded-full">
+                <span className="absolute -top-3 left-7 rounded-full bg-[#1F1B16] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[var(--paper)]">
                   {POPULAR[lang]}
                 </span>
               )}
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className="text-xl font-light">{it.name[lang]}</h3>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.35rem, 2.2vw, 1.75rem)" }}>{it.name[lang]}</h3>
                   {it.badge && (
-                    <span className="text-[10px] tracking-wider uppercase text-[var(--color-gold-ink)] border border-[#B5893F]/30 bg-[#B5893F]/[0.06] px-2 py-0.5 rounded-full">
-                      {it.badge[lang]}
-                    </span>
+                    <span className="micro-caps rounded-full border border-[var(--color-gold)]/40 px-2 py-0.5 text-[var(--color-gold-ink)]">{it.badge[lang]}</span>
                   )}
                 </div>
-                <div className="text-right whitespace-nowrap">
-                  {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/70">{ui.from}</span>}
-                  <span className="text-2xl font-light">{amount(it.price[region])}</span>
+                <div className="whitespace-nowrap text-right">
+                  {it.from && <span className="micro-caps block text-[#1F1B16]/50">{ui.from}</span>}
+                  <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.5rem, 2.4vw, 2rem)" }}>{amount(it.price[region])}</span>
                 </div>
               </div>
-              <p className="text-[#1F1B16]/70 font-light leading-relaxed text-sm mb-4">{it.desc[lang]}</p>
-              {it.meta && <p className="text-xs text-[#1F1B16]/70 mt-auto pt-2">{it.meta[lang]}</p>}
-            </div>
+              <p className="mt-4 text-sm font-light leading-relaxed text-[#1F1B16]/70">{it.desc[lang]}</p>
+              {it.meta && <p className="micro-caps mt-auto pt-4 text-[#1F1B16]/45">{it.meta[lang]}</p>}
+            </motion.div>
           ))}
         </div>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
-          <p className="text-sm text-[#1F1B16]/70 font-light">{ui.notSure}</p>
-          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-[var(--color-gold-ink)] tracking-wider hover:gap-3 transition-all">
-            <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+        <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-3">
+          <p className="text-sm font-light text-[#1F1B16]/60">{ui.notSure}</p>
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+            <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
             {ui.ctaWhatsapp}
           </a>
         </div>
       </section>
 
       {/* 02 · CARE PLANS */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-10">
+      <section className={`${container} py-12 md:py-16`}>
         <SectionHead num="02" title={CARE.title[lang]} tagline={CARE.tagline[lang]} />
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-5 md:grid-cols-3">
           {CARE.plans.map((p, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`relative p-8 rounded-2xl border bg-white flex flex-col ${
-                p.featured
-                  ? "border-[#B5893F]/50 shadow-[0_10px_40px_rgba(31,27,22,0.10)]"
-                  : "border-[#1F1B16]/[0.08] shadow-[0_4px_30px_rgba(31,27,22,0.04)]"
+              {...rise}
+              transition={reduce ? undefined : { duration: 0.55, delay: i * 0.08 }}
+              className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
+                p.featured ? "border-[var(--color-gold)]/55 bg-[var(--bone)]/40" : "border-[color:var(--line)] bg-[var(--paper)]"
               }`}
             >
               {p.featured && (
-                <span className="absolute -top-3 left-8 text-[10px] tracking-wider uppercase bg-[#8F6B2F] text-white px-3 py-1 rounded-full">
+                <span className="absolute -top-3 left-7 rounded-full bg-[#1F1B16] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[var(--paper)]">
                   {POPULAR[lang]}
                 </span>
               )}
-              <h3 className="text-lg font-light mb-2">{p.name}</h3>
-              <div className="mb-6 flex items-baseline gap-1">
-                <span className="text-3xl font-light">{amount(p.price[region])}</span>
-                <span className="text-sm text-[#1F1B16]/70">{ui.perMonth}</span>
+              <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "1.5rem" }}>{p.name}</h3>
+              <div className="mt-3 mb-6 flex items-baseline gap-1.5">
+                <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}>{amount(p.price[region])}</span>
+                <span className="micro-caps text-[#1F1B16]/50">{ui.perMonth}</span>
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-3 border-t border-[color:var(--line)] pt-6">
                 {p.features.map((f, j) => (
-                  <li key={j} className="flex items-start gap-3 text-sm text-[#1F1B16]/70 font-light">
-                    <Check className="w-4 h-4 text-[#B5893F] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <li key={j} className="flex items-start gap-3 text-sm font-light text-[#1F1B16]/75">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={2} />
                     {f[lang]}
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* 03 · BRANDING & CONTENT */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-10">
+      <section className={`${container} py-12 md:py-16`}>
         <SectionHead num="03" title={BRANDING.title[lang]} tagline={BRANDING.tagline[lang]} />
-        <div className="rounded-2xl border border-[#1F1B16]/[0.08] bg-white divide-y divide-[#1F1B16]/[0.06] shadow-[0_4px_30px_rgba(31,27,22,0.04)]">
+        <div className="border-b border-[color:var(--line)]">
           {BRANDING.items.map((it, i) => (
-            <div key={i} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-6 p-6">
+            <motion.div
+              key={i}
+              {...rise}
+              transition={reduce ? undefined : { duration: 0.5, delay: i * 0.05 }}
+              className="flex flex-col gap-2 border-t border-[color:var(--line)] py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
+            >
               <div className="min-w-0">
-                <h3 className="font-light mb-1">{it.name[lang]}</h3>
-                <p className="text-sm text-[#1F1B16]/70 font-light max-w-xl leading-relaxed">{it.desc[lang]}</p>
-                {it.meta && <p className="text-xs text-[#1F1B16]/70 mt-1">{it.meta[lang]}</p>}
+                <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.2rem, 2vw, 1.5rem)" }}>{it.name[lang]}</h3>
+                <p className="mt-1.5 max-w-xl text-sm font-light leading-relaxed text-[#1F1B16]/70">{it.desc[lang]}</p>
+                {it.meta && <p className="micro-caps mt-2 text-[#1F1B16]/45">{it.meta[lang]}</p>}
               </div>
-              <div className="text-left sm:text-right whitespace-nowrap">
-                {it.from && <span className="block text-[10px] tracking-wider uppercase text-[#1F1B16]/70">{ui.from}</span>}
-                <span className="text-lg font-light">{amount(it.price[region])}</span>
+              <div className="whitespace-nowrap text-left sm:text-right">
+                {it.from && <span className="micro-caps block text-[#1F1B16]/50">{ui.from}</span>}
+                <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.6rem)" }}>{amount(it.price[region])}</span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* GOOD TO KNOW */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-10">
-        <div className="rounded-2xl border border-[#1F1B16]/[0.08] bg-[#EEE6D8] p-8">
-          <span className="text-[var(--color-gold-ink)] text-xs tracking-[0.3em] uppercase mb-6 block">{ui.goodToKnow}</span>
-          <div className="grid sm:grid-cols-2 gap-x-10 gap-y-3">
+      <section className={`${container} py-12 md:py-16`}>
+        <div className="rounded-[4px] bg-[var(--bone)] p-8 md:p-12">
+          <span className="micro-caps text-[var(--color-gold-ink)]">{ui.goodToKnow}</span>
+          <div className="mt-7 grid gap-x-12 gap-y-4 sm:grid-cols-2">
             {GOOD_TO_KNOW.map((g, i) => (
-              <p key={i} className="text-sm text-[#1F1B16]/70 font-light">
+              <p key={i} className="text-sm font-light leading-relaxed text-[#1F1B16]/70">
                 <span className="font-medium text-[#1F1B16]">{g.label[lang]}</span> — {resolve(g.value[lang])}
               </p>
             ))}
@@ -239,56 +247,44 @@ export default function PricingPage({
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-12 pb-24">
-        <div className="relative overflow-hidden rounded-3xl border border-[#1F1B16]/[0.08] bg-[#EEE6D8] px-8 py-14 text-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#B5893F]/[0.06] rounded-full blur-[120px]" />
-          <div className="relative">
-            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4">{ui.ctaHeading}</h2>
-            <p className="text-[#1F1B16]/70 font-light mb-8 max-w-xl mx-auto">{ui.ctaText}</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href={localizedHref(lang, "/#contatti")}
-                className="group inline-flex items-center justify-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-8 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all duration-300"
-              >
-                {ui.ctaContact}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 border border-[#1F1B16]/15 px-8 py-4 rounded-full font-medium tracking-wider hover:border-[#B5893F]/60 hover:text-[#B5893F] transition-all duration-300"
-              >
-                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
-                {ui.ctaWhatsapp}
-              </a>
-            </div>
+      {/* CTA — the Espresso dark room */}
+      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+        <div className="mx-auto max-w-[1400px] text-center">
+          <h2 className="display-type mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{ui.ctaHeading}</h2>
+          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(251,248,242,0.68)" }}>{ui.ctaText}</p>
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <Link
+              href={localizedHref(lang, "/#contatti")}
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--paper)] px-8 py-4 text-sm font-medium tracking-wide text-[#1F1B16] transition-colors duration-300 hover:bg-[var(--bone)]"
+            >
+              {ui.ctaContact}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-medium tracking-wide transition-colors duration-300"
+              style={{ borderColor: "rgba(201,162,90,0.4)", color: "var(--gilt)" }}
+            >
+              <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+              {ui.ctaWhatsapp}
+            </a>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-[#1F1B16]/[0.08] py-10 px-6 lg:px-8 bg-[#ECE3D3]">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {year} Modolo Digital Studio</span>
-          <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{foot.home}</Link>
-            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{foot.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{foot.privacy}</Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter lang={lang} marker={KICKER[lang]} />
     </main>
   );
 }
 
 function SectionHead({ num, title, tagline }: { num: string; title: string; tagline: string }) {
   return (
-    <div className="flex items-baseline gap-4 mb-10">
-      <span aria-hidden="true" className="font-serif italic text-[#B5893F] text-2xl">{num}</span>
-      <h2 className="text-2xl md:text-3xl font-light tracking-tight">{title}</h2>
-      <span className="text-sm text-[#1F1B16]/70 hidden sm:block ml-auto font-serif italic">{tagline}</span>
+    <div className="mb-10 flex items-baseline gap-4 md:mb-12">
+      <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>{num}</span>
+      <h2 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{title}</h2>
+      <span className="micro-caps ml-auto hidden text-[#1F1B16]/45 sm:block">{tagline}</span>
     </div>
   );
 }

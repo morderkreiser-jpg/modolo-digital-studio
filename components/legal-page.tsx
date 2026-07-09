@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SiteNav from "@/components/site-nav";
+import SiteFooter from "@/components/site-footer";
+import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 
 export type Lang = Locale;
@@ -11,10 +13,10 @@ export type LegalKind = "impressum" | "privacy";
 type Section = { heading: string; body: string[] };
 type Doc = { title: string; date: string; sections: Section[] };
 
-const ui: Record<Lang, { back: string; updated: string; imprint: string; privacy: string; home: string }> = {
-  en: { back: "Back to homepage", updated: "Last updated", imprint: "Legal Notice", privacy: "Privacy Policy", home: "Home" },
-  de: { back: "Zurück zur Startseite", updated: "Stand", imprint: "Impressum", privacy: "Datenschutz", home: "Home" },
-  it: { back: "Torna alla homepage", updated: "Ultimo aggiornamento", imprint: "Note legali", privacy: "Privacy", home: "Home" },
+const ui: Record<Lang, { back: string; updated: string; kicker: string }> = {
+  en: { back: "Back to homepage", updated: "Last updated", kicker: "Legal" },
+  de: { back: "Zurück zur Startseite", updated: "Stand", kicker: "Rechtliches" },
+  it: { back: "Torna alla homepage", updated: "Ultimo aggiornamento", kicker: "Note legali" },
 };
 
 const content: Record<LegalKind, Record<Lang, Doc>> = {
@@ -306,53 +308,46 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
 export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang }) {
   const doc = content[kind][lang];
   const u = ui[lang];
-  const year = new Date().getFullYear();
 
   return (
-    <main id="main" tabIndex={-1} className="min-h-screen bg-[#F7F3EC] text-[#1F1B16] outline-none">
-      {/* NAVBAR */}
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] outline-none">
       <SiteNav lang={lang} />
+      <div className="mds-grain" aria-hidden />
+      <Measure />
 
       {/* CONTENT */}
-      <section className="max-w-3xl mx-auto px-6 lg:px-8 pt-32 pb-24">
-        <Link href={localizedHref(lang, "/")} className="inline-flex items-center gap-2 text-sm text-[#1F1B16]/65 hover:text-[#B5893F] tracking-wider transition-colors mb-10">
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+      <section className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16 pt-36 pb-20 md:pb-28">
+        <Link href={localizedHref(lang, "/")} data-cursor="link" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
 
-        <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-3">{doc.title}</h1>
-        <p className="text-sm text-[#1F1B16]/70 tracking-wider mb-14">
-          {u.updated}: {doc.date}
-        </p>
+        <div className="mt-12 max-w-3xl">
+          <span className="micro-caps text-[var(--color-gold-ink)]">{u.kicker}</span>
+          <h1 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
+          <p className="micro-caps mt-5 text-[#1F1B16]/45">{u.updated} · {doc.date}</p>
+        </div>
 
-        <div className="space-y-12">
+        <div className="mt-14 max-w-3xl border-b border-[color:var(--line)]">
           {doc.sections.map((s, i) => (
-            <div key={i}>
-              <h2 className="text-xl font-light mb-4 text-[#1F1B16]">
-                <span className="text-[#B5893F] mr-2">{String(i + 1).padStart(2, "0")}</span>
-                {s.heading}
+            <div key={i} className="border-t border-[color:var(--line)] py-8">
+              <h2 className="flex gap-4 text-[#1F1B16]">
+                <span aria-hidden="true" className="micro-caps tnum shrink-0 pt-1.5 text-[var(--color-gold-ink)]">{String(i + 1).padStart(2, "0")}</span>
+                <span className="display-type" style={{ fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)" }}>{s.heading}</span>
               </h2>
-              {s.body.map((p, j) => (
-                <p key={j} className="text-[#1F1B16]/65 font-light leading-relaxed whitespace-pre-line mb-3 last:mb-0">
-                  {p}
-                </p>
-              ))}
+              <div className="mt-3 pl-0 sm:pl-10">
+                {s.body.map((p, j) => (
+                  <p key={j} className="mb-3 whitespace-pre-line font-light leading-relaxed text-[#1F1B16]/70 last:mb-0">
+                    {p}
+                  </p>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-[#1F1B16]/[0.08] py-10 px-6 lg:px-8 bg-[#ECE3D3]">
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-[#1F1B16]/70 tracking-wider">© {year} Modolo Digital Studio</span>
-          <div className="flex items-center gap-5 text-xs tracking-wider">
-            <Link href={localizedHref(lang, "/")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.home}</Link>
-            <Link href={localizedHref(lang, "/impressum")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.imprint}</Link>
-            <Link href={localizedHref(lang, "/privacy")} className="text-[#1F1B16]/70 hover:text-[#B5893F] transition-colors">{u.privacy}</Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter lang={lang} marker={u.kicker} />
     </main>
   );
 }
