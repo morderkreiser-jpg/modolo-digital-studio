@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Icosahedron, MeshDistortMaterial, Sparkles } from "@react-three/drei";
+import { Icosahedron, MeshDistortMaterial } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { useRef } from "react";
 import type { Mesh } from "three";
@@ -45,8 +45,6 @@ export default function HeroCanvas() {
       <pointLight position={[0, 3, -4]} intensity={70} color="#c9a25a" />
       <pointLight position={[2, -3, 2]} intensity={80} color="#fff2d8" />
       <Blob />
-      <Sparkles count={90} scale={[11, 7, 6]} size={5} speed={0.35} opacity={0.7} color="#e8c877" />
-      <Sparkles count={40} scale={[9, 6, 5]} size={7} speed={0.2} opacity={0.6} color="#c9a25a" />
       <EffectComposer>
         <Bloom intensity={1.35} luminanceThreshold={0.13} luminanceSmoothing={0.9} mipmapBlur />
       </EffectComposer>
