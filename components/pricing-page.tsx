@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
@@ -17,31 +16,8 @@ import {
   HOURLY,
   VAT,
   CURRENCY,
-  REGIONS,
-  DEFAULT_REGION,
-  REGION_COOKIE,
-  isRegion,
   type Region,
 } from "@/lib/pricing";
-
-// The pricing region lives in the MDS_REGION cookie (set by proxy.ts geo, or the toggle).
-// Read it via useSyncExternalStore so SSR uses the default and the client reflects the cookie
-// without a hydration mismatch or a setState-in-effect.
-function readRegion(): Region {
-  if (typeof document === "undefined") return DEFAULT_REGION;
-  const m = document.cookie.match(/(?:^|;\s*)MDS_REGION=(ch|it)/);
-  return m && isRegion(m[1]) ? m[1] : DEFAULT_REGION;
-}
-function subscribeRegion(onChange: () => void) {
-  window.addEventListener("mds-region", onChange);
-  return () => window.removeEventListener("mds-region", onChange);
-}
-// Persist the currency choice and notify subscribers. Module-level (not in the component) so
-// it stays a plain browser side effect.
-function rememberRegion(r: Region) {
-  document.cookie = `${REGION_COOKIE}=${r}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-  window.dispatchEvent(new Event("mds-region"));
-}
 
 const POPULAR: Record<Locale, string> = { en: "Popular", de: "Beliebt", it: "Consigliato" };
 const KICKER: Record<Locale, string> = { en: "Pricing", de: "Preise", it: "Listino" };
@@ -56,25 +32,17 @@ function groupThousands(n: number, sep: string): string {
 
 const container = "mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16";
 
-export default function PricingPage({
-  lang,
-  initialRegion = DEFAULT_REGION,
-}: {
-  lang: Locale;
-  initialRegion?: Region;
-}) {
-  // SSR uses initialRegion (resolved server-side from geo/cookie); the client then reflects the
-  // MDS_REGION cookie via the store — same value, so no hydration mismatch and no price flash.
-  const region = useSyncExternalStore(subscribeRegion, readRegion, () => initialRegion);
+export default function PricingPage({ lang }: { lang: Locale }) {
+  // EUR pricing hidden for now (client request 2026-07-10): CHF only, currency toggle removed.
+  // Revert this commit to restore the CH/EUR geo toggle.
+  const region: Region = "ch";
   const reduce = useReducedMotion();
   const ui = PRICING_UI[lang];
-  const whatsapp = `https://wa.me/${(region === "it" ? SITE.phoneIt : SITE.phone).replace(/[^0-9]/g, "")}`;
+  const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}`;
   const sep = THOUSANDS[lang];
   const cur = CURRENCY[region];
   const amount = (n: number) => `${cur} ${groupThousands(n, sep)}`;
-  const regionName = region === "it" ? ui.regionIt : ui.regionCh;
-
-  const chooseRegion = (r: Region) => rememberRegion(r);
+  const regionName = ui.regionCh;
 
   const resolve = (s: string) =>
     s.replace("{cur}", cur).replace("{hourly}", groupThousands(HOURLY[region], sep)).replace("{vat}", VAT[region]);
@@ -86,7 +54,7 @@ export default function PricingPage({
       <SiteNav lang={lang} ctaLabel={ui.ctaContact} ctaHref={localizedHref(lang, "/#contatti")} theme="dark" />
       <div className="mds-grain" aria-hidden />
       
-      {/* HERO — currency toggle */}
+      {/* HERO */}
       <section className={`${container} pt-36 pb-14 md:pb-16`}>
         <Link
           href={localizedHref(lang, "/")}
@@ -104,23 +72,7 @@ export default function PricingPage({
             </h1>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
-            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 rounded-full border border-[#f5efe3]/15 p-0.5">
-              {REGIONS.map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => chooseRegion(r)}
-                  aria-pressed={region === r}
-                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-wider transition-colors ${
-                    region === r ? "bg-[var(--color-gold)] text-[#17130E]" : "text-[#f5efe3]/70 hover:text-[#f5efe3]"
-                  }`}
-                >
-                  {r === "ch" ? "CHF" : "EUR"}
-                </button>
-              ))}
-            </div>
             <p className="micro-caps text-[#f5efe3]/55">{resolve(ui.subtitle)}</p>
-            <p className="sr-only" role="status" aria-live="polite">{ui.regionNote.replace("{region}", regionName)}</p>
           </div>
         </div>
       </section>
