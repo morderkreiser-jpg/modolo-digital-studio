@@ -38,7 +38,16 @@ export default function Reveal({
 
       const run = () => {
         if (!ref.current) return;
-        const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: "top 86%", once: true } });
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: root, start: "top 86%", once: true },
+          // Once the lines have risen, drop the SplitText masks so the heading is plain markup
+          // again — the clip masks are only needed during the reveal, and leaving them on
+          // shrink-wrapped italic headings clips the last slanted glyph. Restores natural text.
+          onComplete: () => {
+            split?.revert();
+            split = undefined;
+          },
+        });
         if (fades.length) tl.from(fades, { y: 18, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }, 0);
         if (heading) {
           split = SplitText.create(heading, { type: "lines", mask: "lines", autoSplit: true });

@@ -241,6 +241,13 @@
   font-weight: 600;
   text-wrap: balance;
 }
+/* Italic accent inside a display heading: the slanted final glyph overhangs its box, so give it
+   room on the right. Fixes two things — the last italic letter being clipped by the line-reveal
+   mask when the heading is shrink-wrapped (portfolio), and an upright char right after the accent
+   colliding with the italic "i" (the "?" in "Pronto a distinguerti?"). */
+.display-space em {
+  padding-right: 0.08em;
+}
 /* Gold gradient text — for accent words on the dark field. */
 .gold-grad {
   background: linear-gradient(100deg, #f0d089, var(--color-gold) 48%, var(--gilt));
