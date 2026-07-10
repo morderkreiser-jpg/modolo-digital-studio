@@ -321,7 +321,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
 
   return (
     <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] overflow-x-hidden outline-none">
-      <SiteNav lang={lang} ctaLabel={u.ctaButton} ctaHref={localizedHref(lang, "/#contatti")} theme="dark" />
+      <SiteNav lang={lang} ctaLabel={u.ctaButton} ctaHref={localizedHref(lang, "/#contatti")} theme="light" />
       <div className="mds-grain" aria-hidden />
       
       {/* HERO */}
@@ -332,23 +332,23 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
         </Link>
         <div className="mt-12 flex items-baseline justify-between gap-4">
           <span className="micro-caps text-[var(--gilt)]">{num} · {u.label}</span>
-          <span className="micro-caps tnum text-[#f5efe3]/40">{num} / {pad(SERVICE_SLUGS.length)}</span>
+          <span className="micro-caps tnum text-[#17130e]/40">{num} / {pad(SERVICE_SLUGS.length)}</span>
         </div>
-        <h1 className="display-space mt-5 text-[#f5efe3]" style={{ fontSize: "clamp(2.5rem, 6.4vw, 5.5rem)" }}>{s.title}</h1>
-        <p className="mt-7 max-w-3xl text-lg font-light leading-relaxed text-[#f5efe3]/65 md:text-xl">{s.intro}</p>
+        <h1 className="display-space mt-5 text-[#17130e]" style={{ fontSize: "clamp(2.5rem, 6.4vw, 5.5rem)" }}>{s.title}</h1>
+        <p className="mt-7 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/65 md:text-xl">{s.intro}</p>
       </section>
 
       {/* INCLUDES */}
       <section className={`${container} py-12 md:py-16`}>
         <div className="mb-10 flex items-baseline gap-4 md:mb-12">
           <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>—</span>
-          <h2 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.includes}</h2>
+          <h2 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.includes}</h2>
         </div>
         <div className="grid border-b border-[color:var(--gold-line)] sm:grid-cols-2 sm:gap-x-12">
           {s.includes.map((item, i) => (
             <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.45, delay: (i % 2) * 0.05 }} className="flex items-start gap-4 border-t border-[color:var(--gold-line)] py-5">
               <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={1.6} />
-              <span className="font-light leading-relaxed text-[#f5efe3]/80">{item}</span>
+              <span className="font-light leading-relaxed text-[#17130e]/80">{item}</span>
             </motion.div>
           ))}
         </div>
@@ -358,26 +358,26 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
       <section className={`${container} py-12 md:py-16`}>
         <div className="mb-10 flex items-baseline gap-4 md:mb-14">
           <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>—</span>
-          <h2 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.approach}</h2>
+          <h2 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{u.approach}</h2>
         </div>
         <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
           {s.approach.map((step, i) => (
             <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.6, delay: i * 0.1 }} className="border-t border-[var(--color-gold)]/30 pt-6">
               <div className="flex items-baseline gap-4">
                 <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{pad(i + 1)}</span>
-                <h3 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.9rem)" }}>{step.title}</h3>
+                <h3 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.9rem)" }}>{step.title}</h3>
               </div>
-              <p className="mt-4 font-light leading-relaxed text-[#f5efe3]/65">{step.desc}</p>
+              <p className="mt-4 font-light leading-relaxed text-[#17130e]/65">{step.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* CTA — the Espresso dark room */}
-      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{u.ctaTitle}</h2>
-          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(251,248,242,0.68)" }}>{u.ctaText}</p>
+          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "#17130e" }}>{u.ctaTitle}</h2>
+          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(31,27,22,0.68)" }}>{u.ctaText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-gold)] px-8 py-4 text-sm font-semibold tracking-wide text-[#17130E] transition-transform duration-300 hover:scale-[1.02]">
               {u.ctaButton}
@@ -407,7 +407,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
             >
               <div className="flex items-baseline gap-4 md:gap-7">
                 <span className="micro-caps tnum text-[var(--gilt)]">{pad(SERVICE_SLUGS.indexOf(o) + 1)}</span>
-                <h3 className="display-space text-[#f5efe3] transition-colors group-hover:text-[var(--gilt)]" style={{ fontSize: "clamp(1.35rem, 2.6vw, 2rem)" }}>{content[o][lang].title}</h3>
+                <h3 className="display-space text-[#17130e] transition-colors group-hover:text-[var(--gilt)]" style={{ fontSize: "clamp(1.35rem, 2.6vw, 2rem)" }}>{content[o][lang].title}</h3>
               </div>
               <ArrowRight className="h-5 w-5 flex-shrink-0 text-[var(--gilt)] transition-transform group-hover:translate-x-1" strokeWidth={1.4} />
             </Link>
