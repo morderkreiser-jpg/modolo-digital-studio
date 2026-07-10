@@ -13,7 +13,7 @@ import Marquee from "@/components/marquee";
 import dynamic from "next/dynamic";
 
 // The immersive gold-blob WebGL hero — code-split + client-only so it never touches SSR/LCP.
-const HeroCanvas = dynamic(() => import("@/components/hero-canvas"), { ssr: false });
+const HeroCanvas = dynamic(() => import("@/components/hero-canvas-light"), { ssr: false });
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -342,46 +342,49 @@ export default function Home({ lang }: { lang: Lang }) {
         ]}
         ctaHref="#contatti"
         ctaLabel={t.nav.contact}
-        theme="dark"
+        theme="light"
+        scrollDark
       />
 
       {/* analog grain over the dark field */}
       <div className="mds-grain" aria-hidden />
 
-      {/* HERO — immersive: the gold-blob WebGL spectacle behind kinetic modern type */}
-      <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(55% 55% at 72% 42%, rgba(181,137,63,0.30), transparent 70%), radial-gradient(45% 45% at 86% 72%, rgba(201,162,90,0.18), transparent 72%)" }} />
+      {/* HERO — the CREAM "header": reflective gold-on-cream 3D + ink type, fading into the dark body */}
+      <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20" style={{ background: "#f6f1e7" }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 52% at 72% 45%, rgba(181,137,63,0.14), transparent 70%)" }} />
         {!reduce && <div className="absolute inset-0"><HeroCanvas /></div>}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(11,8,5,0.92) 0%, rgba(11,8,5,0.5) 42%, rgba(11,8,5,0) 66%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(246,241,231,0.92) 0%, rgba(246,241,231,0.55) 42%, rgba(246,241,231,0) 66%)" }} />
+        {/* fade the cream hero into the dark body below */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-44" style={{ background: "linear-gradient(to bottom, transparent, var(--ink-bg))" }} />
 
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
           <div className="mb-9 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#C9A25A", boxShadow: "0 0 14px #C9A25A" }} />
-            <span className="micro-caps text-[#f5efe3]/55">{t.hero.meta}</span>
+            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
+            <span className="micro-caps text-[#17130e]/55">{t.hero.meta}</span>
           </div>
 
-          <h1 className="display-space text-[#f5efe3] mds-in" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)", animationDelay: "0.12s" }}>
+          <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)", animationDelay: "0.12s" }}>
             {t.hero.line1}
             <br />
             {t.hero.line2}
             <br />
             {t.hero.line3pre}
-            <span className="gold-grad">{t.hero.line3accent}</span>
+            <span style={{ background: "linear-gradient(100deg, #c9992f, #b5893f 45%, #7e5d24)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{t.hero.line3accent}</span>
             {t.hero.line3post}
           </h1>
 
           <div className="mt-9 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <p className="mds-in max-w-xl text-base font-light leading-relaxed text-[#f5efe3]/60 sm:text-lg" style={{ animationDelay: "0.5s" }}>
+            <p className="mds-in max-w-xl text-base font-light leading-relaxed text-[#17130e]/65 sm:text-lg" style={{ animationDelay: "0.5s" }}>
               {t.hero.subtitle}
             </p>
             <div className="mds-in flex flex-wrap items-center gap-x-7 gap-y-4" style={{ animationDelay: "0.58s" }}>
               <Magnetic strength={0.4}>
-                <a href="#contatti" className="gold-glow group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-[#17130E] transition-transform duration-300 hover:scale-[1.03]" style={{ background: "linear-gradient(100deg, #e8c877, #b5893f)", fontFamily: "var(--font-space)" }}>
+                <a href="#contatti" className="group inline-flex items-center gap-2 rounded-full bg-[#17130E] px-8 py-4 text-sm font-medium text-[#F6F1E7] transition-colors duration-300 hover:bg-[#332616]" style={{ fontFamily: "var(--font-space)" }}>
                   {t.hero.ctaPrimary}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </Magnetic>
-              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#f5efe3]/70 transition-colors hover:text-[#f5efe3]">
+              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#17130e]/70 transition-colors hover:text-[#17130e]">
                 <span className="relative">
                   {t.hero.ctaSecondary}
                   <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)] transition-transform duration-300 group-hover:scale-x-100" />
