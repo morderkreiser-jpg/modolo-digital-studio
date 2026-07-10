@@ -13,7 +13,7 @@ import Marquee from "@/components/marquee";
 import dynamic from "next/dynamic";
 
 // The immersive gold-blob WebGL hero — code-split + client-only so it never touches SSR/LCP.
-const HeroCanvas = dynamic(() => import("@/components/hero-canvas"), { ssr: false });
+const HeroCanvas = dynamic(() => import("@/components/hero-canvas-light"), { ssr: false });
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -342,7 +342,7 @@ export default function Home({ lang }: { lang: Lang }) {
         ]}
         ctaHref="#contatti"
         ctaLabel={t.nav.contact}
-        theme="dark"
+        theme="light"
       />
 
       {/* analog grain over the dark field */}
@@ -350,17 +350,17 @@ export default function Home({ lang }: { lang: Lang }) {
 
       {/* HERO — immersive: the gold-blob WebGL spectacle behind kinetic modern type */}
       <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(55% 55% at 72% 42%, rgba(181,137,63,0.30), transparent 70%), radial-gradient(45% 45% at 86% 72%, rgba(201,162,90,0.18), transparent 72%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 52% at 72% 45%, rgba(181,137,63,0.14), transparent 70%)" }} />
         {!reduce && <div className="absolute inset-0"><HeroCanvas /></div>}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(11,8,5,0.92) 0%, rgba(11,8,5,0.5) 42%, rgba(11,8,5,0) 66%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(246,241,231,0.92) 0%, rgba(246,241,231,0.55) 42%, rgba(246,241,231,0) 66%)" }} />
 
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
           <div className="mb-9 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#C9A25A", boxShadow: "0 0 14px #C9A25A" }} />
-            <span className="micro-caps text-[#f5efe3]/55">{t.hero.meta}</span>
+            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
+            <span className="micro-caps text-[#17130e]/55">{t.hero.meta}</span>
           </div>
 
-          <h1 className="display-space text-[#f5efe3] mds-in" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)", animationDelay: "0.12s" }}>
+          <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)", animationDelay: "0.12s" }}>
             {t.hero.line1}
             <br />
             {t.hero.line2}
@@ -371,17 +371,17 @@ export default function Home({ lang }: { lang: Lang }) {
           </h1>
 
           <div className="mt-9 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <p className="mds-in max-w-xl text-base font-light leading-relaxed text-[#f5efe3]/60 sm:text-lg" style={{ animationDelay: "0.5s" }}>
+            <p className="mds-in max-w-xl text-base font-light leading-relaxed text-[#17130e]/60 sm:text-lg" style={{ animationDelay: "0.5s" }}>
               {t.hero.subtitle}
             </p>
             <div className="mds-in flex flex-wrap items-center gap-x-7 gap-y-4" style={{ animationDelay: "0.58s" }}>
               <Magnetic strength={0.4}>
-                <a href="#contatti" className="gold-glow group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-[#17130E] transition-transform duration-300 hover:scale-[1.03]" style={{ background: "linear-gradient(100deg, #e8c877, #b5893f)", fontFamily: "var(--font-space)" }}>
+                <a href="#contatti" className="group inline-flex items-center gap-2 rounded-full bg-[#17130E] px-8 py-4 text-sm font-medium text-[#F6F1E7] transition-colors duration-300 hover:bg-[#332616]" style={{ fontFamily: "var(--font-space)" }}>
                   {t.hero.ctaPrimary}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </Magnetic>
-              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#f5efe3]/70 transition-colors hover:text-[#f5efe3]">
+              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#17130e]/70 transition-colors hover:text-[#17130e]">
                 <span className="relative">
                   {t.hero.ctaSecondary}
                   <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)] transition-transform duration-300 group-hover:scale-x-100" />
@@ -409,8 +409,8 @@ export default function Home({ lang }: { lang: Lang }) {
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 className={`py-4 md:px-8 ${i % 2 === 1 ? "border-l border-[color:var(--gold-line)] pl-5" : ""} ${i >= 2 ? "mt-6 md:mt-0" : ""} ${i === 2 ? "md:border-l md:pl-8" : ""}${i === 0 ? " md:pl-0" : ""}${i === t.stats.length - 1 ? " md:pr-0" : ""}`}
               >
-                <div className="display-space tnum text-[#f5efe3]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)" }}>{stat.value}</div>
-                <div className="micro-caps mt-2.5 text-[#f5efe3]/55">{stat.label}</div>
+                <div className="display-space tnum text-[#17130e]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)" }}>{stat.value}</div>
+                <div className="micro-caps mt-2.5 text-[#17130e]/55">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -429,11 +429,11 @@ export default function Home({ lang }: { lang: Lang }) {
           >
             <div>
               <span className="micro-caps text-[var(--gilt)]">01 · {t.servicesSection.label}</span>
-              <h2 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+              <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
                 {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
               </h2>
             </div>
-            <span className="micro-caps tnum text-[#f5efe3]/40">01 / 04</span>
+            <span className="micro-caps tnum text-[#17130e]/40">01 / 04</span>
           </motion.div>
 
           <div className="border-b border-[color:var(--gold-line)]">
@@ -450,8 +450,8 @@ export default function Home({ lang }: { lang: Lang }) {
                   className="group flex flex-col gap-3 border-t border-[color:var(--gold-line)] py-6 transition-colors hover:bg-[var(--ink-panel)]/40 md:flex-row md:items-baseline md:gap-8 md:px-2 md:py-8"
                 >
                   <span className="micro-caps tnum text-[var(--gilt)] md:w-10">0{i + 1}</span>
-                  <h3 className="display-space text-[#f5efe3] transition-colors duration-300 group-hover:text-[var(--gilt)] md:flex-1" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{service.title}</h3>
-                  <div className="micro-caps flex flex-wrap gap-y-1 text-[#f5efe3]/65 md:max-w-[18rem] md:justify-end md:text-right">
+                  <h3 className="display-space text-[#17130e] transition-colors duration-300 group-hover:text-[var(--gilt)] md:flex-1" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{service.title}</h3>
+                  <div className="micro-caps flex flex-wrap gap-y-1 text-[#17130e]/65 md:max-w-[18rem] md:justify-end md:text-right">
                     {service.tags.map((tag, ti) => (
                       <span key={tag} className="inline-flex items-center">
                         {tag}
@@ -483,11 +483,11 @@ export default function Home({ lang }: { lang: Lang }) {
           <Reveal className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between">
             <div>
               <span data-reveal-fade className="micro-caps inline-block text-[var(--gilt)]">02 · {t.portfolioSection.label}</span>
-              <h2 data-reveal-heading className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+              <h2 data-reveal-heading className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
                 {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
               </h2>
             </div>
-            <span data-reveal-fade className="micro-caps tnum inline-block text-[#f5efe3]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
+            <span data-reveal-fade className="micro-caps tnum inline-block text-[#17130e]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
           </Reveal>
 
           <div className="space-y-24 md:space-y-36">
@@ -506,13 +506,13 @@ export default function Home({ lang }: { lang: Lang }) {
                 <div className="flex items-baseline justify-between gap-4">
                   <div className="flex items-baseline gap-4 md:gap-7">
                     <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.75rem)" }}>{p.num}</span>
-                    <h3 className="display-space leading-none text-[#f5efe3]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
+                    <h3 className="display-space leading-none text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
                   </div>
                   <span className="micro-caps hidden text-[var(--gilt)] sm:block">{p.data.meta}</span>
                 </div>
 
                 {/* the cinematic hook — the one line that sells the project */}
-                <p className="display-space mt-5 max-w-3xl text-[#f5efe3] md:mt-7" style={{ fontSize: "clamp(1.3rem, 2.8vw, 2.2rem)", lineHeight: 1.16 }}>{p.data.outcome}</p>
+                <p className="display-space mt-5 max-w-3xl text-[#17130e] md:mt-7" style={{ fontSize: "clamp(1.3rem, 2.8vw, 2.2rem)", lineHeight: 1.16 }}>{p.data.outcome}</p>
 
                 <div className="relative mt-8 aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E] md:mt-10">
                   {p.media.kind === "video" ? (
@@ -520,15 +520,15 @@ export default function Home({ lang }: { lang: Lang }) {
                   ) : (
                     <Image src={p.media.src} alt={p.media.aria} fill sizes="(max-width: 1024px) 100vw, 1300px" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"}`} />
                   )}
-                  <span className="pointer-events-none absolute bottom-4 right-4 flex translate-y-2 items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide text-[#f5efe3] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" style={{ background: "rgba(251,248,242,0.94)" }}>
+                  <span className="pointer-events-none absolute bottom-4 right-4 flex translate-y-2 items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide text-[#F6F1E7] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" style={{ background: "rgba(31,27,22,0.9)" }}>
                     {p.data.cta} <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.6} />
                   </span>
                 </div>
 
                 <div className="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-                  <p className="max-w-lg text-sm font-light leading-relaxed text-[#f5efe3]/60">{p.data.desc}</p>
+                  <p className="max-w-lg text-sm font-light leading-relaxed text-[#17130e]/60">{p.data.desc}</p>
                   <div className="flex flex-col items-start gap-3 md:items-end">
-                    <div className="micro-caps flex flex-wrap gap-y-1 text-[#f5efe3]/60">
+                    <div className="micro-caps flex flex-wrap gap-y-1 text-[#17130e]/60">
                       {p.data.tags.map((tag, ti) => (
                         <span key={ti} className="inline-flex items-center">
                           <span className={ti === 0 ? "text-[var(--gilt)]" : ""}>{tag}</span>
@@ -548,7 +548,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
           {/* Closing bookend — routes intent to contact */}
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-20 border-t border-[color:var(--gold-line)] pt-10">
-            <p className="max-w-xl font-light text-[#f5efe3]/60">{t.portfolioSection.closingLine}</p>
+            <p className="max-w-xl font-light text-[#17130e]/60">{t.portfolioSection.closingLine}</p>
             <a href="#contatti" className="group mt-4 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
               <span>{t.portfolioSection.closingCta}</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -558,7 +558,7 @@ export default function Home({ lang }: { lang: Lang }) {
       </section>
 
       {/* CHI SIAMO — the ESPRESSO Night room: the one dark surface, the emotional peak */}
-      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px]">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -568,10 +568,10 @@ export default function Home({ lang }: { lang: Lang }) {
             className="mb-14 max-w-3xl md:mb-20"
           >
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
-            <h2 className="display-space mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "var(--paper)" }}>
+            <h2 className="display-space mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "#17130e" }}>
               {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
             </h2>
-            <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(251,248,242,0.68)" }}>{t.about.p1}</p>
+            <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.68)" }}>{t.about.p1}</p>
           </motion.div>
 
           <div className="grid gap-10 mds-split-4-8">
@@ -586,10 +586,10 @@ export default function Home({ lang }: { lang: Lang }) {
                 <Image src="/founder-2.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain object-bottom" />
               </div>
               <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
-                <span className="display-space text-lg" style={{ color: "var(--paper)" }}>{t.founder.name}</span>
+                <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
                 <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.founder.eyebrow}</span>
               </div>
-              <div className="micro-caps mt-2" style={{ color: "rgba(251,248,242,0.48)" }}>{t.founder.role}</div>
+              <div className="micro-caps mt-2" style={{ color: "rgba(31,27,22,0.48)" }}>{t.founder.role}</div>
             </motion.div>
 
             <motion.div
@@ -599,7 +599,7 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="min-w-0"
             >
-              <div className="grid gap-6 text-base font-light leading-relaxed md:grid-cols-2" style={{ color: "rgba(251,248,242,0.66)" }}>
+              <div className="grid gap-6 text-base font-light leading-relaxed md:grid-cols-2" style={{ color: "rgba(31,27,22,0.66)" }}>
                 <p>{t.founder.bio1}</p>
                 <p>{t.founder.bio2}</p>
               </div>
@@ -609,14 +609,14 @@ export default function Home({ lang }: { lang: Lang }) {
                   <div key={i} className="flex gap-6 border-b py-5" style={{ borderColor: "rgba(201,162,90,0.14)" }}>
                     <span aria-hidden="true" className="display-italic leading-none" style={{ color: "var(--gilt)", fontSize: "1.5rem" }}>0{i + 1}</span>
                     <div>
-                      <h3 className="display-space text-lg" style={{ color: "var(--paper)" }}>{value.title}</h3>
-                      <p className="mt-1 text-sm font-light" style={{ color: "rgba(251,248,242,0.5)" }}>{value.desc}</p>
+                      <h3 className="display-space text-lg" style={{ color: "#17130e" }}>{value.title}</h3>
+                      <p className="mt-1 text-sm font-light" style={{ color: "rgba(31,27,22,0.5)" }}>{value.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <p className="display-space mt-12" style={{ fontSize: "clamp(1.35rem, 2.4vw, 2rem)", lineHeight: 1.3, color: "var(--paper)" }}>{t.about.p3}</p>
+              <p className="display-space mt-12" style={{ fontSize: "clamp(1.35rem, 2.4vw, 2rem)", lineHeight: 1.3, color: "#17130e" }}>{t.about.p3}</p>
             </motion.div>
           </div>
         </div>
@@ -627,7 +627,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-10 md:mb-12">
             <span className="micro-caps text-[var(--gilt)]">04 · {t.sectorsSection.label}</span>
-            <h2 className="display-space mt-3 text-[#f5efe3]" style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}>
+            <h2 className="display-space mt-3 text-[#17130e]" style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}>
               {t.sectorsSection.heading1}<em className="text-[var(--color-gold)]">{t.sectorsSection.headingAccent}</em>
             </h2>
           </div>
@@ -642,7 +642,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 className="flex items-baseline gap-4 border-t border-[color:var(--gold-line-strong)] py-5"
               >
                 <span className="micro-caps tnum text-[var(--gilt)]">0{i + 1}</span>
-                <span className="text-lg font-light text-[#f5efe3]/80">{name}</span>
+                <span className="text-lg font-light text-[#17130e]/80">{name}</span>
               </motion.div>
             ))}
           </div>
@@ -654,7 +654,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-16 md:mb-24">
             <span className="micro-caps text-[var(--gilt)]">05 · {t.method.label}</span>
-            <h2 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
               {t.method.heading1}<em className="text-[var(--color-gold)]">{t.method.headingAccent}</em>
             </h2>
           </div>
@@ -670,9 +670,9 @@ export default function Home({ lang }: { lang: Lang }) {
               >
                 <div className="flex items-baseline gap-4">
                   <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.1rem, 2.5vw, 2rem)" }}>{step.num}</span>
-                  <h3 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}>{step.title}</h3>
+                  <h3 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}>{step.title}</h3>
                 </div>
-                <p className="mt-4 font-light leading-relaxed text-[#f5efe3]/65">{step.desc}</p>
+                <p className="mt-4 font-light leading-relaxed text-[#17130e]/65">{step.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -689,7 +689,7 @@ export default function Home({ lang }: { lang: Lang }) {
           className="mx-auto max-w-[1100px]"
         >
           <span className="mb-8 block h-px w-16 bg-[var(--color-gold)]" aria-hidden="true" />
-          <p className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.75rem, 4.4vw, 3.5rem)", lineHeight: 1.16 }}>
+          <p className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.75rem, 4.4vw, 3.5rem)", lineHeight: 1.16 }}>
             {t.quote.line1} <em className="text-[var(--color-gold)]">{t.quote.line2}</em>
           </p>
         </motion.blockquote>
@@ -700,7 +700,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[920px]">
           <header className="mb-12 md:mb-16">
             <span className="micro-caps text-[var(--gilt)]">06 · {t.faqSection.label}</span>
-            <h2 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
               {t.faqSection.heading1}<em className="text-[var(--color-gold)]">{t.faqSection.headingAccent}</em>
             </h2>
           </header>
@@ -712,7 +712,7 @@ export default function Home({ lang }: { lang: Lang }) {
                 <div key={i} className="border-t border-[color:var(--gold-line)]">
                   <h3>
                     <button type="button" id={`faq-q-${i}`} aria-expanded={isOpen} aria-controls={`faq-a-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)} className="group flex w-full items-start justify-between gap-6 py-6 text-left">
-                      <span className="text-lg font-light text-[#f5efe3] transition-colors group-hover:text-[var(--gilt)] md:text-xl">{faq.q}</span>
+                      <span className="text-lg font-light text-[#17130e] transition-colors group-hover:text-[var(--gilt)] md:text-xl">{faq.q}</span>
                       <span aria-hidden="true" className="relative mt-[7px] block h-3.5 w-3.5 shrink-0">
                         <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2" style={{ background: "var(--color-gold-ink)" }} />
                         <span className={`absolute left-1/2 top-0 h-full w-px -translate-x-1/2 transition-transform duration-300 ${isOpen ? "scale-y-0" : "scale-y-100"}`} style={{ background: "var(--color-gold-ink)" }} />
@@ -722,7 +722,7 @@ export default function Home({ lang }: { lang: Lang }) {
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: "easeInOut" }}>
-                        <p className="max-w-2xl pb-7 pr-8 font-light leading-relaxed text-[#f5efe3]/65">{faq.a}</p>
+                        <p className="max-w-2xl pb-7 pr-8 font-light leading-relaxed text-[#17130e]/65">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -738,15 +738,15 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[1400px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.7 }} className="mb-14 max-w-3xl md:mb-20">
             <span className="micro-caps text-[var(--gilt)]">07 · {t.contact.label}</span>
-            <h2 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
               {t.contact.heading1}<em className="text-[var(--color-gold)]">{t.contact.headingAccent}</em>{t.contact.headingEnd}
             </h2>
-            <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#f5efe3]/70">{t.contact.subtitle}</p>
+            <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#17130e]/70">{t.contact.subtitle}</p>
           </motion.div>
 
           <div className="grid gap-12 mds-split-5-7">
             <div className="min-w-0">
-              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 text-[#f5efe3] transition-colors hover:text-[var(--gilt)]">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 text-[#17130e] transition-colors hover:text-[var(--gilt)]">
                 <MessageCircle className="h-5 w-5 text-[var(--gilt)]" strokeWidth={1.5} />
                 <span className="relative text-base tracking-wide">
                   {t.contact.whatsapp}
@@ -756,16 +756,16 @@ export default function Home({ lang }: { lang: Lang }) {
 
               <dl className="mt-10 space-y-7 border-t border-[color:var(--gold-line)] pt-8">
                 <div>
-                  <dt className="micro-caps text-[#f5efe3]/70">{t.contact.emailLabel}</dt>
-                  <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-[#f5efe3]/85 transition-colors hover:text-[var(--gilt)]">{SITE.email}</a></dd>
+                  <dt className="micro-caps text-[#17130e]/70">{t.contact.emailLabel}</dt>
+                  <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-[#17130e]/85 transition-colors hover:text-[var(--gilt)]">{SITE.email}</a></dd>
                 </div>
                 <div>
-                  <dt className="micro-caps text-[#f5efe3]/70">{t.contact.phoneLabel}</dt>
-                  <dd className="mt-1"><a href={`tel:${SITE.phone}`} className="tnum text-[#f5efe3]/85 transition-colors hover:text-[var(--gilt)]">{SITE.phoneDisplay}</a></dd>
+                  <dt className="micro-caps text-[#17130e]/70">{t.contact.phoneLabel}</dt>
+                  <dd className="mt-1"><a href={`tel:${SITE.phone}`} className="tnum text-[#17130e]/85 transition-colors hover:text-[var(--gilt)]">{SITE.phoneDisplay}</a></dd>
                 </div>
                 <div>
-                  <dt className="micro-caps text-[#f5efe3]/70">{t.contact.officesLabel}</dt>
-                  <dd className="mt-1 space-y-1 text-sm leading-relaxed text-[#f5efe3]/70">
+                  <dt className="micro-caps text-[#17130e]/70">{t.contact.officesLabel}</dt>
+                  <dd className="mt-1 space-y-1 text-sm leading-relaxed text-[#17130e]/70">
                     <div><span className="text-[var(--gilt)]">{t.contact.countryCh}</span> — {SITE.address.street}, {SITE.address.postalCode} {SITE.address.locality}</div>
                     <div><span className="text-[var(--gilt)]">{t.contact.countryIt}</span> — {SITE.addressIt.street}, {SITE.addressIt.postalCode} {SITE.addressIt.locality}</div>
                   </dd>
@@ -777,43 +777,43 @@ export default function Home({ lang }: { lang: Lang }) {
               {formStatus === "success" ? (
                 <div ref={successRef} tabIndex={-1} role="status" aria-live="polite" className="flex h-full flex-col items-center justify-center rounded-[4px] border border-[var(--color-gold)]/30 bg-[var(--ink-panel)]/50 p-12 text-center outline-none">
                   <CheckCircle2 className="mb-6 h-14 w-14 text-[var(--gilt)]" strokeWidth={1.2} />
-                  <h3 className="display-space text-2xl text-[#f5efe3]">{t.contact.successTitle}</h3>
-                  <p className="mt-3 font-light text-[#f5efe3]/65">{t.contact.successDesc}</p>
+                  <h3 className="display-space text-2xl text-[#17130e]">{t.contact.successTitle}</h3>
+                  <p className="mt-3 font-light text-[#17130e]/65">{t.contact.successDesc}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-6">
                   {/* anti-spam honeypot (hidden from users; the server rejects submissions that fill it — see /api/contact) */}
                   <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
                   <div>
-                    <span className="micro-caps mb-3 block text-[#f5efe3]/70">{t.contact.needsLabel}</span>
+                    <span className="micro-caps mb-3 block text-[#17130e]/70">{t.contact.needsLabel}</span>
                     <div className="flex flex-wrap gap-2">
                       {t.contact.needs.map((n) => {
                         const active = needs.includes(n);
                         return (
-                          <button key={n} type="button" aria-pressed={active} onClick={() => toggleNeed(n)} className={`rounded-full border px-4 py-2 text-sm tracking-wide transition-all ${active ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-[#17130E]" : "border-[#f5efe3]/20 text-[#f5efe3]/75 hover:border-[var(--color-gold)]/60 hover:text-[#f5efe3]"}`}>{n}</button>
+                          <button key={n} type="button" aria-pressed={active} onClick={() => toggleNeed(n)} className={`rounded-full border px-4 py-2 text-sm tracking-wide transition-all ${active ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-[#17130E]" : "border-[#17130e]/20 text-[#17130e]/75 hover:border-[var(--color-gold)]/60 hover:text-[#17130e]"}`}>{n}</button>
                         );
                       })}
                     </div>
                   </div>
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#f5efe3]/70">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#f5efe3]/20 bg-transparent py-2.5 text-[#f5efe3] placeholder-[#f5efe3]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
+                      <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formName} *</label>
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
-                      <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#f5efe3]/70">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#f5efe3]/20 bg-transparent py-2.5 text-[#f5efe3] placeholder-[#f5efe3]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
+                      <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formEmail} *</label>
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#f5efe3]/70">{t.contact.formCompany} <span className="normal-case tracking-normal text-[#f5efe3]/60">({t.contact.optional})</span></label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#f5efe3]/20 bg-transparent py-2.5 text-[#f5efe3] placeholder-[#f5efe3]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
+                    <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formCompany} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
+                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
-                    <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#f5efe3]/70">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#f5efe3]/60">({t.contact.optional})</span></label>
-                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#f5efe3]/20 bg-transparent py-2.5 text-[#f5efe3] placeholder-[#f5efe3]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
+                    <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
+                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
                     <div role="alert" className="flex items-start gap-3 rounded-[4px] border border-red-300 bg-red-50 p-4 text-red-800">
@@ -826,7 +826,7 @@ export default function Home({ lang }: { lang: Lang }) {
                       {formStatus === "sending" ? t.contact.btnSending : t.contact.btnSend}
                       {formStatus !== "sending" && <Send className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
                     </button>
-                    <p className="micro-caps text-[#f5efe3]/70">{t.contact.reassurance}</p>
+                    <p className="micro-caps text-[#17130e]/70">{t.contact.reassurance}</p>
                   </div>
                 </form>
               )}
@@ -836,7 +836,7 @@ export default function Home({ lang }: { lang: Lang }) {
       </section>
 
       {/* FOOTER — the Espresso bookend; the Measure terminates in a final tick */}
-      <footer className="px-6 sm:px-10 lg:px-16 py-14 md:py-16" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+      <footer className="px-6 sm:px-10 lg:px-16 py-14 md:py-16" style={{ background: "var(--ink-deep)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px]">
           <div className="flex items-center gap-3 border-t pt-8" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
             <span aria-hidden="true" className="h-px w-8" style={{ background: "var(--gilt)" }} />
@@ -845,19 +845,19 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-3">
               <Image src="/logo-mark.png" alt="Modolo Digital Studio" width={30} height={30} />
-              <span className="micro-caps tnum" style={{ color: "rgba(251,248,242,0.55)" }}>© {new Date().getFullYear()} Modolo Digital Studio</span>
+              <span className="micro-caps tnum" style={{ color: "rgba(31,27,22,0.55)" }}>© {new Date().getFullYear()} Modolo Digital Studio</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors text-[color:rgba(251,248,242,0.6)] hover:text-[var(--paper)]">{t.footer.imprint}</Link>
-              <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors text-[color:rgba(251,248,242,0.6)] hover:text-[var(--paper)]">{t.footer.privacy}</Link>
-              <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[color:rgba(251,248,242,0.6)] transition-colors hover:text-[var(--paper)]">
+              <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.footer.imprint}</Link>
+              <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.footer.privacy}</Link>
+              <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[color:rgba(31,27,22,0.6)] transition-colors hover:text-[#17130e]">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                 </svg>
               </a>
-              <span aria-hidden="true" className="hidden h-3 w-px md:inline-block" style={{ background: "rgba(251,248,242,0.2)" }} />
+              <span aria-hidden="true" className="hidden h-3 w-px md:inline-block" style={{ background: "rgba(31,27,22,0.2)" }} />
               <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.footer.madeWith}</span>
             </div>
           </div>
