@@ -66,6 +66,15 @@
   --line: rgba(31, 27, 22, 0.12);      /* hairline on light */
   --line-strong: rgba(31, 27, 22, 0.2);
 
+  /* ===== "Immersive" dark+gold theme (2026-07-09 redesign — dark, gold, super modern) ===== */
+  --ink-bg: #0b0805;        /* primary warm near-black field */
+  --ink-panel: #14100a;     /* raised panel on the dark */
+  --ink-deep: #070502;      /* deepest black for contrast pockets */
+  --ink-text: #f5efe3;      /* cream primary text on dark */
+  --gold-bright: #e6c060;   /* bright gold for glow / gradients on dark */
+  --gold-line: rgba(201, 162, 90, 0.20);       /* gold hairline on dark */
+  --gold-line-strong: rgba(201, 162, 90, 0.40);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -222,6 +231,27 @@
   font-feature-settings: "tnum";
 }
 .tnum { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+/* ===== Immersive dark+gold utilities ===== */
+/* Modern display voice — Space Grotesk, tight. The homepage's headline face in the dark theme. */
+.display-space {
+  font-family: var(--font-space), system-ui, sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  font-weight: 600;
+  text-wrap: balance;
+}
+/* Gold gradient text — for accent words on the dark field. */
+.gold-grad {
+  background: linear-gradient(100deg, #f0d089, var(--color-gold) 48%, var(--gilt));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Soft gold glow (CTAs, focal elements). */
+.gold-glow { box-shadow: 0 0 34px rgba(181, 137, 63, 0.42); }
+/* Fine gold hairline on dark. */
+.ink-hairline { border-color: var(--gold-line); }
 
 /* Analog grain — fixed, subtle, warms the near-white paper. Below the nav (z-50). */
 .mds-grain {

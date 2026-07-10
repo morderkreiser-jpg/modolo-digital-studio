@@ -53,11 +53,13 @@ export default function SiteNav({
   links = [],
   ctaHref = "/#contatti",
   ctaLabel,
+  theme = "light",
 }: {
   lang: Locale;
   links?: NavLink[];
   ctaHref?: string;
   ctaLabel?: string;
+  theme?: "light" | "dark";
 }) {
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
@@ -67,6 +69,22 @@ export default function SiteNav({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hasMenu = links.length > 0;
   const a = NAV_A11Y[lang];
+
+  // Theme-aware styling: the immersive homepage is dark; inner pages stay light.
+  const dark = theme === "dark";
+  const c = {
+    nav: dark ? "bg-[#0b0805]/72 border-[color:var(--gold-line)]" : "bg-[#F7F3EC]/80 border-[#1F1B16]/[0.08]",
+    word: dark ? "text-[#f5efe3]" : "text-[#1F1B16]",
+    sub: dark ? "text-[var(--gilt)]" : "text-[var(--color-gold-ink)]",
+    link: dark ? "text-[#f5efe3]/65 hover:text-[#f5efe3]" : "text-[#1F1B16]/65 hover:text-[#1F1B16]",
+    tBorder: dark ? "border-[#f5efe3]/15" : "border-[#1F1B16]/12",
+    tActive: dark ? "bg-[var(--color-gold)] text-[#17130E]" : "bg-[#1F1B16] text-[var(--paper)]",
+    tIdle: dark ? "text-[#f5efe3]/70 hover:text-[#f5efe3]" : "text-[#1F1B16]/70 hover:text-[#1F1B16]",
+    cta: dark
+      ? "border-[var(--color-gold)]/50 text-[var(--gilt)] hover:bg-[var(--color-gold)] hover:text-[#17130E] hover:border-[var(--color-gold)]"
+      : "border-[#B5893F]/50 text-[var(--color-gold-ink)] hover:bg-[#1F1B16] hover:text-[var(--paper)] hover:border-[#1F1B16]",
+    trigger: dark ? "border-[#f5efe3]/15 text-[#f5efe3]" : "border-[#1F1B16]/12 text-[#1F1B16]",
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -125,7 +143,7 @@ export default function SiteNav({
   };
 
   const langToggle = (variant: "sm" | "lg") => (
-    <div role="group" aria-label={a.language} className="flex items-center gap-1 border border-[#1F1B16]/12 rounded-full p-0.5">
+    <div role="group" aria-label={a.language} className={`flex items-center gap-1 border ${c.tBorder} rounded-full p-0.5`}>
       {LOCALES.map((l) => (
         <button
           key={l}
@@ -136,7 +154,7 @@ export default function SiteNav({
           className={`${
             variant === "lg" ? "px-3 py-1.5 text-xs" : "px-2.5 py-1.5 text-[11px]"
           } rounded-full tracking-wider uppercase transition-colors ${
-            lang === l ? "bg-[#1F1B16] text-[var(--paper)]" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
+            lang === l ? c.tActive : c.tIdle
           }`}
         >
           {l}
@@ -147,21 +165,21 @@ export default function SiteNav({
 
   return (
     <>
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#F7F3EC]/80 border-b border-[#1F1B16]/[0.08]">
+    <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b ${c.nav}`}>
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
         <Link href={localizedHref(lang, "/")} aria-label={a.home} onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Image src="/logo-mark.png" alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
-            <span className="font-light tracking-[0.25em] text-xs sm:text-sm">MODOLO</span>
-            <span className="text-[10px] tracking-[0.3em] text-[var(--color-gold-ink)] hidden sm:block">DIGITAL STUDIO</span>
+            <span className={`font-light tracking-[0.25em] text-xs sm:text-sm ${c.word}`}>MODOLO</span>
+            <span className={`text-[10px] tracking-[0.3em] hidden sm:block ${c.sub}`}>DIGITAL STUDIO</span>
           </span>
         </Link>
 
         {/* Desktop cluster */}
         <div className="hidden md:flex items-center gap-5">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm tracking-wider text-[#1F1B16]/65 hover:text-[#1F1B16] transition-colors">
+            <a key={l.href} href={l.href} className={`text-sm tracking-wider transition-colors ${c.link}`}>
               {l.label}
             </a>
           ))}
@@ -169,7 +187,7 @@ export default function SiteNav({
           {ctaLabel && (
             <a
               href={ctaHref}
-              className="text-sm tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-5 py-2 rounded-full hover:bg-[#1F1B16] hover:text-[var(--paper)] hover:border-[#1F1B16] transition-all duration-300 whitespace-nowrap"
+              className={`text-sm tracking-wider border px-5 py-2 rounded-full transition-all duration-300 whitespace-nowrap ${c.cta}`}
             >
               {ctaLabel}
             </a>
@@ -181,7 +199,7 @@ export default function SiteNav({
           {ctaLabel && !hasMenu && (
             <a
               href={ctaHref}
-              className="text-[11px] tracking-wider border border-[#B5893F]/50 text-[var(--color-gold-ink)] px-3 py-1.5 rounded-full hover:bg-[#1F1B16] hover:text-[var(--paper)] hover:border-[#1F1B16] transition-all whitespace-nowrap"
+              className={`text-[11px] tracking-wider border px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${c.cta}`}
             >
               {ctaLabel}
             </a>
@@ -195,7 +213,7 @@ export default function SiteNav({
               aria-expanded={open}
               aria-controls="mobile-menu"
               onClick={() => setOpen((v) => !v)}
-              className="inline-flex w-10 h-10 items-center justify-center rounded-full border border-[#1F1B16]/12 text-[#1F1B16]"
+              className={`inline-flex w-10 h-10 items-center justify-center rounded-full border ${c.trigger}`}
             >
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -222,19 +240,19 @@ export default function SiteNav({
               role="dialog"
               aria-modal="true"
               aria-label={a.siteMenu}
-              className="absolute top-0 right-0 h-full w-[82%] max-w-sm bg-[#F7F3EC] shadow-2xl flex flex-col p-6 overflow-y-auto"
+              className={`absolute top-0 right-0 h-full w-[82%] max-w-sm shadow-2xl flex flex-col p-6 overflow-y-auto ${dark ? "bg-[var(--ink-panel)]" : "bg-[#F7F3EC]"}`}
               initial={reduce ? false : { x: "100%" }}
               animate={{ x: 0 }}
               exit={reduce ? { opacity: 0 } : { x: "100%" }}
               transition={reduce ? { duration: 0 } : { type: "spring", damping: 30, stiffness: 300 }}
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="font-light tracking-[0.25em] text-sm">MODOLO</span>
+                <span className={`font-light tracking-[0.25em] text-sm ${c.word}`}>MODOLO</span>
                 <button
                   type="button"
                   aria-label={a.closeMenu}
                   onClick={() => setOpen(false)}
-                  className="inline-flex w-10 h-10 items-center justify-center rounded-full border border-[#1F1B16]/12"
+                  className={`inline-flex w-10 h-10 items-center justify-center rounded-full border ${c.trigger}`}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -245,7 +263,7 @@ export default function SiteNav({
                     key={l.href}
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className="py-3 text-lg font-light tracking-wider text-[#1F1B16]/80 hover:text-[#B5893F] border-b border-[#1F1B16]/[0.06] transition-colors"
+                    className={`py-3 text-lg font-light tracking-wider border-b transition-colors ${dark ? "text-[#f5efe3]/80 hover:text-[var(--color-gold)] border-[color:var(--gold-line)]" : "text-[#1F1B16]/80 hover:text-[#B5893F] border-[#1F1B16]/[0.06]"}`}
                   >
                     {l.label}
                   </a>
@@ -255,7 +273,7 @@ export default function SiteNav({
                 <a
                   href={ctaHref}
                   onClick={() => setOpen(false)}
-                  className="mt-8 inline-flex items-center justify-center gap-2 bg-[#1F1B16] text-[#F7F3EC] px-6 py-4 rounded-full font-medium tracking-wider hover:bg-[#33291E] transition-all"
+                  className={`mt-8 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium tracking-wider transition-all ${dark ? "bg-[var(--color-gold)] text-[#17130E] hover:bg-[var(--gilt)]" : "bg-[#1F1B16] text-[#F7F3EC] hover:bg-[#33291E]"}`}
                 >
                   {ctaLabel}
                 </a>

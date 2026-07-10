@@ -36,14 +36,14 @@ export default function Marquee({ items }: { items: string[] }) {
   });
 
   return (
-    <section aria-hidden className="marquee-mask select-none overflow-hidden border-y border-[color:var(--line)] py-5 md:py-7" ref={scope}>
+    <section aria-hidden className="marquee-mask select-none overflow-hidden border-y border-[color:var(--gold-line)] py-5 md:py-7" ref={scope}>
       <div ref={trackRef} className="flex w-max will-change-transform">
         {[0, 1].map((dup) => (
           <div key={dup} className="flex shrink-0 items-center">
             {items.map((d, i) => (
               <span key={`${dup}-${i}`} className="flex items-center">
-                <span className="display-type px-6 text-[#1F1B16]/85 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
-                <span className="inline-block h-1.5 w-1.5 shrink-0 rotate-45" style={{ background: "var(--color-gold)" }} />
+                <span className="display-space px-6 text-[#f5efe3]/85 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
+                <span className="inline-block h-1.5 w-1.5 shrink-0 rotate-45" style={{ background: "var(--color-gold)", boxShadow: "0 0 8px var(--color-gold)" }} />
               </span>
             ))}
           </div>
