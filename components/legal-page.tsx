@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
-import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 
 export type Lang = Locale;
@@ -310,34 +309,33 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
   const u = ui[lang];
 
   return (
-    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] outline-none">
-      <SiteNav lang={lang} />
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] outline-none">
+      <SiteNav lang={lang} theme="dark" />
       <div className="mds-grain" aria-hidden />
-      <Measure />
-
+      
       {/* CONTENT */}
       <section className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16 pt-36 pb-20 md:pb-28">
-        <Link href={localizedHref(lang, "/")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+        <Link href={localizedHref(lang, "/")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
 
         <div className="mt-12 max-w-3xl">
-          <span className="micro-caps text-[var(--color-gold-ink)]">{u.kicker}</span>
-          <h1 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
-          <p className="micro-caps mt-5 text-[#1F1B16]/45">{u.updated} · {doc.date}</p>
+          <span className="micro-caps text-[var(--gilt)]">{u.kicker}</span>
+          <h1 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
+          <p className="micro-caps mt-5 text-[#f5efe3]/45">{u.updated} · {doc.date}</p>
         </div>
 
-        <div className="mt-14 max-w-3xl border-b border-[color:var(--line)]">
+        <div className="mt-14 max-w-3xl border-b border-[color:var(--gold-line)]">
           {doc.sections.map((s, i) => (
-            <div key={i} className="border-t border-[color:var(--line)] py-8">
-              <h2 className="flex gap-4 text-[#1F1B16]">
-                <span aria-hidden="true" className="micro-caps tnum shrink-0 pt-1.5 text-[var(--color-gold-ink)]">{String(i + 1).padStart(2, "0")}</span>
-                <span className="display-type" style={{ fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)" }}>{s.heading}</span>
+            <div key={i} className="border-t border-[color:var(--gold-line)] py-8">
+              <h2 className="flex gap-4 text-[#f5efe3]">
+                <span aria-hidden="true" className="micro-caps tnum shrink-0 pt-1.5 text-[var(--gilt)]">{String(i + 1).padStart(2, "0")}</span>
+                <span className="display-space" style={{ fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)" }}>{s.heading}</span>
               </h2>
               <div className="mt-3 pl-0 sm:pl-10">
                 {s.body.map((p, j) => (
-                  <p key={j} className="mb-3 whitespace-pre-line font-light leading-relaxed text-[#1F1B16]/70 last:mb-0">
+                  <p key={j} className="mb-3 whitespace-pre-line font-light leading-relaxed text-[#f5efe3]/70 last:mb-0">
                     {p}
                   </p>
                 ))}

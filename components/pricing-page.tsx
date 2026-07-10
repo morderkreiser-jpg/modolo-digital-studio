@@ -6,7 +6,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
-import Measure from "@/components/measure";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import {
@@ -83,16 +82,15 @@ export default function PricingPage({
   const rise = reduce ? {} : { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
 
   return (
-    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--paper)] text-[#1F1B16] overflow-x-hidden outline-none">
-      <SiteNav lang={lang} ctaLabel={ui.ctaContact} ctaHref={localizedHref(lang, "/#contatti")} />
+    <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] overflow-x-hidden outline-none">
+      <SiteNav lang={lang} ctaLabel={ui.ctaContact} ctaHref={localizedHref(lang, "/#contatti")} theme="dark" />
       <div className="mds-grain" aria-hidden />
-      <Measure />
-
+      
       {/* HERO — currency toggle */}
       <section className={`${container} pt-36 pb-14 md:pb-16`}>
         <Link
           href={localizedHref(lang, "/")}
-          className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]"
+          className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {ui.back}
@@ -100,13 +98,13 @@ export default function PricingPage({
 
         <div className="mt-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="micro-caps text-[var(--color-gold-ink)]">{KICKER[lang]} · {regionName}</span>
-            <h1 className="display-type mt-4 text-[#1F1B16]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+            <span className="micro-caps text-[var(--gilt)]">{KICKER[lang]} · {regionName}</span>
+            <h1 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
               {ui.heading1}<em className="text-[var(--color-gold)]">{ui.headingAccent}</em>
             </h1>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
-            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 rounded-full border border-[#1F1B16]/12 p-0.5">
+            <div role="group" aria-label={ui.currencyLabel} className="flex items-center gap-1 rounded-full border border-[#f5efe3]/15 p-0.5">
               {REGIONS.map((r) => (
                 <button
                   key={r}
@@ -114,14 +112,14 @@ export default function PricingPage({
                   onClick={() => chooseRegion(r)}
                   aria-pressed={region === r}
                   className={`rounded-full px-4 py-2 text-xs uppercase tracking-wider transition-colors ${
-                    region === r ? "bg-[#1F1B16] text-[var(--paper)]" : "text-[#1F1B16]/70 hover:text-[#1F1B16]"
+                    region === r ? "bg-[var(--color-gold)] text-[#17130E]" : "text-[#f5efe3]/70 hover:text-[#f5efe3]"
                   }`}
                 >
                   {r === "ch" ? "CHF" : "EUR"}
                 </button>
               ))}
             </div>
-            <p className="micro-caps text-[#1F1B16]/55">{resolve(ui.subtitle)}</p>
+            <p className="micro-caps text-[#f5efe3]/55">{resolve(ui.subtitle)}</p>
             <p className="sr-only" role="status" aria-live="polite">{ui.regionNote.replace("{region}", regionName)}</p>
           </div>
         </div>
@@ -137,34 +135,34 @@ export default function PricingPage({
               {...rise}
               transition={reduce ? undefined : { duration: 0.55, delay: (i % 2) * 0.06 }}
               className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
-                it.featured ? "border-[var(--color-gold)]/55 bg-[var(--bone)]/40" : "border-[color:var(--line)] bg-[var(--paper)]"
+                it.featured ? "border-[var(--color-gold)]/55 bg-[var(--ink-panel)]/40" : "border-[color:var(--gold-line)] bg-transparent"
               }`}
             >
               {it.featured && (
-                <span className="absolute -top-3 left-7 rounded-full bg-[#1F1B16] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[var(--paper)]">
+                <span className="absolute -top-3 left-7 rounded-full bg-[var(--color-gold)] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[#17130E]">
                   {POPULAR[lang]}
                 </span>
               )}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.35rem, 2.2vw, 1.75rem)" }}>{it.name[lang]}</h3>
+                  <h3 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.35rem, 2.2vw, 1.75rem)" }}>{it.name[lang]}</h3>
                   {it.badge && (
-                    <span className="micro-caps rounded-full border border-[var(--color-gold)]/40 px-2 py-0.5 text-[var(--color-gold-ink)]">{it.badge[lang]}</span>
+                    <span className="micro-caps rounded-full border border-[var(--color-gold)]/40 px-2 py-0.5 text-[var(--gilt)]">{it.badge[lang]}</span>
                   )}
                 </div>
                 <div className="whitespace-nowrap text-right">
-                  {it.from && <span className="micro-caps block text-[#1F1B16]/50">{ui.from}</span>}
-                  <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.5rem, 2.4vw, 2rem)" }}>{amount(it.price[region])}</span>
+                  {it.from && <span className="micro-caps block text-[#f5efe3]/50">{ui.from}</span>}
+                  <span className="display-space tnum text-[#f5efe3]" style={{ fontSize: "clamp(1.5rem, 2.4vw, 2rem)" }}>{amount(it.price[region])}</span>
                 </div>
               </div>
-              <p className="mt-4 text-sm font-light leading-relaxed text-[#1F1B16]/70">{it.desc[lang]}</p>
-              {it.meta && <p className="micro-caps mt-auto pt-4 text-[#1F1B16]/45">{it.meta[lang]}</p>}
+              <p className="mt-4 text-sm font-light leading-relaxed text-[#f5efe3]/70">{it.desc[lang]}</p>
+              {it.meta && <p className="micro-caps mt-auto pt-4 text-[#f5efe3]/45">{it.meta[lang]}</p>}
             </motion.div>
           ))}
         </div>
         <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-3">
-          <p className="text-sm font-light text-[#1F1B16]/60">{ui.notSure}</p>
-          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--color-gold-ink)] transition-colors hover:text-[var(--color-gold)]">
+          <p className="text-sm font-light text-[#f5efe3]/60">{ui.notSure}</p>
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
             <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
             {ui.ctaWhatsapp}
           </a>
@@ -181,22 +179,22 @@ export default function PricingPage({
               {...rise}
               transition={reduce ? undefined : { duration: 0.55, delay: i * 0.08 }}
               className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
-                p.featured ? "border-[var(--color-gold)]/55 bg-[var(--bone)]/40" : "border-[color:var(--line)] bg-[var(--paper)]"
+                p.featured ? "border-[var(--color-gold)]/55 bg-[var(--ink-panel)]/40" : "border-[color:var(--gold-line)] bg-transparent"
               }`}
             >
               {p.featured && (
-                <span className="absolute -top-3 left-7 rounded-full bg-[#1F1B16] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[var(--paper)]">
+                <span className="absolute -top-3 left-7 rounded-full bg-[var(--color-gold)] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[#17130E]">
                   {POPULAR[lang]}
                 </span>
               )}
-              <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "1.5rem" }}>{p.name}</h3>
+              <h3 className="display-space text-[#f5efe3]" style={{ fontSize: "1.5rem" }}>{p.name}</h3>
               <div className="mt-3 mb-6 flex items-baseline gap-1.5">
-                <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}>{amount(p.price[region])}</span>
-                <span className="micro-caps text-[#1F1B16]/50">{ui.perMonth}</span>
+                <span className="display-space tnum text-[#f5efe3]" style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}>{amount(p.price[region])}</span>
+                <span className="micro-caps text-[#f5efe3]/50">{ui.perMonth}</span>
               </div>
-              <ul className="space-y-3 border-t border-[color:var(--line)] pt-6">
+              <ul className="space-y-3 border-t border-[color:var(--gold-line)] pt-6">
                 {p.features.map((f, j) => (
-                  <li key={j} className="flex items-start gap-3 text-sm font-light text-[#1F1B16]/75">
+                  <li key={j} className="flex items-start gap-3 text-sm font-light text-[#f5efe3]/75">
                     <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={2} />
                     {f[lang]}
                   </li>
@@ -210,22 +208,22 @@ export default function PricingPage({
       {/* 03 · BRANDING & CONTENT */}
       <section className={`${container} py-12 md:py-16`}>
         <SectionHead num="03" title={BRANDING.title[lang]} tagline={BRANDING.tagline[lang]} />
-        <div className="border-b border-[color:var(--line)]">
+        <div className="border-b border-[color:var(--gold-line)]">
           {BRANDING.items.map((it, i) => (
             <motion.div
               key={i}
               {...rise}
               transition={reduce ? undefined : { duration: 0.5, delay: i * 0.05 }}
-              className="flex flex-col gap-2 border-t border-[color:var(--line)] py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
+              className="flex flex-col gap-2 border-t border-[color:var(--gold-line)] py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
             >
               <div className="min-w-0">
-                <h3 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.2rem, 2vw, 1.5rem)" }}>{it.name[lang]}</h3>
-                <p className="mt-1.5 max-w-xl text-sm font-light leading-relaxed text-[#1F1B16]/70">{it.desc[lang]}</p>
-                {it.meta && <p className="micro-caps mt-2 text-[#1F1B16]/45">{it.meta[lang]}</p>}
+                <h3 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.2rem, 2vw, 1.5rem)" }}>{it.name[lang]}</h3>
+                <p className="mt-1.5 max-w-xl text-sm font-light leading-relaxed text-[#f5efe3]/70">{it.desc[lang]}</p>
+                {it.meta && <p className="micro-caps mt-2 text-[#f5efe3]/45">{it.meta[lang]}</p>}
               </div>
               <div className="whitespace-nowrap text-left sm:text-right">
-                {it.from && <span className="micro-caps block text-[#1F1B16]/50">{ui.from}</span>}
-                <span className="display-type tnum text-[#1F1B16]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.6rem)" }}>{amount(it.price[region])}</span>
+                {it.from && <span className="micro-caps block text-[#f5efe3]/50">{ui.from}</span>}
+                <span className="display-space tnum text-[#f5efe3]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.6rem)" }}>{amount(it.price[region])}</span>
               </div>
             </motion.div>
           ))}
@@ -234,12 +232,12 @@ export default function PricingPage({
 
       {/* GOOD TO KNOW */}
       <section className={`${container} py-12 md:py-16`}>
-        <div className="rounded-[4px] bg-[var(--bone)] p-8 md:p-12">
-          <span className="micro-caps text-[var(--color-gold-ink)]">{ui.goodToKnow}</span>
+        <div className="rounded-[4px] bg-[var(--ink-panel)] p-8 md:p-12">
+          <span className="micro-caps text-[var(--gilt)]">{ui.goodToKnow}</span>
           <div className="mt-7 grid gap-x-12 gap-y-4 sm:grid-cols-2">
             {GOOD_TO_KNOW.map((g, i) => (
-              <p key={i} className="text-sm font-light leading-relaxed text-[#1F1B16]/70">
-                <span className="font-medium text-[#1F1B16]">{g.label[lang]}</span> — {resolve(g.value[lang])}
+              <p key={i} className="text-sm font-light leading-relaxed text-[#f5efe3]/70">
+                <span className="font-medium text-[#f5efe3]">{g.label[lang]}</span> — {resolve(g.value[lang])}
               </p>
             ))}
           </div>
@@ -249,12 +247,12 @@ export default function PricingPage({
       {/* CTA — the Espresso dark room */}
       <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-type mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{ui.ctaHeading}</h2>
+          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{ui.ctaHeading}</h2>
           <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(251,248,242,0.68)" }}>{ui.ctaText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href={localizedHref(lang, "/#contatti")}
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--paper)] px-8 py-4 text-sm font-medium tracking-wide text-[#1F1B16] transition-colors duration-300 hover:bg-[var(--bone)]"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-gold)] px-8 py-4 text-sm font-semibold tracking-wide text-[#17130E] transition-transform duration-300 hover:scale-[1.02]"
             >
               {ui.ctaContact}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -282,8 +280,8 @@ function SectionHead({ num, title, tagline }: { num: string; title: string; tagl
   return (
     <div className="mb-10 flex items-baseline gap-4 md:mb-12">
       <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>{num}</span>
-      <h2 className="display-type text-[#1F1B16]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{title}</h2>
-      <span className="micro-caps ml-auto hidden text-[#1F1B16]/45 sm:block">{tagline}</span>
+      <h2 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{title}</h2>
+      <span className="micro-caps ml-auto hidden text-[#f5efe3]/45 sm:block">{tagline}</span>
     </div>
   );
 }
