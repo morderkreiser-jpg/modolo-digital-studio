@@ -62,20 +62,18 @@
   --paper: #fbf8f2;      /* primary near-white field */
   --bone: #eee6d8;       /* recessed / alternating warm panel */
   --espresso: #17130e;   /* display ink + full-bleed Night surfaces */
-  --gilt: #7e5d24;       /* small gold text/accents — AA on the cream light field */
+  --gilt: #c9a25a;       /* gold ON espresso (lighter leaf, stays warm on near-black) */
   --line: rgba(31, 27, 22, 0.12);      /* hairline on light */
   --line-strong: rgba(31, 27, 22, 0.2);
 
-  /* ===== "Immersive" LIGHT gold theme (2026-07-10 — cream field, reflective gold, ink type).
-     The tokens keep their dark-era names but now resolve to the light palette, so every
-     component that used them flips to light at once. ===== */
-  --ink-bg: #f6f1e7;        /* primary warm cream field */
-  --ink-panel: #efe6d6;     /* raised warm bone panel (alternating sections) */
-  --ink-deep: #e8dcc6;      /* deeper bone for contrast pockets */
-  --ink-text: #17130e;      /* ink primary text on cream */
-  --gold-bright: #c9992f;   /* gold for gradients/accents that must read on cream */
-  --gold-line: rgba(31, 27, 22, 0.12);         /* hairline on light */
-  --gold-line-strong: rgba(31, 27, 22, 0.2);
+  /* ===== "Immersive" dark+gold theme (2026-07-09 redesign — dark, gold, super modern; restored 2026-07-10) ===== */
+  --ink-bg: #0b0805;        /* primary warm near-black field */
+  --ink-panel: #14100a;     /* raised panel on the dark */
+  --ink-deep: #070502;      /* deepest black for contrast pockets */
+  --ink-text: #f5efe3;      /* cream primary text on dark */
+  --gold-bright: #e6c060;   /* bright gold for glow / gradients on dark */
+  --gold-line: rgba(201, 162, 90, 0.20);       /* gold hairline on dark */
+  --gold-line-strong: rgba(201, 162, 90, 0.40);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -243,15 +241,15 @@
   font-weight: 600;
   text-wrap: balance;
 }
-/* Gold gradient text — accent words. Tuned to read on the cream light field. */
+/* Gold gradient text — for accent words on the dark field. */
 .gold-grad {
-  background: linear-gradient(100deg, #c9992f, var(--color-gold) 45%, #7e5d24);
+  background: linear-gradient(100deg, #f0d089, var(--color-gold) 48%, var(--gilt));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-/* Soft gold lift (CTAs, focal elements) — a warm shadow on light, not a neon glow. */
-.gold-glow { box-shadow: 0 10px 30px rgba(181, 137, 63, 0.28); }
+/* Soft gold glow (CTAs, focal elements). */
+.gold-glow { box-shadow: 0 0 34px rgba(181, 137, 63, 0.42); }
 /* Fine gold hairline on dark. */
 .ink-hairline { border-color: var(--gold-line); }
 

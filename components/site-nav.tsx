@@ -54,18 +54,14 @@ export default function SiteNav({
   ctaHref = "/#contatti",
   ctaLabel,
   theme = "light",
-  scrollDark = false,
 }: {
   lang: Locale;
   links?: NavLink[];
   ctaHref?: string;
   ctaLabel?: string;
   theme?: "light" | "dark";
-  /** Homepage: cream hero → dark body. Nav is light over the hero, then switches to dark on scroll. */
-  scrollDark?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
   const reduce = useReducedMotion();
   const router = useRouter();
   const pathname = usePathname();
@@ -74,17 +70,8 @@ export default function SiteNav({
   const hasMenu = links.length > 0;
   const a = NAV_A11Y[lang];
 
-  // Switch the nav to its dark styling once the cream hero has scrolled under the bar.
-  useEffect(() => {
-    if (!scrollDark) return;
-    const onScroll = () => setPastHero(window.scrollY > window.innerHeight * 0.82);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollDark]);
-
-  // Theme-aware styling. With scrollDark, the homepage nav is light over the hero and dark below.
-  const dark = scrollDark ? pastHero : theme === "dark";
+  // Theme-aware styling: the immersive homepage is dark; inner pages stay light.
+  const dark = theme === "dark";
   const c = {
     nav: dark ? "bg-[#0b0805]/72 border-[color:var(--gold-line)]" : "bg-[#F7F3EC]/80 border-[#1F1B16]/[0.08]",
     word: dark ? "text-[#f5efe3]" : "text-[#1F1B16]",
@@ -178,11 +165,11 @@ export default function SiteNav({
 
   return (
     <>
-    <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-colors duration-500 ${c.nav}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b ${c.nav}`}>
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between gap-2">
         {/* Logo */}
         <Link href={localizedHref(lang, "/")} aria-label={a.home} onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <Image src="/logo-mark.png" alt="" width={36} height={36} />
+          <Image src={dark ? "/logo-mark-light.png" : "/logo-mark.png"} alt="" width={36} height={36} />
           <span className="flex flex-col leading-tight">
             <span className={`font-light tracking-[0.25em] text-xs sm:text-sm ${c.word}`}>MODOLO</span>
             <span className={`text-[10px] tracking-[0.3em] hidden sm:block ${c.sub}`}>DIGITAL STUDIO</span>
