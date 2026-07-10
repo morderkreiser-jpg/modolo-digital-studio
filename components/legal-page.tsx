@@ -310,7 +310,7 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
 
   return (
     <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] outline-none">
-      <SiteNav lang={lang} theme="light" />
+      <SiteNav lang={lang} theme="dark" />
       <div className="mds-grain" aria-hidden />
       
       {/* CONTENT */}
@@ -322,20 +322,20 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
 
         <div className="mt-12 max-w-3xl">
           <span className="micro-caps text-[var(--gilt)]">{u.kicker}</span>
-          <h1 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
-          <p className="micro-caps mt-5 text-[#17130e]/45">{u.updated} · {doc.date}</p>
+          <h1 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
+          <p className="micro-caps mt-5 text-[#f5efe3]/45">{u.updated} · {doc.date}</p>
         </div>
 
         <div className="mt-14 max-w-3xl border-b border-[color:var(--gold-line)]">
           {doc.sections.map((s, i) => (
             <div key={i} className="border-t border-[color:var(--gold-line)] py-8">
-              <h2 className="flex gap-4 text-[#17130e]">
+              <h2 className="flex gap-4 text-[#f5efe3]">
                 <span aria-hidden="true" className="micro-caps tnum shrink-0 pt-1.5 text-[var(--gilt)]">{String(i + 1).padStart(2, "0")}</span>
                 <span className="display-space" style={{ fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)" }}>{s.heading}</span>
               </h2>
               <div className="mt-3 pl-0 sm:pl-10">
                 {s.body.map((p, j) => (
-                  <p key={j} className="mb-3 whitespace-pre-line font-light leading-relaxed text-[#17130e]/70 last:mb-0">
+                  <p key={j} className="mb-3 whitespace-pre-line font-light leading-relaxed text-[#f5efe3]/70 last:mb-0">
                     {p}
                   </p>
                 ))}
