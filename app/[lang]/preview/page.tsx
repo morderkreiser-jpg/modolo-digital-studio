@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import HeroImmersive from "@/components/hero-immersive";
+import HeroImmersiveLight from "@/components/hero-immersive-light";
 
-// Local-only direction prototype — keep it out of search.
+// Direction prototype (LIGHT variant, for comparison against the live dark homepage). Noindex.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function PreviewPage() {
   return (
-    <main className="min-h-screen bg-[#07070E]">
-      <HeroImmersive />
+    <main className="min-h-screen bg-[#F6F1E7]">
+      <HeroImmersiveLight />
     </main>
   );
 }

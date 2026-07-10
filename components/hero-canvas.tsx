@@ -24,13 +24,13 @@ function Blob() {
   return (
     <Icosahedron ref={ref} args={[1.6, 28]} position={[0.7, 0, 0]}>
       <MeshDistortMaterial
-        color="#3a2c0d"
-        emissive="#8a6418"
-        emissiveIntensity={0.55}
-        roughness={0.22}
-        metalness={0.6}
-        distort={0.42}
-        speed={1.3}
+        color="#4a3208"
+        emissive="#b5791c"
+        emissiveIntensity={0.7}
+        roughness={0.28}
+        metalness={0.7}
+        distort={0.4}
+        speed={1.2}
       />
     </Icosahedron>
   );
@@ -39,14 +39,14 @@ function Blob() {
 export default function HeroCanvas() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}>
-      <ambientLight intensity={0.35} />
-      <pointLight position={[5, 3, 4]} intensity={125} color="#e6c060" />
-      <pointLight position={[-5, -2, 3]} intensity={100} color="#d4a344" />
-      <pointLight position={[0, 3, -4]} intensity={70} color="#c9a25a" />
-      <pointLight position={[2, -3, 2]} intensity={80} color="#fff2d8" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[5, 3, 4]} intensity={130} color="#f0c256" />
+      <pointLight position={[-5, -2, 3]} intensity={105} color="#d99038" />
+      <pointLight position={[0, 3, -4]} intensity={75} color="#c98a3a" />
+      <pointLight position={[2, -3, 2]} intensity={70} color="#ffe6b0" />
       <Blob />
       <EffectComposer>
-        <Bloom intensity={1.35} luminanceThreshold={0.13} luminanceSmoothing={0.9} mipmapBlur />
+        <Bloom intensity={1.3} luminanceThreshold={0.16} luminanceSmoothing={0.92} mipmapBlur />
       </EffectComposer>
     </Canvas>
   );
