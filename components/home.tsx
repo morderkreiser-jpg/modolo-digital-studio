@@ -10,10 +10,7 @@ import BackToTop from "@/components/back-to-top";
 import Magnetic from "@/components/magnetic";
 import Reveal from "@/components/reveal";
 import Marquee from "@/components/marquee";
-import dynamic from "next/dynamic";
-
-// The immersive gold-blob WebGL hero — code-split + client-only so it never touches SSR/LCP.
-const HeroCanvas = dynamic(() => import("@/components/hero-canvas-light"), { ssr: false });
+import HeroSign from "@/components/hero-sign";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -40,6 +37,10 @@ const translations = {
       line3pre: "I'll ",
       line3accent: "reopen it",
       line3post: ".",
+      signClosed: "CLOSED",
+      signOpen: "OPEN",
+      signClosedHours: "Hours  —:—",
+      signOpenHours: "Always open for you",
     },
     stats: [
       { value: "4+", label: "Years building websites" },
@@ -121,6 +122,10 @@ const translations = {
       line3pre: "Ich mache ihn ",
       line3accent: "wieder auf",
       line3post: ".",
+      signClosed: "GESCHLOSSEN",
+      signOpen: "OFFEN",
+      signClosedHours: "Öffnungszeiten  —:—",
+      signOpenHours: "Immer für dich da",
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
@@ -202,6 +207,10 @@ const translations = {
       line3pre: "La ",
       line3accent: "riapro io",
       line3post: ".",
+      signClosed: "CHIUSO",
+      signOpen: "APERTO",
+      signClosedHours: "Orari  —:—",
+      signOpenHours: "Sempre aperto per te",
     },
     stats: [
       { value: "4+", label: "Anni a costruire siti" },
@@ -274,7 +283,6 @@ export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
-  const [heroReady, setHeroReady] = useState(false);
   const reduce = useReducedMotion();
   const successRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
@@ -295,23 +303,6 @@ export default function Home({ lang }: { lang: Lang }) {
   useEffect(() => {
     if (formStatus === "success") successRef.current?.focus();
   }, [formStatus]);
-
-  // Perf: the WebGL hero (three.js) is heavy and was failing mobile Core Web Vitals (LCP/TBT).
-  // Never load it on mobile or low-end devices — the CSS gold glow carries the look there — and on
-  // capable desktops mount it only once the page goes idle, so it can't block first paint or input.
-  useEffect(() => {
-    if (reduce || typeof window === "undefined") return;
-    const desktop = window.matchMedia("(min-width: 1024px)").matches;
-    const capable = (navigator.hardwareConcurrency ?? 4) >= 4;
-    if (!desktop || !capable) return;
-    const ric = window.requestIdleCallback;
-    if (ric) {
-      const id = ric(() => setHeroReady(true), { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    const id = window.setTimeout(() => setHeroReady(true), 1500);
-    return () => window.clearTimeout(id);
-  }, [reduce]);
 
   const [needs, setNeeds] = useState<string[]>([]);
   const toggleNeed = (n: string) => setNeeds((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
@@ -375,8 +366,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
       {/* HERO — immersive: the gold-blob WebGL spectacle behind kinetic modern type */}
       <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 52% at 72% 45%, rgba(181,137,63,0.14), transparent 70%)" }} />
-        {heroReady && <div className="absolute inset-0"><HeroCanvas /></div>}
+        <div className="absolute inset-0"><HeroSign closed={t.hero.signClosed} open={t.hero.signOpen} closedHours={t.hero.signClosedHours} openHours={t.hero.signOpenHours} /></div>
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(246,241,231,0.92) 0%, rgba(246,241,231,0.55) 42%, rgba(246,241,231,0) 66%)" }} />
 
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
