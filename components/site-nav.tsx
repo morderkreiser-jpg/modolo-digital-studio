@@ -14,6 +14,40 @@ type NavLink = { href: string; label: string };
 const LANG_NAMES: Record<Locale, string> = { en: "English", de: "Deutsch", it: "Italiano" };
 const LANG_ROW_H = 40; // px — height of one language row; the gold ruler tick slides in multiples of this.
 
+// Small inline SVG flags (emoji flags don't render on Windows — they show the letters). DE uses
+// the SWISS flag on purpose: the German site targets Swiss clients, so it reinforces "local".
+function Flag({ code }: { code: Locale }) {
+  const cls = "h-[13px] w-[19px] shrink-0 rounded-[2px] overflow-hidden ring-1 ring-black/10";
+  if (code === "it")
+    return (
+      <svg viewBox="0 0 20 14" className={cls} aria-hidden="true">
+        <rect width="20" height="14" fill="#fff" />
+        <rect width="6.67" height="14" fill="#009246" />
+        <rect x="13.33" width="6.67" height="14" fill="#CE2B37" />
+      </svg>
+    );
+  if (code === "de")
+    return (
+      <svg viewBox="0 0 20 14" className={cls} aria-hidden="true">
+        <rect width="20" height="14" fill="#D52B1E" />
+        <rect x="8.3" y="2.6" width="3.4" height="8.8" fill="#fff" />
+        <rect x="5.4" y="5.3" width="9.2" height="3.4" fill="#fff" />
+      </svg>
+    );
+  return (
+    // Union Jack (English)
+    <svg viewBox="0 0 20 14" className={cls} aria-hidden="true">
+      <rect width="20" height="14" fill="#012169" />
+      <path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" strokeWidth="3" />
+      <path d="M0,0 L20,14 M20,0 L0,14" stroke="#C8102E" strokeWidth="1.5" />
+      <rect x="8" width="4" height="14" fill="#fff" />
+      <rect y="5" width="20" height="4" fill="#fff" />
+      <rect x="8.75" width="2.5" height="14" fill="#C8102E" />
+      <rect y="5.75" width="20" height="2.5" fill="#C8102E" />
+    </svg>
+  );
+}
+
 // Persist the chosen locale so proxy.ts keeps the visitor in it on later visits.
 // Module-level (not inside the component) so it stays a plain browser side effect.
 function rememberLocale(locale: Locale) {
@@ -183,6 +217,7 @@ export default function SiteNav({
         } uppercase tracking-[0.18em] transition-colors ${langOpen ? c.tActive : c.tIdle}`}
         style={{ fontFamily: "var(--font-space), sans-serif" }}
       >
+        <Flag code={lang} />
         {lang}
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-300 ${langOpen ? "rotate-180" : ""}`}
@@ -236,7 +271,10 @@ export default function SiteNav({
                       active ? (dark ? "text-[var(--gilt)]" : "text-[var(--color-gold-ink)]") : c.tIdle
                     } ${dark ? "hover:bg-[#f5efe3]/[0.06]" : "hover:bg-[#1F1B16]/[0.04]"}`}
                   >
-                    <span className={`text-sm tracking-wide ${active ? "font-medium" : "font-light"}`}>{LANG_NAMES[l]}</span>
+                    <span className="flex items-center gap-2.5">
+                      <Flag code={l} />
+                      <span className={`text-sm tracking-wide ${active ? "font-medium" : "font-light"}`}>{LANG_NAMES[l]}</span>
+                    </span>
                     <span
                       className="text-[10px] uppercase tracking-[0.22em] opacity-55"
                       style={{ fontFamily: "var(--font-space), sans-serif" }}
