@@ -384,7 +384,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="micro-caps text-[#f5efe3]/55">{t.hero.meta}</span>
           </div>
 
-          <h1 className="display-space text-[#f5efe3] mds-in" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)", animationDelay: "0.12s" }}>
+          <h1 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)" }}>
             {t.hero.line1}
             <br />
             {t.hero.line2}
