@@ -67,7 +67,7 @@ const translations = {
       eyebrow: "The founder",
       name: "Francesco Modolo",
       role: "Web Designer & Developer",
-      bio1: "Technology has been my passion since childhood — I started out building PCs from scratch, sourcing every single component myself. That curiosity grew into a craft: for over four years I have been designing and building websites for businesses across Switzerland.",
+      bio1: "As a kid I took computers apart and put them back together just to understand how they worked. Today, for over four years, that passion has been my job: I design and hand-build websites for businesses across Switzerland, and I do everything myself — design, code and SEO. With just one obsession: that your website isn't only beautiful, but actually brings you customers.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
     values: [
@@ -148,7 +148,7 @@ const translations = {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
       role: "Webdesigner & Entwickler",
-      bio1: "Technologie ist seit meiner Kindheit meine Leidenschaft — angefangen habe ich damit, PCs von Grund auf selbst zu bauen und jedes einzelne Bauteil zu bestellen. Aus dieser Neugier wurde ein Handwerk: Seit über vier Jahren gestalte und entwickle ich Websites für Unternehmen in der ganzen Schweiz.",
+      bio1: "Als Junge habe ich Computer auseinander- und wieder zusammengebaut, einfach um zu verstehen, wie sie funktionieren. Heute, seit über vier Jahren, ist diese Leidenschaft mein Beruf: Ich gestalte und baue von Hand Websites für Betriebe in der ganzen Schweiz und mache alles selbst — Design, Code und SEO. Mit nur einer Besessenheit: dass deine Website nicht nur schön ist, sondern dir echte Kunden bringt.",
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
     values: [
@@ -229,7 +229,7 @@ const translations = {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
       role: "Web Designer & Sviluppatore",
-      bio1: "La tecnologia è la mia passione fin da bambino: ho iniziato costruendo PC da zero, ordinando ogni singolo componente. Da quella curiosità è nato un mestiere: da oltre quattro anni progetto e realizzo siti web per aziende in tutta la Svizzera.",
+      bio1: "Da ragazzino smontavo e rimontavo computer per il gusto di capire come funzionavano. Oggi, da oltre quattro anni, quella passione è il mio lavoro: progetto e costruisco a mano siti per attività in tutta la Svizzera, e seguo tutto io — design, codice e SEO. Con un'ossessione sola: che il tuo sito non sia solo bello, ma ti porti clienti veri.",
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
     values: [
@@ -633,24 +633,14 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="min-w-0"
             >
-              <div className="grid gap-6 text-base font-light leading-relaxed md:grid-cols-2" style={{ color: "rgba(251,248,242,0.66)" }}>
-                <p>{t.founder.bio1}</p>
-                <p>{t.founder.bio2}</p>
-              </div>
+              <p className="text-lg font-light leading-relaxed" style={{ color: "rgba(251,248,242,0.72)" }}>{t.founder.bio1}</p>
 
-              <div className="mt-12 border-t" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
-                {t.values.map((value, i) => (
-                  <div key={i} className="flex gap-6 border-b py-5" style={{ borderColor: "rgba(201,162,90,0.14)" }}>
-                    <span aria-hidden="true" className="display-italic leading-none" style={{ color: "var(--gilt)", fontSize: "1.5rem" }}>0{i + 1}</span>
-                    <div>
-                      <h3 className="display-space text-lg" style={{ color: "var(--paper)" }}>{value.title}</h3>
-                      <p className="mt-1 text-sm font-light" style={{ color: "rgba(251,248,242,0.5)" }}>{value.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="display-space mt-10" style={{ fontSize: "clamp(1.4rem, 2.6vw, 2.1rem)", lineHeight: 1.3, color: "var(--paper)" }}>{t.about.p3}</p>
 
-              <p className="display-space mt-12" style={{ fontSize: "clamp(1.35rem, 2.4vw, 2rem)", lineHeight: 1.3, color: "var(--paper)" }}>{t.about.p3}</p>
+              <a href="#contatti" className="group mt-10 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
+                {t.hero.ctaPrimary}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
+              </a>
             </motion.div>
           </div>
         </div>

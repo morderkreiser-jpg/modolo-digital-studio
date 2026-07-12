@@ -11,79 +11,67 @@ export const FAQS: Record<Locale, QA[]> = {
   en: [
     {
       q: "How much does a website cost?",
-      a: "Every project is tailor-made, so the price depends on your needs: number of pages, features and content to create. That's why we offer a free initial consultation: you tell us about your project and we prepare a clear quote, with no surprises.",
+      a: "Every project is tailor-made, so the price depends on what you need: number of pages, features and content. That's why the first consultation is free — you tell me what you want to achieve and I give you a clear, fixed-price quote agreed before we start. No surprises at the bottom.",
     },
     {
-      q: "How long does it take to get the website online?",
-      a: "It depends on the complexity, but a showcase website usually takes 2 to 4 weeks from gathering the materials. At the start we define a roadmap together, so you always know where we stand.",
+      q: "How long until the website is online?",
+      a: "It depends on the complexity, but a showcase website usually takes 2 to 4 weeks once we have the materials. At the start we set a roadmap together, so you always know where we stand.",
     },
     {
       q: "Do you work all over Switzerland?",
-      a: "Yes. We work with clients across Switzerland, remotely and in person when needed. Distance is never an obstacle: most of the work happens online, with regular calls and updates.",
+      a: "Yes. I work with clients across Switzerland, remotely and in person when needed. Distance is no problem: most of the work happens online, with regular calls and updates — and you always talk to me.",
     },
     {
-      q: "Do you also handle copy and photography?",
-      a: "Absolutely. We can take care of content from start to finish, with professional photo shoots and copywriting. For social media we partner with Project Visibility, specialists in content and page management.",
-    },
-    {
-      q: "Will the website be optimized for Google?",
-      a: "Yes, every website we build is SEO-optimized from the start: correct structure, fast loading and Google Business setup to help you get found locally. A strong online presence starts here.",
+      q: "Will the website be optimised for Google?",
+      a: "Yes — every website I build is SEO-optimised from the start: clean structure, fast loading and a tidy Google Business profile so you get found nearby. Getting found is half the battle.",
     },
     {
       q: "What happens after the website goes live?",
-      a: "We don't leave you on your own. We offer support and maintenance to keep your site secure and up to date, and we're always available for changes or new ideas. We build lasting relationships, not throwaway projects.",
+      a: "I don't disappear. I offer support and maintenance to keep your site secure and up to date, and I'm here for changes or new ideas. One person to message: me.",
     },
   ],
   de: [
     {
       q: "Was kostet eine Website?",
-      a: "Jedes Projekt ist massgeschneidert, daher hängt der Preis von deinen Bedürfnissen ab: Anzahl der Seiten, Funktionen und zu erstellende Inhalte. Deshalb bieten wir eine kostenlose Erstberatung an: Du erzählst uns von deinem Projekt und wir erstellen ein klares Angebot, ohne Überraschungen.",
+      a: "Jedes Projekt ist massgeschneidert, der Preis hängt also davon ab, was du brauchst: Anzahl der Seiten, Funktionen und Inhalte. Deshalb ist die erste Beratung gratis — du erzählst mir, was du erreichen willst, und ich gebe dir ein klares Angebot zum Festpreis, vor dem Start festgelegt. Keine Überraschungen am Schluss.",
     },
     {
       q: "Wie lange dauert es, bis die Website online ist?",
-      a: "Das hängt von der Komplexität ab, aber eine Präsentationswebsite dauert in der Regel 2 bis 4 Wochen ab dem Zusammenstellen der Materialien. Zu Beginn legen wir gemeinsam einen Fahrplan fest, damit du immer weisst, wo wir stehen.",
+      a: "Das hängt von der Komplexität ab, aber eine Präsentationswebsite dauert meist 2 bis 4 Wochen, sobald wir die Materialien haben. Zu Beginn legen wir zusammen einen Fahrplan fest, damit du immer weisst, wo wir stehen.",
     },
     {
-      q: "Arbeitet ihr in der ganzen Schweiz?",
-      a: "Ja. Wir betreuen Kunden in der ganzen Schweiz, remote und bei Bedarf persönlich. Distanz ist nie ein Hindernis: Der grösste Teil der Arbeit findet online statt, mit regelmässigen Calls und Updates.",
-    },
-    {
-      q: "Kümmert ihr euch auch um Texte und Fotos?",
-      a: "Selbstverständlich. Wir können die Inhalte von Anfang bis Ende übernehmen, mit professionellen Fotoshootings und Texterstellung. Für Social Media arbeiten wir mit Project Visibility zusammen, Spezialisten für Content und Seitenbetreuung.",
+      q: "Arbeitest du in der ganzen Schweiz?",
+      a: "Ja. Ich betreue Kunden in der ganzen Schweiz, remote und bei Bedarf persönlich. Distanz ist kein Problem: Der grösste Teil läuft online, mit regelmässigen Calls und Updates — und du sprichst immer mit mir.",
     },
     {
       q: "Wird die Website für Google optimiert?",
-      a: "Ja, jede Website, die wir erstellen, ist von Anfang an SEO-optimiert: korrekte Struktur, schnelle Ladezeiten und Google-Business-Einrichtung, damit du lokal gefunden wirst. Eine starke Online-Präsenz beginnt hier.",
+      a: "Ja — jede Website, die ich baue, ist von Anfang an SEO-optimiert: saubere Struktur, schnelle Ladezeit und ein aufgeräumtes Google-Unternehmensprofil, damit du in der Umgebung gefunden wirst. Gefunden zu werden ist die halbe Miete.",
     },
     {
       q: "Was passiert, nachdem die Website online ist?",
-      a: "Wir lassen dich nicht allein. Wir bieten Support und Wartung, um deine Website sicher und aktuell zu halten, und stehen jederzeit für Änderungen oder neue Ideen zur Verfügung. Wir bauen langfristige Beziehungen auf, keine Wegwerfprojekte.",
+      a: "Ich verschwinde nicht. Ich biete Support und Wartung, damit deine Website sicher und aktuell bleibt, und bin für Änderungen oder neue Ideen da. Eine einzige Ansprechperson: ich.",
     },
   ],
   it: [
     {
       q: "Quanto costa realizzare un sito web?",
-      a: "Ogni progetto è su misura, quindi il prezzo dipende dalle tue esigenze: numero di pagine, funzionalità e contenuti da creare. Per questo offriamo una prima consulenza gratuita: ci racconti il tuo progetto e ti prepariamo un preventivo chiaro, senza sorprese.",
+      a: "Ogni progetto è su misura, quindi il prezzo dipende da cosa ti serve: numero di pagine, funzioni e contenuti. Per questo la prima consulenza è gratuita — mi racconti cosa vuoi ottenere e ti do un preventivo chiaro a prezzo fisso, deciso prima di iniziare. Nessuna sorpresa in fondo.",
     },
     {
-      q: "Quanto tempo serve per avere il sito online?",
-      a: "Dipende dalla complessità, ma in genere un sito vetrina richiede dalle 2 alle 4 settimane dalla raccolta dei materiali. All'inizio definiamo insieme una tabella di marcia, così sai sempre a che punto siamo.",
+      q: "Quanto tempo serve per andare online?",
+      a: "Dipende dalla complessità, ma in genere un sito vetrina richiede dalle 2 alle 4 settimane da quando abbiamo i materiali. All'inizio fissiamo insieme una tabella di marcia, così sai sempre a che punto siamo.",
     },
     {
-      q: "Lavorate in tutta la Svizzera?",
-      a: "Sì. Seguiamo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è mai un ostacolo: gran parte del lavoro avviene online, con call e aggiornamenti costanti.",
-    },
-    {
-      q: "Vi occupate anche di testi e fotografie?",
-      a: "Assolutamente. Possiamo curare i contenuti dall'inizio alla fine, con shooting fotografici professionali e creazione dei testi. Per i social collaboriamo con Project Visibility, specialisti in contenuti e gestione delle pagine.",
+      q: "Lavori in tutta la Svizzera?",
+      a: "Sì. Seguo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è un problema: gran parte del lavoro è online, con call e aggiornamenti costanti — e rispondo sempre io.",
     },
     {
       q: "Il sito sarà ottimizzato per Google?",
-      a: "Sì, ogni sito che realizziamo nasce ottimizzato per la SEO: struttura corretta, velocità di caricamento e configurazione di Google Business per farti trovare sul territorio. Una buona presenza online parte da qui.",
+      a: "Sì — ogni sito che costruisco nasce ottimizzato per la SEO: struttura corretta, caricamento veloce e Google Business a posto per farti trovare in zona. Farti trovare è metà del lavoro.",
     },
     {
       q: "Cosa succede dopo che il sito è online?",
-      a: "Non ti lasciamo solo. Offriamo assistenza e manutenzione per tenere il sito sicuro e aggiornato, e siamo sempre disponibili per modifiche o nuove idee. Costruiamo relazioni durature, non lavori 'usa e getta'.",
+      a: "Non sparisco. Ti offro assistenza e manutenzione per tenere il sito sicuro e aggiornato, e resto a disposizione per modifiche o nuove idee. Una sola persona a cui scrivere: io.",
     },
   ],
 };
