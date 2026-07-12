@@ -42,7 +42,7 @@ export default function Marquee({ items }: { items: string[] }) {
           <div key={dup} className="flex shrink-0 items-center">
             {items.map((d, i) => (
               <span key={`${dup}-${i}`} className="flex items-center">
-                <span className="display-space px-6 text-[#f5efe3]/85 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
+                <span className="display-space px-6 text-[#17130e]/80 md:px-9" style={{ fontSize: "clamp(1.75rem, 4vw, 3.25rem)" }}>{d}</span>
                 <span className="inline-block h-1.5 w-1.5 shrink-0 rotate-45" style={{ background: "var(--color-gold)", boxShadow: "0 0 8px var(--color-gold)" }} />
               </span>
             ))}

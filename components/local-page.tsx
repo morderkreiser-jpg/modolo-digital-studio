@@ -70,7 +70,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
         ]}
         ctaHref={contactHref}
         ctaLabel={u.nav.contact}
-        theme="dark"
+        theme="light"
       />
       <div className="mds-grain" aria-hidden />
 
@@ -89,12 +89,12 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
           <span className="micro-caps text-[var(--gilt)]">{area.eyebrow[lang]}</span>
         </div>
 
-        <h1 className="display-space mt-5 max-w-4xl text-[#f5efe3]" style={{ fontSize: "clamp(2.4rem, 6.5vw, 5.25rem)", lineHeight: 1.02 }}>
+        <h1 className="display-space mt-5 max-w-4xl text-[#17130e]" style={{ fontSize: "clamp(2.4rem, 6.5vw, 5.25rem)", lineHeight: 1.02 }}>
           {area.h1[lang]}
           <em className="gold-grad not-italic">{area.h1accent[lang]}</em>
         </h1>
 
-        <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-[#f5efe3]/70">{area.intro[lang]}</p>
+        <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-[#17130e]/70">{area.intro[lang]}</p>
 
         <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
           <a
@@ -105,21 +105,21 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
             {u.cta}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </a>
-          <Link href={localizedHref(lang, "/#portfolio")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#f5efe3]/70 transition-colors hover:text-[#f5efe3]">
+          <Link href={localizedHref(lang, "/#portfolio")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#17130e]/70 transition-colors hover:text-[#17130e]">
             {u.viewWork}
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <p className="mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#f5efe3]/60">{u.trust}</p>
+        <p className="mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#17130e]/60">{u.trust}</p>
       </section>
 
       {/* WHY LOCAL */}
       <section className={`${container} py-12 md:py-16`}>
         <div className="rounded-[4px] bg-[var(--ink-panel)] p-8 md:p-12">
-          <h2 className="display-space text-[#f5efe3]" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{area.localTitle[lang]}</h2>
-          <p className="mt-5 max-w-3xl text-lg font-light leading-relaxed text-[#f5efe3]/70">{area.localBody[lang]}</p>
-          <p className="mt-8 max-w-2xl font-light leading-relaxed text-[#f5efe3]/60">{u.servicesLine}</p>
+          <h2 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{area.localTitle[lang]}</h2>
+          <p className="mt-5 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/70">{area.localBody[lang]}</p>
+          <p className="mt-8 max-w-2xl font-light leading-relaxed text-[#17130e]/60">{u.servicesLine}</p>
           <div className="mt-6">
             <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
               {u.viewPricing}
@@ -131,13 +131,13 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
 
       {/* OTHER AREAS — internal links */}
       <section className={`${container} py-8`}>
-        <span className="micro-caps text-[#f5efe3]/40">{u.otherAreas}</span>
+        <span className="micro-caps text-[#17130e]/40">{u.otherAreas}</span>
         <div className="mt-4 flex flex-wrap gap-3">
           {others.map((c) => (
             <Link
               key={c}
               href={localizedHref(lang, `/webdesign/${c}`)}
-              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gold-line-strong)] px-5 py-2.5 text-sm text-[#f5efe3]/80 transition-colors hover:border-[var(--color-gold)] hover:text-[#f5efe3]"
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gold-line-strong)] px-5 py-2.5 text-sm text-[#17130e]/80 transition-colors hover:border-[var(--color-gold)] hover:text-[#17130e]"
             >
               <MapPin className="h-3.5 w-3.5 text-[var(--gilt)]" strokeWidth={1.6} aria-hidden="true" />
               {LOCAL_AREAS[c].navLabel[lang]}
@@ -147,10 +147,10 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
       </section>
 
       {/* CTA — Espresso room */}
-      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--espresso)", color: "var(--paper)" }}>
+      <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "var(--paper)" }}>{area.ctaHeading[lang]}</h2>
-          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(251,248,242,0.68)" }}>{u.closingText}</p>
+          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "#17130e" }}>{area.ctaHeading[lang]}</h2>
+          <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(31,27,22,0.68)" }}>{u.closingText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <a
               href={contactHref}
