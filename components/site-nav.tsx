@@ -5,10 +5,14 @@ import Link from "next/link";
 import { useState, useEffect, useRef, type MouseEvent as ReactMouseEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { LOCALES, localizedHref, stripLocale, type Locale } from "@/lib/i18n";
 
 type NavLink = { href: string; label: string };
+
+// Language names shown in the dropdown, each in its own language.
+const LANG_NAMES: Record<Locale, string> = { en: "English", de: "Deutsch", it: "Italiano" };
+const LANG_ROW_H = 40; // px — height of one language row; the gold ruler tick slides in multiples of this.
 
 // Persist the chosen locale so proxy.ts keeps the visitor in it on later visits.
 // Module-level (not inside the component) so it stays a plain browser side effect.
@@ -62,6 +66,8 @@ export default function SiteNav({
   theme?: "light" | "dark";
 }) {
   const [open, setOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [langHover, setLangHover] = useState<Locale | null>(null);
   const reduce = useReducedMotion();
   const router = useRouter();
   const pathname = usePathname();
@@ -121,6 +127,24 @@ export default function SiteNav({
     };
   }, [open]);
 
+  // Close the language ruler on an outside click or Escape.
+  useEffect(() => {
+    if (!langOpen) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Element | null;
+      if (!t?.closest?.("[data-lang-dd]")) setLangOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLangOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [langOpen]);
+
   // Logo click: on the home page the link points to the route we're already on, and
   // Next.js <Link> keeps the scroll position when the Page is still in the viewport — so the
   // tap feels dead (it never returns to the top, as reported on mobile). Intercept it and
@@ -137,29 +161,95 @@ export default function SiteNav({
   // The cookie lets proxy.ts keep the visitor in this locale on later visits.
   const switchLocale = (target: Locale) => {
     setOpen(false);
+    setLangOpen(false);
     if (target === lang) return;
     rememberLocale(target);
     router.push(localizedHref(target, stripLocale(pathname)));
   };
 
-  const langToggle = (variant: "sm" | "lg") => (
-    <div role="group" aria-label={a.language} className={`flex items-center gap-1 border ${c.tBorder} rounded-full p-0.5`}>
-      {LOCALES.map((l) => (
-        <button
-          key={l}
-          type="button"
-          onClick={() => switchLocale(l)}
-          aria-label={a.switchTo(l.toUpperCase())}
-          aria-current={lang === l ? "true" : undefined}
-          className={`${
-            variant === "lg" ? "px-3 py-1.5 text-xs" : "px-2.5 py-1.5 text-[11px]"
-          } rounded-full tracking-wider uppercase transition-colors ${
-            lang === l ? c.tActive : c.tIdle
-          }`}
-        >
-          {l}
-        </button>
-      ))}
+  // Language switcher as the site's "Measure" ruler: a hairline rail with a gold tick that
+  // slides to the current (or hovered) language — a signature detail, not a stock dropdown.
+  const markedIndex = Math.max(0, LOCALES.indexOf(langHover ?? lang));
+  const langMenu = (variant: "sm" | "lg") => (
+    <div data-lang-dd className="relative">
+      <button
+        type="button"
+        onClick={() => setLangOpen((v) => !v)}
+        aria-haspopup="true"
+        aria-expanded={langOpen}
+        aria-label={a.language}
+        className={`flex items-center gap-1.5 border ${c.tBorder} rounded-full ${
+          variant === "lg" ? "px-3.5 py-2 text-xs" : "px-3 py-1.5 text-[11px]"
+        } uppercase tracking-[0.18em] transition-colors ${langOpen ? c.tActive : c.tIdle}`}
+        style={{ fontFamily: "var(--font-space), sans-serif" }}
+      >
+        {lang}
+        <ChevronDown
+          className={`h-3.5 w-3.5 transition-transform duration-300 ${langOpen ? "rotate-180" : ""}`}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+      </button>
+      <AnimatePresence>
+        {langOpen && (
+          <motion.div
+            role="menu"
+            aria-label={a.language}
+            initial={reduce ? false : { opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: reduce ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className={`absolute right-0 mt-3 min-w-[11rem] rounded-2xl border p-2 shadow-xl z-[70] ${
+              dark ? "bg-[var(--ink-panel)] border-[color:var(--gold-line)]" : "bg-[#F7F3EC] border-[#1F1B16]/10"
+            }`}
+          >
+            <div className="relative">
+              {/* the ruler rail */}
+              <span
+                aria-hidden="true"
+                className={`absolute left-1 top-1.5 bottom-1.5 w-px ${dark ? "bg-[#f5efe3]/20" : "bg-[#1F1B16]/15"}`}
+              />
+              {/* the gold tick that slides to the marked language */}
+              <motion.span
+                aria-hidden="true"
+                className="absolute left-[3px] w-[2px] rounded-full bg-[var(--color-gold)]"
+                style={{ top: (LANG_ROW_H - 20) / 2, height: 20 }}
+                initial={false}
+                animate={{ y: markedIndex * LANG_ROW_H }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 34 }}
+              />
+              {LOCALES.map((l) => {
+                const active = lang === l;
+                return (
+                  <button
+                    key={l}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => switchLocale(l)}
+                    onMouseEnter={() => setLangHover(l)}
+                    onMouseLeave={() => setLangHover(null)}
+                    onFocus={() => setLangHover(l)}
+                    onBlur={() => setLangHover(null)}
+                    aria-label={a.switchTo(l.toUpperCase())}
+                    aria-current={active ? "true" : undefined}
+                    className={`group relative flex h-10 w-full items-center justify-between gap-6 rounded-lg pl-5 pr-3 transition-colors ${
+                      active ? (dark ? "text-[var(--gilt)]" : "text-[var(--color-gold-ink)]") : c.tIdle
+                    } ${dark ? "hover:bg-[#f5efe3]/[0.06]" : "hover:bg-[#1F1B16]/[0.04]"}`}
+                  >
+                    <span className={`text-sm tracking-wide ${active ? "font-medium" : "font-light"}`}>{LANG_NAMES[l]}</span>
+                    <span
+                      className="text-[10px] uppercase tracking-[0.22em] opacity-55"
+                      style={{ fontFamily: "var(--font-space), sans-serif" }}
+                    >
+                      {l}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 
@@ -183,7 +273,7 @@ export default function SiteNav({
               {l.label}
             </a>
           ))}
-          {langToggle("sm")}
+          {langMenu("sm")}
           {ctaLabel && (
             <a
               href={ctaHref}
@@ -204,7 +294,7 @@ export default function SiteNav({
               {ctaLabel}
             </a>
           )}
-          {langToggle("sm")}
+          {langMenu("sm")}
           {hasMenu && (
             <button
               ref={triggerRef}
