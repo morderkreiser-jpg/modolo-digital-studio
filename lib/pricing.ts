@@ -363,3 +363,18 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
     },
   },
 ];
+
+// Baseline inclusions in EVERY website — the "what you always get" band. Research finding: a
+// transparent, fully-scoped list of inclusions is the #1 lever that makes a Swiss SME owner feel
+// good about the price (and signals a thorough professional, not a beginner).
+export const INCLUDED_TITLE: Tri = { en: "Every website includes", de: "In jeder Website enthalten", it: "Ogni sito include" };
+export const INCLUDED: Tri[] = [
+  { en: "Tailor-made design, never a template", de: "Massgeschneidertes Design, nie eine Vorlage", it: "Design su misura, mai un template" },
+  { en: "Fast and flawless on every phone", de: "Schnell und einwandfrei auf jedem Handy", it: "Veloce e perfetto su ogni telefono" },
+  { en: "Optimised for Google (SEO built in)", de: "Für Google optimiert (SEO inklusive)", it: "Ottimizzato per Google (SEO inclusa)" },
+  { en: "Google Business profile set up", de: "Google-Unternehmensprofil eingerichtet", it: "Scheda Google Business impostata" },
+  { en: "Contact form + WhatsApp link", de: "Kontaktformular + WhatsApp-Anbindung", it: "Modulo contatti + WhatsApp" },
+  { en: "Hosting & domain set up for you", de: "Hosting & Domain für dich eingerichtet", it: "Hosting e dominio configurati per te" },
+  { en: "Revisions included in the fixed price", de: "Revisionen im Festpreis inbegriffen", it: "Revisioni incluse nel prezzo fisso" },
+  { en: "You always talk to me — no call centre", de: "Du sprichst immer mit mir — kein Callcenter", it: "Parli sempre con me, mai un call center" },
+];

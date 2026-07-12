@@ -13,6 +13,8 @@ import {
   CARE,
   BRANDING,
   GOOD_TO_KNOW,
+  INCLUDED,
+  INCLUDED_TITLE,
   HOURLY,
   VAT,
   CURRENCY,
@@ -112,6 +114,23 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             </motion.div>
           ))}
         </div>
+        {/* Every-website inclusions — the "what you always get" trust band (research: the #1 lever
+            that makes a Swiss SME owner feel good about the price + signals a thorough pro). */}
+        <motion.div
+          {...rise}
+          className="mt-10 rounded-[4px] border border-[color:var(--gold-line)] bg-[var(--ink-panel)]/40 p-7 md:p-9"
+        >
+          <span className="micro-caps text-[var(--gilt)]">{INCLUDED_TITLE[lang]}</span>
+          <ul className="mt-6 grid gap-x-10 gap-y-3.5 sm:grid-cols-2">
+            {INCLUDED.map((f, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm font-light text-[#17130e]/80">
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={2} />
+                {f[lang]}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
         <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-3">
           <p className="text-sm font-light text-[#17130e]/60">{ui.notSure}</p>
           <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
