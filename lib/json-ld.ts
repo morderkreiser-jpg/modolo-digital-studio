@@ -7,6 +7,7 @@ import type { ServiceSlug } from "./site";
 import { localizedHref, type Locale } from "./i18n";
 import { WEBSITES, CARE, BRANDING } from "./pricing";
 import { DEFAULT_REGION, type Region } from "./region";
+import { LOCAL_AREAS, type CitySlug } from "./local-seo";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -129,6 +130,45 @@ export function serviceGraph(slug: ServiceSlug, locale: Locale) {
           { "@type": "ListItem", position: 1, name: "Home", item: abs(localizedHref(locale, "/")) },
           { "@type": "ListItem", position: 2, name: SERVICES_LABEL[locale], item: abs(localizedHref(locale, "/#servizi")) },
           { "@type": "ListItem", position: 3, name: s.title, item: url },
+        ],
+      },
+    ],
+  };
+}
+
+// Structured data for a local-SEO area page (/webdesign/[city]): a ProfessionalService whose
+// areaServed is the city/country, so Google connects the page to local intent.
+export function localAreaGraph(slug: CitySlug, locale: Locale) {
+  const area = LOCAL_AREAS[slug];
+  const url = abs(localizedHref(locale, `/webdesign/${slug}`));
+  const areaServed =
+    area.areaServedType === "Country"
+      ? { "@type": "Country", name: area.areaServedName }
+      : { "@type": "City", name: area.areaServedName };
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Organization", "@id": `${SITE.url}/#organization`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-icon.png` },
+      {
+        "@type": "ProfessionalService",
+        "@id": `${url}#business`,
+        name: `${SITE.name} — ${area.areaServedName}`,
+        url,
+        image: `${SITE.url}/og-image.png`,
+        telephone: SITE.phone,
+        email: SITE.email,
+        address: postalAddress,
+        areaServed,
+        priceRange: "CHF 1900-8500",
+        inLanguage: locale,
+        parentOrganization: { "@id": `${SITE.url}/#organization` },
+        founder: { "@type": "Person", name: SITE.founder },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: abs(localizedHref(locale, "/")) },
+          { "@type": "ListItem", position: 2, name: area.h1accent[locale], item: url },
         ],
       },
     ],

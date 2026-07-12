@@ -17,6 +17,7 @@ const HeroCanvas = dynamic(() => import("@/components/hero-canvas"), { ssr: fals
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
+import { LOCAL_CITIES, LOCAL_AREAS } from "@/lib/local-seo";
 import { useRegion, whatsappHref } from "@/components/use-region";
 
 type Lang = Locale;
@@ -865,6 +866,14 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="flex items-center gap-3 border-t pt-8" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
             <span aria-hidden="true" className="h-px w-8" style={{ background: "var(--gilt)" }} />
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>Fin — 08</span>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="micro-caps" style={{ color: "rgba(251,248,242,0.4)" }}>Webdesign</span>
+            {LOCAL_CITIES.map((c) => (
+              <Link key={c} href={localizedHref(lang, `/webdesign/${c}`)} className="micro-caps transition-colors text-[color:rgba(251,248,242,0.6)] hover:text-[var(--paper)]">
+                {LOCAL_AREAS[c].navLabel[lang]}
+              </Link>
+            ))}
           </div>
           <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-3">

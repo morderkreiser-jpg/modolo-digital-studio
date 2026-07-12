@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
 import { LOCALES, localizedHref } from "@/lib/i18n";
+import { LOCAL_CITIES } from "@/lib/local-seo";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -15,6 +16,11 @@ const PAGES: { path: string; changeFrequency: ChangeFrequency; priority: number 
     path: `/servizi/${slug}`,
     changeFrequency: "monthly" as ChangeFrequency,
     priority: 0.8,
+  })),
+  ...LOCAL_CITIES.map((city) => ({
+    path: `/webdesign/${city}`,
+    changeFrequency: "monthly" as ChangeFrequency,
+    priority: 0.7,
   })),
   { path: "/impressum", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
