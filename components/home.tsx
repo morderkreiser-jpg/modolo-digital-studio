@@ -28,38 +28,40 @@ const translations = {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
-      subtitle: "An independent studio in Winterthur — websites, brands and content tailored to each business, for professionals and small companies across Switzerland. Built by hand, cared for as if they were our own.",
+      subtitle: "I hand-build websites that get your business found on Google and turn the people searching for you into customers who book, call and message. I work with restaurants, practices, B&Bs and small businesses across Switzerland — and the person building your site, and the one answering you, is always me.",
+      founderIntro: "Hi, I'm Francesco Modolo — web designer and developer in Winterthur, and the only person you'll ever deal with.",
+      trustBand: "Websites from CHF 1,900, at a fixed price we agree before we start. Free first consultation and a reply within 24 hours — always from me.",
       ctaPrimary: "Book a free consultation",
-      ctaSecondary: "See the work",
-      meta: "Digital studio · Winterthur",
-      line1: "Websites, brands",
-      line2: "and stories,",
-      line3pre: "built ",
-      line3accent: "by hand",
+      ctaSecondary: "See my work",
+      meta: "Francesco Modolo · Websites & marketing · Winterthur, serving all of Switzerland",
+      line1: "Online, your business",
+      line2: "looks closed.",
+      line3pre: "I'll ",
+      line3accent: "reopen it",
       line3post: ".",
     },
     stats: [
-      { value: "100%", label: "Made in Switzerland" },
-      { value: "24h", label: "Response time" },
-      { value: "Free", label: "First consultation" },
-      { value: "4+", label: "Years of experience" },
+      { value: "4+", label: "Years building websites" },
+      { value: "24h", label: "To hear back from me" },
+      { value: "Free", label: "Your first consultation" },
+      { value: "100%", label: "Made in Switzerland, by me" },
     ],
-    servicesSection: { label: "What we do", heading1: "Tailored services, ", headingAccent: "real results", learnMore: "Learn more", viewPricing: "View pricing" },
+    servicesSection: { label: "What I do", heading1: "Get you found. ", headingAccent: "And get you chosen.", sub: "I don't stop at a 'nice website': I handle the whole chain that takes a customer from a Google search to messaging you or booking. And I handle it myself, in person.", learnMore: "Learn more", viewPricing: "View pricing" },
     services: [
-      { title: "Web & Development", desc: "Modern, high-performance websites optimized for local SEO. Google Business management to stand out in your area.", tags: ["Web Design", "Development", "Local SEO", "Google Business"] },
-      { title: "Brand & Identity", desc: "We build memorable visual identities. From your logo to branded Canva templates, every detail tells your brand's story.", tags: ["Branding", "Visual Identity", "Canva Templates"] },
-      { title: "Content & Visual", desc: "Professional photo shoots and social media management in collaboration with Project Visibility, content specialists.", tags: ["Photo Shooting", "Social Media", "Project Visibility"] },
-      { title: "Email Marketing", desc: "Newsletters and email marketing that turn contacts into customers. Strategies that grow your business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
+      { title: "A website that gets you found and gets visitors to act", desc: "I hand-build a fast, clear website that loads in a flash on a phone and shows up on Google when people nearby search for what you offer. Built so that whoever lands on it books, calls or messages, instead of clicking through to your competitor.", tags: ["Web Design", "Development", "Local SEO", "Google Business"] },
+      { title: "A look people can trust", desc: "A logo, colours and a consistent look across your website, menu, social media and shop front. So you come across as the serious, well-run business you really are, and people trust you before they've even met you.", tags: ["Branding", "Visual Identity", "Canva Templates"] },
+      { title: "Photos, video and words that convince", desc: "Content that shows what you actually do, with no empty phrases. The material that stops your website and social feeds from looking abandoned and starts making people want to give you a try.", tags: ["Photo Shooting", "Social Media", "Project Visibility"] },
+      { title: "Emails and messages that bring customers back", desc: "Someone who's already chosen you once is the easiest customer to win back. I set up newsletters and automated emails that remind people you're there — and fill tables, calendars and carts again.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projects that ", headingAccent: "speak for themselves", indexLabel: "Selected work", closingLine: "Every project here was built by hand, from start to finish.", closingCta: "Let's start yours" },
+    portfolioSection: { label: "Portfolio", heading1: "Three real businesses, ", headingAccent: "built by hand", sub: "ZüriKey, the web app for rental dossiers in Zurich; SaporiVivi, an Italian bar and catering business; BJ Studio, a multilingual beauty studio with WhatsApp booking. Three different businesses, three different problems, each handled from start to finish by me.", indexLabel: "Selected work", closingLine: "Every project here was built by hand, from start to finish.", closingCta: "Let's start yours" },
     saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], meta: "Complete Website · Catering", outcome: "A bar-catering service that feels online as premium as it tastes live.", desc: "A complete website for a premium Italian bar-catering service: a cinematic home, a clear menu of services and events, all tuned to be found on Google.", cta: "Visit site" },
     zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", outcome: "The Zürich flat hunt, turned into a dossier landlords actually notice.", desc: "A web app that walks renters through a standout application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
     bjstudio: { tags: ["Website", "WhatsApp Booking", "Local SEO"], meta: "Website · Zürich", outcome: "A Zürich beauty studio you book on WhatsApp — in four languages.", desc: "A multilingual website for a beauty studio: direct WhatsApp booking, a before/after gallery and local SEO to get found nearby.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
-      label: "About us", heading1: "One studio, ", headingAccent: "one clear vision",
-      p1: "Modolo Digital Studio is an independent studio — not an agency juggling a hundred clients. A few projects at a time, each followed one by one. Because every business deserves a site worthy of its value, not a recycled template.",
-      p2: "We combine refined design, technical development and strategy to build websites and experiences that not only look beautiful, but truly work. We work with professionals and businesses across Switzerland, and partner with specialists like Project Visibility to cover every need, from content creation to social media management.",
-      p3: "No inflated promises: clean code, real attention to detail and a direct relationship. Work with us and you always talk to the person who actually builds your site.",
+      label: "Who's behind it", heading1: "Not an agency. ", headingAccent: "One person: me.",
+      p1: "Modolo Digital Studio isn't an agency with a thousand clients and a switchboard. It's me, Francesco. I take on just a few projects at a time and see each one through personally, from the first call to launch day — so yours never ends up at the bottom of a list and never gets 'passed to the tech department': the person answering you is the person building it.",
+      p2: "For over four years I've been building websites for businesses all across Switzerland: I write the code, craft the design, sort out the SEO, shoot and edit the photos and video. And I don't stop at 'looks good': to me a website works when it brings you customers, so I think about the goal first and the design second.",
+      p3: "Work with me and you always talk to the person who actually builds your site — from the first idea to the day it goes live.",
     },
     founder: {
       eyebrow: "The founder",
@@ -69,23 +71,23 @@ const translations = {
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
     values: [
-      { title: "Strategy first", desc: "We don't just make pretty websites. We build tools that bring concrete results to your business." },
-      { title: "Craftsmanship", desc: "Every project is unique. We give attention to every detail, as if it were our own brand." },
-      { title: "Modern technology", desc: "We use the most advanced tools to ensure fast, secure and future-ready websites." },
+      { title: "The goal first, the design second", desc: "I don't just make pretty websites: I build tools meant to bring you real customers." },
+      { title: "Craftsmanship", desc: "Every project is unique. I look after every detail as if it were my own brand." },
+      { title: "Modern technology", desc: "I use the most advanced tools for fast, secure and future-ready websites." },
     ],
-    sectorsSection: { label: "Who we work for", heading1: "Sectors we ", headingAccent: "excel in" },
+    sectorsSection: { label: "Who I work for", heading1: "Made for restaurants, practices, B&Bs and small shops ", headingAccent: "like yours" },
     sectors: ["Restaurants & Hospitality", "Professional Firms", "E-commerce & Retail", "B&B & Accommodation"],
-    method: { label: "Our method", heading1: "Three phases, ", headingAccent: "one vision" },
+    method: { label: "My method", heading1: "From your first message ", headingAccent: "to your site going live" },
     steps: [
-      { num: "01", title: "Strategy", desc: "We start with a call and concrete questions: who you want to reach and what sets you apart. No jargon, just a clear direction." },
-      { num: "02", title: "Design", desc: "We turn strategy into a bespoke design, never a template. You see the drafts and we decide together, detail by detail." },
-      { num: "03", title: "Development", desc: "We build it with clean, fast, secure code. And we stay by your side: updates, SEO and one single person to write to." },
+      { num: "01", title: "We talk, free of charge", desc: "A call or a coffee: you tell me about your business, who you want to reach and what isn't working right now. I tell you straight away whether and how I can help, and what it costs. No commitment — that half hour is yours to keep either way." },
+      { num: "02", title: "I show you the design", desc: "I turn what you've told me into a tailor-made design, never a recycled template. You see the drafts, you tell me what to change, and we decide together, detail by detail, until it truly feels like yours." },
+      { num: "03", title: "You go live, and I stick around", desc: "I build the site with clean, fast code, put it online and get it found on Google. Then I don't disappear: updates, changes and a single person to message whenever you need something." },
     ],
-    quote: { line1: "We believe every brand has a unique story.", line2: "Our job is to tell it with elegance." },
+    quote: { line1: "A beautiful website that brings in no customers is just a cost.", line2: "I build websites that pay for themselves." },
     faqSection: { label: "Frequently asked questions", heading1: "Everything you ", headingAccent: "want to know" },
     contact: {
-      label: "Let's start", heading1: "Ready to ", headingAccent: "stand out", headingEnd: "?",
-      subtitle: "Tell us about your project. A free initial consultation to understand how we can help you.",
+      label: "Let's start", heading1: "Tell me about your business. ", headingAccent: "The first consultation is on me.", headingEnd: "",
+      subtitle: "Send me a couple of lines about what you do and what you'd like to achieve online. I'll get back to you within 24 hours, personally, with a clear direction and a sense of the costs — no commitment, and no selling you things you don't need.",
       whatsapp: "Message us on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
@@ -107,38 +109,40 @@ const translations = {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
-      subtitle: "Ein unabhängiges Studio in Winterthur — massgeschneiderte Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz. Von Hand gebaut, gepflegt, als wären es unsere eigenen.",
-      ctaPrimary: "Kostenlose Beratung buchen",
-      ctaSecondary: "Arbeiten ansehen",
-      meta: "Digital Studio · Winterthur",
-      line1: "Websites, Marken",
-      line2: "und Inhalte,",
-      line3pre: "",
-      line3accent: "von Hand",
-      line3post: " gebaut.",
+      subtitle: "Ich baue von Hand Websites, die deinen Betrieb bei Google auffindbar machen und Suchende in Kundinnen und Kunden verwandeln, die reservieren, anrufen und schreiben. Ich arbeite mit Restaurants, Studios, B&Bs und kleinen Betrieben in der ganzen Schweiz — und wer sie baut und wer dir antwortet, bin immer ich.",
+      founderIntro: "Hallo, ich bin Francesco Modolo — Webdesigner und Entwickler in Winterthur, und die einzige Person, mit der du sprechen wirst.",
+      trustBand: "Websites ab CHF 1'900, mit Festpreis, den wir vor dem Start festlegen. Erste Beratung gratis und Antwort innert 24 Stunden — immer von mir persönlich.",
+      ctaPrimary: "Gratis-Beratung vereinbaren",
+      ctaSecondary: "Meine Arbeiten ansehen",
+      meta: "Francesco Modolo · Websites und Marketing · Winterthur, für die ganze Schweiz",
+      line1: "Online wirkt dein Betrieb",
+      line2: "geschlossen.",
+      line3pre: "Ich mache ihn ",
+      line3accent: "wieder auf",
+      line3post: ".",
     },
     stats: [
-      { value: "100%", label: "Made in Switzerland" },
-      { value: "24h", label: "Reaktionszeit" },
-      { value: "Gratis", label: "Erstberatung" },
-      { value: "4+", label: "Jahre Erfahrung" },
+      { value: "4+", label: "Jahre im Website-Bau" },
+      { value: "24h", label: "Antworte ich dir persönlich" },
+      { value: "Gratis", label: "Die erste Beratung" },
+      { value: "100%", label: "In der Schweiz gemacht, von mir" },
     ],
-    servicesSection: { label: "Was wir tun", heading1: "Massgeschneiderte Leistungen, ", headingAccent: "echte Ergebnisse", learnMore: "Mehr erfahren", viewPricing: "Preise ansehen" },
+    servicesSection: { label: "Was ich mache", heading1: "Gefunden werden. ", headingAccent: "Und gewählt werden.", sub: "Ich höre nicht bei der «schönen Website» auf: Ich begleite die ganze Kette, die einen Kunden von der Google-Suche bis zur Nachricht oder Reservation führt. Und ich begleite sie selbst, persönlich.", learnMore: "Mehr erfahren", viewPricing: "Preise ansehen" },
     services: [
-      { title: "Web & Entwicklung", desc: "Moderne, performante Websites, optimiert für lokales SEO. Google-Business-Verwaltung, um in deiner Region sichtbar zu werden.", tags: ["Webdesign", "Entwicklung", "Lokales SEO", "Google Business"] },
-      { title: "Marke & Identität", desc: "Wir gestalten einprägsame visuelle Identitäten. Vom Logo bis zu gebrandeten Canva-Vorlagen erzählt jedes Detail die Geschichte deiner Marke.", tags: ["Branding", "Visuelle Identität", "Canva-Vorlagen"] },
-      { title: "Content & Visual", desc: "Professionelle Fotoshootings und Social-Media-Betreuung in Zusammenarbeit mit Project Visibility, Spezialisten für Content.", tags: ["Fotoshooting", "Social Media", "Project Visibility"] },
-      { title: "E-Mail-Marketing", desc: "Newsletter und E-Mail-Marketing, die Kontakte in Kunden verwandeln. Strategien, die dein Geschäft wachsen lassen.", tags: ["Newsletter", "E-Mail-Marketing", "Automation"] },
+      { title: "Eine Website, die dich auffindbar macht und Besucher zum Handeln bringt", desc: "Ich baue von Hand eine schnelle, klare Website, die auf dem Handy sofort lädt und bei Google auftaucht, wenn jemand in der Umgebung nach dem sucht, was du anbietest. Gemacht, damit die, die ankommen, reservieren, anrufen oder schreiben, statt zur Konkurrenz weiterzuklicken.", tags: ["Webdesign", "Entwicklung", "Lokales SEO", "Google Business"] },
+      { title: "Ein Auftritt, dem man vertraut", desc: "Logo, Farben und ein einheitlicher Look auf Website, Menükarte, Social Media und Schaufenster. So wirkst du wie der seriöse, gepflegte Betrieb, der du wirklich bist — und die Leute vertrauen dir, bevor sie dich überhaupt kennen.", tags: ["Branding", "Visuelle Identität", "Canva-Vorlagen"] },
+      { title: "Fotos, Videos und Texte, die überzeugen", desc: "Inhalte, die zeigen, was du wirklich machst, ohne leere Floskeln. Das Material, mit dem Website und Social Media nicht mehr verlassen wirken, sondern Lust machen, dich auszuprobieren.", tags: ["Fotoshooting", "Social Media", "Project Visibility"] },
+      { title: "E-Mails und Nachrichten, die Kunden zurückbringen", desc: "Wer dich einmal gewählt hat, ist am leichtesten zurückzugewinnen. Ich richte Newsletter und automatische E-Mails ein, die die Leute daran erinnern, dass es dich gibt — und Tische, Terminkalender und Warenkörbe wieder füllen.", tags: ["Newsletter", "E-Mail-Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Projekte, die ", headingAccent: "für sich sprechen", indexLabel: "Ausgewählte Arbeiten", closingLine: "Jedes Projekt hier ist von Hand gebaut — von Anfang bis Ende.", closingCta: "Starten wir deins" },
+    portfolioSection: { label: "Portfolio", heading1: "Drei echte Betriebe, ", headingAccent: "von Hand gebaut", sub: "ZüriKey, die Web-App für Mietdossiers in Zürich; SaporiVivi, italienische Bar und Catering; BJ Studio, mehrsprachiges Beauty-Studio mit Reservation über WhatsApp. Drei verschiedene Betriebe, drei verschiedene Probleme, von A bis Z von mir betreut.", indexLabel: "Ausgewählte Arbeiten", closingLine: "Jedes Projekt hier ist von Hand gebaut — von Anfang bis Ende.", closingCta: "Starten wir deins" },
     saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], meta: "Komplette Website · Catering", outcome: "Ein Bar-Catering, das online so edel wirkt wie live am Glas.", desc: "Eine komplette Website für einen Premium-Service für italienisches Bar-Catering: eine cinematische Startseite, ein klares Menü aus Leistungen und Events – auf Google-Sichtbarkeit getrimmt.", cta: "Website besuchen" },
     zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", outcome: "Die Wohnungssuche in Zürich — als Dossier, das Vermieter wirklich beachten.", desc: "Eine Web-App, die Wohnungssuchende Schritt für Schritt zu einem überzeugenden Dossier führt — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
     bjstudio: { tags: ["Website", "WhatsApp-Termine", "Lokales SEO"], meta: "Website · Zürich", outcome: "Ein Zürcher Beauty-Studio, das man per WhatsApp bucht — in vier Sprachen.", desc: "Eine mehrsprachige Website für ein Beauty-Studio: direkte Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokales SEO, um in der Nähe gefunden zu werden.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
-      label: "Über uns", heading1: "Ein Studio, ", headingAccent: "eine klare Vision",
-      p1: "Modolo Digital Studio ist ein unabhängiges Studio — keine Agentur mit hundert Kunden. Wenige Projekte gleichzeitig, jedes einzeln betreut. Weil jedes Unternehmen eine Website verdient, die seinem Wert gerecht wird — keine Vorlage von der Stange.",
-      p2: "Wir verbinden raffiniertes Design, technische Entwicklung und Strategie, um Websites und Erlebnisse zu schaffen, die nicht nur schön aussehen, sondern wirklich funktionieren. Wir arbeiten mit Fachleuten und Unternehmen in der ganzen Schweiz und kooperieren mit Spezialisten wie Project Visibility, um jeden Bedarf abzudecken, von der Content-Erstellung bis zur Social-Media-Betreuung.",
-      p3: "Keine aufgeblasenen Versprechen: sauberer Code, echte Liebe zum Detail und ein direkter Draht. Bei uns sprichst du immer mit der Person, die deine Website tatsächlich baut.",
+      label: "Wer dahintersteckt", heading1: "Keine Agentur. ", headingAccent: "Eine Person: ich.",
+      p1: "Modolo Digital Studio ist keine Agentur mit tausend Kunden und einer Telefonzentrale. Es bin ich, Francesco. Ich nehme immer nur wenige Projekte auf einmal an und betreue jedes einzeln, vom ersten Telefonat bis zur fertigen Website — so landet deines nicht am Ende einer Liste und wird nicht «an die technische Abteilung weitergereicht»: Wer dir antwortet, ist der, der es baut.",
+      p2: "Seit über vier Jahren baue ich Websites für Betriebe in der ganzen Schweiz: Ich schreibe den Code, gestalte das Design, bringe die SEO in Ordnung, drehe und schneide Fotos und Videos. Und ich höre nicht beim «Schön» auf: Für mich funktioniert eine Website dann, wenn sie dir Kunden bringt — also denke ich zuerst ans Ziel und dann ans Design.",
+      p3: "Bei mir sprichst du immer mit der Person, die deine Website wirklich baut — von der ersten Idee bis zum Tag, an dem sie online geht.",
     },
     founder: {
       eyebrow: "Der Gründer",
@@ -148,23 +152,23 @@ const translations = {
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
     values: [
-      { title: "Strategie zuerst", desc: "Wir machen nicht nur schöne Websites. Wir bauen Werkzeuge, die deinem Unternehmen konkrete Ergebnisse bringen." },
-      { title: "Handwerkliche Sorgfalt", desc: "Jedes Projekt ist einzigartig. Wir achten auf jedes Detail, als wäre es unsere eigene Marke." },
-      { title: "Moderne Technologie", desc: "Wir nutzen modernste Werkzeuge für schnelle, sichere und zukunftsfähige Websites." },
+      { title: "Zuerst das Ziel, dann das Design", desc: "Ich mache nicht einfach schöne Websites: Ich baue Werkzeuge, die dir echte Kunden bringen." },
+      { title: "Handwerkliche Sorgfalt", desc: "Jedes Projekt ist einzigartig. Ich pflege jedes Detail, als wäre es meine eigene Marke." },
+      { title: "Moderne Technologie", desc: "Ich nutze modernste Werkzeuge für schnelle, sichere und zukunftsfähige Websites." },
     ],
-    sectorsSection: { label: "Für wen wir arbeiten", heading1: "Branchen, in denen wir ", headingAccent: "glänzen" },
+    sectorsSection: { label: "Für wen ich arbeite", heading1: "Gemacht für Restaurants, Studios, B&Bs und kleine Läden ", headingAccent: "wie deinen" },
     sectors: ["Restaurants & Hospitality", "Kanzleien & Praxen", "E-Commerce & Retail", "B&B & Unterkünfte"],
-    method: { label: "Unsere Methode", heading1: "Drei Phasen, ", headingAccent: "eine Vision" },
+    method: { label: "Meine Methode", heading1: "Von der ersten Nachricht ", headingAccent: "bis zu deiner Website online" },
     steps: [
-      { num: "01", title: "Strategie", desc: "Wir starten mit einem Gespräch und konkreten Fragen: wen du erreichen willst und was dich auszeichnet. Kein Fachjargon, nur eine klare Richtung." },
-      { num: "02", title: "Design", desc: "Wir verwandeln Strategie in ein massgeschneidertes Design, nie eine Vorlage. Du siehst die Entwürfe, und wir entscheiden gemeinsam, Detail für Detail." },
-      { num: "03", title: "Entwicklung", desc: "Wir bauen es mit sauberem, schnellem, sicherem Code. Und wir bleiben an deiner Seite: Updates, SEO und eine einzige Ansprechperson." },
+      { num: "01", title: "Wir reden, gratis", desc: "Ein Telefonat oder ein Kaffee: Du erzählst mir von deinem Betrieb, wen du erreichen willst und was heute nicht läuft. Ich sage dir gleich, ob und wie ich dir helfen kann und was es kostet. Keine Verpflichtung — die halbe Stunde bleibt dir so oder so." },
+      { num: "02", title: "Ich zeige dir den Entwurf", desc: "Ich verwandle das, was du mir gesagt hast, in ein massgeschneidertes Design — nie eine recycelte Vorlage. Du siehst die Entwürfe, sagst mir, was ich ändern soll, und wir entscheiden zusammen Detail für Detail, bis es sich wirklich nach dir anfühlt." },
+      { num: "03", title: "Du gehst online, und ich bleibe an deiner Seite", desc: "Ich baue die Website mit sauberem, schnellem Code, bringe sie online und sorge dafür, dass sie bei Google gefunden wird. Danach verschwinde ich nicht: Updates, Änderungen und eine einzige Person, der du schreibst, wenn du etwas brauchst." },
     ],
-    quote: { line1: "Wir glauben, dass jede Marke eine einzigartige Geschichte hat.", line2: "Unsere Aufgabe ist es, sie mit Eleganz zu erzählen." },
+    quote: { line1: "Eine schöne Website, die keine Kunden bringt, kostet dich nur Geld.", line2: "Ich baue Websites, die sich bezahlt machen." },
     faqSection: { label: "Häufige Fragen", heading1: "Alles, was du ", headingAccent: "wissen möchtest" },
     contact: {
-      label: "Los geht's", heading1: "Bereit, dich ", headingAccent: "abzuheben", headingEnd: "?",
-      subtitle: "Erzähl uns von deinem Projekt. Eine kostenlose Erstberatung, um zu verstehen, wie wir dir helfen können.",
+      label: "Los geht's", heading1: "Erzähl mir von deinem Betrieb. ", headingAccent: "Die erste Beratung geht auf mich.", headingEnd: "",
+      subtitle: "Schreib mir zwei Zeilen dazu, was du machst und was du online erreichen möchtest. Ich antworte dir innert 24 Stunden, persönlich, mit einer klaren Richtung und einer Vorstellung der Kosten — unverbindlich und ohne dir Dinge zu verkaufen, die du nicht brauchst.",
       whatsapp: "Schreib uns auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
@@ -186,38 +190,40 @@ const translations = {
       badge: "Studio digitale · Web · Brand · SEO",
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
-      subtitle: "Uno studio indipendente a Winterthur — siti, brand e contenuti su misura per professionisti e piccole attività in tutta la Svizzera. Fatti a mano, curati come se fossero nostri.",
+      subtitle: "Costruisco a mano siti che fanno trovare la tua attività su Google e trasformano chi ti cerca in clienti che prenotano, chiamano e scrivono. Lavoro con ristoranti, studi, B&B e piccole attività in tutta la Svizzera — e a costruirlo, e a risponderti, ci sono sempre io.",
+      founderIntro: "Ciao, sono Francesco Modolo — web designer e sviluppatore a Winterthur, e l'unica persona con cui parlerai.",
+      trustBand: "Siti da CHF 1'900, prezzo fisso deciso prima di iniziare. Prima consulenza gratuita e risposta entro 24 ore, sempre da me.",
       ctaPrimary: "Prenota una consulenza gratuita",
-      ctaSecondary: "Guarda i lavori",
-      meta: "Studio digitale · Winterthur",
-      line1: "Siti, marchi",
-      line2: "e contenuti,",
-      line3pre: "costruiti ",
-      line3accent: "a mano",
+      ctaSecondary: "Guarda i miei lavori",
+      meta: "Francesco Modolo · Siti e marketing · Winterthur, per tutta la Svizzera",
+      line1: "Online la tua attività",
+      line2: "sembra chiusa.",
+      line3pre: "La ",
+      line3accent: "riapro io",
       line3post: ".",
     },
     stats: [
-      { value: "100%", label: "Made in Switzerland" },
-      { value: "24h", label: "Tempo di risposta" },
-      { value: "Gratis", label: "Prima consulenza" },
-      { value: "4+", label: "Anni di esperienza" },
+      { value: "4+", label: "Anni a costruire siti" },
+      { value: "24h", label: "Ti rispondo io entro" },
+      { value: "Gratis", label: "La prima consulenza" },
+      { value: "100%", label: "Fatto in Svizzera, da me" },
     ],
-    servicesSection: { label: "Cosa facciamo", heading1: "Servizi su misura, ", headingAccent: "risultati concreti", learnMore: "Scopri di più", viewPricing: "Vedi i prezzi" },
+    servicesSection: { label: "Cosa faccio", heading1: "Farti trovare. ", headingAccent: "E farti scegliere.", sub: "Non mi fermo al «bel sito»: seguo tutta la catena che porta un cliente dalla ricerca su Google fino a scriverti o prenotare. E la seguo io, di persona.", learnMore: "Scopri di più", viewPricing: "Vedi i prezzi" },
     services: [
-      { title: "Web & Sviluppo", desc: "Siti web moderni, performanti e ottimizzati per la SEO locale. Gestione Google Business per emergere sul territorio.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
-      { title: "Brand & Identità", desc: "Costruiamo identità visive memorabili. Dal logo ai template Canva brandizzati, ogni dettaglio racconta il tuo brand.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
-      { title: "Contenuti & Visual", desc: "Shooting fotografici professionali e gestione social in collaborazione con Project Visibility, specialisti in contenuti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
-      { title: "Email Marketing", desc: "Newsletter ed email marketing che trasformano i contatti in clienti. Strategie che fanno crescere il tuo business.", tags: ["Newsletter", "Email Marketing", "Automation"] },
+      { title: "Un sito che ti fa trovare e fa agire chi arriva", desc: "Costruisco a mano un sito veloce e chiaro, che si carica al volo dal telefono e compare su Google quando in zona cercano quello che offri. Pensato perché chi arriva prenoti, chiami o scriva, invece di andarsene dal concorrente.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
+      { title: "Un'immagine di cui fidarsi", desc: "Logo, colori e un look coerente su sito, menù, social e vetrina. Così sembri l'attività seria e curata che sei davvero, e le persone si fidano di te prima ancora di conoscerti.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
+      { title: "Foto, video e testi che convincono", desc: "Contenuti che raccontano cosa fai davvero, senza frasi vuote. Il materiale con cui sito e social smettono di sembrare abbandonati e iniziano a far venire voglia di provarti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
+      { title: "Email e messaggi che riportano i clienti", desc: "Chi ti ha già scelto una volta è il cliente più facile da far tornare. Imposto newsletter ed email automatiche che ricordano alla gente che ci sei — e riempiono di nuovo tavoli, agende e carrelli.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Progetti che ", headingAccent: "parlano da soli", indexLabel: "Lavori selezionati", closingLine: "Ogni progetto qui è stato costruito a mano, dall'inizio alla fine.", closingCta: "Iniziamo il tuo" },
+    portfolioSection: { label: "Portfolio", heading1: "Tre attività vere, ", headingAccent: "costruite a mano", sub: "ZüriKey, la web app per i dossier d'affitto a Zurigo; SaporiVivi, bar e catering italiano; BJ Studio, studio di bellezza multilingua con prenotazione via WhatsApp. Tre attività diverse, tre problemi diversi, seguite dall'inizio alla fine da me.", indexLabel: "Lavori selezionati", closingLine: "Ogni progetto qui è stato costruito a mano, dall'inizio alla fine.", closingCta: "Iniziamo il tuo" },
     saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], meta: "Sito Web Completo · Catering", outcome: "Un bar catering che online trasmette la stessa classe che serve nel bicchiere.", desc: "Sito completo per un servizio di bar catering italiano premium: home cinematografica, menu di servizi ed eventi, tutto ottimizzato per farsi trovare su Google.", cta: "Visita il sito" },
     zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", outcome: "La ricerca casa a Zurigo, trasformata in un dossier che i proprietari notano.", desc: "Web app che guida chi cerca casa a costruire una candidatura impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
     bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp", "SEO Locale"], meta: "Sito Web · Zurigo", outcome: "Uno studio beauty di Zurigo che si prenota su WhatsApp, in quattro lingue.", desc: "Sito multilingua per uno studio beauty: prenotazione diretta via WhatsApp, galleria prima/dopo e SEO locale per farsi trovare in zona.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
-      label: "Chi siamo", heading1: "Uno studio, ", headingAccent: "una visione precisa",
-      p1: "Modolo Digital Studio è uno studio indipendente, non un'agenzia con mille clienti: pochi progetti alla volta, seguiti uno per uno. Perché ogni attività merita un sito all'altezza del suo valore — non un modello riciclato.",
-      p2: "Uniamo design raffinato, sviluppo tecnico e strategia per costruire siti ed esperienze che non solo appaiono belli, ma funzionano davvero. Lavoriamo con professionisti e aziende in tutta la Svizzera, e collaboriamo con specialisti come Project Visibility per coprire ogni esigenza, dalla creazione di contenuti alla gestione social.",
-      p3: "Niente promesse gonfiate: codice pulito, cura vera del dettaglio e un rapporto diretto. Lavorando con noi parli sempre con chi il tuo sito lo costruisce davvero.",
+      label: "Chi c'è dietro", heading1: "Non un'agenzia. ", headingAccent: "Una persona: io.",
+      p1: "Modolo Digital Studio non è un'agenzia con mille clienti e un centralino. Sono io, Francesco. Prendo pochi progetti alla volta e li seguo uno per uno, dalla prima chiamata al sito online — così il tuo non finisce in fondo a una lista e non lo «giro all'ufficio tecnico»: chi ti risponde è chi lo sta costruendo.",
+      p2: "Da oltre quattro anni costruisco siti per attività in tutta la Svizzera: scrivo il codice, curo il design, sistemo la SEO, giro e monto foto e video. E non mi fermo al «bello»: per me un sito funziona quando ti porta clienti, quindi ragiono prima sull'obiettivo e poi sul design.",
+      p3: "Lavorando con me parli sempre con chi il tuo sito lo costruisce davvero — dalla prima idea al giorno in cui va online.",
     },
     founder: {
       eyebrow: "Il fondatore",
@@ -227,23 +233,23 @@ const translations = {
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
     values: [
-      { title: "Strategia prima di tutto", desc: "Non facciamo siti belli e basta. Costruiamo strumenti che portano risultati concreti al tuo business." },
-      { title: "Cura artigianale", desc: "Ogni progetto è unico. Dedichiamo attenzione a ogni dettaglio, come fosse il nostro stesso brand." },
-      { title: "Tecnologia moderna", desc: "Usiamo gli strumenti più avanzati per garantire siti veloci, sicuri e pronti per il futuro." },
+      { title: "Prima l'obiettivo, poi il design", desc: "Non faccio siti belli e basta: costruisco strumenti pensati per portarti clienti veri." },
+      { title: "Cura artigianale", desc: "Ogni progetto è unico. Curo ogni dettaglio come fosse il mio stesso brand." },
+      { title: "Tecnologia moderna", desc: "Uso gli strumenti più avanzati per siti veloci, sicuri e pronti per il futuro." },
     ],
-    sectorsSection: { label: "Per chi lavoriamo", heading1: "Settori in cui ", headingAccent: "eccelliamo" },
+    sectorsSection: { label: "Per chi lavoro", heading1: "Fatto per ristoranti, studi, B&B e piccoli negozi ", headingAccent: "come il tuo" },
     sectors: ["Ristoranti & Hospitality", "Studi Professionali", "E-commerce & Retail", "B&B & Strutture Ricettive"],
-    method: { label: "Il nostro metodo", heading1: "Tre fasi, ", headingAccent: "una visione" },
+    method: { label: "Il mio metodo", heading1: "Dal primo messaggio ", headingAccent: "al tuo sito online" },
     steps: [
-      { num: "01", title: "Strategia", desc: "Partiamo da una chiamata e da domande concrete: chi vuoi raggiungere e cosa ti distingue. Niente gergo, solo una direzione chiara." },
-      { num: "02", title: "Design", desc: "Trasformiamo la strategia in un design su misura, mai un template. Vedi le bozze e decidiamo insieme, dettaglio per dettaglio." },
-      { num: "03", title: "Sviluppo", desc: "Lo costruiamo con codice pulito, veloce e sicuro. E restiamo al tuo fianco: aggiornamenti, SEO e una sola persona a cui scrivere." },
+      { num: "01", title: "Parliamo, gratis", desc: "Una chiamata o un caffè: mi racconti la tua attività, chi vuoi raggiungere e cosa oggi non funziona. Ti dico subito se e come posso aiutarti, e quanto costa. Nessun impegno — quella mezz'ora te la tieni comunque." },
+      { num: "02", title: "Ti mostro il progetto", desc: "Trasformo quello che mi hai detto in un design su misura, mai un template riciclato. Vedi le bozze, mi dici cosa cambiare, decidiamo insieme dettaglio per dettaglio finché non lo senti davvero tuo." },
+      { num: "03", title: "Vai online e ti resto accanto", desc: "Costruisco il sito con codice pulito e veloce, lo metto online e lo faccio trovare su Google. Poi non sparisco: aggiornamenti, modifiche e una sola persona a cui scrivere quando ti serve qualcosa." },
     ],
-    quote: { line1: "Crediamo che ogni brand abbia una storia unica.", line2: "Il nostro lavoro è raccontarla con eleganza." },
+    quote: { line1: "Un sito bello che non porta clienti è un costo.", line2: "Io costruisco siti che si ripagano." },
     faqSection: { label: "Domande frequenti", heading1: "Tutto quello che ", headingAccent: "vuoi sapere" },
     contact: {
-      label: "Iniziamo", heading1: "Pronto a ", headingAccent: "distinguerti", headingEnd: "?",
-      subtitle: "Raccontaci il tuo progetto. Una consulenza iniziale gratuita per capire come possiamo aiutarti.",
+      label: "Iniziamo", heading1: "Raccontami la tua attività. ", headingAccent: "La prima consulenza la offro io.", headingEnd: "",
+      subtitle: "Scrivimi due righe su cosa fai e cosa vorresti ottenere online. Ti rispondo io entro 24 ore, di persona, con una direzione chiara e un'idea dei costi — senza impegno e senza venderti cose che non ti servono.",
       whatsapp: "Scrivici su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
@@ -371,9 +377,13 @@ export default function Home({ lang }: { lang: Lang }) {
           </h1>
 
           <div className="mt-9 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <p className="mds-in max-w-xl text-base font-light leading-relaxed text-[#f5efe3]/60 sm:text-lg" style={{ animationDelay: "0.5s" }}>
-              {t.hero.subtitle}
-            </p>
+            <div className="mds-in max-w-xl" style={{ animationDelay: "0.5s" }}>
+              <p className="text-base font-light leading-relaxed text-[#f5efe3]/60 sm:text-lg">{t.hero.subtitle}</p>
+              <p className="mt-5 flex items-start gap-2.5 text-sm font-light leading-relaxed text-[var(--gilt)]">
+                <span aria-hidden className="mt-2 h-px w-6 shrink-0 bg-[var(--gilt)]" />
+                {t.hero.founderIntro}
+              </p>
+            </div>
             <div className="mds-in flex flex-wrap items-center gap-x-7 gap-y-4" style={{ animationDelay: "0.58s" }}>
               <Magnetic strength={0.4}>
                 <a href="#contatti" className="gold-glow group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-[#17130E] transition-transform duration-300 hover:scale-[1.03]" style={{ background: "linear-gradient(100deg, #e8c877, #b5893f)", fontFamily: "var(--font-space)" }}>
@@ -389,6 +399,10 @@ export default function Home({ lang }: { lang: Lang }) {
                 <ArrowRight className="h-3.5 w-3.5 rotate-90 transition-transform group-hover:translate-y-0.5" />
               </a>
             </div>
+          </div>
+
+          <div className="mds-in mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#f5efe3]/60" style={{ animationDelay: "0.66s" }}>
+            {t.hero.trustBand}
           </div>
         </div>
       </section>
@@ -432,6 +446,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <h2 className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
                 {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
               </h2>
+              <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#f5efe3]/60 md:text-lg">{t.servicesSection.sub}</p>
             </div>
             <span className="micro-caps tnum text-[#f5efe3]/40">01 / 04</span>
           </motion.div>
@@ -486,6 +501,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <h2 data-reveal-heading className="display-space mt-4 text-[#f5efe3]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
                 {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
               </h2>
+              <p data-reveal-fade className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#f5efe3]/60">{t.portfolioSection.sub}</p>
             </div>
             <span data-reveal-fade className="micro-caps tnum inline-block text-[#f5efe3]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
           </Reveal>
