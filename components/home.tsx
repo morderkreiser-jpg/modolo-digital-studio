@@ -10,7 +10,7 @@ import BackToTop from "@/components/back-to-top";
 import Magnetic from "@/components/magnetic";
 import Reveal from "@/components/reveal";
 import Marquee from "@/components/marquee";
-import HeroSign from "@/components/hero-sign";
+import HeroShowcase from "@/components/hero-showcase";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -41,6 +41,8 @@ const translations = {
       signOpen: "OPEN",
       signClosedHours: "Hours  —:—",
       signOpenHours: "Always open for you",
+      ctaWhatsapp: "Message me on WhatsApp",
+      chips: ["from CHF 1,900 · fixed price", "free first consultation", "reply within 24h", "made in Switzerland"],
     },
     stats: [
       { value: "4+", label: "Years building websites" },
@@ -126,6 +128,8 @@ const translations = {
       signOpen: "OFFEN",
       signClosedHours: "Öffnungszeiten  —:—",
       signOpenHours: "Immer für dich da",
+      ctaWhatsapp: "Schreib mir auf WhatsApp",
+      chips: ["ab CHF 1'900 · Festpreis", "erste Beratung gratis", "Antwort in 24h", "in der Schweiz gemacht"],
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
@@ -211,6 +215,8 @@ const translations = {
       signOpen: "APERTO",
       signClosedHours: "Orari  —:—",
       signOpenHours: "Sempre aperto per te",
+      ctaWhatsapp: "Scrivimi su WhatsApp",
+      chips: ["da CHF 1'900 · prezzo fisso", "prima consulenza gratis", "risposta in 24h", "fatto in Svizzera"],
     },
     stats: [
       { value: "4+", label: "Anni a costruire siti" },
@@ -299,6 +305,14 @@ export default function Home({ lang }: { lang: Lang }) {
       media: { kind: "image" as const, src: "/portfolio-bjstudio-poster.webp", aria: t.bjstudio.alt } },
   ];
 
+  // Hero proof — the real client sites shown live in the browser frame (SaporiVivi first: the
+  // restaurant is the most relatable to the core audience, and the static/mobile frame).
+  const SHOWCASE = [
+    { name: "SaporiVivi", host: "saporivivi.ch", poster: "/portfolio-saporivivi-v4-poster.webp", href: "https://saporivivi.ch", caption: t.saporivivi.meta },
+    { name: "ZüriKey", host: "zurikey.ch", poster: "/portfolio-zurikey-poster.webp", href: "https://zurikey.ch", caption: t.zurikey.meta },
+    { name: "BJ Studio", host: "bjstudiodebelleza.vercel.app", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.vercel.app", caption: t.bjstudio.meta },
+  ];
+
   // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
   useEffect(() => {
     if (formStatus === "success") successRef.current?.focus();
@@ -364,54 +378,57 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* analog grain over the dark field */}
       <div className="mds-grain" aria-hidden />
 
-      {/* HERO — immersive: the gold-blob WebGL spectacle behind kinetic modern type */}
-      <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
-        <div className="absolute inset-0"><HeroSign closed={t.hero.signClosed} open={t.hero.signOpen} closedHours={t.hero.signClosedHours} openHours={t.hero.signOpenHours} /></div>
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(246,241,231,0.92) 0%, rgba(246,241,231,0.55) 42%, rgba(246,241,231,0) 66%)" }} />
+      {/* HERO — proof-first: the offer on the left, real client sites shown live on the right */}
+      <section className="relative flex min-h-svh items-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 56% at 84% 50%, rgba(201,153,47,0.10), transparent 72%)" }} />
 
-        <div className="relative z-10 mx-auto w-full max-w-[1400px]">
-          <div className="mb-9 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
-            <span className="micro-caps text-[#17130e]/55">{t.hero.meta}</span>
-          </div>
-
-          <h1 className="display-space text-[#17130e]" style={{ fontSize: "clamp(2.4rem, 7vw, 6.25rem)" }}>
-            {t.hero.line1}
-            <br />
-            {t.hero.line2}
-            <br />
-            {t.hero.line3pre}
-            <span className="gold-grad">{t.hero.line3accent}</span>
-            {t.hero.line3post}
-          </h1>
-
-          <div className="mt-9 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div className="mds-in max-w-xl" style={{ animationDelay: "0.5s" }}>
-              <p className="text-base font-light leading-relaxed text-[#17130e]/60 sm:text-lg">{t.hero.subtitle}</p>
-              <p className="mt-5 flex items-start gap-2.5 text-sm font-light leading-relaxed text-[var(--gilt)]">
-                <span aria-hidden className="mt-2 h-px w-6 shrink-0 bg-[var(--gilt)]" />
-                {t.hero.founderIntro}
-              </p>
+        <div className="relative z-10 mx-auto grid w-full max-w-[1400px] items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          {/* LEFT — the offer */}
+          <div>
+            <div className="mb-7 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
+              <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
+              <span className="micro-caps text-[#17130e]/55">{t.hero.meta}</span>
             </div>
-            <div className="mds-in flex flex-wrap items-center gap-x-7 gap-y-4" style={{ animationDelay: "0.58s" }}>
+
+            <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>
+              {t.hero.line1}<br />{t.hero.line2}<br />{t.hero.line3pre}<span className="gold-grad">{t.hero.line3accent}</span>{t.hero.line3post}
+            </h1>
+
+            <p className="mds-in mt-7 max-w-xl text-base font-light leading-relaxed text-[#17130e]/62 sm:text-lg" style={{ animationDelay: "0.32s" }}>{t.hero.subtitle}</p>
+
+            <div className="mds-in mt-6 flex items-center gap-3" style={{ animationDelay: "0.42s" }}>
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-[color:var(--gold-line-strong)]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
+                <Image src="/founder-2.webp" alt="Francesco Modolo" fill sizes="44px" className="object-cover" style={{ objectPosition: "50% 14%" }} />
+              </span>
+              <span className="text-sm font-light leading-snug text-[var(--gilt)]">{t.hero.founderIntro}</span>
+            </div>
+
+            <div className="mds-in mt-8 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ animationDelay: "0.5s" }}>
               <Magnetic strength={0.4}>
                 <a href="#contatti" className="gold-glow group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-[#17130E] transition-transform duration-300 hover:scale-[1.03]" style={{ background: "linear-gradient(100deg, #e8c877, #b5893f)", fontFamily: "var(--font-space)" }}>
                   {t.hero.ctaPrimary}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </Magnetic>
-              <a href="#portfolio" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#17130e]/70 transition-colors hover:text-[#17130e]">
-                <span className="relative">
-                  {t.hero.ctaSecondary}
-                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-gold)] transition-transform duration-300 group-hover:scale-x-100" />
-                </span>
-                <ArrowRight className="h-3.5 w-3.5 rotate-90 transition-transform group-hover:translate-y-0.5" />
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2 text-sm tracking-wide text-[#17130e]/70 transition-colors hover:text-[#17130e]">
+                <MessageCircle className="h-4 w-4 text-[var(--gilt)]" strokeWidth={1.6} />
+                {t.hero.ctaWhatsapp}
               </a>
+            </div>
+
+            <div className="mds-in mt-8 flex flex-wrap gap-x-5 gap-y-2.5 border-t border-[color:var(--gold-line)] pt-6" style={{ animationDelay: "0.58s" }}>
+              {t.hero.chips.map((c) => (
+                <span key={c} className="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-[#17130e]/70">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--gilt)]" strokeWidth={2} />
+                  {c}
+                </span>
+              ))}
             </div>
           </div>
 
-          <div className="mds-in mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#17130e]/60" style={{ animationDelay: "0.66s" }}>
-            {t.hero.trustBand}
+          {/* RIGHT — the proof: real client sites, live */}
+          <div className="flex justify-center md:justify-end">
+            <HeroShowcase items={SHOWCASE} />
           </div>
         </div>
       </section>
