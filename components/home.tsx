@@ -397,8 +397,8 @@ export default function Home({ lang }: { lang: Lang }) {
             <p className="mds-in mt-7 max-w-xl text-base font-light leading-relaxed text-[#17130e]/62 sm:text-lg" style={{ animationDelay: "0.32s" }}>{t.hero.subtitle}</p>
 
             <div className="mds-in mt-6 flex items-center gap-3" style={{ animationDelay: "0.42s" }}>
-              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-[color:var(--gold-line-strong)]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
-                <Image src="/founder-2.webp" alt="Francesco Modolo" fill sizes="44px" className="object-cover" style={{ objectPosition: "50% 14%" }} />
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-[color:var(--gold-line-strong)]" style={{ background: "#f2ead9" }}>
+                <Image src="/founder-avatar.webp" alt="Francesco Modolo" fill sizes="44px" className="object-cover" />
               </span>
               <span className="text-sm font-light leading-snug text-[var(--gilt)]">{t.hero.founderIntro}</span>
             </div>
