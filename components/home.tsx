@@ -301,7 +301,7 @@ export default function Home({ lang }: { lang: Lang }) {
       media: { kind: "video" as const, src: "/portfolio-zurikey.mp4", poster: "/portfolio-zurikey-poster.webp", aria: t.zurikey.alt } },
     { num: "02", name: "SaporiVivi", href: "https://saporivivi.ch", data: t.saporivivi,
       media: { kind: "video" as const, src: "/portfolio-saporivivi-v4.mp4", poster: "/portfolio-saporivivi-v4-poster.webp", aria: "SaporiVivi — Italian luxury bar catering website" } },
-    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.vercel.app", data: t.bjstudio,
+    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.ch", data: t.bjstudio,
       media: { kind: "image" as const, src: "/portfolio-bjstudio-poster.webp", aria: t.bjstudio.alt } },
   ];
 
@@ -310,7 +310,7 @@ export default function Home({ lang }: { lang: Lang }) {
   const SHOWCASE = [
     { name: "SaporiVivi", host: "saporivivi.ch", poster: "/portfolio-saporivivi-v4-poster.webp", href: "https://saporivivi.ch", caption: t.saporivivi.meta },
     { name: "ZüriKey", host: "zurikey.ch", poster: "/portfolio-zurikey-poster.webp", href: "https://zurikey.ch", caption: t.zurikey.meta },
-    { name: "BJ Studio", host: "bjstudiodebelleza.vercel.app", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.vercel.app", caption: t.bjstudio.meta },
+    { name: "BJ Studio", host: "bjstudiodebelleza.ch", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.ch", caption: t.bjstudio.meta },
   ];
 
   // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
