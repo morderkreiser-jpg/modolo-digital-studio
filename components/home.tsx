@@ -273,6 +273,7 @@ export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [heroReady, setHeroReady] = useState(false);
   const reduce = useReducedMotion();
   const successRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
@@ -293,6 +294,23 @@ export default function Home({ lang }: { lang: Lang }) {
   useEffect(() => {
     if (formStatus === "success") successRef.current?.focus();
   }, [formStatus]);
+
+  // Perf: the WebGL hero (three.js) is heavy and was failing mobile Core Web Vitals (LCP/TBT).
+  // Never load it on mobile or low-end devices — the CSS gold glow carries the look there — and on
+  // capable desktops mount it only once the page goes idle, so it can't block first paint or input.
+  useEffect(() => {
+    if (reduce || typeof window === "undefined") return;
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    const capable = (navigator.hardwareConcurrency ?? 4) >= 4;
+    if (!desktop || !capable) return;
+    const ric = window.requestIdleCallback;
+    if (ric) {
+      const id = ric(() => setHeroReady(true), { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(() => setHeroReady(true), 1500);
+    return () => window.clearTimeout(id);
+  }, [reduce]);
 
   const [needs, setNeeds] = useState<string[]>([]);
   const toggleNeed = (n: string) => setNeeds((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
@@ -357,7 +375,7 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* HERO — immersive: the gold-blob WebGL spectacle behind kinetic modern type */}
       <section className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(55% 55% at 72% 42%, rgba(181,137,63,0.30), transparent 70%), radial-gradient(45% 45% at 86% 72%, rgba(201,162,90,0.18), transparent 72%)" }} />
-        {!reduce && <div className="absolute inset-0"><HeroCanvas /></div>}
+        {heroReady && <div className="absolute inset-0"><HeroCanvas /></div>}
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(11,8,5,0.92) 0%, rgba(11,8,5,0.5) 42%, rgba(11,8,5,0) 66%)" }} />
 
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
