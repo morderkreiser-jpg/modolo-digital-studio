@@ -308,7 +308,7 @@ export default function Home({ lang }: { lang: Lang }) {
   // Hero proof — the real client sites shown live in the browser frame (SaporiVivi first: the
   // restaurant is the most relatable to the core audience, and the static/mobile frame).
   const SHOWCASE = [
-    { name: "SaporiVivi", host: "saporivivi.ch", poster: "/portfolio-saporivivi-v4-poster.webp", href: "https://saporivivi.ch", caption: t.saporivivi.meta },
+    { name: "SaporiVivi", host: "saporivivi.ch", poster: "/portfolio-saporivivi-hero.webp", href: "https://saporivivi.ch", caption: t.saporivivi.meta },
     { name: "ZüriKey", host: "zurikey.ch", poster: "/portfolio-zurikey-poster.webp", href: "https://zurikey.ch", caption: t.zurikey.meta },
     { name: "BJ Studio", host: "bjstudiodebelleza.ch", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.ch", caption: t.bjstudio.meta },
   ];
