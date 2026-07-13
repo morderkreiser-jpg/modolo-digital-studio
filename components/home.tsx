@@ -26,23 +26,22 @@ const translations = {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
-      subtitle: "I hand-build websites that get your business found on Google and turn the people searching for you into customers who book, call and message. I work with restaurants, practices, B&Bs and small businesses across Switzerland — and the person building your site, and the one answering you, is always me.",
-      founderIntro: "Hi, I'm Francesco Modolo — web designer and developer in Winterthur, and the only person you'll ever deal with.",
+      subtitle: "SaporiVivi, ZüriKey, BJ Studio: real businesses that get found on Google, get chosen over the competition, and turn searchers into customers who book, call and message. I do the same for restaurants, practices, B&Bs and small local shops across Switzerland — and it's always me building it, and always me replying to you.",
+      founderIntro: "I'm Francesco Modolo, web designer and developer in Winterthur. I hand-built the sites you see here myself — and I'm the only person you'll ever talk to.",
       trustBand: "Websites from CHF 1,900, at a fixed price we agree before we start. Free first consultation and a reply within 24 hours — always from me.",
       ctaPrimary: "Book a free consultation",
       ctaSecondary: "See my work",
-      meta: "Francesco Modolo · Websites & marketing · Winterthur, serving all of Switzerland",
-      line1: "Online, your business",
-      line2: "looks closed —",
-      line3pre: "I'll ",
-      line3accent: "reopen it",
-      line3post: ".",
+      meta: "Francesco Modolo · Websites, SEO & marketing · Winterthur, serving all of Switzerland",
+      line1: "Your website,",
+      line2: "hand-built",
+      line3: "in Winterthur.",
+      accent: "hand-built",
       signClosed: "CLOSED",
       signOpen: "OPEN",
       signClosedHours: "Hours  —:—",
       signOpenHours: "Always open for you",
       ctaWhatsapp: "Message me on WhatsApp",
-      chips: ["from CHF 1,900 · fixed price", "free first consultation", "reply within 24h", "made in Switzerland"],
+      chips: ["from CHF 1,900 · fixed price, agreed up front", "first consultation free", "one person, not an agency", "I reply personally, within 24h"],
     },
     stats: [
       { value: "4+", label: "Years building websites" },
@@ -113,23 +112,22 @@ const translations = {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
-      subtitle: "Ich baue von Hand Websites, die deinen Betrieb bei Google auffindbar machen und Suchende in Kundinnen und Kunden verwandeln, die reservieren, anrufen und schreiben. Ich arbeite mit Restaurants, Studios, B&Bs und kleinen Betrieben in der ganzen Schweiz — und wer sie baut und wer dir antwortet, bin immer ich.",
-      founderIntro: "Hallo, ich bin Francesco Modolo — Webdesigner und Entwickler in Winterthur, und die einzige Person, mit der du sprechen wirst.",
+      subtitle: "SaporiVivi, ZüriKey, BJ Studio: echte Betriebe, die auf Google gefunden und der Konkurrenz vorgezogen werden — und aus Suchenden Kunden machen, die reservieren, anrufen und schreiben. Dasselbe mache ich für Restaurants, Praxen, B&Bs und kleine Betriebe in der ganzen Schweiz — gebaut und geantwortet wird immer von derselben Person: von mir.",
+      founderIntro: "Ich bin Francesco Modolo, Webdesigner und Entwickler in Winterthur. Die Websites, die du hier siehst, habe ich selbst von Hand gebaut — und ich bin die einzige Person, mit der du sprichst.",
       trustBand: "Websites ab CHF 1'900, mit Festpreis, den wir vor dem Start festlegen. Erste Beratung gratis und Antwort innert 24 Stunden — immer von mir persönlich.",
       ctaPrimary: "Gratis-Beratung vereinbaren",
       ctaSecondary: "Meine Arbeiten ansehen",
-      meta: "Francesco Modolo · Websites und Marketing · Winterthur, für die ganze Schweiz",
-      line1: "Online wirkt dein Betrieb",
-      line2: "geschlossen —",
-      line3pre: "ich mache ihn ",
-      line3accent: "wieder auf",
-      line3post: ".",
+      meta: "Francesco Modolo · Webdesign, SEO & Marketing · Winterthur, für die ganze Schweiz",
+      line1: "Deine Website,",
+      line2: "in Winterthur",
+      line3: "von Hand gebaut.",
+      accent: "von Hand gebaut",
       signClosed: "GESCHLOSSEN",
       signOpen: "OFFEN",
       signClosedHours: "Öffnungszeiten  —:—",
       signOpenHours: "Immer für dich da",
       ctaWhatsapp: "Schreib mir auf WhatsApp",
-      chips: ["ab CHF 1'900 · Festpreis", "erste Beratung gratis", "Antwort in 24h", "in der Schweiz gemacht"],
+      chips: ["ab CHF 1'900 · Fixpreis, vorher vereinbart", "erste Beratung gratis", "eine Person, keine Agentur", "Antwort von mir, innert 24h"],
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
@@ -200,23 +198,22 @@ const translations = {
       badge: "Studio digitale · Web · Brand · SEO",
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
-      subtitle: "Costruisco a mano siti che fanno trovare la tua attività su Google e trasformano chi ti cerca in clienti che prenotano, chiamano e scrivono. Lavoro con ristoranti, studi, B&B e piccole attività in tutta la Svizzera — e a costruirlo, e a risponderti, ci sono sempre io.",
-      founderIntro: "Ciao, sono Francesco Modolo — web designer e sviluppatore a Winterthur, e l'unica persona con cui parlerai.",
+      subtitle: "SaporiVivi, ZüriKey, BJ Studio: attività vere che su Google si fanno trovare e scegliere al posto del concorrente, e trasformano chi cerca in clienti che prenotano, chiamano e scrivono. Faccio lo stesso per ristoranti, studi, B&B e piccole attività in tutta la Svizzera — a costruirlo, e a risponderti, ci sono sempre io.",
+      founderIntro: "Sono Francesco Modolo, web designer e sviluppatore a Winterthur. I siti che vedi li ho costruiti io, a mano — e sono l'unica persona con cui parlerai.",
       trustBand: "Siti da CHF 1'900, prezzo fisso deciso prima di iniziare. Prima consulenza gratuita e risposta entro 24 ore, sempre da me.",
       ctaPrimary: "Prenota una consulenza gratuita",
       ctaSecondary: "Guarda i miei lavori",
-      meta: "Francesco Modolo · Siti e marketing · Winterthur, per tutta la Svizzera",
-      line1: "Online la tua attività",
-      line2: "sembra chiusa —",
-      line3pre: "la ",
-      line3accent: "riapro io",
-      line3post: ".",
+      meta: "Francesco Modolo · Siti, SEO e marketing · Winterthur, per tutta la Svizzera",
+      line1: "Il tuo sito,",
+      line2: "fatto a mano",
+      line3: "a Winterthur.",
+      accent: "fatto a mano",
       signClosed: "CHIUSO",
       signOpen: "APERTO",
       signClosedHours: "Orari  —:—",
       signOpenHours: "Sempre aperto per te",
       ctaWhatsapp: "Scrivimi su WhatsApp",
-      chips: ["da CHF 1'900 · prezzo fisso", "prima consulenza gratis", "risposta in 24h", "fatto in Svizzera"],
+      chips: ["da CHF 1'900 · prezzo fisso, deciso prima", "prima consulenza gratis", "una persona sola, non un'agenzia", "rispondo io, entro 24h"],
     },
     stats: [
       { value: "4+", label: "Anni a costruire siti" },
@@ -292,6 +289,13 @@ export default function Home({ lang }: { lang: Lang }) {
   const reduce = useReducedMotion();
   const successRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
+  // Wrap the gold accent phrase within a headline line, wherever it falls.
+  const heroGold = (line: string) => {
+    const a = t.hero.accent;
+    const i = a ? line.indexOf(a) : -1;
+    if (i < 0) return line;
+    return (<>{line.slice(0, i)}<span className="gold-grad">{a}</span>{line.slice(i + a.length)}</>);
+  };
   const region = useRegion();
   const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, t.contact.whatsappMsg);
 
@@ -399,7 +403,7 @@ export default function Home({ lang }: { lang: Lang }) {
             </div>
 
             <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>
-              {t.hero.line1}<br />{t.hero.line2}<br />{t.hero.line3pre}<span className="gold-grad">{t.hero.line3accent}</span>{t.hero.line3post}
+              {heroGold(t.hero.line1)}<br />{heroGold(t.hero.line2)}<br />{heroGold(t.hero.line3)}
             </h1>
 
             <p className="mds-in mt-7 max-w-xl text-base font-light leading-relaxed text-[#17130e]/62 sm:text-lg" style={{ animationDelay: "0.32s" }}>{t.hero.subtitle}</p>
