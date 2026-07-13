@@ -1,39 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 
 /**
  * Hero PROOF — the real client sites shown LIVE inside a browser frame: the actual domain in the
- * URL bar + a green "Live" dot, the whole frame a clickable link to the live site, softly
- * cross-fading through the three real Swiss businesses. Seeing "he really built THESE, and they're
- * real" is the strongest contact-driver Francesco has (he has no reviews yet). Pure DOM/CSS +
- * next/image posters (tiny webp, no WebGL/video) → fast, mobile-safe. Reduced-motion / touch → one
- * static frame (SaporiVivi, the most relatable). Rotation pauses on hover so a curious visitor can
- * read/click it.
+ * URL bar + a green "Live" dot, the whole frame a clickable link to the live site. It cross-fades
+ * through the three real Swiss businesses on every device, and on touch you can also SWIPE to flip
+ * through them (dots below show where you are). Desktop adds a cursor-following 3D tilt. Pure
+ * DOM/CSS + next/image posters (tiny webp, no WebGL/video) → fast, mobile-safe. Reduced-motion →
+ * a single static frame, no motion.
  */
 export type ShowcaseItem = { name: string; host: string; poster: string; href: string; caption: string };
 
 export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
   const reduce = useReducedMotion();
+  const n = items.length;
   const [i, setI] = useState(0);
   const pausedRef = useRef(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const dragRef = useRef({ x: 0, moved: false, down: false });
+
+  // Auto cross-fade on every device (paused on desktop hover); manual actions re-arm the timer.
+  const arm = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (reduce) return;
+    timerRef.current = setInterval(() => {
+      if (!pausedRef.current) setI((v) => (v + 1) % n);
+    }, 4800);
+  }, [reduce, n]);
 
   useEffect(() => {
-    if (reduce || typeof window === "undefined") return;
-    // cross-fade only on a real pointer + roomy viewport; phones get the single static frame
-    if (!window.matchMedia("(min-width: 768px) and (hover: hover)").matches) return;
-    const id = setInterval(() => {
-      if (!pausedRef.current) setI((v) => (v + 1) % items.length);
-    }, 4800);
-    return () => clearInterval(id);
-  }, [reduce, items.length]);
+    arm();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [arm]);
 
-  // 3D tilt — the frame follows the cursor like a real object it wants you to touch.
-  // Desktop + real pointer + motion only; lerped for smoothness, resets on leave/unmount.
+  const goTo = useCallback((idx: number) => { setI(((idx % n) + n) % n); arm(); }, [arm, n]);
+
+  // 3D tilt — the frame follows the cursor like a real object. Desktop + real pointer + motion only.
   useEffect(() => {
     if (reduce || typeof window === "undefined") return;
     if (!window.matchMedia("(min-width: 768px) and (hover: hover)").matches) return;
@@ -79,6 +86,14 @@ export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
         aria-label={`Sito live di ${active.name} — ${active.host}`}
         onMouseEnter={() => { pausedRef.current = true; }}
         onMouseLeave={() => { pausedRef.current = false; }}
+        onPointerDown={(e) => { dragRef.current = { x: e.clientX, moved: false, down: true }; }}
+        onPointerMove={(e) => { if (dragRef.current.down && Math.abs(e.clientX - dragRef.current.x) > 8) dragRef.current.moved = true; }}
+        onPointerUp={(e) => {
+          const d = dragRef.current; d.down = false;
+          const dx = e.clientX - d.x;
+          if (Math.abs(dx) > 40) goTo(i + (dx < 0 ? 1 : -1));
+        }}
+        onClick={(e) => { if (dragRef.current.moved) e.preventDefault(); }}
       >
         <div className="hsw-bar" aria-hidden="true">
           <span className="hsw-tl" /><span className="hsw-tl" /><span className="hsw-tl" />
@@ -99,10 +114,24 @@ export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
           ))}
         </div>
       </a>
-      <div className="hsw-caption" aria-hidden="true">
-        <span className="hsw-name">{active.name}</span>
-        <span className="hsw-sep">·</span>
-        <span className="hsw-cap">{active.caption}</span>
+      <div className="hsw-foot">
+        <div className="hsw-caption" aria-hidden="true">
+          <span className="hsw-name">{active.name}</span>
+          <span className="hsw-sep">·</span>
+          <span className="hsw-cap">{active.caption}</span>
+        </div>
+        <div className="hsw-dots" role="group" aria-label="Sfoglia i lavori">
+          {items.map((it, idx) => (
+            <button
+              key={it.href}
+              type="button"
+              className={`hsw-dot${idx === i ? " on" : ""}`}
+              aria-label={it.name}
+              aria-current={idx === i}
+              onClick={() => goTo(idx)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -111,7 +140,7 @@ export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
 const CSS = `
 .hsw-wrap { width: 100%; max-width: 620px; perspective: 1200px; }
 .hsw-card { display: block; border-radius: 12px; overflow: hidden; text-decoration: none;
-  border: 1px solid var(--gold-line); background: #fbf8f2;
+  border: 1px solid var(--gold-line); background: #fbf8f2; touch-action: pan-y;
   box-shadow: 0 2px 4px rgba(126,93,36,0.08), 0 26px 50px -22px rgba(126,93,36,0.42);
   transition: box-shadow 0.4s; will-change: transform; transform-style: preserve-3d; }
 .hsw-card:hover { box-shadow: 0 6px 12px rgba(126,93,36,0.12), 0 40px 70px -20px rgba(126,93,36,0.55); }
@@ -131,9 +160,19 @@ const CSS = `
 .hsw-body { position: relative; width: 100%; aspect-ratio: 1280 / 700; background: #17130e; }
 .hsw-shot { object-fit: cover; object-position: top center; transition: opacity 1.1s ease-in-out; }
 
-.hsw-caption { margin-top: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+.hsw-foot { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.hsw-caption { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   font-family: var(--font-space), sans-serif; }
 .hsw-name { font-weight: 600; font-size: 14px; color: #17130e; letter-spacing: 0.01em; }
 .hsw-sep { color: var(--gold-line-strong); }
 .hsw-cap { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gilt); }
+
+.hsw-dots { display: flex; align-items: center; gap: 2px; }
+.hsw-dot { width: 22px; height: 22px; padding: 0; border: 0; background: transparent; cursor: pointer;
+  display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
+.hsw-dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(126,93,36,0.30); transition: background 0.3s, transform 0.3s; }
+.hsw-dot.on::before { background: var(--color-gold); transform: scale(1.3); }
+.hsw-dot:hover::before { background: rgba(126,93,36,0.55); }
+.hsw-dot:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 1px; border-radius: 50%; }
 `;
