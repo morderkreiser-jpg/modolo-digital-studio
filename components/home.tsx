@@ -9,9 +9,11 @@ import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import Magnetic from "@/components/magnetic";
 import Reveal from "@/components/reveal";
-import Marquee from "@/components/marquee";
 import HeroShowcase from "@/components/hero-showcase";
 import HeroAtmosphere from "@/components/hero-atmosphere";
+import PaybackCalc from "@/components/payback-calc";
+import VideoReview from "@/components/video-review";
+import GuaranteeBand from "@/components/guarantee-band";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -71,7 +73,7 @@ const translations = {
       eyebrow: "The founder",
       name: "Francesco Modolo",
       role: "Web Designer & Developer",
-      bio1: "As a kid I took computers apart and put them back together just to understand how they worked. Today, for over four years, that passion has been my job: I design and hand-build websites for businesses across Switzerland, and I do everything myself — design, code and SEO. With just one obsession: that your website isn't only beautiful, but actually brings you customers.",
+      bio1: "For over four years I've been building websites for small businesses across Switzerland: the code, the design, the SEO, the photos and the videos — all with my own hands. I work on each one as if the site were mine, because it's my name that goes on it.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
     values: [
@@ -157,7 +159,7 @@ const translations = {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
       role: "Webdesigner & Entwickler",
-      bio1: "Als Junge habe ich Computer auseinander- und wieder zusammengebaut, einfach um zu verstehen, wie sie funktionieren. Heute, seit über vier Jahren, ist diese Leidenschaft mein Beruf: Ich gestalte und baue von Hand Websites für Betriebe in der ganzen Schweiz und mache alles selbst — Design, Code und SEO. Mit nur einer Besessenheit: dass deine Website nicht nur schön ist, sondern dir echte Kunden bringt.",
+      bio1: "Seit über vier Jahren baue ich Websites für kleine Betriebe in der ganzen Schweiz: den Code, das Design, die SEO, die Fotos und die Videos — alles mit meinen eigenen Händen. Ich arbeite daran, als wäre es meine eigene Website, denn es ist mein Name, der draufsteht.",
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
     values: [
@@ -243,7 +245,7 @@ const translations = {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
       role: "Web Designer & Sviluppatore",
-      bio1: "Da ragazzino smontavo e rimontavo computer per il gusto di capire come funzionavano. Oggi, da oltre quattro anni, quella passione è il mio lavoro: progetto e costruisco a mano siti per attività in tutta la Svizzera, e seguo tutto io — design, codice e SEO. Con un'ossessione sola: che il tuo sito non sia solo bello, ma ti porti clienti veri.",
+      bio1: "Da oltre quattro anni costruisco siti per piccole attività in tutta la Svizzera: il codice, il design, la SEO, le foto e i video — tutto con le mie mani. Ci lavoro come se il sito fosse mio, perché è il mio nome quello che ci metto sopra.",
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
     values: [
@@ -281,7 +283,6 @@ const translations = {
   },
 };
 
-const DISCIPLINES = ["Websites", "Branding", "Content", "Foto", "Video", "Reels", "Social", "SEO", "Ads"];
 
 export default function Home({ lang }: { lang: Lang }) {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -448,29 +449,6 @@ export default function Home({ lang }: { lang: Lang }) {
       </section>
 
       {/* DISCIPLINE MARQUEE — Fraunces ticker, coupled to Lenis scroll velocity */}
-      <Marquee items={DISCIPLINES} />
-
-      {/* STATS — editorial data row on Bone; tabular figures, hairline dividers, no icon boxes */}
-      <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-14 md:py-20">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="grid grid-cols-2 md:grid-cols-4">
-            {t.stats.map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={reduce ? false : { opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className={`py-4 md:px-8 ${i % 2 === 1 ? "border-l border-[color:var(--gold-line)] pl-5" : ""} ${i >= 2 ? "mt-6 md:mt-0" : ""} ${i === 2 ? "md:border-l md:pl-8" : ""}${i === 0 ? " md:pl-0" : ""}${i === t.stats.length - 1 ? " md:pr-0" : ""}`}
-              >
-                <div className="display-space tnum text-[#17130e]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)" }}>{stat.value}</div>
-                <div className="micro-caps mt-2.5 text-[#17130e]/55">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* SERVIZI — numbered index table (Klim/Order register), not cards */}
       <section id="servizi" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
@@ -613,6 +591,9 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
+      {/* VIDEO REVIEW — free "how you look on Google" lead magnet, after the proof */}
+      <VideoReview lang={lang} />
+
       {/* CHI SIAMO — the ESPRESSO Night room: the one dark surface, the emotional peak */}
       <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px]">
@@ -657,9 +638,7 @@ export default function Home({ lang }: { lang: Lang }) {
             >
               <p className="text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.72)" }}>{t.founder.bio1}</p>
 
-              <p className="display-space mt-10" style={{ fontSize: "clamp(1.4rem, 2.6vw, 2.1rem)", lineHeight: 1.3, color: "#17130e" }}>{t.about.p3}</p>
-
-              <a href="#contatti" className="group mt-10 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
+              <a href="#contatti" className="group mt-8 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
                 {t.hero.ctaPrimary}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
               </a>
@@ -668,38 +647,11 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      {/* SETTORI — ticked index of sectors, no icon-cards */}
-      <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-20 md:py-28">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="mb-10 md:mb-12">
-            <span className="micro-caps text-[var(--gilt)]">04 · {t.sectorsSection.label}</span>
-            <h2 className="display-space mt-3 text-[#17130e]" style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)" }}>
-              {t.sectorsSection.heading1}<em className="text-[var(--color-gold)]">{t.sectorsSection.headingAccent}</em>
-            </h2>
-          </div>
-          <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
-            {t.sectors.map((name, i) => (
-              <motion.div
-                key={i}
-                initial={reduce ? false : { opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-8%" }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="flex items-baseline gap-4 border-t border-[color:var(--gold-line-strong)] py-5"
-              >
-                <span className="micro-caps tnum text-[var(--gilt)]">0{i + 1}</span>
-                <span className="text-lg font-light text-[#17130e]/80">{name}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* METODO — three phases as ticked stations measured by the ruler */}
       <section id="metodo" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-16 md:mb-24">
-            <span className="micro-caps text-[var(--gilt)]">05 · {t.method.label}</span>
+            <span className="micro-caps text-[var(--gilt)]">04 · {t.method.label}</span>
             <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
               {t.method.heading1}<em className="text-[var(--color-gold)]">{t.method.headingAccent}</em>
             </h2>
@@ -725,27 +677,14 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      {/* QUOTE — large Fraunces pull-quote, pure type */}
-      <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-28 md:py-40">
-        <motion.blockquote
-          initial={reduce ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-15%" }}
-          transition={{ duration: 0.8 }}
-          className="mx-auto max-w-[1100px]"
-        >
-          <span className="mb-8 block h-px w-16 bg-[var(--color-gold)]" aria-hidden="true" />
-          <p className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.75rem, 4.4vw, 3.5rem)", lineHeight: 1.16 }}>
-            {t.quote.line1} <em className="text-[var(--color-gold)]">{t.quote.line2}</em>
-          </p>
-        </motion.blockquote>
-      </section>
+      {/* PAYBACK — interactive: turns "a site pays for itself" into a real number */}
+      <PaybackCalc lang={lang} />
 
       {/* FAQ — hairline-divided index accordion */}
       <section id="faq" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[920px]">
           <header className="mb-12 md:mb-16">
-            <span className="micro-caps text-[var(--gilt)]">06 · {t.faqSection.label}</span>
+            <span className="micro-caps text-[var(--gilt)]">05 · {t.faqSection.label}</span>
             <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
               {t.faqSection.heading1}<em className="text-[var(--color-gold)]">{t.faqSection.headingAccent}</em>
             </h2>
@@ -779,11 +718,14 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
+      {/* GUARANTEE — risk-reversal, right before the ask */}
+      <GuaranteeBand lang={lang} />
+
       {/* CONTATTI — restyled to the system; the working form/Resend pipeline is preserved */}
       <section id="contatti" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.7 }} className="mb-14 max-w-3xl md:mb-20">
-            <span className="micro-caps text-[var(--gilt)]">07 · {t.contact.label}</span>
+            <span className="micro-caps text-[var(--gilt)]">06 · {t.contact.label}</span>
             <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
               {t.contact.heading1}<em className="text-[var(--color-gold)]">{t.contact.headingAccent}</em>{t.contact.headingEnd}
             </h2>
@@ -886,7 +828,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[1400px]">
           <div className="flex items-center gap-3 border-t pt-8" style={{ borderColor: "rgba(201,162,90,0.25)" }}>
             <span aria-hidden="true" className="h-px w-8" style={{ background: "var(--gilt)" }} />
-            <span className="micro-caps" style={{ color: "var(--gilt)" }}>Fin — 08</span>
+            <span className="micro-caps" style={{ color: "var(--gilt)" }}>Fin — 07</span>
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2">
             <span className="micro-caps" style={{ color: "rgba(31,27,22,0.4)" }}>Webdesign</span>
