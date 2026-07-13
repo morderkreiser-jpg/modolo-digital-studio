@@ -28,7 +28,7 @@ const translations = {
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
       subtitle: "I get it: you work hard every day, but online barely anyone finds you, and whoever's searching for what you do ends up with a competitor. That's on me now: I build you a well-crafted website that gets you onto Google when people nearby search — proper SEO, no jargon — and shows off your work, so visitors want to book, call or message. No agency passing you around: you always talk to me, start to finish. I've already done it for SaporiVivi, ZüriKey and BJ Studio, and for lots of small businesses across Switzerland.",
-      founderIntro: "I'm Francesco Modolo, web designer and developer in Winterthur. I hand-built the sites you see here myself — and I'm the only person you'll ever talk to.",
+      founderIntro: "Hi, I'm Francesco. I built the sites you see here myself, one by one — and when you get in touch, it's me who answers, every time.",
       trustBand: "Websites from CHF 1,900, at a fixed price we agree before we start. Free first consultation and a reply within 24 hours — always from me.",
       ctaPrimary: "Book a free consultation",
       ctaSecondary: "See my work",
@@ -114,7 +114,7 @@ const translations = {
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
       subtitle: "Ich kenne das: Du gibst jeden Tag alles, aber online findet dich kaum jemand, und wer nach dem sucht, was du machst, landet bei der Konkurrenz. Das nehme ich dir ab: Ich baue dir eine gepflegte Website, die dich bei Google sichtbar macht, wenn Leute in der Nähe suchen — saubere SEO, ohne Fachchinesisch — und dein Angebot so zeigt, dass man reservieren, anrufen oder schreiben will. Keine Agentur, die dich weiterreicht: Du sprichst immer mit mir, von Anfang bis Ende. Für SaporiVivi, ZüriKey und BJ Studio habe ich das schon gemacht, und für viele kleine Betriebe in der ganzen Schweiz.",
-      founderIntro: "Ich bin Francesco Modolo, Webdesigner und Entwickler in Winterthur. Die Websites, die du hier siehst, habe ich selbst von Hand gebaut — und ich bin die einzige Person, mit der du sprichst.",
+      founderIntro: "Hoi, ich bin Francesco. Die Websites hier oben habe ich alle selbst gebaut, eine nach der anderen — und wenn du mir schreibst, antworte ich dir persönlich, immer.",
       trustBand: "Websites ab CHF 1'900, mit Festpreis, den wir vor dem Start festlegen. Erste Beratung gratis und Antwort innert 24 Stunden — immer von mir persönlich.",
       ctaPrimary: "Gratis-Beratung vereinbaren",
       ctaSecondary: "Meine Arbeiten ansehen",
@@ -200,7 +200,7 @@ const translations = {
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
       subtitle: "So com'è: lavori sodo ogni giorno, ma online quasi nessuno ti trova, e chi cerca quello che fai finisce dal concorrente. Ci penso io: ti costruisco un sito curato che ti fa uscire su Google quando la gente cerca in zona — la SEO fatta come si deve, senza paroloni — e mette in mostra il tuo lavoro, così chi ti trova ha voglia di prenotare, chiamare o scriverti. Niente agenzia che ti rimbalza: parli sempre con me, dall'inizio alla fine. L'ho già fatto per SaporiVivi, ZüriKey e BJ Studio, e per tante piccole attività in tutta la Svizzera.",
-      founderIntro: "Sono Francesco Modolo, web designer e sviluppatore a Winterthur. I siti che vedi li ho costruiti io, a mano — e sono l'unica persona con cui parlerai.",
+      founderIntro: "Ciao, sono Francesco. I siti che scorrono qui li ho costruiti io, a mano, uno per uno — e quando ci scriviamo, dall'altra parte ci sono sempre io.",
       trustBand: "Siti da CHF 1'900, prezzo fisso deciso prima di iniziare. Prima consulenza gratuita e risposta entro 24 ore, sempre da me.",
       ctaPrimary: "Prenota una consulenza gratuita",
       ctaSecondary: "Guarda i miei lavori",
@@ -297,6 +297,11 @@ export default function Home({ lang }: { lang: Lang }) {
     if (i < 0) return line;
     return (<>{line.slice(0, i)}<span className="gold-grad">{a}</span>{line.slice(i + a.length)}</>);
   };
+  // Eyebrow "studio mark" parts (name · disciplines · place → distinctive nameplate).
+  const metaParts = t.hero.meta.split(" · ");
+  const heroName = metaParts[0] ?? "Francesco Modolo";
+  const heroDisciplines = metaParts[1] ?? "";
+  const heroCity = (metaParts[2] ?? "Winterthur").split(",")[0].trim();
   const region = useRegion();
   const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, t.contact.whatsappMsg);
 
@@ -391,17 +396,24 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="relative z-10 mx-auto grid w-full max-w-[1400px] items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           {/* LEFT — the offer */}
           <div>
-            <div className="mb-7 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
-              <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
-              {/* Break only at the "·" separators, never inside a segment, so no 1–2 words
-                  ever wrap alone (e.g. "…la Svizzera" on its own line). */}
-              <span className="micro-caps text-[#17130e]/55">
-                {t.hero.meta.split(" · ").flatMap((seg, i) =>
-                  i === 0
-                    ? [<span key={`m${i}`} className="whitespace-nowrap">{seg}</span>]
-                    : [<span key={`sp${i}`}>{" "}</span>, <span key={`m${i}`} className="whitespace-nowrap">· {seg}</span>]
-                )}
-              </span>
+            {/* Studio mark — a measured maker's nameplate, not a stock dotted eyebrow:
+                a graded gold ruler (the site's Measure signature) + the name in the display
+                face (mixed case, human) + a technical spec line with Winterthur's coordinate. */}
+            <div className="mb-8 flex items-center gap-3.5 mds-in" style={{ animationDelay: "0.05s" }}>
+              <svg width="38" height="18" viewBox="0 0 38 18" aria-hidden="true" className="shrink-0 overflow-visible">
+                <g stroke="var(--color-gold)" strokeWidth="1" strokeLinecap="round">
+                  <line x1="1" y1="13.5" x2="37" y2="13.5" />
+                  <line x1="1" y1="13.5" x2="1" y2="8.5" />
+                  <line x1="10" y1="13.5" x2="10" y2="10.5" />
+                  <line x1="19" y1="13.5" x2="19" y2="4" strokeWidth="1.6" />
+                  <line x1="28" y1="13.5" x2="28" y2="10.5" />
+                  <line x1="37" y1="13.5" x2="37" y2="8.5" />
+                </g>
+              </svg>
+              <div className="flex flex-col leading-[1.15]">
+                <span className="text-[15px] font-medium tracking-[-0.01em] text-[#17130e]" style={{ fontFamily: "var(--font-space), sans-serif" }}>{heroName}</span>
+                <span className="micro-caps mt-[3px] text-[10px] text-[var(--gilt)]">{heroDisciplines} · <span className="whitespace-nowrap">{heroCity} · 47.50° N</span></span>
+              </div>
             </div>
 
             <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>
