@@ -396,24 +396,23 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="relative z-10 mx-auto grid w-full max-w-[1400px] items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           {/* LEFT — the offer */}
           <div>
-            {/* Studio mark — a measured maker's nameplate, not a stock dotted eyebrow:
-                a graded gold ruler (the site's Measure signature) + the name in the display
-                face (mixed case, human) + a technical spec line with Winterthur's coordinate. */}
-            <div className="mb-8 flex items-center gap-3.5 mds-in" style={{ animationDelay: "0.05s" }}>
-              <svg width="38" height="18" viewBox="0 0 38 18" aria-hidden="true" className="shrink-0 overflow-visible">
+            {/* Studio mark — a measured maker's nameplate, not a stock dotted eyebrow. Stacked and
+                flush-left so its edge lines up with the headline, subhead and everything below it:
+                a graded gold ruler (the site's Measure signature) above the name in the display
+                face (mixed case, human), then a spec line with Winterthur's coordinate. */}
+            <div className="mb-8 mds-in" style={{ animationDelay: "0.05s" }}>
+              <svg width="40" height="12" viewBox="0 0 40 12" aria-hidden="true" className="mb-2.5 block overflow-visible">
                 <g stroke="var(--color-gold)" strokeWidth="1" strokeLinecap="round">
-                  <line x1="1" y1="13.5" x2="37" y2="13.5" />
-                  <line x1="1" y1="13.5" x2="1" y2="8.5" />
-                  <line x1="10" y1="13.5" x2="10" y2="10.5" />
-                  <line x1="19" y1="13.5" x2="19" y2="4" strokeWidth="1.6" />
-                  <line x1="28" y1="13.5" x2="28" y2="10.5" />
-                  <line x1="37" y1="13.5" x2="37" y2="8.5" />
+                  <line x1="1" y1="1.5" x2="39" y2="1.5" />
+                  <line x1="1" y1="1.5" x2="1" y2="6" />
+                  <line x1="10.5" y1="1.5" x2="10.5" y2="4" />
+                  <line x1="20" y1="1.5" x2="20" y2="9.5" strokeWidth="1.6" />
+                  <line x1="29.5" y1="1.5" x2="29.5" y2="4" />
+                  <line x1="39" y1="1.5" x2="39" y2="6" />
                 </g>
               </svg>
-              <div className="flex flex-col leading-[1.15]">
-                <span className="text-[15px] font-medium tracking-[-0.01em] text-[#17130e]" style={{ fontFamily: "var(--font-space), sans-serif" }}>{heroName}</span>
-                <span className="micro-caps mt-[3px] text-[10px] text-[var(--gilt)]">{heroDisciplines} · <span className="whitespace-nowrap">{heroCity} · 47.50° N</span></span>
-              </div>
+              <span className="block text-[15px] font-medium leading-tight tracking-[-0.01em] text-[#17130e]" style={{ fontFamily: "var(--font-space), sans-serif" }}>{heroName}</span>
+              <span className="micro-caps mt-1.5 block text-[10px] text-[var(--gilt)]">{heroDisciplines} · <span className="whitespace-nowrap">{heroCity} · 47.50° N</span></span>
             </div>
 
             <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>
