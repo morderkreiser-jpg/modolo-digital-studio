@@ -387,7 +387,15 @@ export default function Home({ lang }: { lang: Lang }) {
           <div>
             <div className="mb-7 flex items-center gap-3 mds-in" style={{ animationDelay: "0.05s" }}>
               <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "#b5893f" }} />
-              <span className="micro-caps text-[#17130e]/55">{t.hero.meta}</span>
+              {/* Break only at the "·" separators, never inside a segment, so no 1–2 words
+                  ever wrap alone (e.g. "…la Svizzera" on its own line). */}
+              <span className="micro-caps text-[#17130e]/55">
+                {t.hero.meta.split(" · ").flatMap((seg, i) =>
+                  i === 0
+                    ? [<span key={`m${i}`} className="whitespace-nowrap">{seg}</span>]
+                    : [<span key={`sp${i}`}>{" "}</span>, <span key={`m${i}`} className="whitespace-nowrap">· {seg}</span>]
+                )}
+              </span>
             </div>
 
             <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>

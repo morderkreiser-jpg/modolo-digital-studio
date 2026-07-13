@@ -250,7 +250,7 @@
 }
 /* Kill orphan words: headings balance (above); body text never leaves 1–2 words alone on the
    last line. text-wrap: pretty rebalances only the final lines, so paragraphs read cleanly. */
-p, li, blockquote, figcaption, .text-balance { text-wrap: pretty; }
+p, li, blockquote, figcaption { text-wrap: pretty; }
 /* Gold gradient text — accent words. Tuned to read on the cream light field. */
 .gold-grad {
   background: linear-gradient(100deg, #c9992f, var(--color-gold) 45%, #7e5d24);
