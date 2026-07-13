@@ -11,6 +11,7 @@ import Magnetic from "@/components/magnetic";
 import Reveal from "@/components/reveal";
 import Marquee from "@/components/marquee";
 import HeroShowcase from "@/components/hero-showcase";
+import HeroAtmosphere from "@/components/hero-atmosphere";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -385,6 +386,7 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* HERO — proof-first: the offer on the left, real client sites shown live on the right */}
       <section className="relative flex min-h-svh items-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 56% at 84% 50%, rgba(201,153,47,0.10), transparent 72%)" }} />
+        <HeroAtmosphere />
 
         <div className="relative z-10 mx-auto grid w-full max-w-[1400px] items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           {/* LEFT — the offer */}
