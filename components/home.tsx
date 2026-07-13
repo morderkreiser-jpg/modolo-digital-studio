@@ -44,7 +44,7 @@ const translations = {
       signClosedHours: "Hours  —:—",
       signOpenHours: "Always open for you",
       ctaWhatsapp: "Message me on WhatsApp",
-      chips: ["from CHF 1,900 · fixed price, agreed up front", "first consultation free", "one person, not an agency", "I reply personally, within 24h"],
+      chips: ["from CHF 1,900 · fixed price, agreed up front", "first consultation free", "always me, not an agency", "I reply personally, within 24h"],
     },
     stats: [
       { value: "4+", label: "Years building websites" },
@@ -64,8 +64,8 @@ const translations = {
     zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", outcome: "The Zürich flat hunt, turned into a dossier landlords actually notice.", desc: "A web app that walks renters through a standout application — profile, documents, affordability score and a flawless German cover letter, ready as a print PDF.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
     bjstudio: { tags: ["Website", "WhatsApp Booking", "Local SEO"], meta: "Website · Zürich", outcome: "A Zürich beauty studio you book on WhatsApp — in four languages.", desc: "A multilingual website for a beauty studio: direct WhatsApp booking, a before/after gallery and local SEO to get found nearby.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty studio website in Zürich" },
     about: {
-      label: "Who's behind it", heading1: "Not an agency — ", headingAccent: "one person: me.",
-      p1: "Modolo Digital Studio isn't an agency with a thousand clients and a switchboard. It's me, Francesco. I take on just a few projects at a time and see each one through personally, from the first call to launch day — so yours never ends up at the bottom of a list and never gets 'passed to the tech department': the person answering you is the person building it.",
+      label: "Who's behind it", heading1: "Not an agency. ", headingAccent: "And not a one-man show.",
+      p1: "Your point of contact is always me, Francesco: I take on just a few projects at a time and see each one through personally, from the first call to the day you go live. But I'm not a one-man show doing everything half-well — when a job needs it, I bring in trusted specialists, like a real photographer and videomaker for the shoots. So you get the upside of always talking to one person, without the risk of depending on one person.",
       p2: "For over four years I've been building websites for businesses all across Switzerland: I write the code, craft the design, sort out the SEO, shoot and edit the photos and video. And I don't stop at 'looks good': to me a website works when it brings you customers, so I think about the goal first and the design second.",
       p3: "Work with me and you always talk to the person who actually builds your site — from the first idea to the day it goes live.",
     },
@@ -73,7 +73,7 @@ const translations = {
       eyebrow: "The founder",
       name: "Francesco Modolo",
       role: "Web Designer & Developer",
-      bio1: "For over four years I've been building websites for small businesses across Switzerland: the code, the design, the SEO, the photos and the videos — all with my own hands. I work on each one as if the site were mine, because it's my name that goes on it.",
+      bio1: "For over four years I've been building websites for small businesses across Switzerland: the code, the design and the SEO I do myself; for photos and video a trusted professional works alongside me. I work on each one as if the site were mine, because it's my name that goes on it.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
     values: [
@@ -130,7 +130,7 @@ const translations = {
       signClosedHours: "Öffnungszeiten  —:—",
       signOpenHours: "Immer für dich da",
       ctaWhatsapp: "Schreib mir auf WhatsApp",
-      chips: ["ab CHF 1'900 · Fixpreis, vorher vereinbart", "erste Beratung gratis", "eine Person, keine Agentur", "Antwort von mir, innert 24h"],
+      chips: ["ab CHF 1'900 · Fixpreis, vorher vereinbart", "erste Beratung gratis", "immer ich, keine Agentur", "Antwort von mir, innert 24h"],
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
@@ -150,8 +150,8 @@ const translations = {
     zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", outcome: "Die Wohnungssuche in Zürich — als Dossier, das Vermieter wirklich beachten.", desc: "Eine Web-App, die Wohnungssuchende Schritt für Schritt zu einem überzeugenden Dossier führt — Profil, Dokumente, Tragbarkeits-Score und ein perfektes Anschreiben auf Deutsch, druckfertig als PDF.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
     bjstudio: { tags: ["Website", "WhatsApp-Termine", "Lokales SEO"], meta: "Website · Zürich", outcome: "Ein Zürcher Beauty-Studio, das man per WhatsApp bucht — in vier Sprachen.", desc: "Eine mehrsprachige Website für ein Beauty-Studio: direkte Terminbuchung via WhatsApp, Vorher-Nachher-Galerie und lokales SEO, um in der Nähe gefunden zu werden.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Beauty-Studio-Website in Zürich" },
     about: {
-      label: "Wer dahintersteckt", heading1: "Keine Agentur — ", headingAccent: "eine Person: ich.",
-      p1: "Modolo Digital Studio ist keine Agentur mit tausend Kunden und einer Telefonzentrale. Es bin ich, Francesco. Ich nehme immer nur wenige Projekte auf einmal an und betreue jedes einzeln, vom ersten Telefonat bis zur fertigen Website — so landet deines nicht am Ende einer Liste und wird nicht «an die technische Abteilung weitergereicht»: Wer dir antwortet, ist der, der es baut.",
+      label: "Wer dahintersteckt", heading1: "Keine Agentur. ", headingAccent: "Und trotzdem nicht allein.",
+      p1: "Deine feste Ansprechperson bin immer ich, Francesco: Ich nehme nur wenige Projekte auf einmal an und betreue jedes einzeln, vom ersten Telefonat bis zum Tag, an dem du online gehst. Aber ich bin kein Einzelkämpfer, der alles halb macht — wenn ein Projekt es braucht, hole ich vertraute Spezialisten dazu, etwa einen richtigen Fotografen und Videomaker für die Shootings. So hast du eine einzige Ansprechperson, ohne das Risiko, von einer einzigen Person abhängig zu sein.",
       p2: "Seit über vier Jahren baue ich Websites für Betriebe in der ganzen Schweiz: Ich schreibe den Code, gestalte das Design, bringe die SEO in Ordnung, drehe und schneide Fotos und Videos. Und ich höre nicht beim «Schön» auf: Für mich funktioniert eine Website dann, wenn sie dir Kunden bringt — also denke ich zuerst ans Ziel und dann ans Design.",
       p3: "Bei mir sprichst du immer mit der Person, die deine Website wirklich baut — von der ersten Idee bis zum Tag, an dem sie online geht.",
     },
@@ -159,7 +159,7 @@ const translations = {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
       role: "Webdesigner & Entwickler",
-      bio1: "Seit über vier Jahren baue ich Websites für kleine Betriebe in der ganzen Schweiz: den Code, das Design, die SEO, die Fotos und die Videos — alles mit meinen eigenen Händen. Ich arbeite daran, als wäre es meine eigene Website, denn es ist mein Name, der draufsteht.",
+      bio1: "Seit über vier Jahren baue ich Websites für kleine Betriebe in der ganzen Schweiz: Code, Design und SEO mache ich selbst; für Fotos und Videos unterstützt mich ein Profi, dem ich vertraue. Ich arbeite daran, als wäre es meine eigene Website, denn es ist mein Name, der draufsteht.",
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
     values: [
@@ -216,7 +216,7 @@ const translations = {
       signClosedHours: "Orari  —:—",
       signOpenHours: "Sempre aperto per te",
       ctaWhatsapp: "Scrivimi su WhatsApp",
-      chips: ["da CHF 1'900 · prezzo fisso, deciso prima", "prima consulenza gratis", "una persona sola, non un'agenzia", "rispondo io, entro 24h"],
+      chips: ["da CHF 1'900 · prezzo fisso, deciso prima", "prima consulenza gratis", "sempre me, non un'agenzia", "rispondo io, entro 24h"],
     },
     stats: [
       { value: "4+", label: "Anni a costruire siti" },
@@ -236,8 +236,8 @@ const translations = {
     zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", outcome: "La ricerca casa a Zurigo, trasformata in un dossier che i proprietari notano.", desc: "Web app che guida chi cerca casa a costruire una candidatura impeccabile: profilo, documenti, punteggio di sostenibilità e lettera in tedesco, pronti in PDF.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
     bjstudio: { tags: ["Sito Web", "Prenotazioni WhatsApp", "SEO Locale"], meta: "Sito Web · Zurigo", outcome: "Uno studio beauty di Zurigo che si prenota su WhatsApp, in quattro lingue.", desc: "Sito multilingua per uno studio beauty: prenotazione diretta via WhatsApp, galleria prima/dopo e SEO locale per farsi trovare in zona.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per uno studio beauty a Zurigo" },
     about: {
-      label: "Chi c'è dietro", heading1: "Non un'agenzia — ", headingAccent: "una persona: io.",
-      p1: "Modolo Digital Studio non è un'agenzia con mille clienti e un centralino. Sono io, Francesco. Prendo pochi progetti alla volta e li seguo uno per uno, dalla prima chiamata al sito online — così il tuo non finisce in fondo a una lista e non lo «giro all'ufficio tecnico»: chi ti risponde è chi lo sta costruendo.",
+      label: "Chi c'è dietro", heading1: "Non un'agenzia. ", headingAccent: "E nemmeno da solo.",
+      p1: "Il tuo referente sono sempre io, Francesco: prendo pochi progetti alla volta e li seguo uno per uno, dalla prima chiamata al giorno in cui vai online. Ma non sono un uomo-solo che fa tutto a metà — quando un lavoro lo richiede coinvolgo specialisti di fiducia, come un fotografo e videomaker veri per gli shooting. Così hai il bello di parlare sempre con una persona sola, senza il rischio di dipendere da una sola persona.",
       p2: "Da oltre quattro anni costruisco siti per attività in tutta la Svizzera: scrivo il codice, curo il design, sistemo la SEO, giro e monto foto e video. E non mi fermo al «bello»: per me un sito funziona quando ti porta clienti, quindi ragiono prima sull'obiettivo e poi sul design.",
       p3: "Lavorando con me parli sempre con chi il tuo sito lo costruisce davvero — dalla prima idea al giorno in cui va online.",
     },
@@ -245,7 +245,7 @@ const translations = {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
       role: "Web Designer & Sviluppatore",
-      bio1: "Da oltre quattro anni costruisco siti per piccole attività in tutta la Svizzera: il codice, il design, la SEO, le foto e i video — tutto con le mie mani. Ci lavoro come se il sito fosse mio, perché è il mio nome quello che ci metto sopra.",
+      bio1: "Da oltre quattro anni costruisco siti per piccole attività in tutta la Svizzera: il codice, il design e la SEO li faccio io; per foto e video mi affianca un professionista di fiducia. Ci lavoro come se il sito fosse mio, perché è il mio nome quello che ci metto sopra.",
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
     values: [
