@@ -160,7 +160,8 @@ const CSS = `
 .hsw-body { position: relative; width: 100%; aspect-ratio: 1280 / 700; background: #17130e; }
 .hsw-shot { object-fit: cover; object-position: top center; transition: opacity 1.1s ease-in-out; }
 
-.hsw-foot { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.hsw-foot { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+@media (max-width: 767px) { .hsw-foot { flex-direction: column; align-items: flex-start; gap: 12px; } }
 .hsw-caption { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   font-family: var(--font-space), sans-serif; }
 .hsw-name { font-weight: 600; font-size: 14px; color: #17130e; letter-spacing: 0.01em; }
