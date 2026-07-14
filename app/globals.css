@@ -283,6 +283,10 @@ p, li, blockquote, figcaption { text-wrap: pretty; }
   .mds-split-7-5 { grid-template-columns: 7fr 5fr; column-gap: 4.5rem; }
 }
 
+/* Chi siamo — the reachable-now presence dot (paused when the visitor prefers reduced motion). */
+@keyframes fc-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(201, 153, 47, 0.45); } 50% { box-shadow: 0 0 0 5px rgba(201, 153, 47, 0); } }
+@media (prefers-reduced-motion: no-preference) { .fc-dot { animation: fc-pulse 2.4s ease-in-out infinite; } }
+
 /* Discipline marquee — seamless auto-scroll (content is duplicated for the -50% loop). */
 @keyframes mds-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .marquee-track {

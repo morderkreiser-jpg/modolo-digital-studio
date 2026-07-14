@@ -15,6 +15,7 @@ import PaybackCalc from "@/components/payback-calc";
 import VideoReview from "@/components/video-review";
 import GuaranteeBand from "@/components/guarantee-band";
 import FounderSignature from "@/components/founder-signature";
+import FounderCircle from "@/components/founder-circle";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -65,13 +66,16 @@ const translations = {
     zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", outcome: "Not a website: a real web app that wins the Zürich rental war.", desc: "A real web app: it walks flat-hunters through it step by step — profile, documents, affordability score and a formal German cover letter — and generates a ready-to-send PDF dossier, with an encrypted EU-hosted account.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
     bjstudio: { tags: ["Complete website", "Online booking", "Local SEO"], meta: "Beauty centre · Zürich", outcome: "A Zürich beauty centre with a complete site where clients book themselves — in four languages.", desc: "A complete website for a beauty centre: the treatment list with prices, a before/after gallery, direct WhatsApp booking and local SEO to get found in Zürich — in four languages.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty centre website in Zürich" },
     about: {
-      label: "Who's behind it", heading1: "Not an agency. ", headingAccent: "And not a one-man show.",
-      statementLead: "Hi, I'm Francesco. You always deal with me directly.",
-      support: "I take on just a few projects at a time and see yours through personally, from the first call to the day you go live. When a job needs it, I bring in people I trust — a real photographer and videomaker — but your point of contact stays one person: me.",
+      label: "Who's behind it", heading1: "Behind your site there's a face.", headingAccent: "The circle, only when it's needed.",
+      statement: "It's me, Francesco. I take on just a few projects at a time and see yours through personally — from the first call to the day you go live. When a job needs it, I call in people I trust: a real photographer and videomaker. But your point of contact stays one person: me.",
       signOff: "Because it's my name that goes on it.",
       reach: "Winterthur · I reply myself, same day",
-      specialistsLabel: "Specialists, when needed",
-      specialists: ["Photographer and video — for the shoots", "Trusted specialists — when needed"],
+      circleCaption: "My circle · when needed",
+      roleTags: [
+        { role: "Photographer", desc: "real shoots" },
+        { role: "Videomaker", desc: "filming & editing" },
+        { role: "Trusted specialists", desc: "when needed" },
+      ],
       p1: "Your point of contact is always me, Francesco: I take on just a few projects at a time and see each one through personally, from the first call to the day you go live. But I'm not a one-man show doing everything half-well — when a job needs it, I bring in trusted specialists, like a real photographer and videomaker for the shoots. So you get the upside of always talking to one person, without the risk of depending on one person.",
       p2: "For over four years I've been building websites for businesses all across Switzerland: I write the code, craft the design, sort out the SEO, shoot and edit the photos and video. And I don't stop at 'looks good': to me a website works when it brings you customers, so I think about the goal first and the design second.",
       p3: "Work with me and you always talk to the person who actually builds your site — from the first idea to the day it goes live.",
@@ -158,13 +162,16 @@ const translations = {
     zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", outcome: "Keine Website: eine echte Web-App, die den Wohnungskampf in Zürich gewinnt.", desc: "Eine echte Web-App: führt Wohnungssuchende Schritt für Schritt — Profil, Dokumente, Tragbarkeits-Score und formelles Bewerbungsschreiben auf Deutsch — und erzeugt ein sendefertiges PDF-Dossier, mit verschlüsseltem Konto in der EU.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
     bjstudio: { tags: ["Komplette Website", "Online-Terminbuchung", "Lokales SEO"], meta: "Kosmetikstudio · Zürich", outcome: "Ein Zürcher Kosmetikstudio mit kompletter Website, auf der Kundinnen selbst buchen — in vier Sprachen.", desc: "Komplette Website für ein Kosmetikstudio: Behandlungsliste mit Preisen, Vorher-Nachher-Galerie, direkte Terminbuchung via WhatsApp und lokales SEO, um in Zürich gefunden zu werden — in vier Sprachen.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Website für ein Kosmetikstudio in Zürich" },
     about: {
-      label: "Wer dahintersteckt", heading1: "Keine Agentur. ", headingAccent: "Und trotzdem nicht allein.",
-      statementLead: "Hallo, ich bin Francesco. Du sprichst immer mit mir.",
-      support: "Ich nehme nur wenige Projekte auf einmal an und betreue deins persönlich, vom ersten Telefonat bis zu dem Tag, an dem du online gehst. Wenn nötig, hole ich Leute dazu, denen ich vertraue — einen echten Fotografen und Videomaker — aber deine Ansprechperson bleibt eine einzige: ich.",
+      label: "Wer dahintersteckt", heading1: "Hinter deiner Website steht ein Gesicht.", headingAccent: "Der Kreis, nur wenn nötig.",
+      statement: "Das bin ich, Francesco. Ich nehme nur wenige Projekte auf einmal an und betreue deins persönlich — vom ersten Telefonat bis zu dem Tag, an dem du online gehst. Wenn es ein Projekt braucht, hole ich Leute dazu, denen ich vertraue: einen echten Fotografen und Videofilmer. Aber deine Ansprechperson bleibt eine: ich.",
       signOff: "Denn es ist mein Name, der draufsteht.",
       reach: "Winterthur · Antwort von mir, am selben Tag",
-      specialistsLabel: "Spezialisten, bei Bedarf",
-      specialists: ["Fotograf und Video — für die Shootings", "Vertraute Fachleute — wenn nötig"],
+      circleCaption: "Mein Kreis · wenn nötig",
+      roleTags: [
+        { role: "Fotograf", desc: "echte Shootings" },
+        { role: "Videofilmer", desc: "Dreh & Schnitt" },
+        { role: "Vertraute Fachleute", desc: "wenn nötig" },
+      ],
       p1: "Deine feste Ansprechperson bin immer ich, Francesco: Ich nehme nur wenige Projekte auf einmal an und betreue jedes einzeln, vom ersten Telefonat bis zum Tag, an dem du online gehst. Aber ich bin kein Einzelkämpfer, der alles halb macht — wenn ein Projekt es braucht, hole ich vertraute Spezialisten dazu, etwa einen richtigen Fotografen und Videomaker für die Shootings. So hast du eine einzige Ansprechperson, ohne das Risiko, von einer einzigen Person abhängig zu sein.",
       p2: "Seit über vier Jahren baue ich Websites für Betriebe in der ganzen Schweiz: Ich schreibe den Code, gestalte das Design, bringe die SEO in Ordnung, drehe und schneide Fotos und Videos. Und ich höre nicht beim «Schön» auf: Für mich funktioniert eine Website dann, wenn sie dir Kunden bringt — also denke ich zuerst ans Ziel und dann ans Design.",
       p3: "Bei mir sprichst du immer mit der Person, die deine Website wirklich baut — von der ersten Idee bis zum Tag, an dem sie online geht.",
@@ -251,13 +258,16 @@ const translations = {
     zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", outcome: "Non un sito: una web app che vince la guerra degli affitti a Zurigo.", desc: "Una vera web app: guida chi cerca casa passo passo — profilo, documenti, punteggio di sostenibilità e lettera formale in tedesco — e genera un dossier PDF pronto da inviare, con account cifrato in UE.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
     bjstudio: { tags: ["Sito completo", "Prenotazione online", "SEO Locale"], meta: "Centro estetico · Zurigo", outcome: "Un centro estetico di Zurigo con un sito completo dove i clienti prenotano da soli, in quattro lingue.", desc: "Sito completo per un centro estetico: listino dei trattamenti con prezzi, galleria prima/dopo, prenotazione diretta via WhatsApp e SEO locale per farsi trovare a Zurigo — in quattro lingue.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per un centro estetico a Zurigo" },
     about: {
-      label: "Chi c'è dietro", heading1: "Non un'agenzia. ", headingAccent: "E nemmeno da solo.",
-      statementLead: "Ciao, sono Francesco. Parli sempre con me.",
-      support: "Prendo pochi progetti alla volta e seguo il tuo di persona, dalla prima chiamata al giorno in cui vai online. Quando serve, porto persone di cui mi fido — un fotografo e un videomaker veri — ma il tuo referente resta uno solo: io.",
+      label: "Chi c'è dietro", heading1: "Dietro il tuo sito c'è una faccia.", headingAccent: "Il cerchio, solo quando serve.",
+      statement: "Sono io, Francesco. Prendo pochi progetti alla volta e seguo il tuo di persona — dalla prima chiamata al giorno in cui vai online. Quando un lavoro lo richiede, chiamo persone di cui mi fido: un fotografo e un videomaker veri. Ma il referente resta uno: io.",
       signOff: "Perché è il mio nome quello che ci metto sopra.",
       reach: "Winterthur · ti rispondo io, in giornata",
-      specialistsLabel: "Specialisti, quando serve",
-      specialists: ["Fotografo e video — per gli shooting", "Consulenti di fiducia — quando serve"],
+      circleCaption: "Il mio cerchio · quando serve",
+      roleTags: [
+        { role: "Fotografo", desc: "shooting reali" },
+        { role: "Videomaker", desc: "riprese & montaggio" },
+        { role: "Consulenti di fiducia", desc: "quando serve" },
+      ],
       p1: "Il tuo referente sono sempre io, Francesco: prendo pochi progetti alla volta e li seguo uno per uno, dalla prima chiamata al giorno in cui vai online. Ma non sono un uomo-solo che fa tutto a metà — quando un lavoro lo richiede coinvolgo specialisti di fiducia, come un fotografo e videomaker veri per gli shooting. Così hai il bello di parlare sempre con una persona sola, senza il rischio di dipendere da una sola persona.",
       p2: "Da oltre quattro anni costruisco siti per attività in tutta la Svizzera: scrivo il codice, curo il design, sistemo la SEO, giro e monto foto e video. E non mi fermo al «bello»: per me un sito funziona quando ti porta clienti, quindi ragiono prima sull'obiettivo e poi sul design.",
       p3: "Lavorando con me parli sempre con chi il tuo sito lo costruisce davvero — dalla prima idea al giorno in cui va online.",
@@ -590,40 +600,39 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* VIDEO REVIEW — free "how you look on Google" lead magnet, after the proof */}
       <VideoReview lang={lang} />
 
-      {/* CHI SIAMO — a signed, first-person statement on the cream: he speaks, then signs it.
-          "Not an agency" = one face + one name + the signature; "not alone" = the quiet, honest
-          circle of real functions, lit lower than he is. */}
-      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
+      {/* CHI SIAMO — "Il Cerchio Vivo": he speaks and signs on the left; on the right his portrait
+          is a LIVING plate (glow on arrival, breathes, tilts to the cursor, gold dust) and his
+          trusted circle — real functions, never invented names — opens around him when you engage.
+          A deeper bone ground keeps it from feeling empty. */}
+      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-deep)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px]">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-12%" }}
             transition={{ duration: 0.7 }}
-            className="max-w-3xl"
+            className="max-w-4xl"
           >
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
-            <h2 className="display-space mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "#17130e" }}>
-              {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
+            <h2 className="display-space mt-5 leading-[1.04]" style={{ fontSize: "clamp(1.9rem, 4vw, 3.15rem)", color: "#17130e" }}>
+              <span className="block">{t.about.heading1}</span>
+              <span className="block gold-grad">{t.about.headingAccent}</span>
             </h2>
           </motion.div>
 
-          <div className="mt-12 grid gap-12 md:mt-16 mds-split-7-5">
-            {/* wide type column — the spoken statement, closing on the signature */}
+          <div className="mt-14 grid items-center gap-12 md:mt-20 mds-split-5-7">
+            {/* type column — the spoken statement, closing on the signature */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8 }}
-              className="min-w-0"
+              className="order-2 min-w-0 md:order-1"
             >
-              <p className="display-space leading-tight" style={{ fontSize: "clamp(1.5rem, 3.2vw, 2.3rem)", color: "#17130e" }}>
-                {t.about.statementLead}
+              <p className="max-w-xl text-[1.05rem] font-light leading-relaxed md:text-lg" style={{ color: "rgba(23,19,14,0.78)" }}>
+                {t.about.statement}
               </p>
-              <p className="mt-6 max-w-xl text-lg font-light leading-relaxed" style={{ color: "rgba(23,19,14,0.72)" }}>
-                {t.about.support}
-              </p>
-              <p className="display-space mt-10 leading-snug" style={{ fontSize: "clamp(1.15rem, 2.2vw, 1.6rem)", color: "#17130e" }}>
+              <p className="display-space mt-9 leading-snug" style={{ fontSize: "clamp(1.1rem, 2vw, 1.5rem)", color: "#17130e" }}>
                 {t.about.signOff}
               </p>
               <div className="mt-4">
@@ -631,37 +640,20 @@ export default function Home({ lang }: { lang: Lang }) {
               </div>
             </motion.div>
 
-            {/* narrow column — the one face, one name, and the honest circle */}
+            {/* living portrait + the trusted circle */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="min-w-0"
+              className="order-1 min-w-0 md:order-2"
             >
-              <div className="relative mx-auto max-w-[300px] md:max-w-none">
-                <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10" style={{ background: "radial-gradient(60% 50% at 50% 30%, rgba(201,153,47,0.16), transparent 72%)" }} />
-                <div className="relative aspect-[4/5] overflow-hidden" style={{ borderRadius: "46% 46% 12px 12px", border: "1px solid var(--gilt)", boxShadow: "inset 0 0 70px rgba(201,153,47,0.10)" }}>
-                  <Image src="/founder-portrait.webp" alt="Francesco Modolo — il tuo referente per Modolo Digital Studio" fill sizes="(max-width: 768px) 80vw, 30vw" className="object-cover" />
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col items-start gap-1.5">
-                <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
-                <span className="inline-flex items-center gap-2 text-sm font-light" style={{ color: "rgba(23,19,14,0.6)" }}>
-                  <span aria-hidden className="inline-block h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: "var(--color-gold)", boxShadow: "0 0 0 3px rgba(201,153,47,0.18)" }} />
-                  {t.about.reach}
-                </span>
-              </div>
-
-              <div className="mt-7 border-t pt-5" style={{ borderColor: "var(--gold-line)" }}>
-                <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.about.specialistsLabel}</span>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {t.about.specialists.map((s, i) => (
-                    <li key={i} className="text-[15px] font-light" style={{ color: "rgba(23,19,14,0.55)" }}>{s}</li>
-                  ))}
-                </ul>
-              </div>
+              <FounderCircle
+                portraitAlt="Francesco Modolo — il tuo referente per Modolo Digital Studio"
+                reach={t.about.reach}
+                circleCaption={t.about.circleCaption}
+                roles={t.about.roleTags}
+              />
             </motion.div>
           </div>
         </div>
