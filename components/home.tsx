@@ -593,8 +593,8 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.8 }}
               className="min-w-0"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[4px]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
-                <Image src="/founder-2.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain object-bottom" />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[10px]" style={{ border: "1px solid var(--gold-line)", boxShadow: "0 2px 4px rgba(126,93,36,0.08), 0 30px 60px -28px rgba(126,93,36,0.42)" }}>
+                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
               </div>
               <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
                 <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
