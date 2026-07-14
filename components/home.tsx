@@ -14,6 +14,7 @@ import HeroAtmosphere from "@/components/hero-atmosphere";
 import PaybackCalc from "@/components/payback-calc";
 import VideoReview from "@/components/video-review";
 import GuaranteeBand from "@/components/guarantee-band";
+import FounderSignature from "@/components/founder-signature";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -65,6 +66,12 @@ const translations = {
     bjstudio: { tags: ["Complete website", "Online booking", "Local SEO"], meta: "Beauty centre · Zürich", outcome: "A Zürich beauty centre with a complete site where clients book themselves — in four languages.", desc: "A complete website for a beauty centre: the treatment list with prices, a before/after gallery, direct WhatsApp booking and local SEO to get found in Zürich — in four languages.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty centre website in Zürich" },
     about: {
       label: "Who's behind it", heading1: "Not an agency. ", headingAccent: "And not a one-man show.",
+      statementLead: "Hi, I'm Francesco. You always deal with me directly.",
+      support: "I take on just a few projects at a time and see yours through personally, from the first call to the day you go live. When a job needs it, I bring in people I trust — a real photographer and videomaker — but your point of contact stays one person: me.",
+      signOff: "Because it's my name that goes on it.",
+      reach: "Winterthur · I reply myself, same day",
+      specialistsLabel: "Specialists, when needed",
+      specialists: ["Photographer and video — for the shoots", "Trusted specialists — when needed"],
       p1: "Your point of contact is always me, Francesco: I take on just a few projects at a time and see each one through personally, from the first call to the day you go live. But I'm not a one-man show doing everything half-well — when a job needs it, I bring in trusted specialists, like a real photographer and videomaker for the shoots. So you get the upside of always talking to one person, without the risk of depending on one person.",
       p2: "For over four years I've been building websites for businesses all across Switzerland: I write the code, craft the design, sort out the SEO, shoot and edit the photos and video. And I don't stop at 'looks good': to me a website works when it brings you customers, so I think about the goal first and the design second.",
       p3: "Work with me and you always talk to the person who actually builds your site — from the first idea to the day it goes live.",
@@ -72,6 +79,7 @@ const translations = {
     founder: {
       eyebrow: "The founder",
       name: "Francesco Modolo",
+      signatureAlt: "Francesco Modolo's signature",
       role: "Web Designer & Developer",
       bio1: "For over four years I've been building websites for small businesses across Switzerland: the code, the design and the SEO I do myself; for photos and video a trusted professional works alongside me. I work on each one as if the site were mine, because it's my name that goes on it.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
@@ -151,6 +159,12 @@ const translations = {
     bjstudio: { tags: ["Komplette Website", "Online-Terminbuchung", "Lokales SEO"], meta: "Kosmetikstudio · Zürich", outcome: "Ein Zürcher Kosmetikstudio mit kompletter Website, auf der Kundinnen selbst buchen — in vier Sprachen.", desc: "Komplette Website für ein Kosmetikstudio: Behandlungsliste mit Preisen, Vorher-Nachher-Galerie, direkte Terminbuchung via WhatsApp und lokales SEO, um in Zürich gefunden zu werden — in vier Sprachen.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Website für ein Kosmetikstudio in Zürich" },
     about: {
       label: "Wer dahintersteckt", heading1: "Keine Agentur. ", headingAccent: "Und trotzdem nicht allein.",
+      statementLead: "Hallo, ich bin Francesco. Du sprichst immer mit mir.",
+      support: "Ich nehme nur wenige Projekte auf einmal an und betreue deins persönlich, vom ersten Telefonat bis zu dem Tag, an dem du online gehst. Wenn nötig, hole ich Leute dazu, denen ich vertraue — einen echten Fotografen und Videomaker — aber deine Ansprechperson bleibt eine einzige: ich.",
+      signOff: "Denn es ist mein Name, der draufsteht.",
+      reach: "Winterthur · Antwort von mir, am selben Tag",
+      specialistsLabel: "Spezialisten, bei Bedarf",
+      specialists: ["Fotograf und Video — für die Shootings", "Vertraute Fachleute — wenn nötig"],
       p1: "Deine feste Ansprechperson bin immer ich, Francesco: Ich nehme nur wenige Projekte auf einmal an und betreue jedes einzeln, vom ersten Telefonat bis zum Tag, an dem du online gehst. Aber ich bin kein Einzelkämpfer, der alles halb macht — wenn ein Projekt es braucht, hole ich vertraute Spezialisten dazu, etwa einen richtigen Fotografen und Videomaker für die Shootings. So hast du eine einzige Ansprechperson, ohne das Risiko, von einer einzigen Person abhängig zu sein.",
       p2: "Seit über vier Jahren baue ich Websites für Betriebe in der ganzen Schweiz: Ich schreibe den Code, gestalte das Design, bringe die SEO in Ordnung, drehe und schneide Fotos und Videos. Und ich höre nicht beim «Schön» auf: Für mich funktioniert eine Website dann, wenn sie dir Kunden bringt — also denke ich zuerst ans Ziel und dann ans Design.",
       p3: "Bei mir sprichst du immer mit der Person, die deine Website wirklich baut — von der ersten Idee bis zum Tag, an dem sie online geht.",
@@ -158,6 +172,7 @@ const translations = {
     founder: {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
+      signatureAlt: "Unterschrift von Francesco Modolo",
       role: "Webdesigner & Entwickler",
       bio1: "Seit über vier Jahren baue ich Websites für kleine Betriebe in der ganzen Schweiz: Code, Design und SEO mache ich selbst; für Fotos und Videos unterstützt mich ein Profi, dem ich vertraue. Ich arbeite daran, als wäre es meine eigene Website, denn es ist mein Name, der draufsteht.",
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
@@ -237,6 +252,12 @@ const translations = {
     bjstudio: { tags: ["Sito completo", "Prenotazione online", "SEO Locale"], meta: "Centro estetico · Zurigo", outcome: "Un centro estetico di Zurigo con un sito completo dove i clienti prenotano da soli, in quattro lingue.", desc: "Sito completo per un centro estetico: listino dei trattamenti con prezzi, galleria prima/dopo, prenotazione diretta via WhatsApp e SEO locale per farsi trovare a Zurigo — in quattro lingue.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per un centro estetico a Zurigo" },
     about: {
       label: "Chi c'è dietro", heading1: "Non un'agenzia. ", headingAccent: "E nemmeno da solo.",
+      statementLead: "Ciao, sono Francesco. Parli sempre con me.",
+      support: "Prendo pochi progetti alla volta e seguo il tuo di persona, dalla prima chiamata al giorno in cui vai online. Quando serve, porto persone di cui mi fido — un fotografo e un videomaker veri — ma il tuo referente resta uno solo: io.",
+      signOff: "Perché è il mio nome quello che ci metto sopra.",
+      reach: "Winterthur · ti rispondo io, in giornata",
+      specialistsLabel: "Specialisti, quando serve",
+      specialists: ["Fotografo e video — per gli shooting", "Consulenti di fiducia — quando serve"],
       p1: "Il tuo referente sono sempre io, Francesco: prendo pochi progetti alla volta e li seguo uno per uno, dalla prima chiamata al giorno in cui vai online. Ma non sono un uomo-solo che fa tutto a metà — quando un lavoro lo richiede coinvolgo specialisti di fiducia, come un fotografo e videomaker veri per gli shooting. Così hai il bello di parlare sempre con una persona sola, senza il rischio di dipendere da una sola persona.",
       p2: "Da oltre quattro anni costruisco siti per attività in tutta la Svizzera: scrivo il codice, curo il design, sistemo la SEO, giro e monto foto e video. E non mi fermo al «bello»: per me un sito funziona quando ti porta clienti, quindi ragiono prima sull'obiettivo e poi sul design.",
       p3: "Lavorando con me parli sempre con chi il tuo sito lo costruisce davvero — dalla prima idea al giorno in cui va online.",
@@ -244,6 +265,7 @@ const translations = {
     founder: {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
+      signatureAlt: "Firma di Francesco Modolo",
       role: "Web Designer & Sviluppatore",
       bio1: "Da oltre quattro anni costruisco siti per piccole attività in tutta la Svizzera: il codice, il design e la SEO li faccio io; per foto e video mi affianca un professionista di fiducia. Ci lavoro come se il sito fosse mio, perché è il mio nome quello che ci metto sopra.",
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
@@ -568,7 +590,9 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* VIDEO REVIEW — free "how you look on Google" lead magnet, after the proof */}
       <VideoReview lang={lang} />
 
-      {/* CHI SIAMO — the ESPRESSO Night room: the one dark surface, the emotional peak */}
+      {/* CHI SIAMO — a signed, first-person statement on the cream: he speaks, then signs it.
+          "Not an agency" = one face + one name + the signature; "not alone" = the quiet, honest
+          circle of real functions, lit lower than he is. */}
       <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px]">
           <motion.div
@@ -576,16 +600,16 @@ export default function Home({ lang }: { lang: Lang }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-12%" }}
             transition={{ duration: 0.7 }}
-            className="mb-14 max-w-3xl md:mb-20"
+            className="max-w-3xl"
           >
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
             <h2 className="display-space mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "#17130e" }}>
               {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
             </h2>
-            <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.68)" }}>{t.about.p1}</p>
           </motion.div>
 
-          <div className="grid gap-10 mds-split-4-8">
+          <div className="mt-12 grid gap-12 md:mt-16 mds-split-7-5">
+            {/* wide type column — the spoken statement, closing on the signature */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -593,16 +617,21 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.8 }}
               className="min-w-0"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[4px]" style={{ background: "linear-gradient(to bottom, #241d14, #17130e)" }}>
-                <Image src="/founder-2.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain object-bottom" />
+              <p className="display-space leading-tight" style={{ fontSize: "clamp(1.5rem, 3.2vw, 2.3rem)", color: "#17130e" }}>
+                {t.about.statementLead}
+              </p>
+              <p className="mt-6 max-w-xl text-lg font-light leading-relaxed" style={{ color: "rgba(23,19,14,0.72)" }}>
+                {t.about.support}
+              </p>
+              <p className="display-space mt-10 leading-snug" style={{ fontSize: "clamp(1.15rem, 2.2vw, 1.6rem)", color: "#17130e" }}>
+                {t.about.signOff}
+              </p>
+              <div className="mt-4">
+                <FounderSignature label={t.founder.signatureAlt} />
               </div>
-              <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
-                <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
-                <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.founder.eyebrow}</span>
-              </div>
-              <div className="micro-caps mt-2" style={{ color: "rgba(31,27,22,0.48)" }}>{t.founder.role}</div>
             </motion.div>
 
+            {/* narrow column — the one face, one name, and the honest circle */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -610,12 +639,29 @@ export default function Home({ lang }: { lang: Lang }) {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="min-w-0"
             >
-              <p className="text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.72)" }}>{t.founder.bio1}</p>
+              <div className="relative mx-auto max-w-[300px] md:max-w-none">
+                <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10" style={{ background: "radial-gradient(60% 50% at 50% 30%, rgba(201,153,47,0.16), transparent 72%)" }} />
+                <div className="relative aspect-[4/5] overflow-hidden" style={{ borderRadius: "46% 46% 12px 12px", border: "1px solid var(--gilt)", boxShadow: "inset 0 0 70px rgba(201,153,47,0.10)" }}>
+                  <Image src="/founder-portrait.webp" alt="Francesco Modolo — il tuo referente per Modolo Digital Studio" fill sizes="(max-width: 768px) 80vw, 30vw" className="object-cover" />
+                </div>
+              </div>
 
-              <a href="#contatti" className="group mt-8 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
-                {t.hero.ctaPrimary}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
-              </a>
+              <div className="mt-6 flex flex-col items-start gap-1.5">
+                <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
+                <span className="inline-flex items-center gap-2 text-sm font-light" style={{ color: "rgba(23,19,14,0.6)" }}>
+                  <span aria-hidden className="inline-block h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: "var(--color-gold)", boxShadow: "0 0 0 3px rgba(201,153,47,0.18)" }} />
+                  {t.about.reach}
+                </span>
+              </div>
+
+              <div className="mt-7 border-t pt-5" style={{ borderColor: "var(--gold-line)" }}>
+                <span className="micro-caps" style={{ color: "var(--gilt)" }}>{t.about.specialistsLabel}</span>
+                <ul className="mt-3 flex flex-col gap-2">
+                  {t.about.specialists.map((s, i) => (
+                    <li key={i} className="text-[15px] font-light" style={{ color: "rgba(23,19,14,0.55)" }}>{s}</li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
           </div>
         </div>

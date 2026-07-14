@@ -280,6 +280,7 @@ p, li, blockquote, figcaption { text-wrap: pretty; }
 @media (min-width: 768px) {
   .mds-split-4-8 { grid-template-columns: 4fr 8fr; column-gap: 4rem; }
   .mds-split-5-7 { grid-template-columns: 5fr 7fr; column-gap: 4rem; }
+  .mds-split-7-5 { grid-template-columns: 7fr 5fr; column-gap: 4.5rem; }
 }
 
 /* Discipline marquee — seamless auto-scroll (content is duplicated for the -50% loop). */
