@@ -334,7 +334,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
           <span className="micro-caps text-[var(--gilt)]">{num} · {u.label}</span>
           <span className="micro-caps tnum text-[#17130e]/40">{num} / {pad(SERVICE_SLUGS.length)}</span>
         </div>
-        <h1 className="display-space mt-5 text-[#17130e]" style={{ fontSize: "clamp(2.5rem, 6.4vw, 5.5rem)" }}>{s.title}</h1>
+        <h1 className="page-h1 display-space mt-5 text-[#17130e]">{s.title}</h1>
         <p className="mt-7 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/65 md:text-xl">{s.intro}</p>
       </section>
 
@@ -376,7 +376,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
       {/* CTA — the Espresso dark room */}
       <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "#17130e" }}>{u.ctaTitle}</h2>
+          <h2 className="section-head display-space mx-auto max-w-3xl text-[#17130e]">{u.ctaTitle}</h2>
           <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(31,27,22,0.68)" }}>{u.ctaText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link href={localizedHref(lang, "/#contatti")} className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-gold)] px-8 py-4 text-sm font-semibold tracking-wide text-[#17130E] transition-transform duration-300 hover:scale-[1.02]">

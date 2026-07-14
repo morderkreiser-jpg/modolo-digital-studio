@@ -243,6 +243,11 @@
   font-weight: 600;
   text-wrap: balance;
 }
+/* One consistent type scale across the whole site so it reads as one system instead of
+   jumping between 48px and 88px. .page-h1 = the single biggest title on a page (home hero +
+   inner-page titles); .section-head = every section heading (h2) under it. */
+.page-h1 { font-size: clamp(2.2rem, 4.5vw, 3.9rem); line-height: 1.04; }
+.section-head { font-size: clamp(1.9rem, 4vw, 3.4rem); line-height: 1.06; }
 /* Italic accent inside a display heading: give the slanted final glyph room on the right so it
    isn't clipped by the line-reveal mask and an upright char after it (e.g. "?") doesn't collide. */
 .display-space em {

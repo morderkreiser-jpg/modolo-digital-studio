@@ -89,7 +89,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
           <span className="micro-caps text-[var(--gilt)]">{area.eyebrow[lang]}</span>
         </div>
 
-        <h1 className="display-space mt-5 max-w-4xl text-[#17130e]" style={{ fontSize: "clamp(2.4rem, 6.5vw, 5.25rem)", lineHeight: 1.02 }}>
+        <h1 className="page-h1 display-space mt-5 max-w-4xl text-[#17130e]">
           {area.h1[lang]}
           <em className="gold-grad not-italic">{area.h1accent[lang]}</em>
         </h1>
@@ -149,7 +149,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
       {/* CTA — Espresso room */}
       <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "#17130e" }}>{area.ctaHeading[lang]}</h2>
+          <h2 className="section-head display-space mx-auto max-w-3xl text-[#17130e]">{area.ctaHeading[lang]}</h2>
           <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(31,27,22,0.68)" }}>{u.closingText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <a

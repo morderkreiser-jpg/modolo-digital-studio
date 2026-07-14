@@ -47,8 +47,9 @@ export default function GuaranteeBand({ lang }: { lang: Locale }) {
         <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16">
           <div>
             <span className="micro-caps text-[var(--gilt)]">{t.kicker}</span>
-            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 4.5vw, 3.5rem)" }}>
-              {t.head} <em className="text-[var(--color-gold)]">{t.accent}</em>
+            <h2 className="section-head display-space mt-4 text-[#17130e]">
+              <span className="block">{t.head}</span>
+              <em className="block text-[var(--color-gold)]">{t.accent}</em>
             </h2>
           </div>
           <ul className="flex flex-col justify-center gap-5">

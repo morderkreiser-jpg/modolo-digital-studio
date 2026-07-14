@@ -69,7 +69,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
         <div className="mt-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="micro-caps text-[var(--gilt)]">{KICKER[lang]} · {regionName}</span>
-            <h1 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+            <h1 className="page-h1 display-space mt-4 text-[#17130e]">
               {ui.heading1}<em className="text-[var(--color-gold)]">{ui.headingAccent}</em>
             </h1>
           </div>
@@ -218,7 +218,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
       {/* CTA — the Espresso dark room */}
       <section className="px-6 sm:px-10 lg:px-16 py-20 md:py-28" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1400px] text-center">
-          <h2 className="display-space mx-auto max-w-3xl" style={{ fontSize: "clamp(2rem, 4.5vw, 3.75rem)", color: "#17130e" }}>{ui.ctaHeading}</h2>
+          <h2 className="section-head display-space mx-auto max-w-3xl text-[#17130e]">{ui.ctaHeading}</h2>
           <p className="mx-auto mt-6 max-w-xl text-lg font-light" style={{ color: "rgba(31,27,22,0.68)" }}>{ui.ctaText}</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link

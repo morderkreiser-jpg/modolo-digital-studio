@@ -401,7 +401,7 @@ export default function Home({ lang }: { lang: Lang }) {
               <span className="micro-caps mt-1.5 block text-[10px] text-[var(--gilt)]">{heroDisciplines} · {heroCity}</span>
             </div>
 
-            <h1 className="display-space text-[#17130e] mds-in" style={{ fontSize: "clamp(2.4rem, 5.2vw, 4.6rem)", animationDelay: "0.12s" }}>
+            <h1 className="page-h1 display-space text-[#17130e] mds-in" style={{ animationDelay: "0.12s" }}>
               {heroGold(t.hero.line1)}<br />{heroGold(t.hero.line2)}<br />{heroGold(t.hero.line3)}
             </h1>
 
@@ -457,7 +457,7 @@ export default function Home({ lang }: { lang: Lang }) {
           >
             <div>
               <span className="micro-caps text-[var(--gilt)]">01 · {t.servicesSection.label}</span>
-              <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+              <h2 className="section-head display-space mt-4 text-[#17130e]">
                 {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
               </h2>
               <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60 md:text-lg">{t.servicesSection.sub}</p>
@@ -512,7 +512,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <Reveal className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between">
             <div>
               <span data-reveal-fade className="micro-caps inline-block text-[var(--gilt)]">02 · {t.portfolioSection.label}</span>
-              <h2 data-reveal-heading className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)" }}>
+              <h2 data-reveal-heading className="section-head display-space mt-4 text-[#17130e]">
                 {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
               </h2>
               <p data-reveal-fade className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60">{t.portfolioSection.sub}</p>
@@ -599,7 +599,8 @@ export default function Home({ lang }: { lang: Lang }) {
             >
               <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
               <h2 className="display-space mt-4" style={{ fontSize: "clamp(1.9rem, 3.6vw, 3rem)", color: "#17130e" }}>
-                {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
+                <span className="block">{t.about.heading1}</span>
+                <em className="block" style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
               </h2>
               <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.74)" }}>{t.about.p1}</p>
               <p className="mt-5 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.74)" }}>{t.founder.bio1}</p>
@@ -618,8 +619,9 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-16 md:mb-24">
             <span className="micro-caps text-[var(--gilt)]">04 · {t.method.label}</span>
-            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
-              {t.method.heading1}<em className="text-[var(--color-gold)]">{t.method.headingAccent}</em>
+            <h2 className="section-head display-space mt-4 text-[#17130e]">
+              <span className="block">{t.method.heading1}</span>
+              <em className="block text-[var(--color-gold)]">{t.method.headingAccent}</em>
             </h2>
           </div>
           <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
@@ -648,7 +650,7 @@ export default function Home({ lang }: { lang: Lang }) {
         <div className="mx-auto max-w-[920px]">
           <header className="mb-12 md:mb-16">
             <span className="micro-caps text-[var(--gilt)]">05 · {t.faqSection.label}</span>
-            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+            <h2 className="section-head display-space mt-4 text-[#17130e]">
               {t.faqSection.heading1}<em className="text-[var(--color-gold)]">{t.faqSection.headingAccent}</em>
             </h2>
           </header>
@@ -687,10 +689,11 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* CONTATTI — restyled to the system; the working form/Resend pipeline is preserved */}
       <section id="contatti" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
-          <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.7 }} className="mb-14 max-w-3xl md:mb-20">
+          <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.7 }} className="mb-14 max-w-[1000px] md:mb-20">
             <span className="micro-caps text-[var(--gilt)]">06 · {t.contact.label}</span>
-            <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
-              {t.contact.heading1}<em className="text-[var(--color-gold)]">{t.contact.headingAccent}</em>{t.contact.headingEnd}
+            <h2 className="section-head display-space mt-4 text-[#17130e]">
+              <span className="block">{t.contact.heading1}</span>
+              <em className="block text-[var(--color-gold)]">{t.contact.headingAccent}</em>
             </h2>
             <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#17130e]/70">{t.contact.subtitle}</p>
           </motion.div>

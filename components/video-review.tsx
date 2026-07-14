@@ -52,7 +52,7 @@ export default function VideoReview({ lang }: { lang: Locale }) {
     <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-20 md:py-28">
       <div className="mx-auto max-w-[1000px] rounded-[8px] border border-[color:var(--gold-line)] bg-[var(--ink-bg)] p-8 sm:p-12 md:p-16">
         <span className="micro-caps text-[var(--gilt)]">{t.kicker}</span>
-        <h2 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(1.9rem, 4.5vw, 3.4rem)" }}>
+        <h2 className="section-head display-space mt-4 text-[#17130e]">
           {t.head} <em className="text-[var(--color-gold)]">{t.accent}</em>
         </h2>
         <p className="mt-5 max-w-2xl font-light leading-relaxed text-[#17130e]/68">{t.desc}</p>
