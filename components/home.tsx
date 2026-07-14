@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Send, CheckCircle2, ExternalLink, AlertCircle, MessageCircle } from "lucide-react";
+import { ArrowRight, Send, CheckCircle2, AlertCircle, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import BackToTop from "@/components/back-to-top";
 import Magnetic from "@/components/magnetic";
@@ -308,12 +308,9 @@ export default function Home({ lang }: { lang: Lang }) {
 
   // Portfolio as a curated monograph — real, borderless site captures.
   const PROJECTS = [
-    { num: "01", name: "ZüriKey", href: "https://zurikey.ch", data: t.zurikey,
-      media: { kind: "video" as const, src: "/portfolio-zurikey.mp4", poster: "/portfolio-zurikey-poster.webp", aria: t.zurikey.alt } },
-    { num: "02", name: "SaporiVivi", href: "https://saporivivi.ch", data: t.saporivivi,
-      media: { kind: "video" as const, src: "/portfolio-saporivivi-v4.mp4", poster: "/portfolio-saporivivi-v4-poster.webp", aria: "SaporiVivi — Italian luxury bar catering website" } },
-    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.ch", data: t.bjstudio,
-      media: { kind: "image" as const, src: "/portfolio-bjstudio-poster.webp", aria: t.bjstudio.alt } },
+    { num: "01", name: "ZüriKey", href: "https://zurikey.ch", host: "zurikey.ch", data: t.zurikey, poster: "/portfolio-zurikey-poster.webp" },
+    { num: "02", name: "SaporiVivi", href: "https://saporivivi.ch", host: "saporivivi.ch", data: t.saporivivi, poster: "/portfolio-saporivivi-hero.webp" },
+    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.ch", host: "bjstudiodebelleza.ch", data: t.bjstudio, poster: "/portfolio-bjstudio-poster.webp" },
   ];
 
   // Hero proof — the real client sites shown live in the browser frame (SaporiVivi first: the
@@ -524,57 +521,34 @@ export default function Home({ lang }: { lang: Lang }) {
             <span data-reveal-fade className="micro-caps tnum inline-block text-[#17130e]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
           </Reveal>
 
-          <div className="space-y-24 md:space-y-36">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {PROJECTS.map((p) => (
               <motion.a
                 key={p.num}
                 href={p.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={reduce ? false : { opacity: 0, y: 40 }}
+                initial={reduce ? false : { opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-10%" }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="group block border-t border-[var(--color-gold)]/25 pt-8 md:pt-10"
+                viewport={{ once: true, margin: "-8%" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="group flex flex-col overflow-hidden rounded-[6px] border border-[color:var(--gold-line)] bg-[var(--ink-panel)]/40 transition-all duration-500 hover:-translate-y-1.5 hover:border-[var(--color-gold)]/40 hover:shadow-[0_26px_50px_-28px_rgba(126,93,36,0.55)]"
               >
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="flex items-baseline gap-4 md:gap-7">
-                    <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.75rem)" }}>{p.num}</span>
-                    <h3 className="display-space leading-none text-[#17130e]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>{p.name}</h3>
-                  </div>
-                  <span className="micro-caps hidden text-[var(--gilt)] sm:block">{p.data.meta}</span>
-                </div>
-
-                {/* the cinematic hook — the one line that sells the project */}
-                <p className="display-space mt-5 max-w-3xl text-[#17130e] md:mt-7" style={{ fontSize: "clamp(1.3rem, 2.8vw, 2.2rem)", lineHeight: 1.16 }}>{p.data.outcome}</p>
-
-                <div className="relative mt-8 aspect-[1280/674] overflow-hidden rounded-[4px] bg-[#17130E] md:mt-10">
-                  {p.media.kind === "video" ? (
-                    <video src={p.media.src} poster={p.media.poster} autoPlay muted loop playsInline preload="metadata" aria-label={p.media.aria} className={`absolute inset-0 h-full w-full object-cover ${reduce ? "" : "transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"}`} />
-                  ) : (
-                    <Image src={p.media.src} alt={p.media.aria} fill sizes="(max-width: 1024px) 100vw, 1300px" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"}`} />
-                  )}
-                  <span className="pointer-events-none absolute bottom-4 right-4 flex translate-y-2 items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide text-[#17130e] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100" style={{ background: "rgba(31,27,22,0.94)" }}>
-                    {p.data.cta} <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.6} />
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#17130e]">
+                  <Image src={p.poster} alt={`${p.name} — ${p.data.meta}`} fill sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"}`} />
+                  <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 font-[var(--font-space)] text-[10px] text-[#5b5142] backdrop-blur" style={{ background: "rgba(251,248,242,0.9)" }}>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#3fae6a" }} />{p.host}
                   </span>
                 </div>
-
-                <div className="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-                  <p className="max-w-lg text-sm font-light leading-relaxed text-[#17130e]/60">{p.data.desc}</p>
-                  <div className="flex flex-col items-start gap-3 md:items-end">
-                    <div className="micro-caps flex flex-wrap gap-y-1 text-[#17130e]/60">
-                      {p.data.tags.map((tag, ti) => (
-                        <span key={ti} className="inline-flex items-center">
-                          <span className={ti === 0 ? "text-[var(--gilt)]" : ""}>{tag}</span>
-                          {ti < p.data.tags.length - 1 && <span aria-hidden="true" className="mx-2.5 text-[var(--color-gold)]/50">·</span>}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors group-hover:text-[var(--color-gold)]">
-                      {p.data.cta}
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
-                    </span>
+                <div className="flex flex-1 flex-col p-5 md:p-6">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.25rem, 1.8vw, 1.6rem)" }}>{p.name}</h3>
+                    <span className="micro-caps text-[var(--gilt)]">{p.data.meta}</span>
                   </div>
+                  <p className="mt-3 flex-1 text-sm font-light leading-relaxed text-[#17130e]/70">{p.data.outcome}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 font-[var(--font-space)] text-[11px] uppercase tracking-[0.14em] text-[var(--gilt)] transition-colors group-hover:text-[var(--color-gold)]">
+                    {p.data.cta} <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" strokeWidth={1.6} />
+                  </span>
                 </div>
               </motion.a>
             ))}
