@@ -42,7 +42,7 @@ const T: Record<Locale, { kicker: string; head: string; accent: string; points: 
 export default function GuaranteeBand({ lang }: { lang: Locale }) {
   const t = T[lang];
   return (
-    <section className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-20 md:py-28">
+    <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16">
           <div>

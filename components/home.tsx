@@ -446,7 +446,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
       {/* DISCIPLINE MARQUEE — Fraunces ticker, coupled to Lenis scroll velocity */}
       {/* SERVIZI — numbered index table (Klim/Order register), not cards */}
-      <section id="servizi" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+      <section id="servizi" className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -476,7 +476,7 @@ export default function Home({ lang }: { lang: Lang }) {
               >
                 <Link
                   href={localizedHref(lang, `/servizi/${SERVICE_SLUGS[i]}`)}
-                  className="group flex flex-col gap-3 border-t border-[color:var(--gold-line)] py-6 transition-colors hover:bg-[var(--ink-panel)]/40 md:flex-row md:items-baseline md:gap-8 md:px-2 md:py-8"
+                  className="group flex flex-col gap-3 border-t border-[color:var(--gold-line)] py-6 transition-colors hover:bg-[#17130e]/[0.035] md:flex-row md:items-baseline md:gap-8 md:px-2 md:py-8"
                 >
                   <span className="micro-caps tnum text-[var(--gilt)] md:w-10">0{i + 1}</span>
                   <h3 className="display-space text-[#17130e] transition-colors duration-300 group-hover:text-[var(--gilt)] md:flex-1" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{service.title}</h3>
@@ -507,7 +507,7 @@ export default function Home({ lang }: { lang: Lang }) {
       </section>
 
       {/* PORTFOLIO — monograph; the Measure motif becomes the row rules */}
-      <section id="portfolio" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-36">
+      <section id="portfolio" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
           <Reveal className="mb-14 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between">
             <div>
@@ -568,7 +568,7 @@ export default function Home({ lang }: { lang: Lang }) {
       <VideoReview lang={lang} />
 
       {/* CHI SIAMO — portrait + who I am, balanced side by side (no empty voids) */}
-      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-32" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
+      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-32" style={{ background: "var(--ink-bg)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1240px]">
           <div className="grid items-center gap-10 md:gap-16 mds-split-5-7">
             {/* portrait + identity (left on desktop, below the text on mobile) */}
@@ -615,7 +615,7 @@ export default function Home({ lang }: { lang: Lang }) {
       </section>
 
       {/* METODO — three phases as ticked stations measured by the ruler */}
-      <section id="metodo" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
+      <section id="metodo" className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-16 md:mb-24">
             <span className="micro-caps text-[var(--gilt)]">04 · {t.method.label}</span>

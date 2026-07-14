@@ -49,7 +49,7 @@ export default function VideoReview({ lang }: { lang: Locale }) {
   const wa = `https://wa.me/${phone}?text=${encodeURIComponent(t.waMsg(biz.trim()))}`;
 
   return (
-    <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-20 md:py-28">
+    <section className="bg-[var(--ink-panel)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
       <div className="mx-auto max-w-[1000px] rounded-[8px] border border-[color:var(--gold-line)] bg-[var(--ink-bg)] p-8 sm:p-12 md:p-16">
         <span className="micro-caps text-[var(--gilt)]">{t.kicker}</span>
         <h2 className="section-head display-space mt-4 text-[#17130e]">
