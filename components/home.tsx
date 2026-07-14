@@ -570,17 +570,18 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* CHI SIAMO — portrait + who I am, balanced side by side (no empty voids) */}
       <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-32" style={{ background: "var(--ink-bg)", color: "#17130e" }}>
         <div className="mx-auto max-w-[1240px]">
-          <div className="grid items-center gap-10 md:gap-16 mds-split-5-7">
-            {/* portrait + identity (left on desktop, below the text on mobile) */}
+          <div className="flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-16">
+            {/* portrait + identity (left on desktop, below the text on mobile) — a proportionate
+                accent, not a dominating block: fixed ~360px so the text carries the section */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8 }}
-              className="order-2 min-w-0 md:order-1"
+              className="order-2 w-full max-w-[320px] shrink-0 md:order-1 md:max-w-none md:w-[360px]"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-[10px]" style={{ border: "1px solid var(--gold-line)", boxShadow: "0 2px 4px rgba(126,93,36,0.08), 0 30px 60px -28px rgba(126,93,36,0.42)" }}>
-                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 90vw, 42vw" className="object-cover" />
+                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 80vw, 360px" className="object-cover" />
               </div>
               <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
                 <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
@@ -595,7 +596,7 @@ export default function Home({ lang }: { lang: Lang }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="order-1 min-w-0 md:order-2"
+              className="order-1 min-w-0 flex-1 md:order-2"
             >
               <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
               <h2 className="display-space mt-4" style={{ fontSize: "clamp(1.9rem, 3.6vw, 3rem)", color: "#17130e" }}>
