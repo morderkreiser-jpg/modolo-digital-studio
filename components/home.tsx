@@ -11,7 +11,6 @@ import Magnetic from "@/components/magnetic";
 import Reveal from "@/components/reveal";
 import HeroShowcase from "@/components/hero-showcase";
 import HeroAtmosphere from "@/components/hero-atmosphere";
-import PaybackCalc from "@/components/payback-calc";
 import VideoReview from "@/components/video-review";
 import GuaranteeBand from "@/components/guarantee-band";
 import { localizedHref, type Locale } from "@/lib/i18n";
@@ -568,33 +567,20 @@ export default function Home({ lang }: { lang: Lang }) {
       {/* VIDEO REVIEW — free "how you look on Google" lead magnet, after the proof */}
       <VideoReview lang={lang} />
 
-      {/* CHI SIAMO — the ESPRESSO Night room: the one dark surface, the emotional peak */}
-      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-36" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
-        <div className="mx-auto max-w-[1400px]">
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-12%" }}
-            transition={{ duration: 0.7 }}
-            className="mb-14 max-w-3xl md:mb-20"
-          >
-            <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
-            <h2 className="display-space mt-5" style={{ fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)", color: "#17130e" }}>
-              {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
-            </h2>
-            <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.68)" }}>{t.about.p1}</p>
-          </motion.div>
-
-          <div className="grid gap-10 mds-split-4-8">
+      {/* CHI SIAMO — portrait + who I am, balanced side by side (no empty voids) */}
+      <section id="chi-siamo" className="px-6 sm:px-10 lg:px-16 py-24 md:py-32" style={{ background: "var(--ink-panel)", color: "#17130e" }}>
+        <div className="mx-auto max-w-[1240px]">
+          <div className="grid items-center gap-10 md:gap-16 mds-split-5-7">
+            {/* portrait + identity (left on desktop, below the text on mobile) */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8 }}
-              className="min-w-0"
+              className="order-2 min-w-0 md:order-1"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-[10px]" style={{ border: "1px solid var(--gold-line)", boxShadow: "0 2px 4px rgba(126,93,36,0.08), 0 30px 60px -28px rgba(126,93,36,0.42)" }}>
-                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 90vw, 42vw" className="object-cover" />
               </div>
               <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
                 <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
@@ -603,14 +589,20 @@ export default function Home({ lang }: { lang: Lang }) {
               <div className="micro-caps mt-2" style={{ color: "rgba(31,27,22,0.48)" }}>{t.founder.role}</div>
             </motion.div>
 
+            {/* kicker + heading + who I am (right on desktop, first on mobile) */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="min-w-0"
+              className="order-1 min-w-0 md:order-2"
             >
-              <p className="text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.72)" }}>{t.founder.bio1}</p>
+              <span className="micro-caps" style={{ color: "var(--gilt)" }}>03 · {t.about.label}</span>
+              <h2 className="display-space mt-4" style={{ fontSize: "clamp(1.9rem, 3.6vw, 3rem)", color: "#17130e" }}>
+                {t.about.heading1}<em style={{ color: "var(--gilt)" }}>{t.about.headingAccent}</em>
+              </h2>
+              <p className="mt-6 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.74)" }}>{t.about.p1}</p>
+              <p className="mt-5 text-lg font-light leading-relaxed" style={{ color: "rgba(31,27,22,0.74)" }}>{t.founder.bio1}</p>
 
               <a href="#contatti" className="group mt-8 inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
                 {t.hero.ctaPrimary}
@@ -650,9 +642,6 @@ export default function Home({ lang }: { lang: Lang }) {
           </div>
         </div>
       </section>
-
-      {/* PAYBACK — interactive: turns "a site pays for itself" into a real number */}
-      <PaybackCalc lang={lang} />
 
       {/* FAQ — hairline-divided index accordion */}
       <section id="faq" className="bg-[var(--ink-bg)] px-6 sm:px-10 lg:px-16 py-24 md:py-32">
