@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, type MouseEvent as ReactMouseEvent } from 
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { LOCALES, localizedHref, stripLocale, type Locale } from "@/lib/i18n";
+import { LOCALES, localizedHref, stripLocale, canonicalizeSlugPath, type Locale } from "@/lib/i18n";
 
 type NavLink = { href: string; label: string };
 
@@ -198,7 +198,9 @@ export default function SiteNav({
     setLangOpen(false);
     if (target === lang) return;
     rememberLocale(target);
-    router.push(localizedHref(target, stripLocale(pathname)));
+    // usePathname returns the localized public path (e.g. /de/leistungen/web); canonicalize
+    // the slug before re-localizing it for the target locale.
+    router.push(localizedHref(target, canonicalizeSlugPath(stripLocale(pathname))));
   };
 
   // Language switcher as the site's "Measure" ruler: a hairline rail with a gold tick that
@@ -339,7 +341,7 @@ export default function SiteNav({
               type="button"
               aria-label={open ? a.closeMenu : a.openMenu}
               aria-expanded={open}
-              aria-controls="mobile-menu"
+              aria-controls={open ? "mobile-menu" : undefined}
               onClick={() => setOpen((v) => !v)}
               className={`inline-flex w-10 h-10 items-center justify-center rounded-full border ${c.trigger}`}
             >

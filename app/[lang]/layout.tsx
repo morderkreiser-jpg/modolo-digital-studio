@@ -5,7 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { SITE } from "@/lib/site";
-import { LOCALES, OG_LOCALE, isLocale, localizedHref, type Locale } from "@/lib/i18n";
+import { LOCALES, OG_LOCALE, HTML_LANG, isLocale, localizedHref, type Locale } from "@/lib/i18n";
 import { HOME_META } from "@/lib/site-data";
 import MotionProvider from "@/components/motion-provider";
 import SmoothScroll from "@/components/smooth-scroll";
@@ -17,6 +17,39 @@ const SKIP_LABEL: Record<Locale, string> = {
   it: "Vai al contenuto",
 };
 
+// Per-locale meta keywords. (Ignored by Google, but kept coherent per language instead of
+// English on every page; the German set targets the Winterthur/Zürich local market.)
+const KEYWORDS: Record<Locale, string[]> = {
+  en: [
+    "web design Switzerland",
+    "web development Winterthur",
+    "web studio Zurich",
+    "SEO",
+    "branding",
+    "Google Business Profile",
+    "Modolo Digital Studio",
+  ],
+  de: [
+    "Webdesign Winterthur",
+    "Webagentur Zürich",
+    "Webdesigner Winterthur",
+    "Website erstellen lassen Schweiz",
+    "SEO",
+    "Branding",
+    "Google Unternehmensprofil",
+    "Modolo Digital Studio",
+  ],
+  it: [
+    "web design Svizzera",
+    "sviluppo siti Winterthur",
+    "web agency Zurigo",
+    "SEO",
+    "branding",
+    "Google Business",
+    "Modolo Digital Studio",
+  ],
+};
+
 // Poppins: font principale (navbar, body, titoli, UI)
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -25,13 +58,15 @@ const poppins = Poppins({
   display: "swap",
 });
 
-// Fraunces: variable editorial serif — the display voice ("The Measure" redesign).
-// Kept for ALL headings + the italic craft accent; kinetic via opsz/wght axes.
+// Fraunces: variable editorial serif — used ONLY for the small italic craft accents
+// (step numbers, dashes) below the fold. Italic-only + preload:false keeps its ~270 KB off
+// the critical path so it never competes with the LCP hero image; it swaps in on scroll.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   axes: ["opsz", "SOFT"],
-  style: ["normal", "italic"],
+  style: "italic",
+  preload: false,
   display: "swap",
 });
 
@@ -64,15 +99,7 @@ export async function generateMetadata({
     metadataBase: new URL(SITE.url),
     title: { default: meta.title, template: "%s | Modolo Digital Studio" },
     description: meta.description,
-    keywords: [
-      "web design Switzerland",
-      "web development Switzerland",
-      "digital studio",
-      "SEO",
-      "branding",
-      "Google Business",
-      "Modolo Digital Studio",
-    ],
+    keywords: KEYWORDS[lang],
     authors: [{ name: SITE.name }],
     creator: SITE.name,
     openGraph: {
@@ -108,7 +135,7 @@ export default async function LangLayout({
 
   return (
     <html
-      lang={lang}
+      lang={HTML_LANG[lang]}
       className={`${poppins.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

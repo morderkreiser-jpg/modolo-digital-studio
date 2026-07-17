@@ -14,12 +14,55 @@ export function isLocale(value: string | undefined | null): value is Locale {
   return value != null && (LOCALES as readonly string[]).includes(value);
 }
 
-// OpenGraph `og:locale` codes per locale.
+// OpenGraph `og:locale` codes per locale. de_CH targets German-speaking Switzerland.
 export const OG_LOCALE: Record<Locale, string> = {
   en: "en_US",
-  de: "de_DE",
+  de: "de_CH",
   it: "it_IT",
 };
+
+// `lang` attribute for the <html> element per locale (regional variant for Swiss German).
+export const HTML_LANG: Record<Locale, string> = {
+  en: "en",
+  de: "de-CH",
+  it: "it",
+};
+
+// Localized URL slugs. Physical route folders stay canonical (servizi/prezzi/privacy);
+// this maps each canonical folder name to the public slug shown per locale.
+// Keep in sync with the folder names under app/[lang]/*.
+export const SLUG_TRANSLATIONS: Record<string, Record<Locale, string>> = {
+  servizi: { en: "services", de: "leistungen", it: "servizi" },
+  prezzi: { en: "pricing", de: "preise", it: "prezzi" },
+  privacy: { en: "privacy", de: "datenschutz", it: "privacy" },
+};
+
+// Reverse lookup: any public slug -> canonical folder segment.
+const CANONICAL_SEGMENT: Record<string, string> = Object.fromEntries(
+  Object.entries(SLUG_TRANSLATIONS).flatMap(([canon, byLocale]) =>
+    Object.values(byLocale).map((slug) => [slug, canon]),
+  ),
+);
+
+function replaceFirstSegment(pathname: string, next: string): string {
+  const parts = pathname.split("/"); // ["", seg, ...rest]
+  if (parts.length > 1) parts[1] = next;
+  return parts.join("/");
+}
+
+// Canonical folder -> localized public slug for a locale (identity when unmapped).
+function localizeFirstSegment(locale: Locale, pathname: string): string {
+  const seg = pathname.split("/")[1] ?? "";
+  const translated = SLUG_TRANSLATIONS[seg]?.[locale];
+  return translated ? replaceFirstSegment(pathname, translated) : pathname;
+}
+
+// Public (localized) path -> canonical path used by the physical routes (identity when unmapped).
+export function canonicalizeSlugPath(pathname: string): string {
+  const seg = pathname.split("/")[1] ?? "";
+  const canon = CANONICAL_SEGMENT[seg];
+  return canon && canon !== seg ? replaceFirstSegment(pathname, canon) : pathname;
+}
 
 // Build a public href for a locale-agnostic base path.
 //   localizedHref("en", "/")             -> "/"
@@ -37,6 +80,7 @@ export function localizedHref(locale: Locale, path: string = "/"): string {
 
   if (pathname === "") pathname = "/";
   if (!pathname.startsWith("/")) pathname = "/" + pathname;
+  pathname = localizeFirstSegment(locale, pathname); // /servizi/web -> /leistungen/web (de)
 
   if (locale === DEFAULT_LOCALE) {
     return pathname + hash;
@@ -62,9 +106,10 @@ export function localeFromPathname(pathname: string): Locale {
   return isLocale(seg) ? seg : DEFAULT_LOCALE;
 }
 
-// (Accept-Language negotiation was intentionally removed: proxy.ts redirects only on an
-// explicit NEXT_LOCALE cookie, never on request headers, to keep the canonical English URL
-// reachable by crawlers and first-time visitors.)
+// Accept-Language negotiation lives in proxy.ts (negotiateLocale): on a first visit with no
+// NEXT_LOCALE cookie, de/de-CH -> /de (German is the primary experience on the .ch domain);
+// English stays the clean-URL fallback / x-default. An explicit NEXT_LOCALE cookie always
+// suppresses negotiation.
 
 // `alternates` block for Metadata: canonical of the current locale + hreflang for all
 // locales + x-default. Relative paths are resolved to absolute URLs via `metadataBase`.
@@ -75,7 +120,8 @@ export function buildAlternates(locale: Locale, basePath: string = "/") {
       en: localizedHref("en", basePath),
       de: localizedHref("de", basePath),
       it: localizedHref("it", basePath),
-      "x-default": localizedHref("en", basePath),
+      // Swiss-first: the language-neutral fallback points at German, not English.
+      "x-default": localizedHref("de", basePath),
     },
   };
 }

@@ -13,6 +13,9 @@ export const SITE = {
   phoneIt: "+393505842579", // Italian WhatsApp/contact number (shown to IT-region visitors)
   phoneItDisplay: "+39 350 584 2579",
   instagram: "https://instagram.com/modolodigitalstudio",
+  // Google Business Profile URL (Maps / g.page). Set NEXT_PUBLIC_GOOGLE_BUSINESS_URL in the
+  // Vercel env once the profile exists; empty string = omitted from the schema graph.
+  googleBusiness: process.env.NEXT_PUBLIC_GOOGLE_BUSINESS_URL ?? "",
   founder: "Francesco Modolo",
   // Swiss address — registered/legal seat (used by Impressum and JSON-LD).
   address: {
@@ -21,6 +24,9 @@ export const SITE = {
     locality: "Winterthur",
     region: "Zürich",
     country: "CH",
+    // TODO(Francesco): replace with the exact pin from the Google Business Profile.
+    // Approximate coordinates for 8400 Winterthur — verify before relying on the map marker.
+    geo: { latitude: 47.4839, longitude: 8.742 },
   },
   // Italian local contact address (shown to Italy-region visitors).
   addressIt: {

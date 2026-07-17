@@ -8,6 +8,7 @@ import { localizedHref, type Locale } from "./i18n";
 import { WEBSITES, CARE, BRANDING } from "./pricing";
 import { DEFAULT_REGION, type Region } from "./region";
 import { LOCAL_AREAS, type CitySlug } from "./local-seo";
+import { REVIEWS, AGGREGATE } from "../data/reviews";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -36,8 +37,71 @@ const SERVICES_LABEL: Record<Locale, string> = {
   it: "Servizi",
 };
 
+const geoCoordinates = {
+  "@type": "GeoCoordinates",
+  latitude: SITE.address.geo.latitude,
+  longitude: SITE.address.geo.longitude,
+};
+
+// TODO(Francesco): confirm real opening hours (or switch to by-appointment) before deploy.
+const OPENING_HOURS_CH = [
+  {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: "09:00",
+    closes: "18:00",
+  },
+];
+
+// Google Business Profile URL, if configured — appended to sameAs where it belongs.
+const googleBusinessSameAs = SITE.googleBusiness ? [SITE.googleBusiness] : [];
+
+// geo + opening hours are only emitted once the Google Business Profile is configured — that's
+// when the exact map pin and hours have been confirmed. Until then they're omitted (never wrong):
+// set NEXT_PUBLIC_GOOGLE_BUSINESS_URL AND replace the placeholder coords/hours with the real ones.
+const verifiedLocalData = SITE.googleBusiness
+  ? { geo: geoCoordinates, openingHoursSpecification: OPENING_HOURS_CH }
+  : {};
+
+// Emits aggregateRating + review ONLY when data/reviews.ts holds real reviews. Never a
+// self-serving empty/fake rating (Google penalizes that), so returns {} while the file is empty.
+function aggregateReviewFields() {
+  if (!AGGREGATE) return {};
+  return {
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: AGGREGATE.ratingValue,
+      reviewCount: AGGREGATE.reviewCount,
+    },
+    review: REVIEWS.map((r) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: r.author },
+      datePublished: r.datePublished,
+      reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+      reviewBody: r.body,
+    })),
+  };
+}
+
 export function homeGraph(locale: Locale) {
   const homeUrl = abs(localizedHref(locale, "/"));
+  // The Italian business entity (EUR, IT address) only belongs on the Italian pages; on /de and
+  // the English root the graph carries just the Swiss entity, keeping the local focus clean.
+  const includeIt = locale === "it";
+  const businessIt = {
+    "@type": "ProfessionalService",
+    "@id": `${SITE.url}/#business-it`,
+    name: SITE.name,
+    url: SITE.url,
+    image: `${SITE.url}/og-image.png`,
+    telephone: SITE.phoneIt,
+    email: SITE.email,
+    address: postalAddressIt,
+    areaServed: { "@type": "Country", name: "Italy" },
+    priceRange: "EUR 900-4800",
+    inLanguage: "it",
+    parentOrganization: { "@id": `${SITE.url}/#organization` },
+  };
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -51,8 +115,11 @@ export function homeGraph(locale: Locale) {
         email: SITE.email,
         telephone: SITE.phone,
         address: postalAddress,
-        location: [{ "@id": `${SITE.url}/#business-ch` }, { "@id": `${SITE.url}/#business-it` }],
-        sameAs: [SITE.instagram],
+        location: [
+          { "@id": `${SITE.url}/#business-ch` },
+          ...(includeIt ? [{ "@id": `${SITE.url}/#business-it` }] : []),
+        ],
+        sameAs: [SITE.instagram, ...googleBusinessSameAs],
         founder: { "@type": "Person", name: SITE.founder },
       },
       {
@@ -64,23 +131,15 @@ export function homeGraph(locale: Locale) {
         telephone: SITE.phone,
         email: SITE.email,
         address: postalAddress,
+        ...verifiedLocalData,
         areaServed: { "@type": "Country", name: "Switzerland" },
         priceRange: "CHF 1900-8500",
+        inLanguage: locale,
+        ...(googleBusinessSameAs.length ? { sameAs: googleBusinessSameAs } : {}),
+        ...aggregateReviewFields(),
         parentOrganization: { "@id": `${SITE.url}/#organization` },
       },
-      {
-        "@type": "ProfessionalService",
-        "@id": `${SITE.url}/#business-it`,
-        name: SITE.name,
-        url: SITE.url,
-        image: `${SITE.url}/og-image.png`,
-        telephone: SITE.phoneIt,
-        email: SITE.email,
-        address: postalAddressIt,
-        areaServed: { "@type": "Country", name: "Italy" },
-        priceRange: "EUR 900-4800",
-        parentOrganization: { "@id": `${SITE.url}/#organization` },
-      },
+      ...(includeIt ? [businessIt] : []),
       {
         "@type": "WebSite",
         "@id": `${homeUrl}#website`,
