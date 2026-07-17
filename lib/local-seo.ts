@@ -38,7 +38,7 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
       en: "Web Designer in Winterthur — websites that bring customers",
     },
     metaDescription: {
-      de: "Webdesigner in Winterthur: Ich baue von Hand schnelle, bei Google auffindbare Websites für lokale Betriebe. Festpreis, gratis Erstberatung, ein persönlicher Ansprechpartner.",
+      de: "Webdesigner in Winterthur und persönliche Alternative zur Webagentur: von Hand gebaute, bei Google auffindbare Websites für lokale Betriebe. Festpreis, gratis Erstberatung.",
       it: "Web designer a Winterthur: costruisco a mano siti veloci e trovabili su Google per le attività locali. Prezzo fisso, prima consulenza gratuita, un'unica persona di riferimento.",
       en: "Web designer in Winterthur: I hand-build fast, Google-friendly websites for local businesses. Fixed price, free first consultation, one personal contact.",
     },
@@ -73,7 +73,7 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
       en: "Web Designer in Zürich — websites that get found",
     },
     metaDescription: {
-      de: "Webdesigner für Zürich: von Hand gebaute Websites mit lokalem SEO, damit dich Kundinnen und Kunden in der Stadt finden. Festpreis, gratis Erstberatung, persönlich betreut.",
+      de: "Webdesigner und Webagentur-Alternative für Zürich: von Hand gebaute Websites mit lokalem SEO, damit Kundinnen und Kunden dich finden. Festpreis, gratis Erstberatung.",
       it: "Web designer per Zurigo: siti costruiti a mano con SEO locale, così i clienti ti trovano in città. Prezzo fisso, prima consulenza gratuita, seguito di persona.",
       en: "Web designer for Zürich: hand-built websites with local SEO so customers find you in the city. Fixed price, free first consultation, personally handled.",
     },

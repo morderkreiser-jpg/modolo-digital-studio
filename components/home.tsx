@@ -13,6 +13,7 @@ import HeroShowcase from "@/components/hero-showcase";
 import HeroAtmosphere from "@/components/hero-atmosphere";
 import VideoReview from "@/components/video-review";
 import GuaranteeBand from "@/components/guarantee-band";
+import Testimonials from "@/components/testimonials";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
@@ -43,6 +44,7 @@ const translations = {
       signClosedHours: "Hours  —:—",
       signOpenHours: "Always open for you",
       ctaWhatsapp: "Message me on WhatsApp",
+      browseWork: "Browse the work",
       chips: ["from CHF 1,900 · fixed price, agreed up front", "first consultation free", "always me, not an agency", "I reply personally, within 24h"],
     },
     stats: [
@@ -72,6 +74,7 @@ const translations = {
       eyebrow: "The founder",
       name: "Francesco Modolo",
       role: "Web Designer & Developer",
+      portraitAlt: "Francesco Modolo — Founder of Modolo Digital Studio",
       bio1: "For over four years I've been building websites for small businesses across Switzerland: the code, the design and the SEO I do myself; for photos and video a trusted professional works alongside me. I work on each one as if the site were mine, because it's my name that goes on it.",
       bio2: "I work hands-on across the entire process — from code in VS Code to platforms like WordPress and Elementor, reliable hosting such as SiteGround, video editing in DaVinci Resolve, and SEO and Google strategy. The goal is always the same: combine strong creativity with results that genuinely grow your business.",
     },
@@ -93,7 +96,8 @@ const translations = {
     contact: {
       label: "Let's start", heading1: "Tell me about your business — ", headingAccent: "the first consultation is on me.", headingEnd: "",
       subtitle: "Send me a couple of lines about what you do and what you'd like to achieve online. I'll get back to you within 24 hours, personally, with a clear direction and a sense of the costs — no commitment, and no selling you things you don't need.",
-      whatsapp: "Message us on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
+      whatsapp: "Message me on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
+      privacyNote: "By sending this you agree to our privacy policy.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
       phName: "Your name", phEmail: "your@email.com", phCompany: "Company name", phMessage: "Two lines about your project…",
@@ -129,7 +133,8 @@ const translations = {
       signClosedHours: "Öffnungszeiten  —:—",
       signOpenHours: "Immer für dich da",
       ctaWhatsapp: "Schreib mir auf WhatsApp",
-      chips: ["ab CHF 1'900 · Fixpreis, vorher vereinbart", "erste Beratung gratis", "immer ich, keine Agentur", "Antwort von mir, innert 24h"],
+      browseWork: "Arbeiten durchblättern",
+      chips: ["ab CHF 1'900 · Festpreis, vorher vereinbart", "erste Beratung gratis", "immer ich, keine Agentur", "Antwort von mir, innert 24h"],
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
@@ -158,6 +163,7 @@ const translations = {
       eyebrow: "Der Gründer",
       name: "Francesco Modolo",
       role: "Webdesigner & Entwickler",
+      portraitAlt: "Francesco Modolo — Gründer von Modolo Digital Studio",
       bio1: "Seit über vier Jahren baue ich Websites für kleine Betriebe in der ganzen Schweiz: Code, Design und SEO mache ich selbst; für Fotos und Videos unterstützt mich ein Profi, dem ich vertraue. Ich arbeite daran, als wäre es meine eigene Website, denn es ist mein Name, der draufsteht.",
       bio2: "Ich arbeite über den gesamten Prozess hinweg praktisch mit — von Code in VS Code über Plattformen wie WordPress und Elementor bis zu zuverlässigem Hosting wie SiteGround, Videoschnitt in DaVinci Resolve sowie SEO- und Google-Strategie. Das Ziel ist immer dasselbe: starke Kreativität mit Ergebnissen zu verbinden, die dein Geschäft wirklich wachsen lassen.",
     },
@@ -179,7 +185,8 @@ const translations = {
     contact: {
       label: "Los geht's", heading1: "Erzähl mir von deinem Betrieb — ", headingAccent: "die erste Beratung geht auf mich.", headingEnd: "",
       subtitle: "Schreib mir zwei Zeilen dazu, was du machst und was du online erreichen möchtest. Ich antworte dir innert 24 Stunden, persönlich, mit einer klaren Richtung und einer Vorstellung der Kosten — unverbindlich und ohne dir Dinge zu verkaufen, die du nicht brauchst.",
-      whatsapp: "Schreib uns auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
+      whatsapp: "Schreib mir auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
+      privacyNote: "Mit dem Absenden stimmst du unserer Datenschutzerklärung zu.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
       phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname", phMessage: "Zwei Zeilen zu deinem Projekt…",
@@ -215,6 +222,7 @@ const translations = {
       signClosedHours: "Orari  —:—",
       signOpenHours: "Sempre aperto per te",
       ctaWhatsapp: "Scrivimi su WhatsApp",
+      browseWork: "Sfoglia i lavori",
       chips: ["da CHF 1'900 · prezzo fisso, deciso prima", "prima consulenza gratis", "sempre me, non un'agenzia", "rispondo io, entro 24h"],
     },
     stats: [
@@ -244,6 +252,7 @@ const translations = {
       eyebrow: "Il fondatore",
       name: "Francesco Modolo",
       role: "Web Designer & Sviluppatore",
+      portraitAlt: "Francesco Modolo — Fondatore di Modolo Digital Studio",
       bio1: "Da oltre quattro anni costruisco siti per piccole attività in tutta la Svizzera: il codice, il design e la SEO li faccio io; per foto e video mi affianca un professionista di fiducia. Ci lavoro come se il sito fosse mio, perché è il mio nome quello che ci metto sopra.",
       bio2: "Seguo l'intero processo in prima persona — dal codice in VS Code alle piattaforme come WordPress ed Elementor, fino a hosting affidabili come SiteGround, al montaggio video in DaVinci Resolve e alla strategia SEO e Google. L'obiettivo è sempre lo stesso: unire una forte creatività a risultati che fanno davvero crescere il tuo business.",
     },
@@ -265,7 +274,8 @@ const translations = {
     contact: {
       label: "Iniziamo", heading1: "Raccontami la tua attività — ", headingAccent: "la prima consulenza la offro io.", headingEnd: "",
       subtitle: "Scrivimi due righe su cosa fai e cosa vorresti ottenere online. Ti rispondo io entro 24 ore, di persona, con una direzione chiara e un'idea dei costi — senza impegno e senza venderti cose che non ti servono.",
-      whatsapp: "Scrivici su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
+      whatsapp: "Scrivimi su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
+      privacyNote: "Inviando accetti la nostra informativa sulla privacy.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
       phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda", phMessage: "Due righe sul tuo progetto…",
@@ -439,7 +449,7 @@ export default function Home({ lang }: { lang: Lang }) {
 
           {/* RIGHT — the proof: real client sites, live */}
           <div className="flex justify-center md:justify-end">
-            <HeroShowcase items={SHOWCASE} />
+            <HeroShowcase items={SHOWCASE} browseLabel={t.hero.browseWork} />
           </div>
         </div>
       </section>
@@ -564,6 +574,10 @@ export default function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
+      {/* STIMMEN — social proof: real client quotes + logo band. Hidden until data/reviews.ts
+          and/or data/clients.ts hold real content. */}
+      <Testimonials lang={lang} />
+
       {/* VIDEO REVIEW — free "how you look on Google" lead magnet, after the proof */}
       <VideoReview lang={lang} />
 
@@ -581,7 +595,7 @@ export default function Home({ lang }: { lang: Lang }) {
               className="order-2 w-full max-w-[320px] shrink-0 md:order-1 md:max-w-none md:w-[360px]"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-[10px]" style={{ border: "1px solid var(--gold-line)", boxShadow: "0 2px 4px rgba(126,93,36,0.08), 0 30px 60px -28px rgba(126,93,36,0.42)" }}>
-                <Image src="/founder-portrait-pro.webp" alt="Francesco Modolo — Fondatore di Modolo Digital Studio" fill sizes="(max-width: 768px) 80vw, 360px" className="object-cover" />
+                <Image src="/founder-portrait-pro.webp" alt={t.founder.portraitAlt} fill sizes="(max-width: 768px) 80vw, 360px" className="object-cover" />
               </div>
               <div className="mt-5 flex items-baseline justify-between border-t pt-4" style={{ borderColor: "rgba(201,162,90,0.3)" }}>
                 <span className="display-space text-lg" style={{ color: "#17130e" }}>{t.founder.name}</span>
@@ -753,22 +767,22 @@ export default function Home({ lang }: { lang: Lang }) {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
                       <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
                       <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
                     <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formCompany} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
+                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
                     <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
-                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#17130e]/20 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/40 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
+                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
                     <div role="alert" className="flex items-start gap-3 rounded-[4px] border border-red-300 bg-red-50 p-4 text-red-800">
@@ -783,6 +797,14 @@ export default function Home({ lang }: { lang: Lang }) {
                     </button>
                     <p className="micro-caps text-[#17130e]/70">{t.contact.reassurance}</p>
                   </div>
+                  <p className="micro-caps text-[#17130e]/60">
+                    <Link
+                      href={localizedHref(lang, "/privacy")}
+                      className="underline underline-offset-2 transition-colors hover:text-[#17130e]"
+                    >
+                      {t.contact.privacyNote}
+                    </Link>
+                  </p>
                 </form>
               )}
             </div>

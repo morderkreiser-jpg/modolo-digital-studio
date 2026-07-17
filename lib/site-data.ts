@@ -156,7 +156,7 @@ export const HOME_META: Record<Locale, { title: string; description: string }> =
   de: {
     title: "Modolo Digital Studio | Webdesign & Entwicklung in der Schweiz",
     description:
-      "Unabhängiges Web-Studio in Winterthur. Von Hand gebaute Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz — ein Projekt nach dem anderen.",
+      "Unabhängiges Web-Studio in Winterthur. Von Hand gebaute Websites, Marken und Inhalte für Fachleute und kleine Unternehmen in der ganzen Schweiz.",
   },
   it: {
     title: "Modolo Digital Studio | Web Design & Sviluppo in Svizzera",

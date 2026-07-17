@@ -14,7 +14,7 @@ import { useReducedMotion } from "framer-motion";
  */
 export type ShowcaseItem = { name: string; host: string; poster: string; href: string; caption: string };
 
-export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
+export default function HeroShowcase({ items, browseLabel }: { items: ShowcaseItem[]; browseLabel: string }) {
   const reduce = useReducedMotion();
   const n = items.length;
   const [i, setI] = useState(0);
@@ -107,7 +107,9 @@ export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
               alt={it.name}
               fill
               sizes="(max-width: 768px) 92vw, 620px"
-              priority={idx === 0}
+              // Next 16: priority is deprecated. For a cross-fade stack (one poster visible),
+              // fetchPriority="high" flags the LCP candidate without preloading all three.
+              fetchPriority={idx === 0 ? "high" : undefined}
               className="hsw-shot"
               style={{ opacity: idx === i ? 1 : 0 }}
             />
@@ -120,7 +122,7 @@ export default function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
           <span className="hsw-sep">·</span>
           <span className="hsw-cap">{active.caption}</span>
         </div>
-        <div className="hsw-dots" role="group" aria-label="Sfoglia i lavori">
+        <div className="hsw-dots" role="group" aria-label={browseLabel}>
           {items.map((it, idx) => (
             <button
               key={it.href}

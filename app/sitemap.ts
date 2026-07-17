@@ -31,7 +31,8 @@ function languagesFor(path: string) {
     en: abs(localizedHref("en", path)),
     de: abs(localizedHref("de", path)),
     it: abs(localizedHref("it", path)),
-    "x-default": abs(localizedHref("en", path)),
+    // Swiss-first: keep consistent with buildAlternates() in lib/i18n.ts.
+    "x-default": abs(localizedHref("de", path)),
   };
 }
 
