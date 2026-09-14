@@ -114,7 +114,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on everything except Next internals, API routes and files with an extension
+  // Run on everything except Next internals, API routes, the two printed-QR review redirects
+  // (route handlers with no locale dimension: the proxy would rewrite them into the /en tree and
+  // 404 the card that was just scanned), and files with an extension
   // (/_next/*, /sitemap.xml, /robots.txt, /og-image.png, /favicon.ico, ...).
-  matcher: ["/((?!_next|api|.*\\..*).*)"],
+  matcher: ["/((?!_next|api|bewertung|recensione|.*\\..*).*)"],
 };
