@@ -19,8 +19,6 @@ import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
 import { LOCAL_CITIES, LOCAL_AREAS } from "@/lib/local-seo";
 import { useRegion, whatsappHref } from "@/components/use-region";
-import { track } from "@/components/analytics";
-import { EVENTS } from "@/lib/analytics";
 
 type Lang = Locale;
 
@@ -370,9 +368,6 @@ export default function Home({ lang }: { lang: Lang }) {
       });
       if (res.ok) {
         setFormStatus("success");
-        // Conversion: fires only on a server-accepted submission, so a validation bounce or
-        // a spam rejection never inflates the count Google Ads optimises against.
-        track(EVENTS.form, { page: window.location.pathname, lang });
         form.reset();
         setNeeds([]);
       } else {

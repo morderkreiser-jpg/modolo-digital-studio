@@ -148,10 +148,9 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
-          heading: "Cookies, analytics and advertising",
+          heading: "Cookies and analytics",
           body: [
             "This website uses Vercel Analytics and Vercel Speed Insights to measure aggregate traffic and performance. These tools are privacy-friendly: they do not set cookies, do not track you across other websites and do not build personal profiles. We use no advertising or third-party tracking. Fonts are hosted directly on our server (via next/font), so no connection to external font providers such as Google Fonts is established when you load the page.",
-            "While we are running online advertising, we additionally use Google Analytics 4 and the Google Ads tag (Google Ireland Ltd. / Google LLC) and, where relevant, the Meta pixel (Meta Platforms Ireland Ltd.), in order to see which advertisement actually produced an enquiry. These tools can set cookies and transmit data to the providers. They are loaded in a denied-by-default consent state and only ever store anything after you have agreed via the banner: if you choose \"Only essential\", or if no campaign is running, no advertising cookie is set at all. You can withdraw your agreement at any time by clearing this site's cookies in your browser, after which the question is asked again.",
           ],
         },
         {
@@ -210,10 +209,9 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
-          heading: "Cookies, Analyse und Werbung",
+          heading: "Cookies und Analyse",
           body: [
             "Diese Website nutzt Vercel Analytics und Vercel Speed Insights, um aggregierte Zugriffe und die Performance zu messen. Diese Werkzeuge sind datenschutzfreundlich: Sie setzen keine Cookies, verfolgen Ihr Verhalten nicht über andere Websites hinweg und erstellen keine persönlichen Profile. Wir verwenden keine Werbung und kein Tracking durch Dritte. Die Schriftarten werden direkt auf unserem Server gehostet (über next/font), sodass beim Laden der Seite keine Verbindung zu externen Schriftanbietern wie Google Fonts hergestellt wird.",
-            "Solange wir Online-Werbung schalten, setzen wir zusätzlich Google Analytics 4 und das Google-Ads-Tag (Google Ireland Ltd. / Google LLC) sowie gegebenenfalls das Meta-Pixel (Meta Platforms Ireland Ltd.) ein, um zu erkennen, welche Anzeige tatsächlich zu einer Anfrage geführt hat. Diese Werkzeuge können Cookies setzen und Daten an die Anbieter übermitteln. Sie werden in einem standardmässig verweigerten Einwilligungszustand geladen und speichern erst dann etwas, wenn Sie über das Banner zugestimmt haben: Wählen Sie \"Nur Notwendige\" oder läuft gerade keine Kampagne, wird kein Werbe-Cookie gesetzt. Sie können Ihre Einwilligung jederzeit widerrufen, indem Sie die Cookies dieser Website in Ihrem Browser löschen; danach wird erneut gefragt.",
           ],
         },
         {
@@ -272,10 +270,9 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
-          heading: "Cookie, statistiche e pubblicità",
+          heading: "Cookie e statistiche",
           body: [
             "Questo sito utilizza Vercel Analytics e Vercel Speed Insights per misurare il traffico aggregato e le prestazioni. Questi strumenti rispettano la privacy: non utilizzano cookie, non ti tracciano su altri siti e non creano profili personali. Non utilizziamo pubblicità né tracciamento di terze parti. I caratteri tipografici sono ospitati direttamente sul nostro server (tramite next/font): di conseguenza, durante il caricamento della pagina non viene stabilita alcuna connessione con fornitori di font esterni come Google Fonts.",
-            "Quando sono attive campagne pubblicitarie online, utilizziamo inoltre Google Analytics 4 e il tag Google Ads (Google Ireland Ltd. / Google LLC) e, se pertinente, il pixel di Meta (Meta Platforms Ireland Ltd.), per capire quale annuncio ha effettivamente generato una richiesta. Questi strumenti possono installare cookie e trasmettere dati ai rispettivi fornitori. Vengono caricati con il consenso negato per impostazione predefinita e memorizzano qualcosa solo dopo che hai acconsentito tramite il banner: se scegli \"Solo essenziali\", o se non è in corso alcuna campagna, non viene installato alcun cookie pubblicitario. Puoi revocare il consenso in qualsiasi momento cancellando i cookie di questo sito dal tuo browser: la domanda ti verrà riproposta.",
           ],
         },
         {
