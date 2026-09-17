@@ -108,8 +108,12 @@ export default function HeroShowcase({ items, browseLabel }: { items: ShowcaseIt
               fill
               sizes="(max-width: 768px) 92vw, 620px"
               // Next 16: priority is deprecated. For a cross-fade stack (one poster visible),
-              // fetchPriority="high" flags the LCP candidate without preloading all three.
+              // fetchPriority="high" flags the LCP candidate without preloading all three —
+              // but next/image still defaults to loading="lazy", which defers the very request
+              // fetchPriority is there to prioritise. eager on the first poster only: the other
+              // two stay lazy and load when the cross-fade reaches them.
               fetchPriority={idx === 0 ? "high" : undefined}
+              loading={idx === 0 ? "eager" : undefined}
               className="hsw-shot"
               style={{ opacity: idx === i ? 1 : 0 }}
             />

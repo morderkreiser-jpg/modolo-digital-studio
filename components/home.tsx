@@ -19,20 +19,22 @@ import { FAQS } from "@/lib/site-data";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
 import { LOCAL_CITIES, LOCAL_AREAS } from "@/lib/local-seo";
 import { useRegion, whatsappHref } from "@/components/use-region";
+import { track } from "@/components/analytics";
+import { EVENTS } from "@/lib/analytics";
 
 type Lang = Locale;
 
 const translations = {
   en: {
-    nav: { services: "Services", pricing: "Pricing", portfolio: "Portfolio", about: "About", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
+    nav: { services: "Services", pricing: "Pricing", portfolio: "Portfolio", about: "About me", faq: "FAQ", contact: "Contact", backToTop: "Back to top" },
     hero: {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, code and strategy",
       titleAccent: "for brands that want to stand out.",
-      subtitle: "I get it: you work hard every day, but online barely anyone finds you, and whoever's searching for what you do ends up with a competitor. That's on me now: I build you a well-crafted website that gets you onto Google when people nearby search — proper SEO, no jargon — and shows off your work, so visitors want to book, call or message. No agency passing you around: you always talk to me, start to finish. I've already done it for SaporiVivi, ZüriKey and BJ Studio, and for lots of small businesses across Switzerland.",
+      subtitle: "I get it: you work hard every day, but online barely anyone finds you, and whoever's searching for what you do ends up with a competitor. That's on me now: I build you a well-crafted website that gets you onto Google when people nearby search, and shows off your work, so visitors want to book, call or message. No agency passing you around: you always talk to me, start to finish.",
       founderIntro: "Hi, I'm Francesco. I built the sites you see here myself, one by one — and when you get in touch, it's me who answers, every time.",
-      trustBand: "Websites from CHF 1,900, at a fixed price we agree before we start. Free first consultation and a reply within 24 hours — always from me.",
-      ctaPrimary: "Book a free consultation",
+      trustBand: "Websites from CHF 1,690, at a fixed price we agree before we start. No subscription: the site is yours. A reply within 24 hours, always from me.",
+      ctaPrimary: "Get a fixed-price offer",
       ctaSecondary: "See my work",
       meta: "Francesco Modolo · Websites, SEO & marketing · Winterthur, serving all of Switzerland",
       line1: "Your website,",
@@ -45,22 +47,23 @@ const translations = {
       signOpenHours: "Always open for you",
       ctaWhatsapp: "Message me on WhatsApp",
       browseWork: "Browse the work",
-      chips: ["from CHF 1,900 · fixed price, agreed up front", "first consultation free", "always me, not an agency", "I reply personally, within 24h"],
+      chips: ["from CHF 1,690 · fixed price, agreed up front", "no required subscription, the site is yours", "always me, not an agency", "I reply personally, within 24h"],
     },
     stats: [
       { value: "4+", label: "Years building websites" },
       { value: "24h", label: "To hear back from me" },
-      { value: "Free", label: "Your first consultation" },
+      { value: "0", label: "Subscriptions. The site is yours" },
       { value: "100%", label: "Made in Switzerland, by me" },
     ],
     servicesSection: { label: "What I do", heading1: "Get you found, ", headingAccent: "and get you chosen.", sub: "I don't stop at a 'nice website': I handle the whole chain that takes a customer from a Google search to messaging you or booking. And I handle it myself, in person.", learnMore: "Learn more", viewPricing: "View pricing" },
     services: [
       { title: "A website that gets you found and gets visitors to act", desc: "I hand-build a fast, clear website that loads in a flash on a phone and shows up on Google when people nearby search for what you offer. Built so that whoever lands on it books, calls or messages, instead of clicking through to your competitor.", tags: ["Web Design", "Development", "Local SEO", "Google Business"] },
-      { title: "A look people can trust", desc: "A logo, colours and a consistent look across your website, menu, social media and shop front. So you come across as the serious, well-run business you really are, and people trust you before they've even met you.", tags: ["Branding", "Visual Identity", "Canva Templates"] },
+      { title: "A look people can trust", desc: "A logo, colours and a consistent look across your website, business card, menu and shop front — and the print files ready to send to the printer. So you come across as the serious, well-run business you really are, and people trust you before they've even met you.", tags: ["Branding", "Visual Identity", "Business Cards & Flyers", "Print-ready"] },
       { title: "Photos, video and words that convince", desc: "Content that shows what you actually do, with no empty phrases. The material that stops your website and social feeds from looking abandoned and starts making people want to give you a try.", tags: ["Photo Shooting", "Social Media", "Project Visibility"] },
+      { title: "Advertising that brings people through the door", desc: "Ads only work when what they point at works. I make the material — graphics, flyers, short video — set up the campaign on Google and Meta, and send people to a page built to make them act, not to a homepage where they get lost. You set the budget, and it stays on your own account.", tags: ["Google Ads", "Meta Ads", "Flyers & Graphics", "Video"] },
       { title: "Emails and messages that bring customers back", desc: "Someone who's already chosen you once is the easiest customer to win back. I set up newsletters and automated emails that remind people you're there — and fill tables, calendars and carts again.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Don't take my word. ", headingAccent: "Click them.", sub: "They're online right now, with real domains and real customers. Open them and judge for yourself.", indexLabel: "Selected work", closingLine: "The next one could be yours.", closingCta: "Let's start yours" },
+    portfolioSection: { label: "Portfolio", heading1: "Don't take my word. ", headingAccent: "Click them.", sub: "They're online right now, with real domains. Open them and judge for yourself.", indexLabel: "Selected work", closingLine: "The next one could be yours.", closingCta: "Let's start yours" },
     saporivivi: { tags: ["Complete Website", "Catering & Events", "SEO"], meta: "Complete Website · Catering", outcome: "Whoever's planning an event arrives, sees the class, and asks for a quote.", desc: "A complete site for an Italian luxury bar-catering service: weddings, corporate events and private parties, the menu and a direct quote request — a cinematic home, tuned to be found on Google.", cta: "Visit site" },
     zurikey: { tags: ["Web App", "Product Design", "Development"], meta: "Web App · Zürich", outcome: "Not a website: a real web app that wins the Zürich rental war.", desc: "A real web app: it walks flat-hunters through it step by step — profile, documents, affordability score and a formal German cover letter — and generates a ready-to-send PDF dossier, with an encrypted EU-hosted account.", cta: "Visit site", alt: "ZüriKey — rental-dossier web app for Zürich" },
     bjstudio: { tags: ["Complete website", "Online booking", "Local SEO"], meta: "Beauty centre · Zürich", outcome: "A Zürich beauty centre with a complete site where clients book themselves — in four languages.", desc: "A complete website for a beauty centre: the treatment list with prices, a before/after gallery, direct WhatsApp booking and local SEO to get found in Zürich — in four languages.", cta: "Visit site", alt: "BJ Studio de Belleza — beauty centre website in Zürich" },
@@ -87,24 +90,24 @@ const translations = {
     sectors: ["Restaurants & Hospitality", "Professional Firms", "E-commerce & Retail", "B&B & Accommodation"],
     method: { label: "My method", heading1: "From your first message ", headingAccent: "to your site going live" },
     steps: [
-      { num: "01", title: "We talk, free of charge", desc: "A call or a coffee: you tell me about your business, who you want to reach and what isn't working right now. I tell you straight away whether and how I can help, and what it costs. No commitment — that half hour is yours to keep either way." },
+      { num: "01", title: "We talk", desc: "A few messages or a coffee: you tell me about your business, who you want to reach and what isn't working right now. I tell you straight away whether and how I can help, and what it costs. No commitment — that half hour is yours to keep either way." },
       { num: "02", title: "I show you the design", desc: "I turn what you've told me into a tailor-made design, never a recycled template. You see the drafts, you tell me what to change, and we decide together, detail by detail, until it truly feels like yours." },
       { num: "03", title: "You go live, and I stick around", desc: "I build the site with clean, fast code, put it online and get it found on Google. Then I don't disappear: updates, changes and a single person to message whenever you need something." },
     ],
     quote: { line1: "A beautiful website that brings in no customers is just a cost —", line2: "I build websites that pay for themselves." },
     faqSection: { label: "Frequently asked questions", heading1: "Everything you ", headingAccent: "want to know" },
     contact: {
-      label: "Let's start", heading1: "Tell me about your business — ", headingAccent: "the first consultation is on me.", headingEnd: "",
+      label: "Let's start", heading1: "Tell me about your business — ", headingAccent: "you get a fixed price before I start.", headingEnd: "",
       subtitle: "Send me a couple of lines about what you do and what you'd like to achieve online. I'll get back to you within 24 hours, personally, with a clear direction and a sense of the costs — no commitment, and no selling you things you don't need.",
       whatsapp: "Message me on WhatsApp", whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
-      privacyNote: "By sending this you agree to our privacy policy.",
+      privacyNote: "By sending this you agree to my privacy policy.",
       emailLabel: "Email", phoneLabel: "Phone", areaLabel: "Area", areaValue: "All of Switzerland", officesLabel: "Offices", countryCh: "Switzerland", countryIt: "Italy",
       formName: "Name", formEmail: "Email", formCompany: "Company", formMessage: "Message",
       phName: "Your name", phEmail: "your@email.com", phCompany: "Company name", phMessage: "Two lines about your project…",
       needsLabel: "What do you need?", needs: ["Website", "Brand & logo", "Content & social", "Email marketing", "Other"], optional: "optional", reassurance: "Reply within 24h · No obligation",
-      btnSend: "Request a free consultation", btnSending: "Sending...",
-      successTitle: "Message sent!", successDesc: "Thanks for reaching out. We'll get back to you within 24 hours.",
-      error: "Something went wrong. Please try again or write to us directly via email.",
+      btnSend: "Request a fixed-price offer", btnSending: "Sending...",
+      successTitle: "Message sent!", successDesc: "Thanks for reaching out. I'll get back to you within 24 hours.",
+      error: "Something went wrong. Please try again, or write to me here:",
       errName: "Please enter your name.",
       errEmailRequired: "Please enter your email.",
       errEmailInvalid: "Please enter a valid email address.",
@@ -113,15 +116,15 @@ const translations = {
     footer: { madeWith: "Made with care in Switzerland", imprint: "Legal Notice", privacy: "Privacy Policy" },
   },
   de: {
-    nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über uns", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
+    nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über mich", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
     hero: {
       badge: "Digital Studio · Web · Brand · SEO",
       titleLine1: "Design, Code und Strategie",
       titleAccent: "für Marken, die sich abheben wollen.",
-      subtitle: "Ich kenne das: Du gibst jeden Tag alles, aber online findet dich kaum jemand, und wer nach dem sucht, was du machst, landet bei der Konkurrenz. Das nehme ich dir ab: Ich baue dir eine gepflegte Website, die dich bei Google sichtbar macht, wenn Leute in der Nähe suchen — saubere SEO, ohne Fachchinesisch — und dein Angebot so zeigt, dass man reservieren, anrufen oder schreiben will. Keine Agentur, die dich weiterreicht: Du sprichst immer mit mir, von Anfang bis Ende. Für SaporiVivi, ZüriKey und BJ Studio habe ich das schon gemacht, und für viele kleine Betriebe in der ganzen Schweiz.",
+      subtitle: "Ich kenne das: Du gibst jeden Tag alles, aber online findet dich kaum jemand, und wer nach dem sucht, was du machst, landet bei der Konkurrenz. Das nehme ich dir ab: Ich baue dir eine gepflegte Website, die dich bei Google sichtbar macht, wenn Leute in der Nähe suchen, und dein Angebot so zeigt, dass man reservieren, anrufen oder schreiben will. Keine Agentur, die dich weiterreicht: Du sprichst immer mit mir, von Anfang bis Ende.",
       founderIntro: "Hoi, ich bin Francesco. Die Websites hier oben habe ich alle selbst gebaut, eine nach der anderen — und wenn du mir schreibst, antworte ich dir persönlich, immer.",
-      trustBand: "Websites ab CHF 1'900, mit Festpreis, den wir vor dem Start festlegen. Erste Beratung gratis und Antwort innert 24 Stunden — immer von mir persönlich.",
-      ctaPrimary: "Gratis-Beratung vereinbaren",
+      trustBand: "Websites ab CHF 1'690, mit Festpreis, den wir vor dem Start festlegen. Kein Abo: die Website gehört dir. Antwort innert 24 Stunden, immer von mir persönlich.",
+      ctaPrimary: "Offerte zum Festpreis anfordern",
       ctaSecondary: "Meine Arbeiten ansehen",
       meta: "Francesco Modolo · Webdesign, SEO & Marketing · Winterthur, für die ganze Schweiz",
       line1: "Deine Website,",
@@ -134,22 +137,23 @@ const translations = {
       signOpenHours: "Immer für dich da",
       ctaWhatsapp: "Schreib mir auf WhatsApp",
       browseWork: "Arbeiten durchblättern",
-      chips: ["ab CHF 1'900 · Festpreis, vorher vereinbart", "erste Beratung gratis", "immer ich, keine Agentur", "Antwort von mir, innert 24h"],
+      chips: ["ab CHF 1'690 · Festpreis, vorher vereinbart", "kein Pflicht-Abo, die Website gehört dir", "immer ich, keine Agentur", "Antwort von mir, innert 24h"],
     },
     stats: [
       { value: "4+", label: "Jahre im Website-Bau" },
       { value: "24h", label: "Antworte ich dir persönlich" },
-      { value: "Gratis", label: "Die erste Beratung" },
+      { value: "0", label: "Abos. Die Website gehört dir" },
       { value: "100%", label: "In der Schweiz gemacht, von mir" },
     ],
     servicesSection: { label: "Was ich mache", heading1: "Gefunden werden ", headingAccent: "und gewählt werden.", sub: "Ich höre nicht bei der «schönen Website» auf: Ich begleite die ganze Kette, die einen Kunden von der Google-Suche bis zur Nachricht oder Reservation führt. Und ich begleite sie selbst, persönlich.", learnMore: "Mehr erfahren", viewPricing: "Preise ansehen" },
     services: [
       { title: "Eine Website, die dich auffindbar macht und Besucher zum Handeln bringt", desc: "Ich baue von Hand eine schnelle, klare Website, die auf dem Handy sofort lädt und bei Google auftaucht, wenn jemand in der Umgebung nach dem sucht, was du anbietest. Gemacht, damit die, die ankommen, reservieren, anrufen oder schreiben, statt zur Konkurrenz weiterzuklicken.", tags: ["Webdesign", "Entwicklung", "Lokales SEO", "Google Business"] },
-      { title: "Ein Auftritt, dem man vertraut", desc: "Logo, Farben und ein einheitlicher Look auf Website, Menükarte, Social Media und Schaufenster. So wirkst du wie der seriöse, gepflegte Betrieb, der du wirklich bist — und die Leute vertrauen dir, bevor sie dich überhaupt kennen.", tags: ["Branding", "Visuelle Identität", "Canva-Vorlagen"] },
+      { title: "Ein Auftritt, dem man vertraut", desc: "Logo, Farben und ein einheitlicher Look auf Website, Visitenkarte, Menükarte und Schaufenster — samt druckfertigen Daten für die Druckerei. So wirkst du wie der seriöse, gepflegte Betrieb, der du wirklich bist — und die Leute vertrauen dir, bevor sie dich überhaupt kennen.", tags: ["Branding", "Visuelle Identität", "Visitenkarten & Flyer", "Druckdaten"] },
       { title: "Fotos, Videos und Texte, die überzeugen", desc: "Inhalte, die zeigen, was du wirklich machst, ohne leere Floskeln. Das Material, mit dem Website und Social Media nicht mehr verlassen wirken, sondern Lust machen, dich auszuprobieren.", tags: ["Fotoshooting", "Social Media", "Project Visibility"] },
+      { title: "Werbung, die Leute zur Tür bringt", desc: "Werbung wirkt nur, wenn das Ziel funktioniert. Ich mache das Material — Sujets, Flyer, kurzes Video —, richte die Kampagne bei Google und Meta ein und schicke die Leute auf eine Seite, die zum Handeln führt, statt auf eine Startseite, wo sie sich verlieren. Das Budget bestimmst du, und es bleibt auf deinem eigenen Konto.", tags: ["Google Ads", "Meta Ads", "Flyer & Sujets", "Video"] },
       { title: "E-Mails und Nachrichten, die Kunden zurückbringen", desc: "Wer dich einmal gewählt hat, ist am leichtesten zurückzugewinnen. Ich richte Newsletter und automatische E-Mails ein, die die Leute daran erinnern, dass es dich gibt — und Tische, Terminkalender und Warenkörbe wieder füllen.", tags: ["Newsletter", "E-Mail-Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Glaub mir nicht. ", headingAccent: "Klick sie an.", sub: "Sie sind gerade jetzt online, mit echten Domains und echten Kunden. Öffne sie und urteile selbst.", indexLabel: "Ausgewählte Arbeiten", closingLine: "Das nächste könnte deins sein.", closingCta: "Starten wir deins" },
+    portfolioSection: { label: "Portfolio", heading1: "Glaub mir nicht. ", headingAccent: "Klick sie an.", sub: "Sie sind gerade jetzt online, mit echten Domains. Öffne sie und urteile selbst.", indexLabel: "Ausgewählte Arbeiten", closingLine: "Das nächste könnte deins sein.", closingCta: "Starten wir deins" },
     saporivivi: { tags: ["Komplette Website", "Catering & Events", "SEO"], meta: "Komplette Website · Catering", outcome: "Wer ein Event plant, kommt an, sieht die Klasse und fragt die Offerte an.", desc: "Komplette Website für ein italienisches Luxus-Bar-Catering: Hochzeiten, Firmenevents und private Feiern, die Menükarte und die direkte Offert-Anfrage — cinematische Startseite, für Google optimiert.", cta: "Website besuchen" },
     zurikey: { tags: ["Web App", "Produktdesign", "Entwicklung"], meta: "Web App · Zürich", outcome: "Keine Website: eine echte Web-App, die den Wohnungskampf in Zürich gewinnt.", desc: "Eine echte Web-App: führt Wohnungssuchende Schritt für Schritt — Profil, Dokumente, Tragbarkeits-Score und formelles Bewerbungsschreiben auf Deutsch — und erzeugt ein sendefertiges PDF-Dossier, mit verschlüsseltem Konto in der EU.", cta: "Website besuchen", alt: "ZüriKey — Mietdossier-Web-App für Zürich" },
     bjstudio: { tags: ["Komplette Website", "Online-Terminbuchung", "Lokales SEO"], meta: "Kosmetikstudio · Zürich", outcome: "Ein Zürcher Kosmetikstudio mit kompletter Website, auf der Kundinnen selbst buchen — in vier Sprachen.", desc: "Komplette Website für ein Kosmetikstudio: Behandlungsliste mit Preisen, Vorher-Nachher-Galerie, direkte Terminbuchung via WhatsApp und lokales SEO, um in Zürich gefunden zu werden — in vier Sprachen.", cta: "Website besuchen", alt: "BJ Studio de Belleza — Website für ein Kosmetikstudio in Zürich" },
@@ -176,24 +180,24 @@ const translations = {
     sectors: ["Restaurants & Hospitality", "Kanzleien & Praxen", "E-Commerce & Retail", "B&B & Unterkünfte"],
     method: { label: "Meine Methode", heading1: "Von der ersten Nachricht ", headingAccent: "bis zu deiner Website online" },
     steps: [
-      { num: "01", title: "Wir reden, gratis", desc: "Ein Telefonat oder ein Kaffee: Du erzählst mir von deinem Betrieb, wen du erreichen willst und was heute nicht läuft. Ich sage dir gleich, ob und wie ich dir helfen kann und was es kostet. Keine Verpflichtung — die halbe Stunde bleibt dir so oder so." },
+      { num: "01", title: "Wir reden", desc: "Ein paar Nachrichten oder ein Kaffee: Du erzählst mir von deinem Betrieb, wen du erreichen willst und was heute nicht läuft. Ich sage dir gleich, ob und wie ich dir helfen kann und was es kostet. Keine Verpflichtung — die halbe Stunde bleibt dir so oder so." },
       { num: "02", title: "Ich zeige dir den Entwurf", desc: "Ich verwandle das, was du mir gesagt hast, in ein massgeschneidertes Design — nie eine recycelte Vorlage. Du siehst die Entwürfe, sagst mir, was ich ändern soll, und wir entscheiden zusammen Detail für Detail, bis es sich wirklich nach dir anfühlt." },
       { num: "03", title: "Du gehst online, und ich bleibe an deiner Seite", desc: "Ich baue die Website mit sauberem, schnellem Code, bringe sie online und sorge dafür, dass sie bei Google gefunden wird. Danach verschwinde ich nicht: Updates, Änderungen und eine einzige Person, der du schreibst, wenn du etwas brauchst." },
     ],
     quote: { line1: "Eine schöne Website, die keine Kunden bringt, kostet dich nur Geld —", line2: "ich baue Websites, die sich bezahlt machen." },
     faqSection: { label: "Häufige Fragen", heading1: "Alles, was du ", headingAccent: "wissen möchtest" },
     contact: {
-      label: "Los geht's", heading1: "Erzähl mir von deinem Betrieb — ", headingAccent: "die erste Beratung geht auf mich.", headingEnd: "",
+      label: "Los geht's", heading1: "Erzähl mir von deinem Betrieb — ", headingAccent: "den Festpreis machen wir vorher ab.", headingEnd: "",
       subtitle: "Schreib mir zwei Zeilen dazu, was du machst und was du online erreichen möchtest. Ich antworte dir innert 24 Stunden, persönlich, mit einer klaren Richtung und einer Vorstellung der Kosten — unverbindlich und ohne dir Dinge zu verkaufen, die du nicht brauchst.",
       whatsapp: "Schreib mir auf WhatsApp", whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
-      privacyNote: "Mit dem Absenden stimmst du unserer Datenschutzerklärung zu.",
+      privacyNote: "Mit dem Absenden stimmst du meiner Datenschutzerklärung zu.",
       emailLabel: "E-Mail", phoneLabel: "Telefon", areaLabel: "Gebiet", areaValue: "Ganze Schweiz", officesLabel: "Standorte", countryCh: "Schweiz", countryIt: "Italien",
       formName: "Name", formEmail: "E-Mail", formCompany: "Unternehmen", formMessage: "Nachricht",
       phName: "Dein Name", phEmail: "deine@email.com", phCompany: "Firmenname", phMessage: "Zwei Zeilen zu deinem Projekt…",
       needsLabel: "Was brauchst du?", needs: ["Website", "Marke & Logo", "Content & Social", "E-Mail-Marketing", "Anderes"], optional: "optional", reassurance: "Antwort in 24 Std · Unverbindlich",
-      btnSend: "Kostenlose Beratung anfragen", btnSending: "Wird gesendet...",
-      successTitle: "Nachricht gesendet!", successDesc: "Danke für deine Nachricht. Wir melden uns innerhalb von 24 Stunden.",
-      error: "Etwas ist schiefgelaufen. Bitte versuche es erneut oder schreib uns direkt eine E-Mail.",
+      btnSend: "Offerte zum Festpreis anfordern", btnSending: "Wird gesendet...",
+      successTitle: "Nachricht gesendet!", successDesc: "Danke für deine Nachricht. Ich melde mich innert 24 Stunden bei dir.",
+      error: "Etwas ist schiefgelaufen. Bitte versuche es erneut oder schreib mir direkt hier:",
       errName: "Bitte gib deinen Namen ein.",
       errEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       errEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
@@ -202,15 +206,15 @@ const translations = {
     footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt", imprint: "Impressum", privacy: "Datenschutz" },
   },
   it: {
-    nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi siamo", faq: "FAQ", contact: "Contattaci", backToTop: "Torna su" },
+    nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi sono", faq: "FAQ", contact: "Scrivimi", backToTop: "Torna su" },
     hero: {
       badge: "Studio digitale · Web · Brand · SEO",
       titleLine1: "Design, codice e strategia",
       titleAccent: "per brand che vogliono distinguersi.",
-      subtitle: "So com'è: lavori sodo ogni giorno, ma online quasi nessuno ti trova, e chi cerca quello che fai finisce dal concorrente. Ci penso io: ti costruisco un sito curato che ti fa uscire su Google quando la gente cerca in zona — la SEO fatta come si deve, senza paroloni — e mette in mostra il tuo lavoro, così chi ti trova ha voglia di prenotare, chiamare o scriverti. Niente agenzia che ti rimbalza: parli sempre con me, dall'inizio alla fine. L'ho già fatto per SaporiVivi, ZüriKey e BJ Studio, e per tante piccole attività in tutta la Svizzera.",
+      subtitle: "So com'è: lavori sodo ogni giorno, ma online quasi nessuno ti trova, e chi cerca quello che fai finisce dal concorrente. Ci penso io: ti costruisco un sito curato che ti fa uscire su Google quando la gente cerca in zona, e mette in mostra il tuo lavoro, così chi ti trova ha voglia di prenotare, chiamare o scriverti. Niente agenzia che ti rimbalza: parli sempre con me, dall'inizio alla fine.",
       founderIntro: "Ciao, sono Francesco. I siti che scorrono qui li ho costruiti io, a mano, uno per uno — e quando ci scriviamo, dall'altra parte ci sono sempre io.",
-      trustBand: "Siti da CHF 1'900, prezzo fisso deciso prima di iniziare. Prima consulenza gratuita e risposta entro 24 ore, sempre da me.",
-      ctaPrimary: "Prenota una consulenza gratuita",
+      trustBand: "Siti da CHF 1'690, prezzo fisso deciso prima di iniziare. Nessun abbonamento: il sito è tuo. Rispondo sempre io, entro 24 ore.",
+      ctaPrimary: "Chiedi un'offerta a prezzo fisso",
       ctaSecondary: "Guarda i miei lavori",
       meta: "Francesco Modolo · Siti, SEO e marketing · Winterthur, per tutta la Svizzera",
       line1: "Il tuo sito,",
@@ -223,22 +227,23 @@ const translations = {
       signOpenHours: "Sempre aperto per te",
       ctaWhatsapp: "Scrivimi su WhatsApp",
       browseWork: "Sfoglia i lavori",
-      chips: ["da CHF 1'900 · prezzo fisso, deciso prima", "prima consulenza gratis", "sempre me, non un'agenzia", "rispondo io, entro 24h"],
+      chips: ["da CHF 1'690 · prezzo fisso, deciso prima", "nessun abbonamento obbligatorio, il sito è tuo", "sempre me, non un'agenzia", "rispondo io, entro 24h"],
     },
     stats: [
       { value: "4+", label: "Anni a costruire siti" },
       { value: "24h", label: "Ti rispondo io entro" },
-      { value: "Gratis", label: "La prima consulenza" },
+      { value: "0", label: "Abbonamenti. Il sito è tuo" },
       { value: "100%", label: "Fatto in Svizzera, da me" },
     ],
     servicesSection: { label: "Cosa faccio", heading1: "Farti trovare, ", headingAccent: "e farti scegliere.", sub: "Non mi fermo al «bel sito»: seguo tutta la catena che porta un cliente dalla ricerca su Google fino a scriverti o prenotare. E la seguo io, di persona.", learnMore: "Scopri di più", viewPricing: "Vedi i prezzi" },
     services: [
       { title: "Un sito che ti fa trovare e fa agire chi arriva", desc: "Costruisco a mano un sito veloce e chiaro, che si carica al volo dal telefono e compare su Google quando in zona cercano quello che offri. Pensato perché chi arriva prenoti, chiami o scriva, invece di andarsene dal concorrente.", tags: ["Web Design", "Sviluppo", "SEO Locale", "Google Business"] },
-      { title: "Un'immagine di cui fidarsi", desc: "Logo, colori e un look coerente su sito, menù, social e vetrina. Così sembri l'attività seria e curata che sei davvero, e le persone si fidano di te prima ancora di conoscerti.", tags: ["Branding", "Identità Visiva", "Template Canva"] },
+      { title: "Un'immagine di cui fidarsi", desc: "Logo, colori e un look coerente su sito, biglietto da visita, menù e vetrina — con i file pronti da mandare in tipografia. Così sembri l'attività seria e curata che sei davvero, e le persone si fidano di te prima ancora di conoscerti.", tags: ["Branding", "Identità Visiva", "Biglietti & Flyer", "Pronti per la stampa"] },
       { title: "Foto, video e testi che convincono", desc: "Contenuti che raccontano cosa fai davvero, senza frasi vuote. Il materiale con cui sito e social smettono di sembrare abbandonati e iniziano a far venire voglia di provarti.", tags: ["Shooting", "Social Media", "Project Visibility"] },
+      { title: "Pubblicità che porta gente dentro", desc: "La pubblicità funziona solo se funziona quello che c'è dietro. Faccio io il materiale — grafiche, flyer, video brevi — imposto la campagna su Google e Meta e mando le persone su una pagina fatta per farle agire, non sulla home, dove si perdono. Il budget lo decidi tu e resta sul tuo account.", tags: ["Google Ads", "Meta Ads", "Flyer & Grafiche", "Video"] },
       { title: "Email e messaggi che riportano i clienti", desc: "Chi ti ha già scelto una volta è il cliente più facile da far tornare. Imposto newsletter ed email automatiche che ricordano alla gente che ci sei — e riempiono di nuovo tavoli, agende e carrelli.", tags: ["Newsletter", "Email Marketing", "Automation"] },
     ],
-    portfolioSection: { label: "Portfolio", heading1: "Non credermi. ", headingAccent: "Cliccali.", sub: "Sono online proprio adesso, con domini e clienti veri. Aprili e giudica tu se funzionano.", indexLabel: "Lavori selezionati", closingLine: "Il prossimo potrebbe essere il tuo.", closingCta: "Iniziamo il tuo" },
+    portfolioSection: { label: "Portfolio", heading1: "Non credermi. ", headingAccent: "Cliccali.", sub: "Sono online proprio adesso, con domini veri. Aprili e giudica tu se funzionano.", indexLabel: "Lavori selezionati", closingLine: "Il prossimo potrebbe essere il tuo.", closingCta: "Iniziamo il tuo" },
     saporivivi: { tags: ["Sito Web Completo", "Catering & Eventi", "SEO"], meta: "Sito Web Completo · Catering", outcome: "Chi organizza un evento arriva, vede la classe e chiede il preventivo.", desc: "Sito completo per un bar-catering italiano di lusso: matrimoni, eventi aziendali e feste private, il menù e la richiesta di preventivo diretta — home cinematografica, ottimizzato per farsi trovare su Google.", cta: "Visita il sito" },
     zurikey: { tags: ["Web App", "Product Design", "Sviluppo"], meta: "Web App · Zurigo", outcome: "Non un sito: una web app che vince la guerra degli affitti a Zurigo.", desc: "Una vera web app: guida chi cerca casa passo passo — profilo, documenti, punteggio di sostenibilità e lettera formale in tedesco — e genera un dossier PDF pronto da inviare, con account cifrato in UE.", cta: "Visita il sito", alt: "ZüriKey — web app per il dossier d'affitto a Zurigo" },
     bjstudio: { tags: ["Sito completo", "Prenotazione online", "SEO Locale"], meta: "Centro estetico · Zurigo", outcome: "Un centro estetico di Zurigo con un sito completo dove i clienti prenotano da soli, in quattro lingue.", desc: "Sito completo per un centro estetico: listino dei trattamenti con prezzi, galleria prima/dopo, prenotazione diretta via WhatsApp e SEO locale per farsi trovare a Zurigo — in quattro lingue.", cta: "Visita il sito", alt: "BJ Studio de Belleza — sito per un centro estetico a Zurigo" },
@@ -265,24 +270,24 @@ const translations = {
     sectors: ["Ristoranti & Hospitality", "Studi Professionali", "E-commerce & Retail", "B&B & Strutture Ricettive"],
     method: { label: "Il mio metodo", heading1: "Dal primo messaggio ", headingAccent: "al tuo sito online" },
     steps: [
-      { num: "01", title: "Parliamo, gratis", desc: "Una chiamata o un caffè: mi racconti la tua attività, chi vuoi raggiungere e cosa oggi non funziona. Ti dico subito se e come posso aiutarti, e quanto costa. Nessun impegno — quella mezz'ora te la tieni comunque." },
+      { num: "01", title: "Parliamo", desc: "Due messaggi o un caffè: mi racconti la tua attività, chi vuoi raggiungere e cosa oggi non funziona. Ti dico subito se e come posso aiutarti, e quanto costa. Nessun impegno — quella mezz'ora te la tieni comunque." },
       { num: "02", title: "Ti mostro il progetto", desc: "Trasformo quello che mi hai detto in un design su misura, mai un template riciclato. Vedi le bozze, mi dici cosa cambiare, decidiamo insieme dettaglio per dettaglio finché non lo senti davvero tuo." },
       { num: "03", title: "Vai online e ti resto accanto", desc: "Costruisco il sito con codice pulito e veloce, lo metto online e lo faccio trovare su Google. Poi non sparisco: aggiornamenti, modifiche e una sola persona a cui scrivere quando ti serve qualcosa." },
     ],
     quote: { line1: "Un sito bello che non porta clienti è un costo —", line2: "io costruisco siti che si ripagano." },
     faqSection: { label: "Domande frequenti", heading1: "Tutto quello che ", headingAccent: "vuoi sapere" },
     contact: {
-      label: "Iniziamo", heading1: "Raccontami la tua attività — ", headingAccent: "la prima consulenza la offro io.", headingEnd: "",
+      label: "Iniziamo", heading1: "Raccontami la tua attività — ", headingAccent: "il prezzo fisso lo decidiamo prima.", headingEnd: "",
       subtitle: "Scrivimi due righe su cosa fai e cosa vorresti ottenere online. Ti rispondo io entro 24 ore, di persona, con una direzione chiara e un'idea dei costi — senza impegno e senza venderti cose che non ti servono.",
       whatsapp: "Scrivimi su WhatsApp", whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
-      privacyNote: "Inviando accetti la nostra informativa sulla privacy.",
+      privacyNote: "Inviando accetti la mia informativa sulla privacy.",
       emailLabel: "Email", phoneLabel: "Telefono", areaLabel: "Area", areaValue: "Tutta la Svizzera", officesLabel: "Sedi", countryCh: "Svizzera", countryIt: "Italia",
       formName: "Nome", formEmail: "Email", formCompany: "Azienda", formMessage: "Messaggio",
       phName: "Il tuo nome", phEmail: "la-tua@email.com", phCompany: "Nome azienda", phMessage: "Due righe sul tuo progetto…",
       needsLabel: "Di cosa hai bisogno?", needs: ["Sito web", "Brand & logo", "Contenuti & social", "Email marketing", "Altro"], optional: "facoltativo", reassurance: "Risposta entro 24h · Senza impegno",
-      btnSend: "Richiedi la consulenza gratuita", btnSending: "Invio in corso...",
-      successTitle: "Messaggio inviato!", successDesc: "Grazie per averci scritto. Ti risponderemo entro 24 ore.",
-      error: "Si è verificato un errore. Riprova o scrivici direttamente via email.",
+      btnSend: "Richiedi un'offerta a prezzo fisso", btnSending: "Invio in corso...",
+      successTitle: "Messaggio inviato!", successDesc: "Grazie per avermi scritto. Ti rispondo entro 24 ore.",
+      error: "Si è verificato un errore. Riprova, oppure scrivimi qui:",
       errName: "Inserisci il tuo nome.",
       errEmailRequired: "Inserisci la tua email.",
       errEmailInvalid: "Inserisci un indirizzo email valido.",
@@ -365,6 +370,9 @@ export default function Home({ lang }: { lang: Lang }) {
       });
       if (res.ok) {
         setFormStatus("success");
+        // Conversion: fires only on a server-accepted submission, so a validation bounce or
+        // a spam rejection never inflates the count Google Ads optimises against.
+        track(EVENTS.form, { page: window.location.pathname, lang });
         form.reset();
         setNeeds([]);
       } else {
@@ -396,7 +404,7 @@ export default function Home({ lang }: { lang: Lang }) {
       <div className="mds-grain" aria-hidden />
 
       {/* HERO — proof-first: the offer on the left, real client sites shown live on the right */}
-      <section className="relative flex min-h-svh items-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-20">
+      <section className="relative flex min-h-svh items-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-20 sm:pt-32 pb-20">
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(52% 56% at 84% 50%, rgba(201,153,47,0.10), transparent 72%)" }} />
         <HeroAtmosphere />
 
@@ -468,7 +476,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <div>
               <span className="micro-caps text-[var(--gilt)]">01 · {t.servicesSection.label}</span>
               <h2 className="section-head display-space mt-4 text-[#17130e]">
-                {t.servicesSection.heading1}<em className="text-[var(--color-gold)]">{t.servicesSection.headingAccent}</em>
+                {t.servicesSection.heading1}<em className="text-[var(--gilt)]">{t.servicesSection.headingAccent}</em>
               </h2>
               <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60 md:text-lg">{t.servicesSection.sub}</p>
             </div>
@@ -523,7 +531,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <div>
               <span data-reveal-fade className="micro-caps inline-block text-[var(--gilt)]">02 · {t.portfolioSection.label}</span>
               <h2 data-reveal-heading className="section-head display-space mt-4 text-[#17130e]">
-                {t.portfolioSection.heading1}<em className="text-[var(--color-gold)]">{t.portfolioSection.headingAccent}</em>
+                {t.portfolioSection.heading1}<em className="text-[var(--gilt)]">{t.portfolioSection.headingAccent}</em>
               </h2>
               <p data-reveal-fade className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60">{t.portfolioSection.sub}</p>
             </div>
@@ -636,7 +644,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="micro-caps text-[var(--gilt)]">04 · {t.method.label}</span>
             <h2 className="section-head display-space mt-4 text-[#17130e]">
               <span className="block">{t.method.heading1}</span>
-              <em className="block text-[var(--color-gold)]">{t.method.headingAccent}</em>
+              <em className="block text-[var(--gilt)]">{t.method.headingAccent}</em>
             </h2>
           </div>
           <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
@@ -666,7 +674,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <header className="mb-12 md:mb-16">
             <span className="micro-caps text-[var(--gilt)]">05 · {t.faqSection.label}</span>
             <h2 className="section-head display-space mt-4 text-[#17130e]">
-              {t.faqSection.heading1}<em className="text-[var(--color-gold)]">{t.faqSection.headingAccent}</em>
+              {t.faqSection.heading1}<em className="text-[var(--gilt)]">{t.faqSection.headingAccent}</em>
             </h2>
           </header>
 
@@ -708,7 +716,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="micro-caps text-[var(--gilt)]">06 · {t.contact.label}</span>
             <h2 className="section-head display-space mt-4 text-[#17130e]">
               <span className="block">{t.contact.heading1}</span>
-              <em className="block text-[var(--color-gold)]">{t.contact.headingAccent}</em>
+              <em className="block text-[var(--gilt)]">{t.contact.headingAccent}</em>
             </h2>
             <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#17130e]/70">{t.contact.subtitle}</p>
           </motion.div>
@@ -767,27 +775,32 @@ export default function Home({ lang }: { lang: Lang }) {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
                       <label htmlFor="contact-name" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formName} *</label>
-                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phName} />
+                      <input id="contact-name" type="text" name="nome" required aria-invalid={fieldErrors.name ? true : undefined} aria-describedby={fieldErrors.name ? "contact-name-err" : undefined} onChange={() => fieldErrors.name && setFieldErrors((p) => ({ ...p, name: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)]" placeholder={t.contact.phName} />
                       {fieldErrors.name && <p id="contact-name-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.name}</p>}
                     </div>
                     <div>
                       <label htmlFor="contact-email" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formEmail} *</label>
-                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phEmail} />
+                      <input id="contact-email" type="email" name="email" required aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? "contact-email-err" : undefined} onChange={() => fieldErrors.email && setFieldErrors((p) => ({ ...p, email: undefined }))} className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)]" placeholder={t.contact.phEmail} />
                       {fieldErrors.email && <p id="contact-email-err" role="alert" className="mt-2 text-sm text-red-700">{fieldErrors.email}</p>}
                     </div>
                   </div>
                   <div>
                     <label htmlFor="contact-company" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formCompany} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
-                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phCompany} />
+                    <input id="contact-company" type="text" name="azienda" className="w-full border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)]" placeholder={t.contact.phCompany} />
                   </div>
                   <div>
                     <label htmlFor="contact-message" className="micro-caps mb-2 block text-[#17130e]/70">{t.contact.formMessage} <span className="normal-case tracking-normal text-[#17130e]/60">({t.contact.optional})</span></label>
-                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)] focus:outline-none" placeholder={t.contact.phMessage} />
+                    <textarea id="contact-message" name="messaggio" rows={3} className="w-full resize-none border-b border-[#17130e]/50 bg-transparent py-2.5 text-[#17130e] placeholder-[#17130e]/60 transition-colors focus:border-[var(--color-gold)]" placeholder={t.contact.phMessage} />
                   </div>
                   {formStatus === "error" && (
                     <div role="alert" className="flex items-start gap-3 rounded-[4px] border border-red-300 bg-red-50 p-4 text-red-800">
                       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-                      <p className="text-sm font-light">{t.contact.error}</p>
+                      <p className="text-sm font-light">
+                        {t.contact.error}{" "}
+                        <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="font-medium underline">{t.contact.whatsapp}</a>
+                        {" · "}
+                        <a href={`mailto:${SITE.email}`} className="font-medium underline">{SITE.email}</a>
+                      </p>
                     </div>
                   )}
                   <div className="flex flex-wrap items-center gap-6 pt-2">
@@ -820,7 +833,7 @@ export default function Home({ lang }: { lang: Lang }) {
             <span className="micro-caps" style={{ color: "var(--gilt)" }}>Fin — 07</span>
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2">
-            <span className="micro-caps" style={{ color: "rgba(31,27,22,0.4)" }}>Webdesign</span>
+            <span className="micro-caps" style={{ color: "rgba(31,27,22,0.62)" }}>Webdesign</span>
             {LOCAL_CITIES.map((c) => (
               <Link key={c} href={localizedHref(lang, `/webdesign/${c}`)} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">
                 {LOCAL_AREAS[c].navLabel[lang]}

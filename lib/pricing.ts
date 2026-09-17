@@ -67,7 +67,7 @@ export const PRICING_UI: Record<
       "Transparent pricing for websites, care plans and branding. Swiss (CHF) and Italian (EUR) rates — web design and development across Switzerland.",
     heading1: "Services & ",
     headingAccent: "pricing",
-    subtitle: "Prices in {cur} · excl. VAT · valid 2026",
+    subtitle: "Prices in {cur} · final price, no VAT · valid 2026",
     from: "from",
     perMonth: "/month",
     regionNote: "Showing {region} prices",
@@ -75,10 +75,10 @@ export const PRICING_UI: Record<
     regionIt: "Italy · EUR",
     goodToKnow: "Good to know",
     ctaHeading: "Ready to stand out?",
-    ctaText: "Let's talk about your project — we'll prepare a tailored offer.",
-    ctaContact: "Talk to us",
-    ctaWhatsapp: "Message us on WhatsApp",
-    notSure: "Not sure which package fits? Let's talk.",
+    ctaText: "Tell me about your project — I'll prepare a tailored offer.",
+    ctaContact: "Write to me",
+    ctaWhatsapp: "Message me on WhatsApp",
+    notSure: "Not sure which package fits? Write to me.",
     back: "Back to home",
   },
   de: {
@@ -88,7 +88,7 @@ export const PRICING_UI: Record<
       "Transparente Preise für Websites, Care-Pakete und Branding. Preise für die Schweiz (CHF) und Italien (EUR) — Webdesign und Entwicklung.",
     heading1: "Leistungen & ",
     headingAccent: "Preise",
-    subtitle: "Preise in {cur} · exkl. MwSt · gültig 2026",
+    subtitle: "Preise in {cur} · Endpreis, keine MWST · gültig 2026",
     from: "ab",
     perMonth: "/Monat",
     regionNote: "{region}-Preise werden angezeigt",
@@ -96,10 +96,10 @@ export const PRICING_UI: Record<
     regionIt: "Italien · EUR",
     goodToKnow: "Gut zu wissen",
     ctaHeading: "Bereit, dich abzuheben?",
-    ctaText: "Sprich mit uns über dein Projekt — wir erstellen ein massgeschneidertes Angebot.",
-    ctaContact: "Sprich mit uns",
-    ctaWhatsapp: "Schreib uns auf WhatsApp",
-    notSure: "Unsicher, welches Paket passt? Sprich mit uns.",
+    ctaText: "Erzähl mir von deinem Projekt — ich mache dir ein massgeschneidertes Angebot.",
+    ctaContact: "Schreib mir",
+    ctaWhatsapp: "Schreib mir auf WhatsApp",
+    notSure: "Unsicher, welches Paket passt? Schreib mir.",
     back: "Zurück zur Startseite",
   },
   it: {
@@ -109,7 +109,7 @@ export const PRICING_UI: Record<
       "Prezzi trasparenti per siti web, pacchetti care e branding. Tariffe per Svizzera (CHF) e Italia (EUR) — web design e sviluppo.",
     heading1: "Servizi e ",
     headingAccent: "prezzi",
-    subtitle: "Prezzi in {cur} · IVA escl. · validi 2026",
+    subtitle: "Prezzi in {cur} · prezzo finale, senza IVA · validi 2026",
     from: "da",
     perMonth: "/mese",
     regionNote: "Stai vedendo i prezzi per {region}",
@@ -117,9 +117,9 @@ export const PRICING_UI: Record<
     regionIt: "Italia · EUR",
     goodToKnow: "Buono a sapersi",
     ctaHeading: "Pronto a farti notare?",
-    ctaText: "Parliamo del tuo progetto — ti prepariamo un'offerta su misura.",
-    ctaContact: "Parla con noi",
-    ctaWhatsapp: "Scrivici su WhatsApp",
+    ctaText: "Parlami del tuo progetto — ti preparo un'offerta su misura.",
+    ctaContact: "Scrivimi",
+    ctaWhatsapp: "Scrivimi su WhatsApp",
     notSure: "Non sai quale pacchetto scegliere? Parliamone.",
     back: "Torna alla home",
   },
@@ -135,6 +135,77 @@ export const WEBSITES = {
   } as Tri,
   items: [
     {
+      // Entry rung: the one price that can be named cold, at a door or on the phone.
+      // Fixed (not "from"), delivered in an afternoon, and every delivery earns a review.
+      name: {
+        en: "Google Profile Start",
+        de: "Google-Profil Start",
+        it: "Google Profile Start",
+      },
+      badge: { en: "Entry step", de: "Einstieg", it: "Primo passo" },
+      desc: {
+        en: "Your Google listing, sorted: correct opening hours, a description in German and Italian, your services, and a contact button that works from a phone. You send me your photos; I do the rest.",
+        de: "Dein Google-Eintrag, sauber gemacht: korrekte Öffnungszeiten, Beschreibung auf Deutsch und Italienisch, deine Leistungen und ein Kontakt-Button, der auf dem Handy funktioniert. Die Fotos schickst du mir; den Rest mache ich.",
+        it: "La tua scheda Google sistemata: orari giusti, descrizione in tedesco e italiano, i tuoi servizi e un pulsante di contatto che funziona dal telefono. Le foto me le mandi tu, al resto penso io.",
+      },
+      meta: {
+        en: "One-off setup · delivered in one afternoon · fixed price",
+        de: "Lieferung an einem Nachmittag · Fixpreis",
+        it: "Consegnato in un pomeriggio · prezzo fisso",
+      },
+      from: false,
+      price: { ch: 390, it: 250 },
+    },
+    {
+      // La visita è ciò che nessun concorrente della piazza vende sotto i 5'000: Hyperpage
+      // include il servizio fotografico solo dal pacchetto ab 5'090. È il gradino che la
+      // lettera SHAB propone, ed è l'unico posizionamento difendibile — chi entra nel negozio.
+      name: {
+        en: "Google Profile On Site",
+        de: "Google-Profil vor Ort",
+        it: "Google Profile in loco",
+      },
+      badge: { en: "I come to you", de: "Ich komme vorbei", it: "Vengo io da te" },
+      desc: {
+        en: "Everything in Google Profile Start, but I come to you: I shoot the 8–10 photos myself at your place, write the German and Italian text, and set the whole thing up. Your effort: ten minutes on the phone and twenty on site.",
+        de: "Alles aus Google-Profil Start, aber ich komme zu dir: Ich mache die acht bis zehn Fotos selber bei dir, schreibe den deutschen und italienischen Text und richte alles ein. Dein Aufwand: zehn Minuten am Telefon und zwanzig vor Ort.",
+        it: "Tutto quello di Google Profile Start, ma vengo io: faccio io le 8–10 foto da te, scrivo il testo in tedesco e italiano e imposto tutto. Il tuo impegno: dieci minuti al telefono e venti sul posto.",
+      },
+      meta: {
+        en: "Photos and text included · fixed price",
+        de: "Fotos und Text inklusive · Fixpreis",
+        it: "Foto e testi inclusi · prezzo fisso",
+      },
+      from: false,
+      price: { ch: 690, it: 420 },
+    },
+    {
+      // L'unico servizio adiacente con una misura di DOMANDA e non solo di offerta: lo studio
+      // localsearch/HSLU, misurato automaticamente su 47'079 siti svizzeri, trova che solo il 36%
+      // delle PMI ha un sito e che di quelle solo il 7% ha uno strumento di prenotazione.
+      // Si vende il SETUP, mai il software: il canone del tool lo paga il cliente al fornitore.
+      // Costruirlo su misura sarebbe la trappola — i concorrenti gratuiti esistono (Cal.com,
+      // Timify Classic), quindi il valore sta nella configurazione, non nel codice.
+      name: {
+        en: "Online Booking, set up",
+        de: "Online-Terminbuchung, eingerichtet",
+        it: "Prenotazione online, configurata",
+      },
+      badge: { en: "New", de: "Neu", it: "Nuovo" },
+      desc: {
+        en: "Your customers book themselves, day and night. I set up the booking tool with your services, durations and breaks, put it on your website and wire the Book button into your Google listing. You get a short video showing how to change anything.",
+        de: "Deine Kundschaft bucht selber, Tag und Nacht. Ich richte das Buchungstool mit deinen Leistungen, Dauern und Pausen ein, baue es in deine Website und verbinde den Termin-Button mit deinem Google-Eintrag. Dazu ein kurzes Video, wie du alles selber änderst.",
+        it: "I tuoi clienti prenotano da soli, giorno e notte. Configuro lo strumento con i tuoi servizi, le durate e le pause, lo metto sul sito e collego il pulsante Prenota alla tua scheda Google. In più un video breve per cambiare tutto da solo.",
+      },
+      meta: {
+        en: "Tool subscription paid by you, direct to the provider",
+        de: "Das Tool-Abo zahlst du direkt beim Anbieter",
+        it: "L'abbonamento allo strumento lo paghi tu, direttamente al fornitore",
+      },
+      from: false,
+      price: { ch: 690, it: 390 },
+    },
+    {
       name: { en: "Essential", de: "Essential", it: "Essential" },
       badge: { en: "One page", de: "Eine Seite", it: "Pagina unica" },
       desc: {
@@ -148,7 +219,7 @@ export const WEBSITES = {
         it: "Consegna ~1–2 settimane · realizzato con Framer",
       },
       from: true,
-      price: { ch: 1900, it: 900 },
+      price: { ch: 1690, it: 950 },
     },
     {
       name: { en: "Business", de: "Business", it: "Business" },
@@ -165,7 +236,7 @@ export const WEBSITES = {
         it: "Consegna ~3–4 settimane · realizzato con Framer",
       },
       from: true,
-      price: { ch: 3900, it: 2200 },
+      price: { ch: 4200, it: 2400 },
     },
     {
       name: { en: "Signature", de: "Signature", it: "Signature" },
@@ -181,7 +252,7 @@ export const WEBSITES = {
         it: "Consegna ~6+ settimane · sviluppo su misura",
       },
       from: true,
-      price: { ch: 8500, it: 4800 },
+      price: { ch: 7400, it: 4200 },
     },
     {
       name: { en: "E-Commerce", de: "E-Commerce", it: "E-Commerce" },
@@ -196,7 +267,7 @@ export const WEBSITES = {
         it: "Preventivo su misura",
       },
       from: true,
-      price: { ch: 6500, it: 3500 },
+      price: { ch: 5900, it: 3300 },
     },
   ] as PriceItem[],
 };
@@ -216,29 +287,44 @@ export const CARE = {
       features: [
         { en: "Hosting & domain management", de: "Hosting- & Domain-Verwaltung", it: "Gestione hosting & dominio" },
         { en: "Updates, backups & security", de: "Updates, Backups & Sicherheit", it: "Update, backup & sicurezza" },
-        { en: "Up to 30 min edits/month", de: "Bis zu 30 Min Änderungen/Monat", it: "Fino a 30 min modifiche/mese" },
         { en: "Email support", de: "E-Mail-Support", it: "Supporto email" },
+        { en: "Edits billed by the hour", de: "Änderungen nach Aufwand", it: "Modifiche a ore" },
       ],
     },
     {
       name: "Care · Plus",
       featured: true,
-      price: { ch: 129, it: 69 },
+      price: { ch: 149, it: 79 },
       features: [
         { en: "Everything in Light", de: "Alles aus Light", it: "Tutto di Light" },
-        { en: "Up to 2 h edits/month", de: "Bis zu 2 Std Änderungen/Monat", it: "Fino a 2 h modifiche/mese" },
+        { en: "Up to 1 h edits/month", de: "Bis zu 1 Std Änderungen/Monat", it: "Fino a 1 h modifiche/mese" },
         { en: "Monthly analytics report", de: "Monatlicher Analytics-Report", it: "Report analytics mensile" },
         { en: "Priority support", de: "Prioritärer Support", it: "Supporto prioritario" },
       ],
     },
     {
       name: "Care · Pro",
-      price: { ch: 249, it: 129 },
+      price: { ch: 290, it: 149 },
       features: [
         { en: "Everything in Plus", de: "Alles aus Plus", it: "Tutto di Plus" },
-        { en: "Up to 4 h edits/month", de: "Bis zu 4 Std Änderungen/Monat", it: "Fino a 4 h modifiche/mese" },
+        { en: "Up to 2 h edits/month", de: "Bis zu 2 Std Änderungen/Monat", it: "Fino a 2 h modifiche/mese" },
         { en: "SEO monitoring", de: "SEO-Monitoring", it: "Monitoraggio SEO" },
-        { en: "Monthly strategy call", de: "Monatlicher Strategie-Call", it: "Call strategica mensile" },
+        { en: "Quarterly review, in writing", de: "Quartals-Review, schriftlich", it: "Punto trimestrale, per iscritto" },
+      ],
+    },
+    {
+      // Il lavoro che oggi vende una volta sola a 390/690 e poi abbandona. Il mercato svizzero e'
+      // gia' educato a pagarlo a canone: heise regioconcept lo vende a 55/109/159/369 al mese con
+      // durata minima 12 mesi. Regola operativa: si lavora A BLOCCHI, cinque clienti nella stessa
+      // mezza giornata. Cliente per cliente, a 1.5 h l'uno, rende 86 CHF/ora e quindi ci si rimette.
+      name: "Google · Care",
+      price: { ch: 129, it: 69 },
+      features: [
+        { en: "4 posts per quarter", de: "4 Beiträge pro Quartal", it: "4 post a trimestre" },
+        { en: "Photos and hours kept current", de: "Fotos und Öffnungszeiten aktuell", it: "Foto e orari sempre aggiornati" },
+        { en: "Replies to reviews within 48 h", de: "Antwort auf Bewertungen in 48 Std", it: "Risposta alle recensioni in 48 h" },
+        { en: "Monthly report, in writing", de: "Monatsreport, schriftlich", it: "Report mensile, per iscritto" },
+        { en: "12 months minimum", de: "Mindestlaufzeit 12 Monate", it: "Durata minima 12 mesi" },
       ],
     },
   ] as CarePlan[],
@@ -282,7 +368,7 @@ export const BRANDING = {
       },
       meta: { en: "half day", de: "halber Tag", it: "a mezza giornata" },
       from: false,
-      price: { ch: 900, it: 450 },
+      price: { ch: 690, it: 350 },
     },
     {
       name: { en: "Copywriting", de: "Copywriting", it: "Copywriting" },
@@ -293,7 +379,7 @@ export const BRANDING = {
       },
       meta: { en: "per page", de: "pro Seite", it: "a pagina" },
       from: true,
-      price: { ch: 150, it: 80 },
+      price: { ch: 190, it: 95 },
     },
     {
       name: { en: "Email Marketing Setup", de: "E-Mail-Marketing-Setup", it: "Setup Email Marketing" },
@@ -325,9 +411,9 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
   {
     label: { en: "Payment", de: "Zahlung", it: "Pagamento" },
     value: {
-      en: "50% upfront, 50% on delivery",
-      de: "50% bei Start, 50% bei Lieferung",
-      it: "50% all'avvio, 50% alla consegna",
+      en: "50% upfront, 50% on delivery — two design rounds; deposit back if neither convinces you",
+      de: "50% bei Start, 50% bei Lieferung — zwei Design-Runden; Anzahlung zurück, wenn keine überzeugt",
+      it: "50% all'avvio, 50% alla consegna — due giri di design; acconto indietro se nessuno convince",
     },
   },
   {
@@ -349,9 +435,9 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
   {
     label: { en: "VAT", de: "MwSt", it: "IVA" },
     value: {
-      en: "prices excl. VAT ({vat}) where applicable",
-      de: "Preise exkl. MwSt ({vat}) wo anwendbar",
-      it: "prezzi IVA escl. ({vat}) ove applicabile",
+      en: "not VAT-registered — the price you see is the final price",
+      de: "nicht mehrwertsteuerpflichtig — der genannte Preis ist der Endpreis",
+      it: "non soggetto a IVA — il prezzo indicato è quello finale",
     },
   },
   {
@@ -372,7 +458,7 @@ export const INCLUDED: Tri[] = [
   { en: "Tailor-made design, never a template", de: "Massgeschneidertes Design, nie eine Vorlage", it: "Design su misura, mai un template" },
   { en: "Fast and flawless on every phone", de: "Schnell und einwandfrei auf jedem Handy", it: "Veloce e perfetto su ogni telefono" },
   { en: "Optimised for Google (SEO built in)", de: "Für Google optimiert (SEO inklusive)", it: "Ottimizzato per Google (SEO inclusa)" },
-  { en: "Google Business profile set up", de: "Google-Unternehmensprofil eingerichtet", it: "Scheda Google Business impostata" },
+  { en: "Google listing linked to the site", de: "Google-Eintrag mit der Website verknüpft", it: "Scheda Google collegata al sito" },
   { en: "Contact form + WhatsApp link", de: "Kontaktformular + WhatsApp-Anbindung", it: "Modulo contatti + WhatsApp" },
   { en: "Hosting & domain set up for you", de: "Hosting & Domain für dich eingerichtet", it: "Hosting e dominio configurati per te" },
   { en: "Revisions included in the fixed price", de: "Revisionen im Festpreis inbegriffen", it: "Revisioni incluse nel prezzo fisso" },

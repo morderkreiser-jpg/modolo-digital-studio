@@ -42,5 +42,5 @@ export const SITE = {
   gold: "#B5893F",
 } as const;
 
-export const SERVICE_SLUGS = ["web", "brand", "content", "email"] as const;
+export const SERVICE_SLUGS = ["web", "brand", "content", "ads", "email"] as const;
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];

@@ -258,7 +258,7 @@
 p, li, blockquote, figcaption { text-wrap: pretty; }
 /* Gold gradient text — accent words. Tuned to read on the cream light field. */
 .gold-grad {
-  background: linear-gradient(100deg, #c9992f, var(--color-gold) 45%, #7e5d24);
+  background: linear-gradient(100deg, #a67c33, #8f6a2a 45%, #7e5d24);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

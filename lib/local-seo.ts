@@ -38,9 +38,9 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
       en: "Web Designer in Winterthur — websites that bring customers",
     },
     metaDescription: {
-      de: "Webdesigner in Winterthur und persönliche Alternative zur Webagentur: von Hand gebaute, bei Google auffindbare Websites für lokale Betriebe. Festpreis, gratis Erstberatung.",
-      it: "Web designer a Winterthur: costruisco a mano siti veloci e trovabili su Google per le attività locali. Prezzo fisso, prima consulenza gratuita, un'unica persona di riferimento.",
-      en: "Web designer in Winterthur: I hand-build fast, Google-friendly websites for local businesses. Fixed price, free first consultation, one personal contact.",
+      de: "Webdesigner in Winterthur und persönliche Alternative zur Webagentur: von Hand gebaute, bei Google auffindbare Websites für lokale Betriebe. Festpreis, kein Abo.",
+      it: "Web designer a Winterthur: costruisco a mano siti veloci e trovabili su Google per le attività locali. Prezzo fisso, nessun abbonamento, un'unica persona di riferimento.",
+      en: "Web designer in Winterthur: I hand-build fast, Google-friendly websites for local businesses. Fixed price, no subscription, one personal contact.",
     },
     eyebrow: { de: "Webdesign · Winterthur", it: "Web design · Winterthur", en: "Web design · Winterthur" },
     h1: { de: "Dein Webdesigner in ", it: "Il tuo web designer a ", en: "Your web designer in " },
@@ -73,9 +73,9 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
       en: "Web Designer in Zürich — websites that get found",
     },
     metaDescription: {
-      de: "Webdesigner und Webagentur-Alternative für Zürich: von Hand gebaute Websites mit lokalem SEO, damit Kundinnen und Kunden dich finden. Festpreis, gratis Erstberatung.",
-      it: "Web designer per Zurigo: siti costruiti a mano con SEO locale, così i clienti ti trovano in città. Prezzo fisso, prima consulenza gratuita, seguito di persona.",
-      en: "Web designer for Zürich: hand-built websites with local SEO so customers find you in the city. Fixed price, free first consultation, personally handled.",
+      de: "Webdesigner und Webagentur-Alternative für Zürich: von Hand gebaute Websites mit lokalem SEO, damit Kundinnen und Kunden dich finden. Festpreis, kein Abo.",
+      it: "Web designer per Zurigo: siti costruiti a mano con SEO locale, così i clienti ti trovano in città. Prezzo fisso, nessun abbonamento, seguito di persona.",
+      en: "Web designer for Zürich: hand-built websites with local SEO so customers find you in the city. Fixed price, no subscription, personally handled.",
     },
     eyebrow: { de: "Webdesign · Zürich", it: "Web design · Zurigo", en: "Web design · Zürich" },
     h1: { de: "Dein Webdesigner für ", it: "Il tuo web designer per ", en: "Your web designer for " },
@@ -87,9 +87,9 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
     },
     localTitle: { de: "Schon in Zürich umgesetzt", it: "Già realizzato a Zurigo", en: "Already built in Zürich" },
     localBody: {
-      de: "Ich habe bereits für Zürcher Kunden gebaut: ZüriKey, die Web-App für Mietdossiers, und BJ Studio, ein mehrsprachiges Beauty-Studio mit Terminbuchung über WhatsApp. Verschiedene Betriebe, dasselbe Ziel — online gefunden werden und Anfragen gewinnen.",
-      it: "Ho già lavorato per clienti di Zurigo: ZüriKey, la web app per i dossier d'affitto, e BJ Studio, uno studio beauty multilingua con prenotazione via WhatsApp. Attività diverse, stesso obiettivo — farsi trovare online e ottenere richieste.",
-      en: "I've already built for Zürich clients: ZüriKey, the web app for rental dossiers, and BJ Studio, a multilingual beauty studio with WhatsApp booking. Different businesses, one goal — get found online and win enquiries.",
+      de: "In Zürich habe ich BJ Studio gebaut, ein mehrsprachiges Beauty-Studio mit Terminbuchung über WhatsApp — dazu ZüriKey, meine eigene Web-App für Mietdossiers. Verschiedene Betriebe, dasselbe Ziel — online gefunden werden und Anfragen gewinnen.",
+      it: "A Zurigo ho costruito BJ Studio, uno studio beauty multilingua con prenotazione via WhatsApp — e ZüriKey, la mia web app per i dossier d'affitto. Attività diverse, stesso obiettivo — farsi trovare online e ottenere richieste.",
+      en: "In Zürich I built BJ Studio, a multilingual beauty studio with WhatsApp booking — plus ZüriKey, my own web app for rental dossiers. Different businesses, one goal — get found online and win enquiries.",
     },
     ctaHeading: {
       de: "Bereit, in Zürich gefunden zu werden?",
@@ -122,7 +122,7 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
     },
     localTitle: { de: "100% Made in Switzerland", it: "100% Made in Switzerland", en: "100% Made in Switzerland" },
     localBody: {
-      de: "Ich arbeite aus Winterthur, kenne den Schweizer Markt und schreibe sauberes Schweizer Hochdeutsch — dazu Italienisch und Englisch, wenn dein Betrieb mehrsprachig ist. Festpreis vorab, keine Überraschungen, und immer dieselbe Person, die antwortet: ich.",
+      de: "Von Winterthur aus arbeite ich für die ganze Schweiz, kenne den Schweizer Markt und schreibe sauberes Schweizer Hochdeutsch — dazu Italienisch und Englisch, wenn dein Betrieb mehrsprachig ist. Festpreis vorab, keine Überraschungen, und immer dieselbe Person, die antwortet: ich.",
       it: "Lavoro da Winterthur, conosco il mercato svizzero e scrivo in tedesco svizzero corretto — oltre a italiano e inglese, se la tua attività è multilingua. Prezzo fisso concordato prima, nessuna sorpresa, e sempre la stessa persona che risponde: io.",
       en: "I work from Winterthur, know the Swiss market and write proper Swiss High German — plus Italian and English if your business is multilingual. Fixed price agreed upfront, no surprises, and always the same person answering: me.",
     },

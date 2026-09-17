@@ -9,46 +9,51 @@ import { SITE } from "@/lib/site";
 const SITE_PHONE_DIGITS = SITE.phone.replace(/[^0-9]/g, "");
 
 // Small localized UI labels for the local-SEO pages (kept here so the page is self-contained).
+// `whatsappMsg` names the page it came from: WhatsApp gives no referrer, so the pre-filled
+// message is the only way an incoming chat says which entry point produced it.
 const UI: Record<Locale, {
   back: string; nav: { pricing: string; portfolio: string; contact: string };
   cta: string; trust: string; servicesLine: string; viewPricing: string; viewWork: string;
-  otherAreas: string; closingText: string; whatsapp: string;
+  otherAreas: string; closingText: string; whatsapp: string; whatsappMsg: (city: string) => string;
 }> = {
   de: {
     back: "Zur Startseite",
     nav: { pricing: "Preise", portfolio: "Portfolio", contact: "Kontakt" },
-    cta: "Gratis-Beratung vereinbaren",
-    trust: "Websites ab CHF 1'900 · Festpreis · gratis Erstberatung · Antwort in 24 h",
+    cta: "Offerte zum Festpreis anfordern",
+    trust: "Websites ab CHF 1'690 · Festpreis · kein Pflicht-Abo · Antwort in 24 h",
     servicesLine: "Websites, lokales SEO, Branding und Inhalte — alles aus einer Hand, von mir.",
     viewPricing: "Preise ansehen",
     viewWork: "Arbeiten ansehen",
     otherAreas: "Auch tätig in",
     closingText: "Eine kurze, unverbindliche Beratung — du erzählst mir von deinem Betrieb, ich sage dir ehrlich, ob und wie ich helfen kann.",
     whatsapp: "WhatsApp",
+    whatsappMsg: (city) => `Hallo Francesco, ich habe deine Seite für ${city} gesehen und möchte über eine Website sprechen.`,
   },
   it: {
     back: "Torna alla home",
     nav: { pricing: "Prezzi", portfolio: "Portfolio", contact: "Contatti" },
-    cta: "Prenota una consulenza gratuita",
-    trust: "Siti da CHF 1'900 · prezzo fisso · prima consulenza gratuita · risposta in 24 h",
+    cta: "Chiedi un'offerta a prezzo fisso",
+    trust: "Siti da CHF 1'690 · prezzo fisso · nessun abbonamento obbligatorio · risposta in 24 h",
     servicesLine: "Siti, SEO locale, branding e contenuti — tutto da un'unica persona, io.",
     viewPricing: "Vedi i prezzi",
     viewWork: "Guarda i lavori",
     otherAreas: "Attivo anche a",
     closingText: "Una chiacchierata breve e senza impegno — mi racconti la tua attività e ti dico onestamente se e come posso aiutarti.",
     whatsapp: "WhatsApp",
+    whatsappMsg: (city) => `Ciao Francesco, ho visto la tua pagina per ${city} e vorrei parlare di un sito.`,
   },
   en: {
     back: "Back to home",
     nav: { pricing: "Pricing", portfolio: "Portfolio", contact: "Contact" },
-    cta: "Book a free consultation",
-    trust: "Websites from CHF 1,900 · fixed price · free first consultation · reply within 24 h",
+    cta: "Get a fixed-price offer",
+    trust: "Websites from CHF 1,690 · fixed price · no required subscription · reply within 24 h",
     servicesLine: "Websites, local SEO, branding and content — all from one person: me.",
     viewPricing: "View pricing",
     viewWork: "See my work",
     otherAreas: "Also serving",
     closingText: "A short, no-obligation chat — you tell me about your business and I tell you honestly whether and how I can help.",
     whatsapp: "WhatsApp",
+    whatsappMsg: (city) => `Hi Francesco, I saw your page for ${city} and I would like to talk about a website.`,
   },
 };
 
@@ -160,7 +165,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href={`https://wa.me/${SITE_PHONE_DIGITS}`}
+              href={`https://wa.me/${SITE_PHONE_DIGITS}?text=${encodeURIComponent(u.whatsappMsg(area.navLabel[lang]))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-medium tracking-wide transition-colors duration-300"

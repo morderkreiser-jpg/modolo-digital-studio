@@ -11,7 +11,11 @@ export const FAQS: Record<Locale, QA[]> = {
   en: [
     {
       q: "How much does a website cost?",
-      a: "Every project is tailor-made, so the price depends on what you need: number of pages, features and content. That's why the first consultation is free — you tell me what you want to achieve and I give you a clear, fixed-price quote agreed before we start. No surprises at the bottom.",
+      a: "Fixed prices, agreed before we start. Google listing sorted: CHF 390, or CHF 690 if I come to you and shoot the photos myself. A 3-6 page website: CHF 1,690. A complete website: CHF 4,200. I am not VAT-registered, so the price you read is the final price, and a subscription is never required.",
+    },
+    {
+      q: "Do I own the website?",
+      a: "Yes, completely: domain, files, access. If you stop working with me one day, everything stays with you and you take it wherever you like. That is not the norm: with many subscriptions the site disappears the day you stop paying, along with your photos and your copy.",
     },
     {
       q: "How long until the website is online?",
@@ -33,7 +37,11 @@ export const FAQS: Record<Locale, QA[]> = {
   de: [
     {
       q: "Was kostet eine Website?",
-      a: "Jedes Projekt ist massgeschneidert, der Preis hängt also davon ab, was du brauchst: Anzahl der Seiten, Funktionen und Inhalte. Deshalb ist die erste Beratung gratis — du erzählst mir, was du erreichen willst, und ich gebe dir ein klares Angebot zum Festpreis, vor dem Start festgelegt. Keine Überraschungen am Schluss.",
+      a: "Feste Preise, vor dem Start vereinbart. Google-Eintrag eingerichtet: CHF 390, oder CHF 690, wenn ich für die Fotos zu dir komme. Website mit 3 bis 6 Seiten: CHF 1’690. Komplette Website: CHF 4’200. Ich bin nicht mehrwertsteuerpflichtig, der genannte Preis ist also der Endpreis — und ein Abo ist nie Pflicht.",
+    },
+    {
+      q: "Gehört die Website danach mir?",
+      a: "Ja, vollständig: Domain, Dateien, Zugänge. Wenn du eines Tages nicht mehr mit mir arbeitest, bleibt alles bei dir und du nimmst es mit. Das ist nicht überall so: Bei vielen Abos ist die Website weg, sobald du aufhörst zu zahlen — mitsamt deinen Fotos und Texten.",
     },
     {
       q: "Wie lange dauert es, bis die Website online ist?",
@@ -55,7 +63,11 @@ export const FAQS: Record<Locale, QA[]> = {
   it: [
     {
       q: "Quanto costa realizzare un sito web?",
-      a: "Ogni progetto è su misura, quindi il prezzo dipende da cosa ti serve: numero di pagine, funzioni e contenuti. Per questo la prima consulenza è gratuita — mi racconti cosa vuoi ottenere e ti do un preventivo chiaro a prezzo fisso, deciso prima di iniziare. Nessuna sorpresa in fondo.",
+      a: "Prezzi fissi, decisi prima di iniziare. Scheda Google sistemata: CHF 390, oppure CHF 690 se vengo io a fare le foto da te. Sito di 3-6 pagine: CHF 1’690. Sito completo: CHF 4’200. Non sono soggetto a IVA, quindi il prezzo che leggi è quello finale, e nessun abbonamento è mai obbligatorio.",
+    },
+    {
+      q: "Il sito resta mio?",
+      a: "Sì, tutto: dominio, file, accessi. Se un giorno smetti di lavorare con me, resta tuo e te lo porti dove vuoi. Non funziona così ovunque: con molti abbonamenti il sito sparisce il giorno che smetti di pagare, con dentro le tue foto e i tuoi testi.",
     },
     {
       q: "Quanto tempo serve per andare online?",
@@ -87,12 +99,17 @@ export const SERVICE_META: Record<Locale, Record<ServiceSlug, { title: string; d
     brand: {
       title: "Brand & Identity",
       description:
-        "Memorable visual identities: logo design, colour and typography systems, brand guidelines and branded templates.",
+        "Memorable visual identities: logo design, colour and typography systems, brand guidelines, business cards and flyers ready for print.",
     },
     content: {
       title: "Content & Visual",
       description:
-        "Professional photo shoots and social media management to bring your brand to life, in collaboration with Project Visibility.",
+        "Photos I shoot myself, plus social media run together with Project Visibility. Content made for your business, not bought from a stock library.",
+    },
+    ads: {
+      title: "Advertising",
+      description:
+        "Google Ads and Meta campaigns for local businesses: graphics, flyers, short video and a landing page built to convert. Fixed price, your budget stays on your account.",
     },
     email: {
       title: "Email Marketing",
@@ -109,12 +126,17 @@ export const SERVICE_META: Record<Locale, Record<ServiceSlug, { title: string; d
     brand: {
       title: "Marke & Identität",
       description:
-        "Einprägsame visuelle Identitäten: Logodesign, Farb- und Typografiesysteme, Markenrichtlinien und gebrandete Vorlagen.",
+        "Einprägsame visuelle Identitäten: Logodesign, Farb- und Typografiesysteme, Markenrichtlinien, Visitenkarten und Flyer druckfertig.",
     },
     content: {
       title: "Content & Visual",
       description:
-        "Professionelle Fotoshootings und Social-Media-Betreuung, die deine Marke zum Leben erwecken – in Zusammenarbeit mit Project Visibility.",
+        "Fotos, die ich selber mache, und Social-Media-Betreuung zusammen mit Project Visibility. Inhalte für deinen Betrieb, nicht aus einer Bilddatenbank.",
+    },
+    ads: {
+      title: "Werbung",
+      description:
+        "Kampagnen bei Google Ads und Meta für lokale Betriebe: Sujets, Flyer, kurzes Video und eine Landingpage, die wirkt. Festpreis, dein Budget bleibt auf deinem Konto.",
     },
     email: {
       title: "E-Mail-Marketing",
@@ -131,12 +153,17 @@ export const SERVICE_META: Record<Locale, Record<ServiceSlug, { title: string; d
     brand: {
       title: "Brand & Identità",
       description:
-        "Identità visive memorabili: design del logo, sistemi di colore e tipografia, linee guida del brand e template brandizzati.",
+        "Identità visive memorabili: design del logo, sistemi di colore e tipografia, linee guida del brand, biglietti da visita e flyer pronti per la stampa.",
     },
     content: {
       title: "Contenuti & Visual",
       description:
-        "Shooting fotografici professionali e gestione social per dare vita al tuo brand, in collaborazione con Project Visibility.",
+        "Foto che faccio io e gestione social insieme a Project Visibility. Contenuti fatti per la tua attività, non comprati da una banca di immagini.",
+    },
+    ads: {
+      title: "Pubblicità",
+      description:
+        "Campagne Google Ads e Meta per attività locali: grafiche, flyer, video brevi e una landing page fatta per convertire. Prezzo fisso, il budget resta sul tuo account.",
     },
     email: {
       title: "Email Marketing",

@@ -10,9 +10,9 @@ import { SITE } from "@/lib/site";
 import { useRegion, whatsappHref } from "@/components/use-region";
 
 export type Lang = Locale;
-export type Slug = "web" | "brand" | "content" | "email";
+export type Slug = "web" | "brand" | "content" | "ads" | "email";
 
-export const SERVICE_SLUGS: Slug[] = ["web", "brand", "content", "email"];
+export const SERVICE_SLUGS: Slug[] = ["web", "brand", "content", "ads", "email"];
 
 const ui: Record<
   Lang,
@@ -33,12 +33,12 @@ const ui: Record<
   en: {
     label: "Service",
     includes: "What's included",
-    approach: "How we work",
+    approach: "How I work",
     other: "Other services",
     back: "All services",
     ctaTitle: "Ready to stand out?",
-    ctaText: "Tell us about your project — the first consultation is free.",
-    ctaButton: "Talk to us",
+    ctaText: "Tell me about your project. You get a fixed-price offer before I start.",
+    ctaButton: "Write to me",
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
     ctaPricing: "See pricing",
@@ -46,12 +46,12 @@ const ui: Record<
   de: {
     label: "Leistung",
     includes: "Was enthalten ist",
-    approach: "Wie wir arbeiten",
+    approach: "Wie ich arbeite",
     other: "Weitere Leistungen",
     back: "Alle Leistungen",
     ctaTitle: "Bereit, dich abzuheben?",
-    ctaText: "Erzähl uns von deinem Projekt – die Erstberatung ist kostenlos.",
-    ctaButton: "Sprich mit uns",
+    ctaText: "Erzähl mir von deinem Projekt. Du bekommst vorher eine Offerte zum Festpreis.",
+    ctaButton: "Schreib mir",
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
     ctaPricing: "Preise ansehen",
@@ -59,12 +59,12 @@ const ui: Record<
   it: {
     label: "Servizio",
     includes: "Cosa include",
-    approach: "Come lavoriamo",
+    approach: "Come lavoro",
     other: "Altri servizi",
     back: "Tutti i servizi",
     ctaTitle: "Pronto a distinguerti?",
-    ctaText: "Raccontaci il tuo progetto – la prima consulenza è gratuita.",
-    ctaButton: "Parla con noi",
+    ctaText: "Raccontami il tuo progetto. Ti mando un'offerta a prezzo fisso, prima di iniziare.",
+    ctaButton: "Scrivimi",
     ctaWhatsapp: "WhatsApp",
     whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
     ctaPricing: "Vedi i prezzi",
@@ -83,7 +83,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     en: {
       title: "Web & Development",
       intro:
-        "Fast, modern websites built to convert — designed around your brand and optimised to be found locally. From the first sketch to launch and beyond, we build digital foundations that truly work for your business.",
+        "Fast, modern websites built to convert — designed around your brand and optimised to be found locally. From the first sketch to launch and beyond, I build digital foundations that truly work for your business.",
       includes: [
         "Custom web design tailored to your brand",
         "High-performance development (fast, secure, mobile-first)",
@@ -93,7 +93,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Ongoing support and maintenance after launch",
       ],
       approach: [
-        { title: "Strategy first", desc: "We start from your goals, your audience and your market — so every page has a purpose." },
+        { title: "Strategy first", desc: "I start from your goals, your audience and your market — so every page has a purpose." },
         { title: "Built to perform", desc: "Clean, modern code and best practices for speed, security and search visibility." },
         { title: "Made to last", desc: "Easy to maintain and ready to grow together with your business." },
       ],
@@ -101,7 +101,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     de: {
       title: "Web & Entwicklung",
       intro:
-        "Schnelle, moderne Websites, die konvertieren – gestaltet rund um deine Marke und optimiert, um lokal gefunden zu werden. Vom ersten Entwurf bis zum Launch und darüber hinaus bauen wir digitale Grundlagen, die für dein Unternehmen wirklich funktionieren.",
+        "Schnelle, moderne Websites, die konvertieren – gestaltet rund um deine Marke und optimiert, um lokal gefunden zu werden. Vom ersten Entwurf bis zum Launch und darüber hinaus baue ich digitale Grundlagen, die für dein Unternehmen wirklich funktionieren.",
       includes: [
         "Massgeschneidertes Webdesign, abgestimmt auf deine Marke",
         "Performante Entwicklung (schnell, sicher, mobile-first)",
@@ -111,7 +111,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Laufender Support und Wartung nach dem Launch",
       ],
       approach: [
-        { title: "Strategie zuerst", desc: "Wir starten bei deinen Zielen, deiner Zielgruppe und deinem Markt – damit jede Seite einen Zweck hat." },
+        { title: "Strategie zuerst", desc: "Ich starte bei deinen Zielen, deiner Zielgruppe und deinem Markt – damit jede Seite einen Zweck hat." },
         { title: "Auf Leistung gebaut", desc: "Sauberer, moderner Code und Best Practices für Geschwindigkeit, Sicherheit und Sichtbarkeit." },
         { title: "Gemacht, um zu bleiben", desc: "Einfach zu pflegen und bereit, mit deinem Unternehmen zu wachsen." },
       ],
@@ -119,7 +119,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     it: {
       title: "Web & Sviluppo",
       intro:
-        "Siti web veloci e moderni, costruiti per convertire – progettati attorno al tuo brand e ottimizzati per essere trovati sul territorio. Dal primo schizzo al lancio e oltre, costruiamo basi digitali che funzionano davvero per la tua attività.",
+        "Siti web veloci e moderni, costruiti per convertire – progettati attorno al tuo brand e ottimizzati per essere trovati sul territorio. Dal primo schizzo al lancio e oltre, costruisco basi digitali che funzionano davvero per la tua attività.",
       includes: [
         "Web design su misura, in linea con il tuo brand",
         "Sviluppo performante (veloce, sicuro, mobile-first)",
@@ -129,7 +129,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Assistenza e manutenzione continua dopo il lancio",
       ],
       approach: [
-        { title: "Prima la strategia", desc: "Partiamo dai tuoi obiettivi, dal pubblico e dal mercato – così ogni pagina ha uno scopo." },
+        { title: "Prima la strategia", desc: "Parto dai tuoi obiettivi, dal pubblico e dal mercato – così ogni pagina ha uno scopo." },
         { title: "Costruito per rendere", desc: "Codice pulito e moderno, con le migliori pratiche per velocità, sicurezza e visibilità." },
         { title: "Fatto per durare", desc: "Facile da mantenere e pronto a crescere con la tua attività." },
       ],
@@ -139,55 +139,58 @@ const content: Record<Slug, Record<Lang, Service>> = {
     en: {
       title: "Brand & Identity",
       intro:
-        "A memorable brand is more than a logo. We craft cohesive visual identities — from your logo to colours, typography and branded templates — that tell your story and make you instantly recognisable.",
+        "A memorable brand is more than a logo. I craft cohesive visual identities — from your logo to colours, typography and branded templates, right through to print-ready business cards and flyers — that tell your story and make you instantly recognisable.",
       includes: [
         "Logo design and full visual identity",
         "Colour palette and typography system",
         "Branded Canva templates for everyday use",
         "Brand guidelines to keep everything consistent",
         "Visual kit for social media",
-        "Stationery and marketing materials",
+        "Business cards, flyers and price lists",
+        "Print-ready files, sent straight to the printer",
       ],
       approach: [
-        { title: "Discover", desc: "We get to know your values, your audience and what makes you different." },
-        { title: "Design", desc: "We translate that into a distinctive, coherent visual language." },
+        { title: "Discover", desc: "I get to know your values, your audience and what makes you different." },
+        { title: "Design", desc: "I translate that into a distinctive, coherent visual language." },
         { title: "Deliver", desc: "You get ready-to-use assets and clear guidelines to apply them." },
       ],
     },
     de: {
       title: "Marke & Identität",
       intro:
-        "Eine einprägsame Marke ist mehr als ein Logo. Wir gestalten stimmige visuelle Identitäten – vom Logo über Farben und Typografie bis zu gebrandeten Vorlagen –, die deine Geschichte erzählen und dich sofort wiedererkennbar machen.",
+        "Eine einprägsame Marke ist mehr als ein Logo. Ich gestalte stimmige visuelle Identitäten – vom Logo über Farben, Typografie und gebrandete Vorlagen bis zu druckfertigen Visitenkarten und Flyern –, die deine Geschichte erzählen und dich sofort wiedererkennbar machen.",
       includes: [
         "Logodesign und komplette visuelle Identität",
         "Farbpalette und Typografie-System",
         "Gebrandete Canva-Vorlagen für den Alltag",
         "Markenrichtlinien für durchgängige Konsistenz",
         "Visual-Kit für Social Media",
-        "Geschäftsausstattung und Marketingmaterialien",
+        "Visitenkarten, Flyer und Preislisten",
+        "Druckfertige Daten, direkt für die Druckerei",
       ],
       approach: [
-        { title: "Entdecken", desc: "Wir lernen deine Werte, deine Zielgruppe und das, was dich besonders macht, kennen." },
-        { title: "Gestalten", desc: "Wir übersetzen das in eine unverwechselbare, kohärente visuelle Sprache." },
+        { title: "Entdecken", desc: "Ich lerne deine Werte, deine Zielgruppe und das, was dich besonders macht, kennen." },
+        { title: "Gestalten", desc: "Ich übersetze das in eine unverwechselbare, kohärente visuelle Sprache." },
         { title: "Übergeben", desc: "Du erhältst einsatzbereite Assets und klare Richtlinien zur Anwendung." },
       ],
     },
     it: {
       title: "Brand & Identità",
       intro:
-        "Un brand memorabile è molto più di un logo. Creiamo identità visive coerenti – dal logo a colori, tipografia e template brandizzati – che raccontano la tua storia e ti rendono subito riconoscibile.",
+        "Un brand memorabile è molto più di un logo. Creo identità visive coerenti – dal logo a colori, tipografia e template brandizzati, fino a biglietti da visita e flyer pronti per la stampa – che raccontano la tua storia e ti rendono subito riconoscibile.",
       includes: [
         "Design del logo e identità visiva completa",
         "Palette colori e sistema tipografico",
         "Template Canva brandizzati per l'uso quotidiano",
         "Linee guida del brand per la massima coerenza",
         "Kit visivo per i social media",
-        "Materiali di cancelleria e marketing",
+        "Biglietti da visita, flyer e listini",
+        "File pronti per la stampa, da mandare in tipografia",
       ],
       approach: [
-        { title: "Scopriamo", desc: "Conosciamo i tuoi valori, il tuo pubblico e ciò che ti rende diverso." },
-        { title: "Progettiamo", desc: "Traduciamo tutto in un linguaggio visivo distintivo e coerente." },
-        { title: "Consegniamo", desc: "Ricevi asset pronti all'uso e linee guida chiare per applicarli." },
+        { title: "Scopro", desc: "Conosco i tuoi valori, il tuo pubblico e ciò che ti rende diverso." },
+        { title: "Progetto", desc: "Traduco tutto in un linguaggio visivo distintivo e coerente." },
+        { title: "Consegno", desc: "Ricevi asset pronti all'uso e linee guida chiare per applicarli." },
       ],
     },
   },
@@ -195,7 +198,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     en: {
       title: "Content & Visual",
       intro:
-        "Great content makes your brand come alive. Through professional photography and social media management — in collaboration with Project Visibility — we produce visuals and stories that engage your audience.",
+        "Great content makes your brand come alive. I shoot the photos myself; the social media side I run together with Project Visibility. Visuals and stories that engage your audience, made for your business and not bought from a stock library.",
       includes: [
         "Professional photo shoots",
         "Social media management (with Project Visibility)",
@@ -205,7 +208,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Consistent, on-brand content",
       ],
       approach: [
-        { title: "Plan", desc: "We define the story to tell and the content that supports your goals." },
+        { title: "Plan", desc: "I define the story to tell and the content that supports your goals." },
         { title: "Produce", desc: "Professional shoots and assets, crafted with care." },
         { title: "Publish", desc: "A consistent presence across your channels, managed for you." },
       ],
@@ -213,7 +216,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     de: {
       title: "Content & Visual",
       intro:
-        "Guter Content erweckt deine Marke zum Leben. Mit professioneller Fotografie und Social-Media-Betreuung – in Zusammenarbeit mit Project Visibility – produzieren wir Visuals und Geschichten, die deine Zielgruppe begeistern.",
+        "Guter Content erweckt deine Marke zum Leben. Die Fotos mache ich selber; die Social-Media-Betreuung führe ich zusammen mit Project Visibility. Visuals und Geschichten für deinen Betrieb, nicht aus einer Bilddatenbank gekauft.",
       includes: [
         "Professionelle Fotoshootings",
         "Social-Media-Betreuung (mit Project Visibility)",
@@ -223,7 +226,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Konsistenter, markengerechter Content",
       ],
       approach: [
-        { title: "Planen", desc: "Wir definieren die Geschichte und den Content, der deine Ziele unterstützt." },
+        { title: "Planen", desc: "Ich definiere die Geschichte und den Content, der deine Ziele unterstützt." },
         { title: "Produzieren", desc: "Professionelle Shootings und Assets, mit Sorgfalt erstellt." },
         { title: "Veröffentlichen", desc: "Eine konsistente Präsenz auf deinen Kanälen, für dich betreut." },
       ],
@@ -231,7 +234,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     it: {
       title: "Contenuti & Visual",
       intro:
-        "I buoni contenuti danno vita al tuo brand. Con shooting fotografici professionali e gestione social – in collaborazione con Project Visibility – produciamo visual e storie che coinvolgono il tuo pubblico.",
+        "I buoni contenuti danno vita al tuo brand. Le foto le faccio io; la parte social la seguo insieme a Project Visibility. Visual e storie fatte per la tua attività, non comprate da una banca di immagini.",
       includes: [
         "Shooting fotografici professionali",
         "Gestione social media (con Project Visibility)",
@@ -241,9 +244,69 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Contenuti coerenti e in linea con il brand",
       ],
       approach: [
-        { title: "Pianifichiamo", desc: "Definiamo la storia da raccontare e i contenuti che sostengono i tuoi obiettivi." },
-        { title: "Produciamo", desc: "Shooting e asset professionali, curati nel dettaglio." },
-        { title: "Pubblichiamo", desc: "Una presenza costante sui tuoi canali, gestita per te." },
+        { title: "Pianifico", desc: "Definisco con te la storia da raccontare e i contenuti che sostengono i tuoi obiettivi." },
+        { title: "Produco", desc: "Shooting e asset professionali, curati nel dettaglio." },
+        { title: "Pubblico", desc: "Una presenza costante sui tuoi canali, gestita per te." },
+      ],
+    },
+  },
+  // Scritta in prima persona, come la home e come la lettera ("Ich arbeite allein"), non con il
+  // "wir" che le altre tre pagine hanno ereditato: chi arriva qui dopo una lettera che dice
+  // "nessun callcenter, sempre la stessa persona" non deve trovare un "noi".
+  // Nessuna promessa di risultato: il budget e la piattaforma non sono sotto il suo controllo.
+  ads: {
+    en: {
+      title: "Advertising",
+      intro:
+        "Ads only work when what they point at works. I make the creatives, set up the campaign on Google and Meta, and send people to a page built to make them act — not to a homepage where they get lost. You set the budget, and it stays on your own account.",
+      includes: [
+        "Google Ads and Meta campaign setup",
+        "Creatives: graphics, flyers, short video, ad copy",
+        "A landing page built for the campaign",
+        "Audiences and areas defined with you",
+        "Conversion tracking, so you see what came back",
+        "Your budget stays on your account, always",
+      ],
+      approach: [
+        { title: "Decide", desc: "We agree what a new customer is worth to you. That number sets the budget, not the other way round." },
+        { title: "Build", desc: "Creatives and landing page first. Ads that point at a weak page burn money." },
+        { title: "Measure", desc: "A short monthly report in plain words: spend, enquiries, cost per enquiry." },
+      ],
+    },
+    de: {
+      title: "Werbung",
+      intro:
+        "Werbung wirkt nur, wenn das Ziel funktioniert. Ich mache die Sujets, richte die Kampagne bei Google und Meta ein und schicke die Leute auf eine Seite, die zum Handeln führt — nicht auf eine Startseite, wo sie sich verlieren. Das Budget bestimmst du, und es bleibt auf deinem eigenen Konto.",
+      includes: [
+        "Kampagnen bei Google Ads und Meta einrichten",
+        "Material: Sujets, Flyer, kurzes Video, Anzeigentexte",
+        "Eine Landingpage, die zur Kampagne passt",
+        "Zielgruppen und Gebiet zusammen festgelegt",
+        "Messung der Anfragen, damit du siehst, was zurückkommt",
+        "Dein Budget bleibt immer auf deinem Konto",
+      ],
+      approach: [
+        { title: "Festlegen", desc: "Wir halten fest, was dir ein neuer Kunde wert ist. Diese Zahl bestimmt das Budget, nicht umgekehrt." },
+        { title: "Bauen", desc: "Zuerst Sujets und Landingpage. Werbung auf eine schwache Seite verbrennt Geld." },
+        { title: "Messen", desc: "Ein kurzer Monatsbericht in klaren Worten: Ausgaben, Anfragen, Kosten pro Anfrage." },
+      ],
+    },
+    it: {
+      title: "Pubblicità",
+      intro:
+        "La pubblicità funziona solo se funziona quello che c'è dietro. Faccio i materiali, imposto la campagna su Google e Meta e mando le persone su una pagina fatta per farle agire — non sulla home, dove si perdono. Il budget lo decidi tu e resta sul tuo account.",
+      includes: [
+        "Campagne Google Ads e Meta, impostate da zero",
+        "Materiali: grafiche, flyer, video brevi, testi degli annunci",
+        "Una landing page costruita per la campagna",
+        "Pubblico e zona decisi insieme",
+        "Misurazione delle richieste, per vedere cosa è tornato indietro",
+        "Il budget resta sempre sul tuo account",
+      ],
+      approach: [
+        { title: "Decidiamo", desc: "Stabiliamo quanto vale per te un cliente nuovo. È quel numero a decidere il budget, non il contrario." },
+        { title: "Costruisco", desc: "Prima i materiali e la pagina. La pubblicità che porta su una pagina debole brucia soldi." },
+        { title: "Misuro", desc: "Un report mensile corto e in parole chiare: spesa, richieste, costo per richiesta." },
       ],
     },
   },
@@ -251,7 +314,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
     en: {
       title: "Email Marketing",
       intro:
-        "Email is still the channel that turns contacts into customers. We design newsletters and automated campaigns that nurture your audience and grow your business — measurable, on-brand and effective.",
+        "Email is still the channel that turns contacts into customers. I design newsletters and automated campaigns that nurture your audience and grow your business — measurable, on-brand and effective.",
       includes: [
         "Newsletter design and setup",
         "Automated email campaigns and flows",
@@ -261,15 +324,15 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Strategy to turn subscribers into clients",
       ],
       approach: [
-        { title: "Strategy", desc: "We define who to reach and what to say to drive results." },
-        { title: "Automate", desc: "We set up flows that work for you around the clock." },
-        { title: "Optimise", desc: "We measure and refine to keep improving conversions." },
+        { title: "Strategy", desc: "I define who to reach and what to say to drive results." },
+        { title: "Automate", desc: "I set up flows that work for you around the clock." },
+        { title: "Optimise", desc: "I measure and refine to keep improving conversions." },
       ],
     },
     de: {
       title: "E-Mail-Marketing",
       intro:
-        "E-Mail ist nach wie vor der Kanal, der Kontakte in Kunden verwandelt. Wir gestalten Newsletter und automatisierte Kampagnen, die deine Zielgruppe pflegen und dein Geschäft wachsen lassen – messbar, markengerecht und wirksam.",
+        "E-Mail ist nach wie vor der Kanal, der Kontakte in Kunden verwandelt. Ich gestalte Newsletter und automatisierte Kampagnen, die deine Zielgruppe pflegen und dein Geschäft wachsen lassen – messbar, markengerecht und wirksam.",
       includes: [
         "Newsletter-Design und -Einrichtung",
         "Automatisierte E-Mail-Kampagnen und Flows",
@@ -279,15 +342,15 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Strategie, um Abonnenten zu Kunden zu machen",
       ],
       approach: [
-        { title: "Strategie", desc: "Wir definieren, wen wir erreichen und was wir sagen, um Ergebnisse zu erzielen." },
-        { title: "Automatisieren", desc: "Wir richten Flows ein, die rund um die Uhr für dich arbeiten." },
-        { title: "Optimieren", desc: "Wir messen und verfeinern, um die Conversions stetig zu verbessern." },
+        { title: "Strategie", desc: "Ich lege fest, wen du erreichen willst und was gesagt werden muss." },
+        { title: "Automatisieren", desc: "Ich richte Flows ein, die rund um die Uhr für dich arbeiten." },
+        { title: "Optimieren", desc: "Ich messe und verfeinere, um die Conversions stetig zu verbessern." },
       ],
     },
     it: {
       title: "Email Marketing",
       intro:
-        "L'email è ancora il canale che trasforma i contatti in clienti. Creiamo newsletter e campagne automatizzate che coltivano il tuo pubblico e fanno crescere il business – misurabili, in linea col brand ed efficaci.",
+        "L'email è ancora il canale che trasforma i contatti in clienti. Creo newsletter e campagne automatizzate che coltivano il tuo pubblico e fanno crescere il business – misurabili, in linea col brand ed efficaci.",
       includes: [
         "Design e configurazione della newsletter",
         "Campagne email automatizzate e flussi",
@@ -297,9 +360,9 @@ const content: Record<Slug, Record<Lang, Service>> = {
         "Strategia per trasformare gli iscritti in clienti",
       ],
       approach: [
-        { title: "Strategia", desc: "Definiamo chi raggiungere e cosa dire per ottenere risultati." },
-        { title: "Automatizziamo", desc: "Creiamo flussi che lavorano per te 24 ore su 24." },
-        { title: "Ottimizziamo", desc: "Misuriamo e miglioriamo per aumentare le conversioni." },
+        { title: "Strategia", desc: "Definisco chi raggiungere e cosa dire per ottenere risultati." },
+        { title: "Automatizzo", desc: "Creo flussi che lavorano per te 24 ore su 24." },
+        { title: "Ottimizzo", desc: "Misuro e miglioro per aumentare le conversioni." },
       ],
     },
   },

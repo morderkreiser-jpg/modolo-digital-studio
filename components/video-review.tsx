@@ -53,7 +53,7 @@ export default function VideoReview({ lang }: { lang: Locale }) {
       <div className="mx-auto max-w-[1000px] rounded-[8px] border border-[color:var(--gold-line)] bg-[var(--ink-bg)] p-8 sm:p-12 md:p-16">
         <span className="micro-caps text-[var(--gilt)]">{t.kicker}</span>
         <h2 className="section-head display-space mt-4 text-[#17130e]">
-          {t.head} <em className="text-[var(--color-gold)]">{t.accent}</em>
+          {t.head} <em className="text-[var(--gilt)]">{t.accent}</em>
         </h2>
         <p className="mt-5 max-w-2xl font-light leading-relaxed text-[#17130e]/68">{t.desc}</p>
 
@@ -64,7 +64,7 @@ export default function VideoReview({ lang }: { lang: Locale }) {
             onChange={(e) => setBiz(e.target.value)}
             placeholder={t.placeholder}
             aria-label={t.placeholder}
-            className="flex-1 rounded-full border border-[color:var(--gold-line-strong)] bg-[#fbf8f2] px-6 py-4 text-[#17130e] outline-none transition-colors placeholder:text-[#17130e]/40 focus:border-[var(--color-gold)]"
+            className="flex-1 rounded-full border border-[color:var(--gold-line-strong)] bg-[#fbf8f2] px-6 py-4 text-[#17130e] transition-colors placeholder:text-[#17130e]/60 focus:border-[var(--color-gold)]"
           />
           <a
             href={wa}

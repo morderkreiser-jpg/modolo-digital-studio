@@ -3,6 +3,7 @@ import { SITE } from "@/lib/site";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { isRegion, DEFAULT_REGION, type Region } from "@/lib/region";
 import { contactAutoReply } from "@/lib/email";
+import { clientIp, contactPolicy } from "@/lib/rate-limit";
 
 // Server-side contact handler. Sends the enquiry to SITE.email via Resend when configured
 // (set RESEND_API_KEY, and CONTACT_FROM once the domain is verified). Until then it falls
@@ -49,7 +50,16 @@ async function readFields(request: Request): Promise<Fields> {
   };
 }
 
+// Bodies larger than this cannot be a real enquiry (5000-char message + fields is ~6 KB), so we
+// refuse them before parsing. No false positives, and it caps the work a flood can force on us.
+const MAX_BODY_BYTES = 100_000;
+
 export async function POST(request: Request) {
+  const declared = Number(request.headers.get("content-length") || 0);
+  if (declared > MAX_BODY_BYTES) {
+    return NextResponse.json({ ok: false, error: "too-large" }, { status: 413 });
+  }
+
   let fields: Fields;
   try {
     fields = await readFields(request);
@@ -72,6 +82,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
 
+  // Abuse control — AFTER the honeypot (a bot that fills it must keep seeing a fake 200, and must
+  // not consume a quota shared with humans behind the same NAT) and AFTER validation (a counter that
+  // only moves on requests that would really send mail means "emails", not "noise").
+  // Fails open: no IP header, or any internal error, and the message goes through.
+  const policy = contactPolicy(clientIp(request), email);
+  if (!policy.notify) {
+    return NextResponse.json(
+      { ok: false, error: "rate-limited", retryAfter: policy.retryAfter },
+      { status: 429, headers: { "Retry-After": String(policy.retryAfter) } },
+    );
+  }
+
   const subject = `New enquiry — ${nome}${azienda ? ` (${azienda})` : ""}${servizi ? ` — ${servizi}` : ""}`;
   const text = `Name: ${nome}\nEmail: ${email}\nCompany: ${azienda || "—"}\nServices: ${servizi || "—"}\nLanguage: ${locale}\n\n${messaggio || "(no message)"}`;
 
@@ -89,7 +111,10 @@ export async function POST(request: Request) {
 
     // 2) Branded, localized auto-reply to the visitor — from the monitored info@ address.
     //    Best-effort: a failure here never fails the request.
-    try {
+    //    Skipped when the policy says so: this address is the only part of the endpoint that mails a
+    //    STRANGER, i.e. the part that can be abused as a relay against our own domain reputation.
+    //    Suppressing it never costs a lead — the owner has already been notified above.
+    if (policy.autoReply) try {
       const replyFrom = `Modolo Digital Studio <${SITE.email}>`;
       const ar = contactAutoReply(locale, region, nome);
       await sendEmail(apiKey, { from: replyFrom, to: [email], reply_to: SITE.email, subject: ar.subject, text: ar.text, html: ar.html });

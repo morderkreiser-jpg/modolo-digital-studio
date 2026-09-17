@@ -11,7 +11,7 @@ const T: Record<Locale, { kicker: string; head: string; accent: string; points: 
     kicker: "Zero rischi per te",
     head: "Il rischio", accent: "me lo prendo io.",
     points: [
-      "Vedi e approvi tutto il design prima di pagare un franco. Se non ti convince, te ne vai senza costi.",
+      "Approvi il design prima che scriva una riga di codice. Se la prima proposta non ti convince, la rifaccio. Se non ti convince nemmeno la seconda, ci fermiamo e ti restituisco l'acconto.",
       "Il prezzo fisso lo decidiamo prima e lo metto per iscritto: quello paghi, nessuna sorpresa alla fine.",
       "Il sito è tuo. Nessun vincolo: se un giorno vuoi cambiare, te lo porti via.",
     ],
@@ -21,7 +21,7 @@ const T: Record<Locale, { kicker: string; head: string; accent: string; points: 
     kicker: "Null Risiko für dich",
     head: "Das Risiko", accent: "trage ich.",
     points: [
-      "Du siehst und genehmigst das ganze Design, bevor du einen Franken zahlst. Überzeugt es dich nicht, gehst du kostenlos.",
+      "Du genehmigst das Design, bevor ich eine Zeile Code schreibe. Überzeugt dich der erste Entwurf nicht, mache ich einen neuen. Überzeugt auch der zweite nicht, hören wir auf und du bekommst die Anzahlung zurück.",
       "Den Festpreis legen wir vorher fest und ich halte ihn schriftlich fest: den zahlst du, keine Überraschungen am Schluss.",
       "Die Website gehört dir. Keine Bindung: Willst du eines Tages wechseln, nimmst du sie mit.",
     ],
@@ -31,7 +31,7 @@ const T: Record<Locale, { kicker: string; head: string; accent: string; points: 
     kicker: "Zero risk for you",
     head: "The risk", accent: "is on me.",
     points: [
-      "You see and approve the whole design before you pay a franc. If it doesn't convince you, you walk away at no cost.",
+      "You approve the design before I write a line of code. If the first draft doesn't convince you, I redo it. If the second one doesn't either, we stop and you get your deposit back.",
       "We agree the fixed price up front and I put it in writing: that's what you pay, no surprises at the end.",
       "The site is yours. No lock-in: if you ever want to move on, you take it with you.",
     ],
@@ -49,7 +49,7 @@ export default function GuaranteeBand({ lang }: { lang: Locale }) {
             <span className="micro-caps text-[var(--gilt)]">{t.kicker}</span>
             <h2 className="section-head display-space mt-4 text-[#17130e]">
               <span className="block">{t.head}</span>
-              <em className="block text-[var(--color-gold)]">{t.accent}</em>
+              <em className="block text-[var(--gilt)]">{t.accent}</em>
             </h2>
           </div>
           <ul className="flex flex-col justify-center gap-5">

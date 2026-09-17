@@ -138,19 +138,20 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Contact form",
           body: [
-            "If you use our contact form, we collect the data you enter — your name, email address, company (optional) and your message — in order to process your enquiry and respond to you. The form is processed through Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA), which forwards the submitted data to us by email on our behalf. We use this data only to handle your request and do not pass it on to any other third parties.",
+            "If you use our contact form, we collect the data you enter — your name, email address, company (optional) and your message — in order to process your enquiry and respond to you. The form is processed on our own server and the resulting email is delivered on our behalf by Resend (Plus Five Five, Inc., San Francisco, USA). As a fallback, if the mail service is not configured, the enquiry is forwarded to us by Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA). We use this data only to handle your request and do not pass it on to any other third parties.",
           ],
         },
         {
           heading: "Transfer abroad",
           body: [
-            "Because Vercel and Formspree are based in the United States, your data may be processed outside Switzerland and the EU. These providers commit to appropriate safeguards (such as standard contractual clauses) to ensure an adequate level of data protection.",
+            "Because Vercel, Resend and Formspree are based in the United States, your data may be processed outside Switzerland and the EU. These providers commit to appropriate safeguards (such as standard contractual clauses) to ensure an adequate level of data protection.",
           ],
         },
         {
-          heading: "Cookies and analytics",
+          heading: "Cookies, analytics and advertising",
           body: [
             "This website uses Vercel Analytics and Vercel Speed Insights to measure aggregate traffic and performance. These tools are privacy-friendly: they do not set cookies, do not track you across other websites and do not build personal profiles. We use no advertising or third-party tracking. Fonts are hosted directly on our server (via next/font), so no connection to external font providers such as Google Fonts is established when you load the page.",
+            "While we are running online advertising, we additionally use Google Analytics 4 and the Google Ads tag (Google Ireland Ltd. / Google LLC) and, where relevant, the Meta pixel (Meta Platforms Ireland Ltd.), in order to see which advertisement actually produced an enquiry. These tools can set cookies and transmit data to the providers. They are loaded in a denied-by-default consent state and only ever store anything after you have agreed via the banner: if you choose \"Only essential\", or if no campaign is running, no advertising cookie is set at all. You can withdraw your agreement at any time by clearing this site's cookies in your browser, after which the question is asked again.",
           ],
         },
         {
@@ -199,19 +200,20 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Kontaktformular",
           body: [
-            "Wenn Sie unser Kontaktformular nutzen, erheben wir die von Ihnen eingegebenen Daten – Name, E-Mail-Adresse, Unternehmen (optional) und Ihre Nachricht –, um Ihre Anfrage zu bearbeiten und Ihnen zu antworten. Das Formular wird über Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA) verarbeitet, das die übermittelten Daten in unserem Auftrag per E-Mail an uns weiterleitet. Wir verwenden diese Daten ausschliesslich zur Bearbeitung Ihres Anliegens und geben sie nicht an weitere Dritte weiter.",
+            "Wenn Sie unser Kontaktformular nutzen, erheben wir die von Ihnen eingegebenen Daten – Name, E-Mail-Adresse, Unternehmen (optional) und Ihre Nachricht –, um Ihre Anfrage zu bearbeiten und Ihnen zu antworten. Das Formular wird auf unserem eigenen Server verarbeitet; die daraus entstehende E-Mail wird in unserem Auftrag von Resend (Plus Five Five, Inc., San Francisco, USA) zugestellt. Ersatzweise, falls der Maildienst nicht konfiguriert ist, leitet Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA) die Anfrage an uns weiter. Wir verwenden diese Daten ausschliesslich zur Bearbeitung Ihres Anliegens und geben sie nicht an weitere Dritte weiter.",
           ],
         },
         {
           heading: "Datenübermittlung ins Ausland",
           body: [
-            "Da Vercel und Formspree ihren Sitz in den USA haben, können Ihre Daten ausserhalb der Schweiz und der EU verarbeitet werden. Diese Anbieter verpflichten sich zu angemessenen Garantien (etwa Standardvertragsklauseln), um ein angemessenes Datenschutzniveau sicherzustellen.",
+            "Da Vercel, Resend und Formspree ihren Sitz in den USA haben, können Ihre Daten ausserhalb der Schweiz und der EU verarbeitet werden. Diese Anbieter verpflichten sich zu angemessenen Garantien (etwa Standardvertragsklauseln), um ein angemessenes Datenschutzniveau sicherzustellen.",
           ],
         },
         {
-          heading: "Cookies und Analyse",
+          heading: "Cookies, Analyse und Werbung",
           body: [
-            "Diese Website nutzt Vercel Analytics und Vercel Speed Insights, um aggregierte Zugriffe und die Performance zu messen. Diese Werkzeuge sind datenschutzfreundlich: Sie setzen keine Cookies, verfolgen dich nicht über andere Websites hinweg und erstellen keine persönlichen Profile. Wir verwenden keine Werbung und kein Tracking durch Dritte. Die Schriftarten werden direkt auf unserem Server gehostet (über next/font), sodass beim Laden der Seite keine Verbindung zu externen Schriftanbietern wie Google Fonts hergestellt wird.",
+            "Diese Website nutzt Vercel Analytics und Vercel Speed Insights, um aggregierte Zugriffe und die Performance zu messen. Diese Werkzeuge sind datenschutzfreundlich: Sie setzen keine Cookies, verfolgen Ihr Verhalten nicht über andere Websites hinweg und erstellen keine persönlichen Profile. Wir verwenden keine Werbung und kein Tracking durch Dritte. Die Schriftarten werden direkt auf unserem Server gehostet (über next/font), sodass beim Laden der Seite keine Verbindung zu externen Schriftanbietern wie Google Fonts hergestellt wird.",
+            "Solange wir Online-Werbung schalten, setzen wir zusätzlich Google Analytics 4 und das Google-Ads-Tag (Google Ireland Ltd. / Google LLC) sowie gegebenenfalls das Meta-Pixel (Meta Platforms Ireland Ltd.) ein, um zu erkennen, welche Anzeige tatsächlich zu einer Anfrage geführt hat. Diese Werkzeuge können Cookies setzen und Daten an die Anbieter übermitteln. Sie werden in einem standardmässig verweigerten Einwilligungszustand geladen und speichern erst dann etwas, wenn Sie über das Banner zugestimmt haben: Wählen Sie \"Nur Notwendige\" oder läuft gerade keine Kampagne, wird kein Werbe-Cookie gesetzt. Sie können Ihre Einwilligung jederzeit widerrufen, indem Sie die Cookies dieser Website in Ihrem Browser löschen; danach wird erneut gefragt.",
           ],
         },
         {
@@ -260,19 +262,20 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         {
           heading: "Modulo di contatto",
           body: [
-            "Quando utilizzi il nostro modulo di contatto, raccogliamo i dati che inserisci – nome, indirizzo e-mail, azienda (facoltativo) e il tuo messaggio – per gestire la tua richiesta e risponderti. Il modulo è elaborato tramite Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA), che ci inoltra per e-mail i dati inviati per nostro conto. Utilizziamo questi dati esclusivamente per gestire la tua richiesta e non li comunichiamo ad altri terzi.",
+            "Quando utilizzi il nostro modulo di contatto, raccogliamo i dati che inserisci – nome, indirizzo e-mail, azienda (facoltativo) e il tuo messaggio – per gestire la tua richiesta e risponderti. Il modulo è elaborato sul nostro server e l’e-mail che ne deriva è recapitata per nostro conto da Resend (Plus Five Five, Inc., San Francisco, USA). In riserva, se il servizio di posta non è configurato, la richiesta ci viene inoltrata da Formspree, Inc. (2000 Lakewood Way, Harahan, LA 70123, USA). Utilizziamo questi dati esclusivamente per gestire la tua richiesta e non li comunichiamo ad altri terzi.",
           ],
         },
         {
           heading: "Trasferimento dei dati all'estero",
           body: [
-            "Poiché Vercel e Formspree hanno sede negli Stati Uniti, i tuoi dati possono essere trattati al di fuori della Svizzera e dell'UE. Questi fornitori si impegnano ad adottare garanzie adeguate (come le clausole contrattuali tipo) per assicurare un livello di protezione dei dati adeguato.",
+            "Poiché Vercel, Resend e Formspree hanno sede negli Stati Uniti, i tuoi dati possono essere trattati al di fuori della Svizzera e dell'UE. Questi fornitori si impegnano ad adottare garanzie adeguate (come le clausole contrattuali tipo) per assicurare un livello di protezione dei dati adeguato.",
           ],
         },
         {
-          heading: "Cookie e statistiche",
+          heading: "Cookie, statistiche e pubblicità",
           body: [
             "Questo sito utilizza Vercel Analytics e Vercel Speed Insights per misurare il traffico aggregato e le prestazioni. Questi strumenti rispettano la privacy: non utilizzano cookie, non ti tracciano su altri siti e non creano profili personali. Non utilizziamo pubblicità né tracciamento di terze parti. I caratteri tipografici sono ospitati direttamente sul nostro server (tramite next/font): di conseguenza, durante il caricamento della pagina non viene stabilita alcuna connessione con fornitori di font esterni come Google Fonts.",
+            "Quando sono attive campagne pubblicitarie online, utilizziamo inoltre Google Analytics 4 e il tag Google Ads (Google Ireland Ltd. / Google LLC) e, se pertinente, il pixel di Meta (Meta Platforms Ireland Ltd.), per capire quale annuncio ha effettivamente generato una richiesta. Questi strumenti possono installare cookie e trasmettere dati ai rispettivi fornitori. Vengono caricati con il consenso negato per impostazione predefinita e memorizzano qualcosa solo dopo che hai acconsentito tramite il banner: se scegli \"Solo essenziali\", o se non è in corso alcuna campagna, non viene installato alcun cookie pubblicitario. Puoi revocare il consenso in qualsiasi momento cancellando i cookie di questo sito dal tuo browser: la domanda ti verrà riproposta.",
           ],
         },
         {

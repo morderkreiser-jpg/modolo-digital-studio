@@ -45,3 +45,12 @@ next-env.d.ts
 # local redesign scratch (screenshots + full-page capture tool) and dev log
 /.redesign/
 /.dev-server.log
+
+# MCP: contiene una chiave API personale. Il file resta in locale, fuori da git.
+.mcp.json
+
+# Materiale di acquisizione: elenchi di imprese, partner e lettere.
+# Sono dati personali di terzi e il repo e' PUBBLICO su GitHub: non devono finirci mai.
+/scripts/output/
+/scripts/*.csv
+/scripts/*.pdf

@@ -8,7 +8,6 @@ import { localizedHref, type Locale } from "./i18n";
 import { WEBSITES, CARE, BRANDING } from "./pricing";
 import { DEFAULT_REGION, type Region } from "./region";
 import { LOCAL_AREAS, type CitySlug } from "./local-seo";
-import { REVIEWS, AGGREGATE } from "../data/reviews";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -63,24 +62,26 @@ const verifiedLocalData = SITE.googleBusiness
   ? { geo: geoCoordinates, openingHoursSpecification: OPENING_HOURS_CH }
   : {};
 
-// Emits aggregateRating + review ONLY when data/reviews.ts holds real reviews. Never a
-// self-serving empty/fake rating (Google penalizes that), so returns {} while the file is empty.
+// Emette SEMPRE nulla, e non e' una svista: e' la regola di Google, non una cautela nostra.
+//
+// "Review snippet" structured data guidelines:
+//   "If the entity that's being reviewed controls the reviews about itself, their pages that use
+//    LocalBusiness or any other type of Organization structured data are ineligible for star
+//    review feature. For example, a review about entity A is placed on the website of entity A,
+//    either directly in their structured data or through an embedded third-party widget (for
+//    example, Google Business reviews or Facebook reviews widget)."
+//
+// Le recensioni in data/reviews.ts sono autentiche e verificabili sulla scheda Google, ma sono
+// ospitate sul dominio dell'azienda recensita: per Google restano "self-serving" QUALUNQUE sia il
+// loro numero. Quindi niente aggregateRating e niente Review qui — le stelle nei risultati di
+// ricerca arrivano dalla scheda Google Business, che e' il canale legittimo per ottenerle.
+//
+// Restano visibili ai visitatori in components/testimonials.tsx: quello e' lecito, ed e' anche il
+// posto dove servono davvero, perche' le legge una persona che sta decidendo se scriverti.
+//
+// NON reintrodurre un aggregateRating "adesso che le recensioni sono tante": il numero non c'entra.
 function aggregateReviewFields() {
-  if (!AGGREGATE) return {};
-  return {
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: AGGREGATE.ratingValue,
-      reviewCount: AGGREGATE.reviewCount,
-    },
-    review: REVIEWS.map((r) => ({
-      "@type": "Review",
-      author: { "@type": "Person", name: r.author },
-      datePublished: r.datePublished,
-      reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
-      reviewBody: r.body,
-    })),
-  };
+  return {};
 }
 
 export function homeGraph(locale: Locale) {
@@ -98,7 +99,6 @@ export function homeGraph(locale: Locale) {
     email: SITE.email,
     address: postalAddressIt,
     areaServed: { "@type": "Country", name: "Italy" },
-    priceRange: "EUR 900-4800",
     inLanguage: "it",
     parentOrganization: { "@id": `${SITE.url}/#organization` },
   };
@@ -133,7 +133,7 @@ export function homeGraph(locale: Locale) {
         address: postalAddress,
         ...verifiedLocalData,
         areaServed: { "@type": "Country", name: "Switzerland" },
-        priceRange: "CHF 1900-8500",
+        priceRange: "CHF 190-7400",
         inLanguage: locale,
         ...(googleBusinessSameAs.length ? { sameAs: googleBusinessSameAs } : {}),
         ...aggregateReviewFields(),
@@ -218,7 +218,7 @@ export function localAreaGraph(slug: CitySlug, locale: Locale) {
         email: SITE.email,
         address: postalAddress,
         areaServed,
-        priceRange: "CHF 1900-8500",
+        priceRange: "CHF 190-7400",
         inLanguage: locale,
         parentOrganization: { "@id": `${SITE.url}/#organization` },
         founder: { "@type": "Person", name: SITE.founder },
@@ -240,7 +240,6 @@ function priceSpec(price: number, from: boolean, recurring: boolean, region: Reg
   const spec: Record<string, unknown> = {
     "@type": "UnitPriceSpecification",
     priceCurrency: region === "it" ? "EUR" : "CHF",
-    valueAddedTaxIncluded: false,
   };
   if (from) spec.minPrice = price;
   else spec.price = price;

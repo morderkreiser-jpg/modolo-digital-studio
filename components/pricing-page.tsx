@@ -24,6 +24,14 @@ import {
 const POPULAR: Record<Locale, string> = { en: "Popular", de: "Beliebt", it: "Consigliato" };
 const KICKER: Record<Locale, string> = { en: "Pricing", de: "Preise", it: "Listino" };
 
+// Pre-filled WhatsApp text. WhatsApp sends no referrer, so naming the page inside the message
+// is the only thing that tells an incoming chat apart from every other entry point.
+const WHATSAPP_MSG: Record<Locale, string> = {
+  en: "Hi Francesco, I've looked at your pricing and I'd like to talk about a project.",
+  de: "Hallo Francesco, ich habe deine Preise angeschaut und möchte über ein Projekt sprechen.",
+  it: "Ciao Francesco, ho guardato i prezzi e vorrei parlare di un progetto.",
+};
+
 // Thousands separator per display locale (English comma, Swiss German apostrophe, Italian dot)
 // so the separator is unambiguous in each language. Formatted manually rather than via Intl so
 // the result is byte-identical on server and client regardless of the runtime's ICU data.
@@ -40,7 +48,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
   const region: Region = "ch";
   const reduce = useReducedMotion();
   const ui = PRICING_UI[lang];
-  const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}`;
+  const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(WHATSAPP_MSG[lang])}`;
   const sep = THOUSANDS[lang];
   const cur = CURRENCY[region];
   const amount = (n: number) => `${cur} ${groupThousands(n, sep)}`;
@@ -70,7 +78,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
           <div>
             <span className="micro-caps text-[var(--gilt)]">{KICKER[lang]} · {regionName}</span>
             <h1 className="page-h1 display-space mt-4 text-[#17130e]">
-              {ui.heading1}<em className="text-[var(--color-gold)]">{ui.headingAccent}</em>
+              {ui.heading1}<em className="text-[var(--gilt)]">{ui.headingAccent}</em>
             </h1>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
@@ -143,7 +151,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
       {/* 02 · CARE PLANS */}
       <section className={`${container} py-12 md:py-16`}>
         <SectionHead num="02" title={CARE.title[lang]} tagline={CARE.tagline[lang]} />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {CARE.plans.map((p, i) => (
             <motion.div
               key={i}

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Poppins, Fraunces, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Tracking from "@/components/analytics";
+import ConsentBanner from "@/components/consent-banner";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { SITE } from "@/lib/site";
@@ -54,7 +56,7 @@ const KEYWORDS: Record<Locale, string[]> = {
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
@@ -150,6 +152,9 @@ export default async function LangLayout({
         </MotionProvider>
         <Analytics />
         <SpeedInsights />
+        {/* Ad tags + WhatsApp-click conversions. Renders nothing until a tag ID is set in env. */}
+        <Tracking />
+        <ConsentBanner lang={lang} />
       </body>
     </html>
   );
