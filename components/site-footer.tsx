@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { localizedHref, type Locale } from "@/lib/i18n";
 
-const T: Record<Locale, { imprint: string; privacy: string; madeWith: string }> = {
-  en: { imprint: "Legal Notice", privacy: "Privacy Policy", madeWith: "Made with care in Switzerland" },
-  de: { imprint: "Impressum", privacy: "Datenschutz", madeWith: "Mit Sorgfalt in der Schweiz erstellt" },
-  it: { imprint: "Note legali", privacy: "Privacy", madeWith: "Fatto con cura in Svizzera" },
+const T: Record<Locale, { imprint: string; privacy: string; madeWith: string; card: string }> = {
+  en: { imprint: "Legal Notice", privacy: "Privacy Policy", madeWith: "Made with care in Switzerland", card: "Save my contact" },
+  de: { imprint: "Impressum", privacy: "Datenschutz", madeWith: "Mit Sorgfalt in der Schweiz erstellt", card: "Kontakt speichern" },
+  it: { imprint: "Note legali", privacy: "Privacy", madeWith: "Fatto con cura in Svizzera", card: "Salva il contatto" },
 };
 
 /**
@@ -29,6 +29,11 @@ export default function SiteFooter({ lang, marker }: { lang: Locale; marker?: st
             <span className="micro-caps tnum" style={{ color: "rgba(31,27,22,0.55)" }}>© {year} Modolo Digital Studio</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {/* The digital business card. In gilt rather than grey because it is the only ACTION
+                in a row of legal links — one tap and the studio is in the reader's address book.
+                Deliberately the only entry point from the site: the card is noindex and stays out
+                of the nav and the sitemap. */}
+            <Link href={localizedHref(lang, "/biglietto")} className="micro-caps transition-colors text-[color:var(--gilt)] hover:text-[#17130e]">{t.card}</Link>
             <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.imprint}</Link>
             <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.privacy}</Link>
             <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[color:rgba(31,27,22,0.6)] transition-colors hover:text-[#17130e]">

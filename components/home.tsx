@@ -111,7 +111,7 @@ const translations = {
       errEmailInvalid: "Please enter a valid email address.",
       errMessage: "Please enter a message.",
     },
-    footer: { madeWith: "Made with care in Switzerland", imprint: "Legal Notice", privacy: "Privacy Policy" },
+    footer: { madeWith: "Made with care in Switzerland", imprint: "Legal Notice", privacy: "Privacy Policy", card: "Save my contact" },
   },
   de: {
     nav: { services: "Leistungen", pricing: "Preise", portfolio: "Portfolio", about: "Über mich", faq: "FAQ", contact: "Kontakt", backToTop: "Nach oben" },
@@ -201,7 +201,7 @@ const translations = {
       errEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       errMessage: "Bitte gib eine Nachricht ein.",
     },
-    footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt", imprint: "Impressum", privacy: "Datenschutz" },
+    footer: { madeWith: "Mit Sorgfalt in der Schweiz erstellt", imprint: "Impressum", privacy: "Datenschutz", card: "Kontakt speichern" },
   },
   it: {
     nav: { services: "Servizi", pricing: "Prezzi", portfolio: "Portfolio", about: "Chi sono", faq: "FAQ", contact: "Scrivimi", backToTop: "Torna su" },
@@ -291,7 +291,7 @@ const translations = {
       errEmailInvalid: "Inserisci un indirizzo email valido.",
       errMessage: "Inserisci un messaggio.",
     },
-    footer: { madeWith: "Fatto con cura in Svizzera", imprint: "Note legali", privacy: "Privacy" },
+    footer: { madeWith: "Fatto con cura in Svizzera", imprint: "Note legali", privacy: "Privacy", card: "Salva il contatto" },
   },
 };
 
@@ -850,6 +850,9 @@ export default function Home({ lang }: { lang: Lang }) {
               <span className="micro-caps tnum" style={{ color: "rgba(31,27,22,0.55)" }}>© {new Date().getFullYear()} Modolo Digital Studio</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              {/* See the note in components/site-footer.tsx: the business card's only entry
+                  point from the site, gilt because it is the one action in a row of legal links. */}
+              <Link href={localizedHref(lang, "/biglietto")} className="micro-caps transition-colors text-[color:var(--gilt)] hover:text-[#17130e]">{t.footer.card}</Link>
               <Link href={localizedHref(lang, "/impressum")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.footer.imprint}</Link>
               <Link href={localizedHref(lang, "/privacy")} className="micro-caps transition-colors text-[color:rgba(31,27,22,0.6)] hover:text-[#17130e]">{t.footer.privacy}</Link>
               <a href="https://instagram.com/modolodigitalstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[color:rgba(31,27,22,0.6)] transition-colors hover:text-[#17130e]">
