@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { ArrowRight, Send, CheckCircle2, AlertCircle, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
@@ -687,13 +687,22 @@ export default function Home({ lang }: { lang: Lang }) {
                       </span>
                     </button>
                   </h3>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: "easeInOut" }}>
-                        <p className="max-w-2xl pb-7 pr-8 font-light leading-relaxed text-[#17130e]/65">{faq.a}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Sempre montata, anche da chiusa: prima le risposte non aperte non esistevano
+                      nel DOM, quindi non le leggeva nessuno — ne' un visitatore che cerca nella
+                      pagina, ne' un motore di ricerca. `inert` da chiusa la toglie dal focus e
+                      dalla lettura assistiva, cosi' aria-expanded="false" resta vero. */}
+                  <motion.div
+                    id={`faq-a-${i}`}
+                    role="region"
+                    aria-labelledby={`faq-q-${i}`}
+                    inert={!isOpen}
+                    initial={false}
+                    animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
+                    transition={{ duration: reduce ? 0 : 0.3, ease: "easeInOut" }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <p className="max-w-2xl pb-7 pr-8 font-light leading-relaxed text-[#17130e]/65">{faq.a}</p>
+                  </motion.div>
                 </div>
               );
             })}
