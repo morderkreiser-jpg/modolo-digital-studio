@@ -23,7 +23,7 @@ export const FAQS: Record<Locale, QA[]> = {
     },
     {
       q: "Do you work all over Switzerland?",
-      a: "Yes. I work with clients across Switzerland, remotely and in person when needed. Distance is no problem: most of the work happens online, with regular calls and updates — and you always talk to me.",
+      a: "Yes. I work with clients across Switzerland, remotely and in person when needed. Distance is no problem: most of the work happens online, with regular written updates — and you always talk to me.",
     },
     {
       q: "Will the website be optimised for Google?",
@@ -49,7 +49,7 @@ export const FAQS: Record<Locale, QA[]> = {
     },
     {
       q: "Arbeitest du in der ganzen Schweiz?",
-      a: "Ja. Ich betreue Kunden in der ganzen Schweiz, remote und bei Bedarf persönlich. Distanz ist kein Problem: Der grösste Teil läuft online, mit regelmässigen Calls und Updates — und du sprichst immer mit mir.",
+      a: "Ja. Ich betreue Kunden in der ganzen Schweiz, remote und bei Bedarf persönlich. Distanz ist kein Problem: Der grösste Teil läuft online, mit regelmässigen schriftlichen Updates — und du sprichst immer mit mir.",
     },
     {
       q: "Wird die Website für Google optimiert?",
@@ -75,7 +75,7 @@ export const FAQS: Record<Locale, QA[]> = {
     },
     {
       q: "Lavori in tutta la Svizzera?",
-      a: "Sì. Seguo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è un problema: gran parte del lavoro è online, con call e aggiornamenti costanti — e rispondo sempre io.",
+      a: "Sì. Seguo clienti in tutta la Svizzera, da remoto e di persona quando serve. La distanza non è un problema: gran parte del lavoro è online, con aggiornamenti scritti costanti — e rispondo sempre io.",
     },
     {
       q: "Il sito sarà ottimizzato per Google?",

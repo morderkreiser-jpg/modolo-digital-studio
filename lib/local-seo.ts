@@ -116,9 +116,9 @@ export const LOCAL_AREAS: Record<CitySlug, LocalArea> = {
     h1: { de: "Website erstellen lassen in der ", it: "Farsi creare un sito in ", en: "Get your website built across " },
     h1accent: { de: "ganzen Schweiz", it: "tutta la Svizzera", en: "Switzerland" },
     intro: {
-      de: "Egal ob Winterthur, Zürich, St. Gallen oder Tessin — ich baue Websites für kleine Betriebe in der ganzen Schweiz. Das meiste läuft online, mit Calls und Updates; wenn es Sinn macht, komme ich vorbei. Die Distanz war noch nie ein Problem.",
-      it: "Che tu sia a Winterthur, Zurigo, San Gallo o in Ticino — costruisco siti per piccole attività in tutta la Svizzera. Gran parte del lavoro è online, con call e aggiornamenti; quando ha senso, passo di persona. La distanza non è mai stata un problema.",
-      en: "Whether you're in Winterthur, Zürich, St. Gallen or Ticino — I build websites for small businesses across Switzerland. Most of it happens online, with calls and updates; when it makes sense, I come by. Distance has never been a problem.",
+      de: "Egal ob Winterthur, Zürich, St. Gallen oder Tessin — ich baue Websites für kleine Betriebe in der ganzen Schweiz. Das meiste läuft online, mit schriftlichen Updates; wenn es Sinn macht, komme ich vorbei. Die Distanz war noch nie ein Problem.",
+      it: "Che tu sia a Winterthur, Zurigo, San Gallo o in Ticino — costruisco siti per piccole attività in tutta la Svizzera. Gran parte del lavoro è online, con aggiornamenti scritti; quando ha senso, passo di persona. La distanza non è mai stata un problema.",
+      en: "Whether you're in Winterthur, Zürich, St. Gallen or Ticino — I build websites for small businesses across Switzerland. Most of it happens online, with written updates; when it makes sense, I come by. Distance has never been a problem.",
     },
     localTitle: { de: "100% Made in Switzerland", it: "100% Made in Switzerland", en: "100% Made in Switzerland" },
     localBody: {
