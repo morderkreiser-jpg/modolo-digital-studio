@@ -309,3 +309,69 @@ p, li, blockquote, figcaption { text-wrap: pretty; }
 @media (prefers-reduced-motion: no-preference) {
   .mds-line > * { transform: translateY(110%); animation: mds-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
 }
+/* ============================================================================
+   STIMMEN — le quattro recensioni come UNA sola banda editoriale.
+   Scritta a mano e non con le utility di griglia per lo stesso motivo di
+   .mds-split-*: il numero di colonne e' la sostanza di questo blocco e non deve
+   dipendere da quali utility il build decide di emettere.
+
+   Il difetto che risolve: su desktop la quarta scheda cadeva da sola sulla riga
+   sotto (3+1), e le schede della prima riga si stiravano all'altezza della piu'
+   lunga, lasciando un buco verticale dentro quella corta. align-items:start
+   toglie lo stiramento; togliere la SCATOLA fa si' che la differenza di
+   lunghezza legga come un finale di colonna invece che come un riquadro mezzo
+   vuoto — ed era la scatola, non la griglia, la causa vera.
+   ========================================================================== */
+.mds-voices {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 3rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Stesso breakpoint del padding sm: della sezione, cosi' colonne e margini
+   cambiano insieme e non a due passi diversi. */
+@media (min-width: 640px) {
+  .mds-voices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5rem 2.5rem; }
+}
+/* La banda unica. Sotto i 1280px quattro colonne darebbero righe troppo strette
+   per una citazione; sopra, dentro max-w-6xl, stanno a ~264px per colonna. */
+@media (min-width: 1280px) {
+  .mds-voices { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3.5rem 2rem; }
+}
+
+.mds-voice {
+  border-top: 1px solid var(--gold-line);
+  padding-top: 1.25rem;
+}
+.mds-voice-fig { margin: 0; }
+.mds-voice figcaption { display: block; }
+
+.mds-voice-stars {
+  display: flex;
+  gap: 0.25rem;
+  color: var(--gilt);
+}
+.mds-voice-name    { display: block; margin-top: 0.75rem;  color: #17130e; }
+.mds-voice-company { display: block; margin-top: 0.125rem; color: rgba(23, 19, 14, 0.62); }
+/* 0.62 e non 0.45: a 0.45 l'etichetta stava a 2,87:1 sul pannello, sotto la soglia di 4,5
+   per un testo di questa misura. A 0.62 sta a 4,80:1 e resta comunque una nota secondaria. */
+.mds-voice-lang    { display: block; margin-top: 0.5rem;   color: rgba(23, 19, 14, 0.62); }
+/* La voce scritta nella lingua di chi legge. Nessun bordo diverso, nessun corpo
+   piu' grande, nessun badge: cambia il colore di QUESTA riga e basta. E' un
+   fatto ("originale, non tradotto"), quindi puo' stare su una voce senza
+   declassare le altre tre — e su /it tocca le italiane, non il dialetto. */
+.mds-voice-lang-native { color: var(--gilt); }
+
+.mds-voice blockquote {
+  margin: 1rem 0 0;
+  padding: 0;
+  font-weight: 300;
+  line-height: 1.625;
+  color: rgba(23, 19, 14, 0.85);
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
