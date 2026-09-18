@@ -61,6 +61,27 @@ export function reviewTarget(profile: ReviewProfile): string {
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 
+// The Winterthur profile's Google place id, from the verified writereview URL above.
+const PLACE_ID_CH = "ChIJLfH5iSWZmkcR04-71ASOXUI";
+
+/**
+ * Where to send someone to READ the reviews — not to write one.
+ *
+ * The distinction matters and is easy to get wrong: reviewTarget() opens the review COMPOSER,
+ * which is the right thing on a printed card handed to a finished client and exactly the wrong
+ * thing on the business card of someone you met five minutes ago. Asking a stranger to rate you
+ * before you have done anything for them is the one move that makes the four real reviews look
+ * worse than none.
+ *
+ * `?q=place_id:` is Google's documented Maps URL form and survives link-scheme changes better
+ * than the g.page short links; SITE.googleBusiness (env) overrides it when set.
+ */
+export function googleProfileUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_GOOGLE_BUSINESS_URL?.trim();
+  if (configured) return configured;
+  return `https://www.google.com/maps/place/?q=place_id:${PLACE_ID_CH}`;
+}
+
 /** True when a real Google review link exists (env or built in) rather than the Maps fallback. */
 export function isReviewLinkConfigured(profile: ReviewProfile): boolean {
   const v = (profile === "ch" ? process.env.GOOGLE_REVIEW_CH : process.env.GOOGLE_REVIEW_IT)?.trim();

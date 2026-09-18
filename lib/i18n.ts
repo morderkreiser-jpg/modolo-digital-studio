@@ -35,6 +35,8 @@ export const SLUG_TRANSLATIONS: Record<string, Record<Locale, string>> = {
   servizi: { en: "services", de: "leistungen", it: "servizi" },
   prezzi: { en: "pricing", de: "preise", it: "prezzi" },
   privacy: { en: "privacy", de: "datenschutz", it: "privacy" },
+  offerta: { en: "offer", de: "angebot", it: "offerta" },
+  biglietto: { en: "card", de: "visitenkarte", it: "biglietto" },
 };
 
 // Reverse lookup: any public slug -> canonical folder segment.

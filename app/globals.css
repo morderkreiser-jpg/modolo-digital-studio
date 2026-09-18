@@ -375,3 +375,32 @@ p, li, blockquote, figcaption { text-wrap: pretty; }
   -webkit-hyphens: auto;
   hyphens: auto;
 }
+
+/* ============================================================================
+   BIGLIETTO DA VISITA ELETTRONICO (/card · /de/visitenkarte · /it/biglietto)
+   ========================================================================== */
+
+/* Micro-caps in Space Grotesk. `.micro-caps` esiste gia' ma e' POPPINS: su questa pagina
+   sarebbe un secondo carattere, e il cartoncino stampato ne ha UNO solo. Questa classe e'
+   usata solo dal biglietto, dove la coerenza con l'oggetto di carta e' il punto. */
+.card-caps {
+  font-family: var(--font-space), system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 500;
+  font-feature-settings: "tnum";
+}
+
+/* Il QR ha due vite. Su telefono chi guarda la pagina il QR non lo usa (ce l'ha gia' aperto):
+   sta chiuso in un <details>, zero JavaScript. Su schermo grande serve invece a Francesco, che
+   mostra lo schermo perche' l'altro lo inquadri: li' e' sempre visibile. Due elementi distinti
+   con una media query ciascuno, non un solo elemento con due comportamenti — quella e' la
+   ricetta del "su mobile si apre da solo". */
+@media (min-width: 900px) { .mds-qr-fold { display: none; } }
+@media (max-width: 899px) { .mds-qr-static { display: none; } }
+
+/* Il triangolino del <details>. `list-none` da solo non basta su Safari, che disegna il marker
+   con uno pseudo-elemento suo: senza questa riga il QR e la riga di soccorso mostrerebbero una
+   freccetta di sistema dentro un'interfaccia che non ne ha nessun'altra. */
+.card-summary::-webkit-details-marker { display: none; }

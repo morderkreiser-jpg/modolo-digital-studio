@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
       // Italian keeps its slugs; EN /privacy is already canonical — no redirect needed.
     ];
   },
+  // A second, file-looking URL for the business card's contact file. Some in-app browsers
+  // (WhatsApp's in particular) ignore Content-Disposition and save the download under the last
+  // path segment: from /api/vcard that produces a file called "vcard" with no extension, which
+  // Android will not hand to Contacts. A URL that already ends in .vcf survives that.
+  // The path contains a dot, so proxy.ts's matcher skips it and no locale rewrite interferes.
+  async rewrites() {
+    return [{ source: "/francesco-modolo.vcf", destination: "/api/vcard" }];
+  },
 };
 
 export default nextConfig;

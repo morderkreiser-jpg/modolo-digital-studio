@@ -25,10 +25,10 @@ import { REGION_COOKIE, DEFAULT_REGION } from "@/lib/region";
 const COOKIE = "NEXT_LOCALE";
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
-// Best supported locale from an Accept-Language header, honouring q-values. Returns
-// DEFAULT_LOCALE (en) when nothing matches, so English stays the negotiation fallback.
-function negotiateLocale(header: string | null): Locale {
-  if (!header) return DEFAULT_LOCALE;
+// Best supported locale from an Accept-Language header, honouring q-values. Returns `fallback`
+// when nothing matches — DEFAULT_LOCALE (en) everywhere except the business card, see CARD_PATH.
+function negotiateLocale(header: string | null, fallback: Locale = DEFAULT_LOCALE): Locale {
+  if (!header) return fallback;
   const ranked = header
     .split(",")
     .map((part) => {
@@ -42,8 +42,18 @@ function negotiateLocale(header: string | null): Locale {
   for (const { base } of ranked) {
     if (isLocale(base)) return base; // "de-ch" -> "de", "it-it" -> "it", "en-us" -> "en"
   }
-  return DEFAULT_LOCALE;
+  return fallback;
 }
+
+// The digital business card (canonical segment; public slugs are /card, /de/visitenkarte,
+// /it/biglietto). It is the ONE page where an unrecognised phone language should land on German
+// rather than English: it is handed over in person in Winterthur, and a large share of the trades
+// there run their phone in Albanian, Portuguese, Turkish or Serbian while doing every bit of
+// business in German. Sending those people to an English business card is the wrong guess, and
+// unlike the rest of the site there is no second chance — the card is read once, on the spot.
+// Scoped deliberately to this path: the rest of the site keeps English as its clean-URL fallback,
+// which is what is already indexed.
+const CARD_PATH = "/biglietto";
 
 // Set the pricing-region cookie from the visitor's country (Vercel geo header) on first
 // visit, unless they already have one (an explicit currency-toggle choice persists).
@@ -98,7 +108,8 @@ export function proxy(request: NextRequest) {
   // 3b) No stored choice -> negotiate Accept-Language (German primary on .ch). Redirect only to
   //     a prefixed locale (/de|/it), which re-enters via case 1/2, never case 3 — so no loop.
   if (!cookieLocale) {
-    const preferred = negotiateLocale(request.headers.get("accept-language"));
+    const isCard = canonicalizeSlugPath(pathname).replace(/\/$/, "") === CARD_PATH;
+    const preferred = negotiateLocale(request.headers.get("accept-language"), isCard ? "de" : DEFAULT_LOCALE);
     if (preferred !== DEFAULT_LOCALE) {
       const url = request.nextUrl.clone();
       url.pathname = localizedHref(preferred, canonicalizeSlugPath(pathname));
