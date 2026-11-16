@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
   --font-serif: Georgia, "Times New Roman", serif;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-space), system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -77,6 +77,15 @@
   --gold-line: rgba(31, 27, 22, 0.12);         /* hairline on light */
   --gold-line-strong: rgba(31, 27, 22, 0.2);
 
+  /* Homepage with the hero film (SPEC §5.6, Nov 2026). The film is the one dark surface. */
+  --film-bg: #17130e;
+  --film-cream: #f6f1e7;
+  --film-gold: #e8c877;
+  --live-green: #2b8a50;      /* the «live» dot next to a client's domain: decorative, >= 3:1 on cream/panel */
+  --sheet-radius: 28px;       /* section 01's cream sheet: overlap over the film = top radius */
+  --nav-h: 80px;              /* fixed nav height (components/site-nav.tsx: h-16 md:h-20) */
+  --mds-sticky-h: 0px;        /* set on <html> by the mobile sticky bar while it is visible */
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -109,6 +118,14 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+@media (max-width: 767px) {
+  :root { --nav-h: 64px; }
+}
+/* PORTRAIT_MQ (lib/film-media.ts): the hero's Layout P and the 20 px sheet use exactly this query. */
+@media (max-width: 767px), (orientation: portrait) and (max-aspect-ratio: 4/5) {
+  :root { --sheet-radius: 20px; }
 }
 
 .dark {
@@ -215,11 +232,18 @@
   text-wrap: balance;
   font-weight: 500;
 }
-.display-type em,
-.display-italic {
+.display-type em {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 500;
+}
+/* Step numbers and dashes on the inner pages. Was Fraunces italic (146 KB of font for a few
+   glyphs); Space Grotesk since Nov 2026 (SPEC D21 / §5.5). */
+.display-italic {
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 /* Tracked micro-caps kicker — the single most reliable "expensive" cue.
@@ -285,6 +309,82 @@ p, li, blockquote, figcaption { text-wrap: pretty; }
 @media (min-width: 768px) {
   .mds-split-4-8 { grid-template-columns: 4fr 8fr; column-gap: 4rem; }
   .mds-split-5-7 { grid-template-columns: 5fr 7fr; column-gap: 4rem; }
+}
+/* Three equal cards from 900 px (the offer ladder), one column below (SPEC §5.6; 14 px between
+   the stacked cards on phones). */
+.mds-cols-3 { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) {
+  .mds-cols-3 { gap: 20px; }
+}
+@media (min-width: 900px) {
+  .mds-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Homepage (SPEC §5.6). In-page anchors land below the fixed nav; keyboard focus on the film
+   (and on the nav while it floats over it) gets the light gold ring: the site-wide gilt ring is
+   lost on a mid-tone frame. */
+section[id],
+#gratis-check {
+  scroll-margin-top: calc(var(--nav-h) + 12px);
+}
+/* Pages that scroll natively (the homepage, the business card) glide to their anchors. Lenis pages
+   (components/smooth-scroll.tsx) put the class "lenis" on <html> and scroll themselves. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+[data-film] :focus-visible,
+[data-nav-mode="film"] :focus-visible {
+  outline: 2px solid var(--film-gold);
+  outline-offset: 3px;
+}
+
+/* Phone-only disclosure (homepage length, SPEC A15): a native <details> below 768 px; from 768 px
+   the content is always shown and the summary is gone. Guarded by @supports: a browser without
+   ::details-content keeps the working disclosure on desktop too, it never hides content for good.
+   .mds-more-head = a heading that replaces the summary on desktop (only where the guard applies). */
+.mds-more > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.mds-more > summary::-webkit-details-marker {
+  display: none;
+}
+.mds-more-icon {
+  transition: transform 0.25s ease;
+}
+.mds-more[open] .mds-more-icon {
+  transform: rotate(45deg);
+}
+.mds-more-head {
+  display: none;
+}
+@supports selector(details::details-content) {
+  @media (min-width: 768px) {
+    .mds-more > summary {
+      display: none;
+    }
+    .mds-more::details-content {
+      content-visibility: visible;
+    }
+    .mds-more-head {
+      display: block;
+    }
+  }
+}
+
+/* Chi siamo's entrance (SPEC D27: the framer rise, same 30 px and 0.8 s, now CSS). The content is
+   visible in the server HTML; components/home/rise.tsx arms it only for a block that starts below
+   the fold, and never under reduced motion. */
+[data-rise="armed"] {
+  opacity: 0;
+  transform: translateY(30px);
+}
+[data-rise="in"] {
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Discipline marquee — seamless auto-scroll (content is duplicated for the -50% loop). */

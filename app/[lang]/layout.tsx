@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Fraunces, Space_Grotesk } from "next/font/google";
+import { Poppins, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { notFound } from "next/navigation";
@@ -59,17 +59,8 @@ const poppins = Poppins({
   display: "swap",
 });
 
-// Fraunces: variable editorial serif — used ONLY for the small italic craft accents
-// (step numbers, dashes) below the fold. Italic-only + preload:false keeps its ~270 KB off
-// the critical path so it never competes with the LCP hero image; it swaps in on scroll.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  axes: ["opsz", "SOFT"],
-  style: "italic",
-  preload: false,
-  display: "swap",
-});
+// (Fraunces left in Nov 2026: 146 KB of font for a few italic step numbers. .display-italic is
+// Space Grotesk now, see app/globals.css; SPEC D21.)
 
 // Space Grotesk: modern techy grotesk — the display voice for the "immersive" direction.
 const spaceGrotesk = Space_Grotesk({
@@ -137,7 +128,7 @@ export default async function LangLayout({
   return (
     <html
       lang={HTML_LANG[lang]}
-      className={`${poppins.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${poppins.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <a

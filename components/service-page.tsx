@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
 import { localizedHref, type Locale } from "@/lib/i18n";
-import { SITE } from "@/lib/site";
-import { useRegion, whatsappHref } from "@/components/use-region";
+import { SERVICE_META } from "@/lib/site-data";
+import { waHref } from "@/lib/whatsapp";
+import { useRegion } from "@/components/use-region";
+import { PREFILL } from "@/content/home/prefills";
 
 export type Lang = Locale;
 export type Slug = "web" | "brand" | "content" | "ads" | "email";
@@ -26,21 +28,21 @@ const ui: Record<
     ctaText: string;
     ctaButton: string;
     ctaWhatsapp: string;
-    whatsappMsg: string;
     ctaPricing: string;
   }
 > = {
+  // ctaTitle/ctaText = PRICING_UI.ctaHeading/ctaText (COPY §16): the old text repeated the
+  // heading's verb ("Tell me about your business." / "Tell me about your project.").
   en: {
     label: "Service",
     includes: "What's included",
     approach: "How I work",
     other: "Other services",
-    back: "All services",
-    ctaTitle: "Ready to stand out?",
-    ctaText: "Tell me about your project. You get a fixed-price offer before I start.",
+    back: "All services and prices",
+    ctaTitle: "Tell me about your business.",
+    ctaText: "Write to me with what you need. I'll send you a fixed price, in writing.",
     ctaButton: "Write to me",
     ctaWhatsapp: "WhatsApp",
-    whatsappMsg: "Hi Francesco, I'd like to talk about a project.",
     ctaPricing: "See pricing",
   },
   de: {
@@ -48,12 +50,11 @@ const ui: Record<
     includes: "Was enthalten ist",
     approach: "Wie ich arbeite",
     other: "Weitere Leistungen",
-    back: "Alle Leistungen",
-    ctaTitle: "Bereit, dich abzuheben?",
-    ctaText: "Erzähl mir von deinem Projekt. Du bekommst vorher eine Offerte zum Festpreis.",
+    back: "Alle Leistungen und Preise",
+    ctaTitle: "Erzähl mir von deinem Betrieb.",
+    ctaText: "Schreib mir, was du brauchst. Ich schicke dir einen Fixpreis, schriftlich.",
     ctaButton: "Schreib mir",
     ctaWhatsapp: "WhatsApp",
-    whatsappMsg: "Hallo Francesco, ich möchte über ein Projekt sprechen.",
     ctaPricing: "Preise ansehen",
   },
   it: {
@@ -61,12 +62,11 @@ const ui: Record<
     includes: "Cosa include",
     approach: "Come lavoro",
     other: "Altri servizi",
-    back: "Tutti i servizi",
-    ctaTitle: "Pronto a distinguerti?",
-    ctaText: "Raccontami il tuo progetto. Ti mando un'offerta a prezzo fisso, prima di iniziare.",
+    back: "Tutti i servizi e i prezzi",
+    ctaTitle: "Raccontami della tua attività.",
+    ctaText: "Scrivimi cosa ti serve. Ti mando un prezzo fisso, per iscritto.",
     ctaButton: "Scrivimi",
     ctaWhatsapp: "WhatsApp",
-    whatsappMsg: "Ciao Francesco, vorrei parlare di un progetto.",
     ctaPricing: "Vedi i prezzi",
   },
 };
@@ -83,14 +83,14 @@ const content: Record<Slug, Record<Lang, Service>> = {
     en: {
       title: "Web & Development",
       intro:
-        "Fast, modern websites built to convert — designed around your brand and optimised to be found locally. From the first sketch to launch and beyond, I build digital foundations that truly work for your business.",
+        "Websites that load fast on a phone and show what a customer needs to know: what you offer, prices, opening hours, contact. With local SEO, so people nearby find your business.",
       includes: [
         "Custom web design tailored to your brand",
         "High-performance development (fast, secure, mobile-first)",
         "Local SEO optimisation to rank in your area",
-        "Google Business profile setup and optimisation",
+        "Google listing linked to the site",
         "Responsive layouts that look great on every device",
-        "Ongoing support and maintenance after launch",
+        "Care after launch if you want it: from CHF 49 a month",
       ],
       approach: [
         { title: "Strategy first", desc: "I start from your goals, your audience and your market — so every page has a purpose." },
@@ -101,14 +101,14 @@ const content: Record<Slug, Record<Lang, Service>> = {
     de: {
       title: "Web & Entwicklung",
       intro:
-        "Schnelle, moderne Websites, die konvertieren – gestaltet rund um deine Marke und optimiert, um lokal gefunden zu werden. Vom ersten Entwurf bis zum Launch und darüber hinaus baue ich digitale Grundlagen, die für dein Unternehmen wirklich funktionieren.",
+        "Websites, die auf dem Handy schnell laden und zeigen, was ein Kunde wissen muss: Angebot, Preise, Öffnungszeiten, Kontakt. Dazu lokales SEO, damit man deinen Betrieb in der Region findet.",
       includes: [
         "Massgeschneidertes Webdesign, abgestimmt auf deine Marke",
         "Performante Entwicklung (schnell, sicher, mobile-first)",
         "Lokale SEO-Optimierung für deine Region",
-        "Einrichtung und Optimierung deines Google-Business-Profils",
+        "Google-Eintrag mit der Website verknüpft",
         "Responsive Layouts, die auf jedem Gerät überzeugen",
-        "Laufender Support und Wartung nach dem Launch",
+        "Betreuung nach dem Launch, wenn du willst: ab CHF 49 im Monat",
       ],
       approach: [
         { title: "Strategie zuerst", desc: "Ich starte bei deinen Zielen, deiner Zielgruppe und deinem Markt – damit jede Seite einen Zweck hat." },
@@ -119,14 +119,14 @@ const content: Record<Slug, Record<Lang, Service>> = {
     it: {
       title: "Web & Sviluppo",
       intro:
-        "Siti web veloci e moderni, costruiti per convertire – progettati attorno al tuo brand e ottimizzati per essere trovati sul territorio. Dal primo schizzo al lancio e oltre, costruisco basi digitali che funzionano davvero per la tua attività.",
+        "Siti che si aprono veloci sul telefono e mostrano quello che un cliente deve sapere: offerta, prezzi, orari, contatti. Con la SEO locale, perché la tua attività si trovi in zona.",
       includes: [
         "Web design su misura, in linea con il tuo brand",
         "Sviluppo performante (veloce, sicuro, mobile-first)",
         "Ottimizzazione SEO locale per emergere nella tua zona",
-        "Configurazione e ottimizzazione del profilo Google Business",
+        "Scheda Google collegata al sito",
         "Layout responsive, perfetti su ogni dispositivo",
-        "Assistenza e manutenzione continua dopo il lancio",
+        "Assistenza dopo il lancio, se la vuoi: da CHF 49 al mese",
       ],
       approach: [
         { title: "Prima la strategia", desc: "Parto dai tuoi obiettivi, dal pubblico e dal mercato – così ogni pagina ha uno scopo." },
@@ -214,7 +214,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
       ],
     },
     de: {
-      title: "Content & Visual",
+      title: "Fotos & Social Media",
       intro:
         "Guter Content erweckt deine Marke zum Leben. Die Fotos mache ich selber; die Social-Media-Betreuung führe ich zusammen mit Project Visibility. Visuals und Geschichten für deinen Betrieb, nicht aus einer Bilddatenbank gekauft.",
       includes: [
@@ -232,7 +232,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
       ],
     },
     it: {
-      title: "Contenuti & Visual",
+      title: "Foto e social media",
       intro:
         "I buoni contenuti danno vita al tuo brand. Le foto le faccio io; la parte social la seguo insieme a Project Visibility. Visual e storie fatte per la tua attività, non comprate da una banca di immagini.",
       includes: [
@@ -348,7 +348,7 @@ const content: Record<Slug, Record<Lang, Service>> = {
       ],
     },
     it: {
-      title: "Email Marketing",
+      title: "E-mail marketing",
       intro:
         "L'email è ancora il canale che trasforma i contatti in clienti. Creo newsletter e campagne automatizzate che coltivano il tuo pubblico e fanno crescere il business – misurabili, in linea col brand ed efficaci.",
       includes: [
@@ -374,13 +374,17 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) {
   const u = ui[lang];
   const s = content[slug][lang];
-  const reduce = useReducedMotion();
   const region = useRegion();
-  const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, u.whatsappMsg);
+  // Tagged prefill (content/home/prefills.ts) naming this service, so the chat says where it came from.
+  const whatsapp = waHref(PREFILL[lang].service(SERVICE_META[lang][slug].title), region);
   const others = SERVICE_SLUGS.filter((x) => x !== slug);
   const num = pad(SERVICE_SLUGS.indexOf(slug) + 1);
 
-  const rise = reduce ? {} : { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
+  // Same props on the server and in the browser. Switching them off with useReducedMotion() left the
+  // server's opacity:0 in place for reduced-motion visitors (the hook is null on the server), so the
+  // blocks never appeared. MotionConfig reducedMotion="user" in the root layout already drops the
+  // slide for those visitors and keeps only the fade.
+  const rise = { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
 
   return (
     <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] overflow-x-hidden outline-none">
@@ -389,13 +393,13 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
       
       {/* HERO */}
       <section className={`${container} pt-36 pb-14 md:pb-20`}>
-        <Link href={localizedHref(lang, "/#servizi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
+        <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
           {u.back}
         </Link>
         <div className="mt-12 flex items-baseline justify-between gap-4">
           <span className="micro-caps text-[var(--gilt)]">{num} · {u.label}</span>
-          <span className="micro-caps tnum text-[#17130e]/40">{num} / {pad(SERVICE_SLUGS.length)}</span>
+          <span className="micro-caps tnum text-[#17130e]/70">{num} / {pad(SERVICE_SLUGS.length)}</span>
         </div>
         <h1 className="page-h1 display-space mt-5 text-[#17130e]">{s.title}</h1>
         <p className="mt-7 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/65 md:text-xl">{s.intro}</p>
@@ -409,7 +413,7 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
         </div>
         <div className="grid border-b border-[color:var(--gold-line)] sm:grid-cols-2 sm:gap-x-12">
           {s.includes.map((item, i) => (
-            <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.45, delay: (i % 2) * 0.05 }} className="flex items-start gap-4 border-t border-[color:var(--gold-line)] py-5">
+            <motion.div key={i} {...rise} transition={{ duration: 0.45, delay: (i % 2) * 0.05 }} className="flex items-start gap-4 border-t border-[color:var(--gold-line)] py-5">
               <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--color-gold)]" strokeWidth={1.6} />
               <span className="font-light leading-relaxed text-[#17130e]/80">{item}</span>
             </motion.div>
@@ -425,9 +429,9 @@ export default function ServicePage({ slug, lang }: { slug: Slug; lang: Lang }) 
         </div>
         <div className="grid gap-y-10 md:grid-cols-3 md:gap-x-12">
           {s.approach.map((step, i) => (
-            <motion.div key={i} {...rise} transition={reduce ? undefined : { duration: 0.6, delay: i * 0.1 }} className="border-t border-[var(--color-gold)]/30 pt-6">
+            <motion.div key={i} {...rise} transition={{ duration: 0.6, delay: i * 0.1 }} className="border-t border-[var(--color-gold)]/30 pt-6">
               <div className="flex items-baseline gap-4">
-                <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{pad(i + 1)}</span>
+                <span aria-hidden="true" className="display-italic leading-none text-[var(--gilt)]" style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)" }}>{pad(i + 1)}</span>
                 <h3 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.9rem)" }}>{step.title}</h3>
               </div>
               <p className="mt-4 font-light leading-relaxed text-[#17130e]/65">{step.desc}</p>

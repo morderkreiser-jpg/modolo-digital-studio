@@ -1,13 +1,8 @@
 "use client";
 
-import { ReactLenis, useLenis, type LenisRef } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
+import { useEffect } from "react";
+import { stripLocale } from "@/lib/i18n";
 
 /**
  * Routes that keep the browser's own scrolling.
@@ -26,71 +21,49 @@ if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 const NATIVE_SCROLL = /(^|\/)(card|visitenkarte|biglietto)\/?$/;
 
 /**
- * Site-wide momentum scroll substrate. Lenis runs with autoRaf:false and is advanced off the
- * single GSAP ticker, so Lenis, ScrollTrigger, framer-motion and the WebGL RAF share one clock.
- *
- * IMPORTANT: the ticker callback reads lenisRef.current?.lenis EVERY FRAME. An earlier version
- * read the instance once at effect time and bailed if the ref wasn't populated yet — which left
- * Lenis capturing the wheel but never advancing, i.e. the mouse wheel did nothing. Reading the
- * ref each frame recovers as soon as ReactLenis has mounted its instance.
- *
- * Under prefers-reduced-motion the wheel is left native (no smoothing). Root mode attaches to
- * the document and renders no wrapper element → no hydration shift.
+ * The homepage scrolls natively too (SPEC §5.7 / D22, Nov 2026): the hero film, the sticky panel of
+ * section 01 and the anchors (scroll-margin-top + CSS smooth scrolling in globals.css) need no
+ * Lenis, and Lenis + GSAP were the largest part of its JavaScript.
  */
-function LenisBridge() {
-  // useLenis reads the ReactLenis context, so the instance is reliably available here.
-  const lenis = useLenis(() => ScrollTrigger.update());
-  useEffect(() => {
-    if (!lenis) return;
-    const w = window as unknown as { __lenis?: unknown };
-    w.__lenis = lenis; // handle for tooling/captures
-    // Clear it on unmount. Since some routes opt out of Lenis entirely (NATIVE_SCROLL above),
-    // navigating to one of them and back used to leave a handle pointing at a destroyed
-    // instance — and the .redesign capture scripts drive scrolling through exactly this handle.
-    return () => {
-      if (w.__lenis === lenis) delete w.__lenis;
-    };
-  }, [lenis]);
-  return null;
+function isNative(pathname: string | null): boolean {
+  const p = pathname ?? "";
+  return NATIVE_SCROLL.test(p) || stripLocale(p) === "/";
 }
 
+/**
+ * Momentum scroll for the inner pages. Lenis and GSAP live in their own chunk
+ * (components/smooth-scroll-lenis.ts), imported only on a page that uses them, after hydration:
+ * the native pages never download it. Renders no element and never wraps the page, so switching
+ * between native and Lenis pages remounts nothing.
+ */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const reduce = useReducedMotion();
   const pathname = usePathname();
-  const lenisRef = useRef<LenisRef>(null);
-  const native = NATIVE_SCROLL.test(pathname ?? "");
+  const native = isNative(pathname);
 
   useEffect(() => {
     if (native) return;
-    const update = (time: number) => {
-      lenisRef.current?.lenis?.raf(time * 1000); // read fresh each frame — never bail permanently
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let stop: (() => void) | null = null;
+    let generation = 0;
+    const start = () => {
+      const mine = ++generation;
+      stop?.();
+      stop = null;
+      void import("./smooth-scroll-lenis").then(({ startLenis }) => {
+        if (mine !== generation) return; // superseded or unmounted meanwhile
+        stop = startLenis(mq.matches);
+      });
     };
-    gsap.ticker.add(update);
-    gsap.ticker.lagSmoothing(0);
+    start();
+    // Under reduced motion the wheel stays native: restart when the setting changes.
+    mq.addEventListener("change", start);
     return () => {
-      gsap.ticker.remove(update);
+      generation++;
+      mq.removeEventListener("change", start);
+      stop?.();
+      stop = null;
     };
   }, [native]);
 
-  // Not just "don't advance it": ReactLenis must not MOUNT, or it attaches its wheel/touch
-  // listeners to the document and the page stops scrolling altogether.
-  if (native) return <>{children}</>;
-
-  return (
-    <ReactLenis
-      root
-      ref={lenisRef}
-      options={{
-        autoRaf: false,
-        duration: 1.05,
-        lerp: reduce ? 1 : 0.11,
-        smoothWheel: !reduce,
-        wheelMultiplier: 1,
-        anchors: { offset: -80 },
-      }}
-    >
-      <LenisBridge />
-      {children}
-    </ReactLenis>
-  );
+  return <>{children}</>;
 }

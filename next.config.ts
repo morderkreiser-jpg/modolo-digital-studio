@@ -27,6 +27,17 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: "/francesco-modolo.vcf", destination: "/api/vcard" }];
   },
+  // The hero film and the work screenshots carry a content hash in every file name
+  // (tools/film/build-hero-film.mjs, public/img/work/*-<h8>.*): a changed file gets a new name,
+  // so they can be cached for a year. Only these two folders: other public files keep their
+  // plain names and must stay revalidated.
+  async headers() {
+    const immutable = [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }];
+    return [
+      { source: "/film/:path*", headers: immutable },
+      { source: "/img/work/:path*", headers: immutable },
+    ];
+  },
 };
 
 export default nextConfig;

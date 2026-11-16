@@ -61,10 +61,10 @@ export const PRICING_UI: Record<
   }
 > = {
   en: {
-    metaTitle: "Website Pricing — Switzerland/Italy",
+    metaTitle: "Website prices in CHF",
     currencyLabel: "Currency",
     metaDescription:
-      "Transparent pricing for websites, care plans and branding. Swiss (CHF) and Italian (EUR) rates — web design and development across Switzerland.",
+      "Fixed prices in CHF for Google profiles, websites, care plans and branding. Final price, nothing added. Web design from Winterthur.",
     heading1: "Services & ",
     headingAccent: "pricing",
     subtitle: "Prices in {cur} · final price, nothing added · valid 2026",
@@ -74,18 +74,18 @@ export const PRICING_UI: Record<
     regionCh: "Switzerland · CHF",
     regionIt: "Italy · EUR",
     goodToKnow: "Good to know",
-    ctaHeading: "Ready to stand out?",
-    ctaText: "Tell me about your project — I'll prepare a tailored offer.",
+    ctaHeading: "Tell me about your business.",
+    ctaText: "Write to me with what you need. I'll send you a fixed price, in writing.",
     ctaContact: "Write to me",
     ctaWhatsapp: "Message me on WhatsApp",
-    notSure: "Not sure which package fits? Write to me.",
+    notSure: "I'll tell you which package fits. Write to me.",
     back: "Back to home",
   },
   de: {
-    metaTitle: "Website-Preise — Schweiz & Italien",
+    metaTitle: "Website-Preise in CHF",
     currencyLabel: "Währung",
     metaDescription:
-      "Transparente Preise für Websites, Care-Pakete und Branding. Preise für die Schweiz (CHF) und Italien (EUR) — Webdesign und Entwicklung.",
+      "Fixpreise in CHF für Google-Profile, Websites, Betreuung und Branding. Endpreis, es kommt nichts dazu. Webdesign aus Winterthur.",
     heading1: "Leistungen & ",
     headingAccent: "Preise",
     subtitle: "Preise in {cur} · Endpreis, es kommt nichts dazu · gültig 2026",
@@ -95,18 +95,18 @@ export const PRICING_UI: Record<
     regionCh: "Schweiz · CHF",
     regionIt: "Italien · EUR",
     goodToKnow: "Gut zu wissen",
-    ctaHeading: "Bereit, dich abzuheben?",
-    ctaText: "Erzähl mir von deinem Projekt — ich mache dir ein massgeschneidertes Angebot.",
+    ctaHeading: "Erzähl mir von deinem Betrieb.",
+    ctaText: "Schreib mir, was du brauchst. Ich schicke dir einen Fixpreis, schriftlich.",
     ctaContact: "Schreib mir",
-    ctaWhatsapp: "Schreib mir auf WhatsApp",
-    notSure: "Unsicher, welches Paket passt? Schreib mir.",
+    ctaWhatsapp: "Per WhatsApp schreiben",
+    notSure: "Welches Paket passt, sage ich dir gern. Schreib mir.",
     back: "Zurück zur Startseite",
   },
   it: {
-    metaTitle: "Prezzi siti web — Svizzera e Italia",
+    metaTitle: "Prezzi dei siti in CHF",
     currencyLabel: "Valuta",
     metaDescription:
-      "Prezzi trasparenti per siti web, pacchetti care e branding. Tariffe per Svizzera (CHF) e Italia (EUR) — web design e sviluppo.",
+      "Prezzi fissi in CHF per profili Google, siti web, assistenza e branding. Prezzo finale, non si aggiunge nulla. Web design da Winterthur.",
     heading1: "Servizi e ",
     headingAccent: "prezzi",
     subtitle: "Prezzi in {cur} · prezzo finale, non si aggiunge nulla · validi 2026",
@@ -116,11 +116,11 @@ export const PRICING_UI: Record<
     regionCh: "Svizzera · CHF",
     regionIt: "Italia · EUR",
     goodToKnow: "Buono a sapersi",
-    ctaHeading: "Pronto a farti notare?",
-    ctaText: "Parlami del tuo progetto — ti preparo un'offerta su misura.",
+    ctaHeading: "Raccontami della tua attività.",
+    ctaText: "Scrivimi cosa ti serve. Ti mando un prezzo fisso, per iscritto.",
     ctaContact: "Scrivimi",
     ctaWhatsapp: "Scrivimi su WhatsApp",
-    notSure: "Non sai quale pacchetto scegliere? Parliamone.",
+    notSure: "Quale pacchetto fa per te te lo dico io. Scrivimi.",
     back: "Torna alla home",
   },
 };
@@ -140,7 +140,7 @@ export const WEBSITES = {
       name: {
         en: "Google Profile Start",
         de: "Google-Profil Start",
-        it: "Google Profile Start",
+        it: "Profilo Google Start",
       },
       badge: { en: "Entry step", de: "Einstieg", it: "Primo passo" },
       desc: {
@@ -163,13 +163,13 @@ export const WEBSITES = {
       name: {
         en: "Google Profile On Site",
         de: "Google-Profil vor Ort",
-        it: "Google Profile in loco",
+        it: "Profilo Google da te",
       },
       badge: { en: "I come to you", de: "Ich komme vorbei", it: "Vengo io da te" },
       desc: {
-        en: "Everything in Google Profile Start, but I come to you: I shoot the 8–10 photos myself at your place, write the German and Italian text, and set the whole thing up. Your effort: ten minutes on the phone and twenty on site.",
+        en: "Everything in Google Profile Start, but I come to you: I shoot the 8–10 photos myself at your place, write the German and Italian text, and set the whole thing up. Your effort: ten minutes to agree the details and twenty on site.",
         de: "Alles aus Google-Profil Start, aber ich komme zu dir: Ich mache die acht bis zehn Fotos selber bei dir, schreibe den deutschen und italienischen Text und richte alles ein. Dein Aufwand: zehn Minuten zum Abstimmen und zwanzig vor Ort.",
-        it: "Tutto quello di Google Profile Start, ma vengo io: faccio io le 8–10 foto da te, scrivo il testo in tedesco e italiano e imposto tutto. Il tuo impegno: dieci minuti al telefono e venti sul posto.",
+        it: "Tutto quello del Profilo Google Start, ma vengo io: faccio io le 8–10 foto da te, scrivo il testo in tedesco e italiano e imposto tutto. Il tuo impegno: dieci minuti per accordarci e venti sul posto.",
       },
       meta: {
         en: "Photos and text included · fixed price",
@@ -209,9 +209,9 @@ export const WEBSITES = {
       name: { en: "Essential", de: "Essential", it: "Essential" },
       badge: { en: "One page", de: "Eine Seite", it: "Pagina unica" },
       desc: {
-        en: "An elegant landing page for professionals and personal brands. Fully responsive, contact form, basic SEO, one revision.",
-        de: "Eine elegante Landingpage für Fachleute und Personal Brands. Voll responsive, Kontaktformular, Basis-SEO, eine Revision.",
-        it: "Un'elegante landing page per professionisti e brand personali. Totalmente responsive, modulo contatti, SEO di base, una revisione.",
+        en: "One page for your business: what you offer, prices, opening hours and contact. Works on every phone, with a contact form, basic SEO and one round of changes.",
+        de: "Eine Seite für deinen Betrieb: Angebot, Preise, Öffnungszeiten und Kontakt. Läuft auf jedem Handy, mit Kontaktformular, Basis-SEO und einer Korrekturrunde.",
+        it: "Una pagina per la tua attività: offerta, prezzi, orari e contatti. Si legge bene su ogni telefono, con modulo contatti, SEO di base e una revisione.",
       },
       meta: {
         en: "Delivery ~1–2 weeks · built with Framer",
@@ -226,9 +226,9 @@ export const WEBSITES = {
       badge: { en: "Multi-page", de: "Mehrseitig", it: "Multi-pagina" },
       featured: true,
       desc: {
-        en: "Up to 6 pages with content management for blog/news, SEO setup, refined animations and two revisions. The standard for growing businesses.",
-        de: "Bis zu 6 Seiten mit Content-Management für Blog/News, SEO-Setup, sorgfältige Animationen und zwei Revisionen. Der Standard für wachsende Unternehmen.",
-        it: "Fino a 6 pagine con gestione contenuti per blog/news, impostazione SEO, animazioni curate e due revisioni. Lo standard per aziende in crescita.",
+        en: "Up to 6 pages, for example for services, team and gallery. You add news and offers yourself. With SEO setup, animations and two rounds of changes.",
+        de: "Bis zu 6 Seiten, zum Beispiel für Leistungen, Team und Galerie. News und Aktionen trägst du selbst ein. Mit SEO-Einrichtung, Animationen und zwei Korrekturrunden.",
+        it: "Fino a 6 pagine, per esempio per servizi, team e galleria. Novità e promozioni le inserisci tu. Con impostazione SEO, animazioni e due revisioni.",
       },
       meta: {
         en: "Delivery ~3–4 weeks · built with Framer",
@@ -242,9 +242,9 @@ export const WEBSITES = {
       name: { en: "Signature", de: "Signature", it: "Signature" },
       badge: { en: "Custom", de: "Massgeschneidert", it: "Su misura" },
       desc: {
-        en: "A fully bespoke experience, hand-coded (Next.js): unique design, advanced animations, custom features and multilingual.",
-        de: "Ein vollständig massgeschneidertes Erlebnis, von Hand programmiert (Next.js): einzigartiges Design, fortgeschrittene Animationen, individuelle Funktionen und mehrsprachig.",
-        it: "Un'esperienza interamente su misura, scritta a mano (Next.js): design unico, animazioni avanzate, funzioni personalizzate e multilingua.",
+        en: "Hand-coded (Next.js), no website builder: your own design, more elaborate animations, custom features and several languages.",
+        de: "Von Hand programmiert (Next.js), ohne Baukasten: eigenes Design, aufwendigere Animationen, Funktionen nach Mass und mehrere Sprachen.",
+        it: "Programmato a mano (Next.js), senza costruttori di siti: design tutto tuo, animazioni più elaborate, funzioni su misura e più lingue.",
       },
       meta: {
         en: "Delivery ~6+ weeks · custom development",
@@ -411,9 +411,9 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
   {
     label: { en: "Payment", de: "Zahlung", it: "Pagamento" },
     value: {
-      en: "50% upfront, 50% on delivery — two design rounds; deposit back if neither convinces you",
-      de: "50% bei Start, 50% bei Lieferung — zwei Design-Runden; Anzahlung zurück, wenn keine überzeugt",
-      it: "50% all'avvio, 50% alla consegna — due giri di design; acconto indietro se nessuno convince",
+      en: "50% upfront, 50% on delivery. If the second draft doesn't convince you either, you get the deposit back (design phase only).",
+      de: "50% bei Start, 50% bei Lieferung. Überzeugt dich auch der zweite Entwurf nicht, bekommst du die Anzahlung zurück (nur in der Designphase).",
+      it: "50% all'avvio, 50% alla consegna. Se non ti convince nemmeno la seconda bozza, ti restituisco l'acconto (solo nella fase di design).",
     },
   },
   {
@@ -435,9 +435,9 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
   {
     label: { en: "VAT", de: "MwSt", it: "IVA" },
     value: {
-      en: "not VAT-registered — the price you see is the final price",
-      de: "nicht mehrwertsteuerpflichtig — der genannte Preis ist der Endpreis",
-      it: "non soggetto a IVA — il prezzo indicato è quello finale",
+      en: "not VAT-registered, the price you see is the final price",
+      de: "nicht mehrwertsteuerpflichtig, der genannte Preis ist der Endpreis",
+      it: "non soggetto a IVA, il prezzo indicato è quello finale",
     },
   },
   {
@@ -461,6 +461,6 @@ export const INCLUDED: Tri[] = [
   { en: "Google listing linked to the site", de: "Google-Eintrag mit der Website verknüpft", it: "Scheda Google collegata al sito" },
   { en: "Contact form + WhatsApp link", de: "Kontaktformular + WhatsApp-Anbindung", it: "Modulo contatti + WhatsApp" },
   { en: "Hosting & domain set up for you", de: "Hosting & Domain für dich eingerichtet", it: "Hosting e dominio configurati per te" },
-  { en: "Revisions included in the fixed price", de: "Revisionen im Festpreis inbegriffen", it: "Revisioni incluse nel prezzo fisso" },
-  { en: "You always talk to me — no call centre", de: "Du sprichst immer mit mir — kein Callcenter", it: "Parli sempre con me, mai un call center" },
+  { en: "Revisions included in the fixed price", de: "Revisionen im Fixpreis inbegriffen", it: "Revisioni incluse nel prezzo fisso" },
+  { en: "You always deal with me, never a call centre", de: "Du hast immer mit mir zu tun, nie mit einem Callcenter", it: "Tratti sempre con me, mai con un call center" },
 ];

@@ -5,12 +5,58 @@ import { ArrowLeft } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
 import { localizedHref, type Locale } from "@/lib/i18n";
+import { FILM, type FilmCredit } from "@/lib/film-media";
+import type { ProjectId } from "@/data/projects";
 
 export type Lang = Locale;
 export type LegalKind = "impressum" | "privacy";
 
 type Section = { heading: string; body: string[] };
 type Doc = { title: string; date: string; sections: Section[] };
+
+// Impressum credit for the homepage film (COPY-HERO §11). The film shows the studio's real websites on
+// laptops and phones; the hands and rooms around them are licensed stock footage. Both lists come from
+// lib/film-media.ts, which the film build writes from the published variant: the authors are the stock
+// footage actually in the loop, and the sites are exactly the ones on its screens (FILM.projects), never
+// the whole list in data/projects.ts. A site the published film does not show is never named here.
+const FILM_CREDITS: readonly FilmCredit[] = FILM.credits;
+const FILM_AUTHORS = [...new Set(FILM_CREDITS.filter((c) => c.source === "pexels").map((c) => c.author))];
+/** What each site is, after its host (the host itself comes from FILM.projects). */
+const FILM_SITE: Record<Lang, Partial<Record<ProjectId, string>>> = {
+  de: { bjstudio: "für eine Kundin", zurikey: "als eigenes Projekt", zumove: "für einen Kunden" },
+  it: { bjstudio: "per una cliente", zurikey: "come progetto proprio", zumove: "per un cliente" },
+  en: { bjstudio: "for a client", zurikey: "as its own project", zumove: "for a client" },
+};
+const IMPRESSUM_FILM: Record<Lang, { title: string; and: string; text: (authors: string, sites: string) => string }> = {
+  de: {
+    title: "Film auf der Startseite",
+    and: "und",
+    text: (a, s) =>
+      `Aufnahmen von ${a}, über Pexels (Pexels-Lizenz). Die Hände und Räume im Film stammen aus diesen lizenzierten Aufnahmen; die gefilmten Personen stehen in keiner Verbindung zu Modolo Digital Studio. Die Websites auf den Bildschirmen sind echt und von Modolo Digital Studio gebaut: ${s}. Die Bildschirminhalte wurden von den Live-Websites aufgenommen und in die Aufnahmen eingesetzt.`,
+  },
+  it: {
+    title: "Video della pagina iniziale",
+    and: "e",
+    text: (a, s) =>
+      `Riprese di ${a}, tramite Pexels (licenza Pexels). Le mani e gli ambienti del video vengono da queste riprese con licenza; le persone riprese non hanno alcun legame con Modolo Digital Studio. I siti sugli schermi sono veri e li ha realizzati Modolo Digital Studio: ${s}. Le immagini degli schermi sono state registrate dai siti online e inserite nelle riprese.`,
+  },
+  en: {
+    title: "Home page film",
+    and: "and",
+    text: (a, s) =>
+      `Footage by ${a}, via Pexels (Pexels License). The hands and rooms in the film come from this licensed footage; the people in it have no connection with Modolo Digital Studio. The websites on the screens are real and were built by Modolo Digital Studio: ${s}. The screen images were recorded from the live sites and placed into the footage.`,
+  },
+};
+function joinNames(names: string[], and: string): string {
+  return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} ${and} ${names[names.length - 1]}`;
+}
+function filmSection(lang: Lang): Section[] {
+  if (!FILM_AUTHORS.length) return [];
+  const f = IMPRESSUM_FILM[lang];
+  // A site without a description is still named (bare host): the Impressum never drops a site that is on screen.
+  const sites = FILM.projects.map((p) => (FILM_SITE[lang][p.id] ? `${p.host} ${FILM_SITE[lang][p.id]}` : p.host));
+  return [{ heading: f.title, body: [f.text(joinNames(FILM_AUTHORS, f.and), joinNames(sites, f.and))] }];
+}
 
 const ui: Record<Lang, { back: string; updated: string; kicker: string }> = {
   en: { back: "Back to homepage", updated: "Last updated", kicker: "Legal" },
@@ -22,7 +68,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
   impressum: {
     en: {
       title: "Legal Notice",
-      date: "June 2026",
+      date: "November 2026",
       sections: [
         {
           heading: "Responsible for the content of this website",
@@ -30,7 +76,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         },
         {
           heading: "Contact",
-          body: ["Email: info@modolodigitalstudio.ch\nPhone: +41 77 223 79 00"],
+          body: ["Email: info@modolodigitalstudio.ch\nWhatsApp: +41 77 223 79 00"],
         },
         {
           heading: "Disclaimer",
@@ -50,11 +96,12 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
             "The copyright and all other rights to content, images, photos or other files on this website belong exclusively to Modolo Digital Studio or to the specifically named rights holders. The written consent of the copyright holder must be obtained in advance for the reproduction of any element.",
           ],
         },
+        ...filmSection("en"),
       ],
     },
     de: {
       title: "Impressum",
-      date: "Juni 2026",
+      date: "November 2026",
       sections: [
         {
           heading: "Verantwortlich für den Inhalt dieser Website",
@@ -62,7 +109,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         },
         {
           heading: "Kontakt",
-          body: ["E-Mail: info@modolodigitalstudio.ch\nTelefon: +41 77 223 79 00"],
+          body: ["E-Mail: info@modolodigitalstudio.ch\nWhatsApp: +41 77 223 79 00"],
         },
         {
           heading: "Haftungsausschluss",
@@ -82,11 +129,12 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
             "Die Urheber- und alle anderen Rechte an Inhalten, Bildern, Fotos oder anderen Dateien auf dieser Website gehören ausschliesslich Modolo Digital Studio oder den speziell genannten Rechtsinhabern. Für die Reproduktion jeglicher Elemente ist die schriftliche Zustimmung der Urheberrechtsträger im Voraus einzuholen.",
           ],
         },
+        ...filmSection("de"),
       ],
     },
     it: {
       title: "Note legali",
-      date: "Giugno 2026",
+      date: "Novembre 2026",
       sections: [
         {
           heading: "Responsabile del contenuto di questo sito web",
@@ -94,7 +142,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
         },
         {
           heading: "Contatti",
-          body: ["E-mail: info@modolodigitalstudio.ch\nTelefono: +41 77 223 79 00"],
+          body: ["E-mail: info@modolodigitalstudio.ch\nWhatsApp: +41 77 223 79 00"],
         },
         {
           heading: "Esclusione di responsabilità",
@@ -114,6 +162,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
             "I diritti d'autore e tutti gli altri diritti relativi a contenuti, immagini, foto o altri file presenti su questo sito appartengono esclusivamente a Modolo Digital Studio o ai titolari dei diritti espressamente indicati. Per la riproduzione di qualsiasi elemento è necessario ottenere preventivamente il consenso scritto del titolare dei diritti.",
           ],
         },
+        ...filmSection("it"),
       ],
     },
   },

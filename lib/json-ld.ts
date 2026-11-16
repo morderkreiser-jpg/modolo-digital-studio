@@ -8,6 +8,7 @@ import { localizedHref, type Locale } from "./i18n";
 import { WEBSITES, CARE, BRANDING } from "./pricing";
 import { DEFAULT_REGION, type Region } from "./region";
 import { LOCAL_AREAS, type CitySlug } from "./local-seo";
+import { googleProfileUrl } from "./review-links";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -54,6 +55,13 @@ const OPENING_HOURS_CH = [
 
 // Google Business Profile URL, if configured — appended to sameAs where it belongs.
 const googleBusinessSameAs = SITE.googleBusiness ? [SITE.googleBusiness] : [];
+
+// The Winterthur Google Business Profile as a Maps place URL (place_id form, lib/review-links.ts).
+// Emitted as `hasMap` on the Winterthur business and in Organization.sameAs. It is independent of
+// NEXT_PUBLIC_GOOGLE_BUSINESS_URL on purpose: that variable also switches on the placeholder geo
+// and opening hours below, which must first be replaced with the real pin and hours (seo-perf §4).
+const googleMapUrl = googleProfileUrl();
+const organizationSameAs = [...new Set([SITE.instagram, googleMapUrl, ...googleBusinessSameAs])];
 
 // geo + opening hours are only emitted once the Google Business Profile is configured — that's
 // when the exact map pin and hours have been confirmed. Until then they're omitted (never wrong):
@@ -119,7 +127,7 @@ export function homeGraph(locale: Locale) {
           { "@id": `${SITE.url}/#business-ch` },
           ...(includeIt ? [{ "@id": `${SITE.url}/#business-it` }] : []),
         ],
-        sameAs: [SITE.instagram, ...googleBusinessSameAs],
+        sameAs: organizationSameAs,
         founder: { "@type": "Person", name: SITE.founder },
       },
       {
@@ -131,6 +139,7 @@ export function homeGraph(locale: Locale) {
         telephone: SITE.phone,
         email: SITE.email,
         address: postalAddress,
+        hasMap: googleMapUrl,
         ...verifiedLocalData,
         areaServed: { "@type": "Country", name: "Switzerland" },
         priceRange: "CHF 190-7400",
@@ -187,7 +196,7 @@ export function serviceGraph(slug: ServiceSlug, locale: Locale) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: abs(localizedHref(locale, "/")) },
-          { "@type": "ListItem", position: 2, name: SERVICES_LABEL[locale], item: abs(localizedHref(locale, "/#servizi")) },
+          { "@type": "ListItem", position: 2, name: SERVICES_LABEL[locale], item: abs(localizedHref(locale, "/prezzi")) },
           { "@type": "ListItem", position: 3, name: s.title, item: url },
         ],
       },
@@ -217,6 +226,8 @@ export function localAreaGraph(slug: CitySlug, locale: Locale) {
         telephone: SITE.phone,
         email: SITE.email,
         address: postalAddress,
+        // Same Winterthur address as #business-ch, so the same map.
+        hasMap: googleMapUrl,
         areaServed,
         priceRange: "CHF 190-7400",
         inLanguage: locale,

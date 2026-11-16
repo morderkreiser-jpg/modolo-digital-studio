@@ -4,58 +4,66 @@ import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
 import { localizedHref, type Locale } from "@/lib/i18n";
 import { LOCAL_AREAS, LOCAL_CITIES, type CitySlug } from "@/lib/local-seo";
-import { SITE } from "@/lib/site";
-
-const SITE_PHONE_DIGITS = SITE.phone.replace(/[^0-9]/g, "");
+import { waHref } from "@/lib/whatsapp";
+import { PREFILL } from "@/content/home/prefills";
+import { REPLY_TEXT } from "@/content/home/promises";
+import { buildPrices } from "@/content/home/prices";
 
 // Small localized UI labels for the local-SEO pages (kept here so the page is self-contained).
-// `whatsappMsg` names the page it came from: WhatsApp gives no referrer, so the pre-filled
-// message is the only way an incoming chat says which entry point produced it.
+// The WhatsApp text comes from content/home/prefills.ts (`city`): WhatsApp gives no referrer,
+// so the tag inside the pre-filled message is the only way a chat says which page produced it.
+// This is a server component, so it always uses the CH number (city pages are CH-targeted).
 const UI: Record<Locale, {
   back: string; nav: { pricing: string; portfolio: string; contact: string };
-  cta: string; trust: string; servicesLine: string; viewPricing: string; viewWork: string;
-  otherAreas: string; closingText: string; whatsapp: string; whatsappMsg: (city: string) => string;
+  cta: string; trust: (essential: string) => string; servicesLine: string; viewPricing: string; viewWork: string;
+  otherAreas: string; closingText: string; whatsapp: string;
 }> = {
   de: {
     back: "Zur Startseite",
-    nav: { pricing: "Preise", portfolio: "Portfolio", contact: "Kontakt" },
-    cta: "Offerte zum Festpreis anfordern",
-    trust: "Websites ab CHF 1'690 · Festpreis · kein Pflicht-Abo · Antwort in 24 h",
-    servicesLine: "Websites, lokales SEO, Branding und Inhalte — alles aus einer Hand, von mir.",
+    nav: { pricing: "Preise", portfolio: "Arbeiten", contact: "Kontakt" },
+    cta: "Offerte zum Fixpreis anfordern",
+    trust: (essential) => `Websites ab ${essential} · Fixpreis · kein Pflicht-Abo · Antwort`,
+    servicesLine: "Websites, Google-Profile, Branding und Inhalte, mit einer festen Ansprechperson: mir.",
     viewPricing: "Preise ansehen",
     viewWork: "Arbeiten ansehen",
     otherAreas: "Auch tätig in",
-    closingText: "Eine kurze, unverbindliche Beratung — du erzählst mir von deinem Betrieb, ich sage dir ehrlich, ob und wie ich helfen kann.",
+    closingText: "Schreib mir zwei Zeilen zu deinem Betrieb. Ich sage dir, ob und wie ich helfen kann und was es kostet.",
     whatsapp: "WhatsApp",
-    whatsappMsg: (city) => `Hallo Francesco, ich habe deine Seite für ${city} gesehen und möchte über eine Website sprechen.`,
   },
   it: {
     back: "Torna alla home",
-    nav: { pricing: "Prezzi", portfolio: "Portfolio", contact: "Contatti" },
+    nav: { pricing: "Prezzi", portfolio: "Lavori", contact: "Contatti" },
     cta: "Chiedi un'offerta a prezzo fisso",
-    trust: "Siti da CHF 1'690 · prezzo fisso · nessun abbonamento obbligatorio · risposta in 24 h",
-    servicesLine: "Siti, SEO locale, branding e contenuti — tutto da un'unica persona, io.",
+    trust: (essential) => `Siti da ${essential} · prezzo fisso · nessun abbonamento obbligatorio · risposta`,
+    servicesLine: "Siti, profili Google, branding e contenuti, con una sola persona di riferimento: io.",
     viewPricing: "Vedi i prezzi",
     viewWork: "Guarda i lavori",
     otherAreas: "Attivo anche a",
-    closingText: "Una chiacchierata breve e senza impegno — mi racconti la tua attività e ti dico onestamente se e come posso aiutarti.",
+    closingText: "Scrivimi due righe sulla tua attività. Ti dico se e come posso aiutarti, e quanto costa.",
     whatsapp: "WhatsApp",
-    whatsappMsg: (city) => `Ciao Francesco, ho visto la tua pagina per ${city} e vorrei parlare di un sito.`,
   },
   en: {
     back: "Back to home",
-    nav: { pricing: "Pricing", portfolio: "Portfolio", contact: "Contact" },
+    nav: { pricing: "Pricing", portfolio: "Work", contact: "Contact" },
     cta: "Get a fixed-price offer",
-    trust: "Websites from CHF 1,690 · fixed price · no required subscription · reply within 24 h",
-    servicesLine: "Websites, local SEO, branding and content — all from one person: me.",
+    trust: (essential) => `Websites from ${essential} · fixed price · no required subscription · reply`,
+    servicesLine: "Websites, Google profiles, branding and content, with one fixed contact: me.",
     viewPricing: "View pricing",
     viewWork: "See my work",
     otherAreas: "Also serving",
-    closingText: "A short, no-obligation chat — you tell me about your business and I tell you honestly whether and how I can help.",
+    closingText: "Send me two lines about your business. I'll tell you whether and how I can help, and what it costs.",
     whatsapp: "WhatsApp",
-    whatsappMsg: (city) => `Hi Francesco, I saw your page for ${city} and I would like to talk about a website.`,
   },
 };
+
+// German UI terms quoted inside Italian/English copy are marked lang="de" for screen readers.
+const GERMAN_TERM = /(Termin buchen)/;
+function withGermanTerms(text: string, lang: Locale) {
+  if (lang === "de") return text;
+  return text.split(GERMAN_TERM).map((part, i) =>
+    part === "Termin buchen" ? <span key={i} lang="de">{part}</span> : part,
+  );
+}
 
 const container = "mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16";
 
@@ -64,6 +72,8 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
   const u = UI[lang];
   const others = LOCAL_CITIES.filter((c) => c !== slug);
   const contactHref = localizedHref(lang, "/#contatti");
+  const prices = buildPrices("ch", lang);
+  const whatsapp = waHref(PREFILL[lang].city(area.navLabel[lang]), "ch");
 
   return (
     <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] overflow-x-hidden outline-none">
@@ -116,14 +126,16 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
           </Link>
         </div>
 
-        <p className="mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#17130e]/60">{u.trust}</p>
+        <p className="mt-10 max-w-3xl border-t border-[color:var(--gold-line)] pt-5 text-sm font-light leading-relaxed text-[#17130e]/60">
+          {u.trust(prices.essential)} <span className="whitespace-nowrap">{REPLY_TEXT[lang].short}</span>
+        </p>
       </section>
 
       {/* WHY LOCAL */}
       <section className={`${container} py-12 md:py-16`}>
         <div className="rounded-[4px] bg-[var(--ink-panel)] p-8 md:p-12">
           <h2 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)" }}>{area.localTitle[lang]}</h2>
-          <p className="mt-5 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/70">{area.localBody[lang]}</p>
+          <p className="mt-5 max-w-3xl text-lg font-light leading-relaxed text-[#17130e]/70">{withGermanTerms(area.localBody[lang], lang)}</p>
           <p className="mt-8 max-w-2xl font-light leading-relaxed text-[#17130e]/60">{u.servicesLine}</p>
           <div className="mt-6">
             <Link href={localizedHref(lang, "/prezzi")} className="group inline-flex items-center gap-2 text-sm tracking-wide text-[var(--gilt)] transition-colors hover:text-[var(--color-gold)]">
@@ -136,7 +148,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
 
       {/* OTHER AREAS — internal links */}
       <section className={`${container} py-8`}>
-        <span className="micro-caps text-[#17130e]/40">{u.otherAreas}</span>
+        <span className="micro-caps text-[#17130e]/70">{u.otherAreas}</span>
         <div className="mt-4 flex flex-wrap gap-3">
           {others.map((c) => (
             <Link
@@ -165,7 +177,7 @@ export default function LocalPage({ slug, lang }: { slug: CitySlug; lang: Locale
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href={`https://wa.me/${SITE_PHONE_DIGITS}?text=${encodeURIComponent(u.whatsappMsg(area.navLabel[lang]))}`}
+              href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-medium tracking-wide transition-colors duration-300"

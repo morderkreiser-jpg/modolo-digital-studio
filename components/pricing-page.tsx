@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
 import { localizedHref, type Locale } from "@/lib/i18n";
-import { SITE } from "@/lib/site";
+import { waHref } from "@/lib/whatsapp";
+import { useRegion } from "@/components/use-region";
+import { PREFILL } from "@/content/home/prefills";
+import { formatPrice } from "@/content/home/prices";
 import {
   PRICING_UI,
   WEBSITES,
@@ -24,40 +27,33 @@ import {
 const POPULAR: Record<Locale, string> = { en: "Popular", de: "Beliebt", it: "Consigliato" };
 const KICKER: Record<Locale, string> = { en: "Pricing", de: "Preise", it: "Listino" };
 
-// Pre-filled WhatsApp text. WhatsApp sends no referrer, so naming the page inside the message
-// is the only thing that tells an incoming chat apart from every other entry point.
-const WHATSAPP_MSG: Record<Locale, string> = {
-  en: "Hi Francesco, I've looked at your pricing and I'd like to talk about a project.",
-  de: "Hallo Francesco, ich habe deine Preise angeschaut und möchte über ein Projekt sprechen.",
-  it: "Ciao Francesco, ho guardato i prezzi e vorrei parlare di un progetto.",
-};
-
-// Thousands separator per display locale (English comma, Swiss German apostrophe, Italian dot)
-// so the separator is unambiguous in each language. Formatted manually rather than via Intl so
-// the result is byte-identical on server and client regardless of the runtime's ICU data.
-const THOUSANDS: Record<Locale, string> = { en: ",", de: "'", it: "." };
-function groupThousands(n: number, sep: string): string {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-}
-
 const container = "mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-16";
 
 export default function PricingPage({ lang }: { lang: Locale }) {
   // EUR pricing hidden for now (client request 2026-07-10): CHF only, currency toggle removed.
   // Revert this commit to restore the CH/EUR geo toggle.
   const region: Region = "ch";
-  const reduce = useReducedMotion();
   const ui = PRICING_UI[lang];
-  const whatsapp = `https://wa.me/${SITE.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(WHATSAPP_MSG[lang])}`;
-  const sep = THOUSANDS[lang];
+  // Pre-filled WhatsApp text from content/home/prefills.ts: WhatsApp sends no referrer, so the
+  // tag inside the message is the only thing that tells this page apart from every other entry
+  // point. The number follows the visitor's region (IT cookie → Italian WhatsApp); the prices on
+  // this page stay CHF for everyone while the EUR toggle is hidden.
+  const contactRegion = useRegion();
+  const whatsapp = waHref(PREFILL[lang].pricing, contactRegion);
   const cur = CURRENCY[region];
-  const amount = (n: number) => `${cur} ${groupThousands(n, sep)}`;
+  // Same format as the homepage (content/home/prices.ts): "CHF 1’690" with U+2019 and a
+  // no-break space, so the currency never wraps away from its amount.
+  const amount = (n: number) => formatPrice(n, region, lang);
   const regionName = ui.regionCh;
 
   const resolve = (s: string) =>
-    s.replace("{cur}", cur).replace("{hourly}", groupThousands(HOURLY[region], sep)).replace("{vat}", VAT[region]);
+    s.replace("{cur} {hourly}", amount(HOURLY[region])).replace("{cur}", cur).replace("{vat}", VAT[region]);
 
-  const rise = reduce ? {} : { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
+  // Same props on the server and in the browser. Switching them off with useReducedMotion() left the
+  // server's opacity:0 in place for reduced-motion visitors (the hook is null on the server), so the
+  // blocks never appeared. MotionConfig reducedMotion="user" in the root layout already drops the
+  // slide for those visitors and keeps only the fade.
+  const rise = { initial: { opacity: 0, y: 22 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-8%" }, transition: { duration: 0.6 } };
 
   return (
     <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--ink-bg)] text-[var(--ink-text)] overflow-x-hidden outline-none">
@@ -82,7 +78,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             </h1>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
-            <p className="micro-caps text-[#17130e]/55">{resolve(ui.subtitle)}</p>
+            <p className="micro-caps text-[#17130e]/70">{resolve(ui.subtitle)}</p>
           </div>
         </div>
       </section>
@@ -95,7 +91,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             <motion.div
               key={i}
               {...rise}
-              transition={reduce ? undefined : { duration: 0.55, delay: (i % 2) * 0.06 }}
+              transition={{ duration: 0.55, delay: (i % 2) * 0.06 }}
               className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
                 it.featured ? "border-[var(--color-gold)]/55 bg-[var(--ink-panel)]/40" : "border-[color:var(--gold-line)] bg-transparent"
               }`}
@@ -113,12 +109,12 @@ export default function PricingPage({ lang }: { lang: Locale }) {
                   )}
                 </div>
                 <div className="whitespace-nowrap text-right">
-                  {it.from && <span className="micro-caps block text-[#17130e]/50">{ui.from}</span>}
+                  {it.from && <span className="micro-caps block text-[#17130e]/70">{ui.from}</span>}
                   <span className="display-space tnum text-[#17130e]" style={{ fontSize: "clamp(1.5rem, 2.4vw, 2rem)" }}>{amount(it.price[region])}</span>
                 </div>
               </div>
               <p className="mt-4 text-sm font-light leading-relaxed text-[#17130e]/70">{it.desc[lang]}</p>
-              {it.meta && <p className="micro-caps mt-auto pt-4 text-[#17130e]/45">{it.meta[lang]}</p>}
+              {it.meta && <p className="micro-caps mt-auto pt-4 text-[#17130e]/70">{it.meta[lang]}</p>}
             </motion.div>
           ))}
         </div>
@@ -156,7 +152,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             <motion.div
               key={i}
               {...rise}
-              transition={reduce ? undefined : { duration: 0.55, delay: i * 0.08 }}
+              transition={{ duration: 0.55, delay: i * 0.08 }}
               className={`relative flex flex-col rounded-[4px] border p-7 md:p-8 ${
                 p.featured ? "border-[var(--color-gold)]/55 bg-[var(--ink-panel)]/40" : "border-[color:var(--gold-line)] bg-transparent"
               }`}
@@ -169,7 +165,7 @@ export default function PricingPage({ lang }: { lang: Locale }) {
               <h3 className="display-space text-[#17130e]" style={{ fontSize: "1.5rem" }}>{p.name}</h3>
               <div className="mt-3 mb-6 flex items-baseline gap-1.5">
                 <span className="display-space tnum text-[#17130e]" style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}>{amount(p.price[region])}</span>
-                <span className="micro-caps text-[#17130e]/50">{ui.perMonth}</span>
+                <span className="micro-caps text-[#17130e]/70">{ui.perMonth}</span>
               </div>
               <ul className="space-y-3 border-t border-[color:var(--gold-line)] pt-6">
                 {p.features.map((f, j) => (
@@ -192,16 +188,16 @@ export default function PricingPage({ lang }: { lang: Locale }) {
             <motion.div
               key={i}
               {...rise}
-              transition={reduce ? undefined : { duration: 0.5, delay: i * 0.05 }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
               className="flex flex-col gap-2 border-t border-[color:var(--gold-line)] py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
             >
               <div className="min-w-0">
                 <h3 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.2rem, 2vw, 1.5rem)" }}>{it.name[lang]}</h3>
                 <p className="mt-1.5 max-w-xl text-sm font-light leading-relaxed text-[#17130e]/70">{it.desc[lang]}</p>
-                {it.meta && <p className="micro-caps mt-2 text-[#17130e]/45">{it.meta[lang]}</p>}
+                {it.meta && <p className="micro-caps mt-2 text-[#17130e]/70">{it.meta[lang]}</p>}
               </div>
               <div className="whitespace-nowrap text-left sm:text-right">
-                {it.from && <span className="micro-caps block text-[#17130e]/50">{ui.from}</span>}
+                {it.from && <span className="micro-caps block text-[#17130e]/70">{ui.from}</span>}
                 <span className="display-space tnum text-[#17130e]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.6rem)" }}>{amount(it.price[region])}</span>
               </div>
             </motion.div>
@@ -258,9 +254,9 @@ export default function PricingPage({ lang }: { lang: Locale }) {
 function SectionHead({ num, title, tagline }: { num: string; title: string; tagline: string }) {
   return (
     <div className="mb-10 flex items-baseline gap-4 md:mb-12">
-      <span aria-hidden="true" className="display-italic leading-none text-[var(--color-gold)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>{num}</span>
+      <span aria-hidden="true" className="display-italic leading-none text-[var(--gilt)]" style={{ fontSize: "clamp(1.25rem, 2vw, 1.75rem)" }}>{num}</span>
       <h2 className="display-space text-[#17130e]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)" }}>{title}</h2>
-      <span className="micro-caps ml-auto hidden text-[#17130e]/45 sm:block">{tagline}</span>
+      <span className="micro-caps ml-auto hidden text-[#17130e]/70 sm:block">{tagline}</span>
     </div>
   );
 }

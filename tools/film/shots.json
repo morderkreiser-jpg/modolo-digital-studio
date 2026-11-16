@@ -1,0 +1,109 @@
+{
+  "version": "v2",
+  "fps": 25,
+  "loop_frames": 345,
+  "variant": "nozu",
+  "license": "Pexels License: free commercial use, no attribution required, no implied endorsement, no resale of unaltered copies",
+  "start_at": { "de": 0, "en": 0, "it": 0 },
+  "note": "Film v2 «PROVA» (FILM-HERO-SPEC 16.11.2026): his real websites on laptops and phones in one warm room, hard cuts, 13.8 s. The look is rendered in MEDIA by v2/a/tools/cut.py into the masters below (copies of every tool and edit list: tools/film/v2/). The build only checks, encodes, cuts posters, hashes, publishes and writes lib/film-media.ts. Hashes are pinned by MEDIA/v2/a/tools/pin_masters.py after a re-render.",
+  "variants": {
+    "nozu": {
+      "masters": { "16x9": "v2/a/masters/nozu/master-16x9.mkv", "9x16": "v2/a/masters/nozu/master-9x16.mkv" },
+      "sha256": { "16x9": "c421e39090c66031703e7bfa7de2051b890df994d050199bcb5149eb8a53ae71", "9x16": "143ede8c966bb6a0abb9459e5ada0ceaf97035190f815bfd9ce75cc4b3448b43", "16x9_report": "788868e9974a0825c0167f9ee2f187638d5b3a8b032c23ccc7914da7eee726b3", "9x16_report": "afe71158265335cd36be41f7483d64a0947911181d4b95ceb25c72dc8615b1cd" },
+      "edits": { "16x9": "v2/a/edit/e169_nozu.json", "9x16": "v2/a/edit/e916_nozu.json" }
+    },
+    "zu": {
+      "masters": { "16x9": "v2/a/masters/zu/master-16x9.mkv", "9x16": "v2/a/masters/zu/master-9x16.mkv" },
+      "sha256": { "16x9": "cbbad7c89af9afdf5d9d8a8ac373b110a1942765ede738b49ee69ca9b56baf55", "9x16": "63c11d13b0e5cf53816a1731f7b42755aee0a4e438b08e38649a3232717eae40", "16x9_report": "a697f943f0cbb88c6c0d3819806b4da55c872a6aa7dd771f8687e5fa1e724d9c", "9x16_report": "d602ea4e512d7ef8329aad0e8fbc06353ce352d89345ba6a3bb7cea92cab5a2a" },
+      "edits": { "16x9": "v2/a/edit/e169_zu.json", "9x16": "v2/a/edit/e916_zu.json" },
+      "requires": "zumove approval removed in data/projects.ts + --zumove-ok <yyyy-mm-dd>"
+    }
+  },
+  "timeline": [
+    { "slot": "S1", "slot916": "M1", "frames": 75, "project": { "nozu": "bjstudio", "zu": "bjstudio" },
+      "plates": { "16x9": "6279145", "9x16": "6279146" }, "in": { "16x9": 0.40, "9x16": 3.00 }, "src_fps": { "16x9": 30, "9x16": 30 },
+      "captures": { "16x9": "bj-d14-hold", "9x16": "bj-ph-hold" } },
+    { "slot": "S2", "slot916": "M2", "frames": 50, "project": { "nozu": null, "zu": null },
+      "plates": { "16x9": "854136", "9x16": "854136" }, "in": { "16x9": 12.60, "9x16": 12.60 }, "src_fps": { "16x9": 25, "9x16": 25 } },
+    { "slot": "S3", "slot916": "M3", "frames": 70, "project": { "nozu": "bjstudio", "zu": "zumove" },
+      "plates": { "16x9": "6279154", "9x16": "6279154" }, "in": { "16x9": 4.00, "9x16": 4.00 }, "src_fps": { "16x9": 30, "9x16": 30 },
+      "captures": { "nozu": "bj-ph-s1", "zu": "zu-ph-hold" } },
+    { "slot": "S4", "slot916": "M4", "frames": 50, "project": { "nozu": null, "zu": null },
+      "plates": { "16x9": "9218101", "9x16": "9218101" }, "in": { "16x9": 1.13, "9x16": 1.13 }, "src_fps": { "16x9": 29.97, "9x16": 29.97 },
+      "placeholder": "replace with Francesco's own take (SPEC Q5)" },
+    { "slot": "S5", "slot916": "M5", "frames": 30, "project": { "nozu": null, "zu": null },
+      "plates": { "16x9": "8774518", "9x16": "8774518" }, "in": { "16x9": 6.30, "9x16": 6.30 }, "src_fps": { "16x9": 25, "9x16": 25 } },
+    { "slot": "S6", "slot916": "M6", "frames": 70, "project": { "nozu": "zurikey", "zu": "zurikey" },
+      "plates": { "16x9": "6279143", "9x16": "6279147" }, "in": { "16x9": 1.00, "9x16": 2.20 }, "src_fps": { "16x9": 30, "9x16": 30 },
+      "captures": { "16x9": "zk-d14-intro", "9x16": "zk-ph-s1" } }
+  ],
+  "plates": {
+    "6279145": { "author": "Artem Podrez", "page": "https://www.pexels.com/video/person-using-a-laptop-6279145/", "source": "pexels" },
+    "6279146": { "author": "Artem Podrez", "page": "https://www.pexels.com/video/a-person-holding-his-phone-6279146/", "source": "pexels" },
+    "854136": { "author": "Coverr", "page": "https://www.pexels.com/video/person-drawing-854136/", "source": "pexels" },
+    "6279154": { "author": "Artem Podrez", "page": "https://www.pexels.com/video/person-holding-a-cellphone-6279154/", "source": "pexels" },
+    "9218101": { "author": "PNW Production", "page": "https://www.pexels.com/video/a-person-holding-a-camera-9218101/", "source": "pexels" },
+    "8774518": { "author": "PureRaw: Camera & Film Grain", "page": "https://www.pexels.com/video/typing-on-a-laptop-8774518/", "source": "pexels" },
+    "6279143": { "author": "Artem Podrez", "page": "https://www.pexels.com/video/6279143/", "source": "pexels" },
+    "6279147": { "author": "Artem Podrez", "page": "https://www.pexels.com/video/person-touching-the-screen-of-a-cellphone-6279147/", "source": "pexels" }
+  },
+  "captures": {
+    "bj-d14-hold": { "host": "bjstudiodebelleza.ch", "at": "2026-11-16", "what": "1440x900 @2, static, no hover/click" },
+    "bj-ph-hold": { "host": "bjstudiodebelleza.ch", "at": "2026-11-15", "what": "393x852 @3, top of the page" },
+    "bj-ph-s1": { "host": "bjstudiodebelleza.ch", "at": "2026-11-16", "what": "393x852 @3, frame 40: Leistungen & Preise (60/60/80/90 CHF)" },
+    "zu-ph-hold": { "host": "zumove.ch", "at": "2026-11-15", "what": "393x852 @3, its own hero film, frames 75-149" },
+    "zk-d14-intro": { "host": "zurikey.ch", "at": "2026-11-16", "what": "1440x900 @2, the page loads (frames 6-72 used)" },
+    "zk-ph-s1": { "host": "zurikey.ch", "at": "2026-11-15", "what": "393x852 @3, scroll retimed to the finger (map_zk_ph.json)" }
+  },
+  "encodes": {
+    "16x9-1080": { "w": 1920, "h": 1080, "h264_crf": 24, "h264_crf_max": 26, "av1_crf": 30, "av1_crf_max": 36, "av1_preset": 4, "budget_kb": { "av1": 1536, "h264": 2560 } },
+    "16x9-720":  { "w": 1280, "h": 720,  "h264_crf": 26, "h264_crf_max": 28, "av1_crf": 32, "av1_crf_max": 38, "av1_preset": 4, "budget_kb": { "av1": 614,  "h264": 922 } },
+    "9x16-720":  { "w": 720,  "h": 1280, "h264_crf": 24, "h264_crf_max": 26, "av1_crf": 28, "av1_crf_max": 34, "av1_preset": 4, "budget_kb": { "av1": 1024, "h264": 1536 } }
+  },
+  "x264_params": "aq-mode=3",
+  "av1_params": "tune=0:enable-overlays=1",
+  "posters": {
+    "frame": 0,
+    "avif_crf": { "16x9": 44, "9x16": 32 }, "webp_q": 72, "jpg_q": 78,
+    "budget_kb": { "16x9_avif": 60, "16x9_webp": 90, "16x9_jpg": 120, "9x16_avif": 35, "9x16_avif_text_exception": 45, "9x16_webp": 60, "9x16_jpg": 90 },
+    "seam_rect": { "16x9": [1060, 240, 640, 400], "9x16": [245, 330, 285, 640] },
+    "seam_max_de": 1.5
+  },
+  "gates": {
+    "env_mean": [40, 62],
+    "proof_frame_mean_max": { "16x9": 90, "9x16": 95 },
+    "frame_p999_max": 241,
+    "env_p999_rgb_max": [246, 241, 231],
+    "rb_mid": { "proof": [34, 52], "how": [26, 54] },
+    "upscale_max": 1.25,
+    "capture_max_age_days": 90
+  },
+  "g1_exceptions_note": "SPEC §1.11 G1 bands the approved look cannot meet within the tuning SPEC §1.2 allows without asking (ev ±0.06, sat ±0.08, wb ±0.04, site_gain ≥ 0.90; S1/S6 framing and S4 crop fixed). The build passes them as EXC, prints them and lists them in report.json gates.G1.exceptions. Each needs the orchestrator's sign-off; delete an entry to make the build strict again.",
+  "g1_exceptions": [
+    { "orient": "16x9", "shot": "S1", "gate": "env_mean", "min": 36.0, "measured": 37.0,
+      "why": "approved poster: dark candle-lit room, the woman's back and a 90-px ink margin on the left; ev +0.06 (the allowed maximum) only reaches 38.7, and a brighter left side would lower the contrast of the copy that sits over it" },
+    { "orient": "16x9", "shot": "S4", "gate": "env_mean", "min": 35.0, "measured": 36.3,
+      "why": "the SPEC's own S4 values (ev 0.58 so the wall sinks into evening, a 240-px ink feather around the fixed 0.86x crop) give 36.3; ev 0.64 (allowed maximum) gives 38.9; S4 is the placeholder for Francesco's own take" },
+    { "orient": "16x9", "shot": "S6", "gate": "env_mean", "min": 28.0, "measured": 29.2,
+      "why": "approved framing with a 4 % ink margin (crop x -860: 413 px of ink at 1080p) and a dark point-of-view room; 40 would need ev ~1.3 (allowed 0.92 ± 0.06)" },
+    { "orient": "16x9", "shot": "S6", "gate": "rb_mid", "min": 27.5, "measured": 28.5,
+      "why": "S6's midtones are the neutral grey laptop deck and screen-lit hands; the allowed maximum warmth (wb [1.11,1,0.86], sat 0.93; the SPEC start values gave 25.5) reaches 28.5, so the S5 -> S6 cut drops 20.7 points of warmth instead of 28" }
+  ],
+  "tools_sha256": {
+    "cut.py": "b33203bf2b5ef04544e7e176733bab0accdfddc990026ba1405f0868ebc73fd0",
+    "screenrep_seq.py": "370d6b18349f8115bf08e0ea088d9fbff8dcb9cb49fecbcb921af33d6d4f30af",
+    "prep_site.py": "3aa36bab7a2e8af4dd1b39c848e469213a775051fb7e3e3fcb9d317dc761b561",
+    "statusbar_notch.mjs": "0f87457eb918f07ed9851806b44e6f912894ad49c1b2887bacff9473b213ac1f",
+    "run_composites.sh": "73a5307610a4e17e277bbcb8af5b4bb86da1b76a5547dbbcc107633bfd96c36f",
+    "m6_gates.py": "cfa0fdf01b4f57d72ef84ee60f64e1b2841a20c10e5d657a6b2d3cda579b69e8",
+    "m6_strips.py": "965be1273cfbf8c77d9a05d1ae5fbb83a68241d481459b7141154e835f958976",
+    "master_gates.py": "3276da270cfe21dd4d83d7c75154dc6680d5fcf7c09311b834859c9e29931112",
+    "encode_crops.py": "9f8332779e32acf303108e98d83dd20c9f0dcda4ef6f61a1ab7eea973cbaed27",
+    "pin_masters.py": "3cfb96d9b7dd8e2d1ec0149b2d5f375f656ca4f6beace100cd6cc3e225892fc9",
+    "e169_nozu.json": "1fcdeb290a58dc2c13fc3f466ae72f664a003e5c5c4d6032fd876cb0b59d60e1",
+    "e169_zu.json": "3a07de74bae3544ddf6fd9fe1e1d31db0de3024f0378707c1be873f7ef8e1c9b",
+    "e916_nozu.json": "923da6a4119e148b6c861921f8952509fbcbc2317783af170078c4690941871d",
+    "e916_zu.json": "74813ffeea1d00c844272a4379ed4c90be646589b343bc89d044bb5c5d640cc6",
+    "make_edits.py": "045d9787299d7d7750854d920bf25982f7890c99446bf097c98482b909e6239d"
+  }
+}

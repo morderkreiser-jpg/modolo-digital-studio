@@ -1,0 +1,280 @@
+{
+ "title": "film v2 · 16:9 master 1920x1080 · variant zu · 345 f = 13.8 s · 25 fps · hard cuts",
+ "fps": 25,
+ "size": [
+  1920,
+  1080
+ ],
+ "grain": 0,
+ "sat": 0.8,
+ "hal": 0.07,
+ "bloom": 0.06,
+ "vig": 0.3,
+ "upscale_max": 1.25,
+ "shots": [
+  {
+   "id": "S1",
+   "label": "PROOF · BJ Studio on a laptop (poster)",
+   "notes": [
+    "Pexels 6279145 (Artem Podrez) 0.40 s +75 f",
+    "capture bj-d14-hold (no hover, no click), gain 0.965"
+   ],
+   "src": {
+    "type": "frames",
+    "dir": "../work/s1h_bj_laptop"
+   },
+   "n": 75,
+   "crop": [
+    -180,
+    40,
+    3840,
+    2160
+   ],
+   "crop_end": [
+    -150,
+    60,
+    3780,
+    2126
+   ],
+   "feather": 160,
+   "ev": 0.92,
+   "sat": 0.8,
+   "bezel": {
+    "track": "../work/s1h_bj_laptop/sm_corners.npy",
+    "t": [
+     0.37,
+     0.56
+    ],
+    "d": [
+     16,
+     78
+    ],
+    "sigma": 30
+   }
+  },
+  {
+   "id": "S2",
+   "label": "HOW · a hand sketches a phone page",
+   "notes": [
+    "Pexels 854136 (Coverr) 12.60 s +50 f",
+    "lamp falloff toward ink hides the nails"
+   ],
+   "src": {
+    "type": "clip",
+    "path": "../../pexels/v1copy/854136/854136.mp4",
+    "in": 12.6
+   },
+   "n": 50,
+   "crop": [
+    0,
+    140,
+    1670,
+    939
+   ],
+   "crop_end": [
+    30,
+    160,
+    1610,
+    905
+   ],
+   "feather": 120,
+   "ev": 0.66,
+   "sat": 0.72,
+   "wb": [
+    1.04,
+    1.0,
+    0.92
+   ],
+   "falloff": {
+    "y0": 0.5556,
+    "y1": 0.7569,
+    "k": 0.97
+   }
+  },
+  {
+   "id": "S3",
+   "label": "PROOF · ZUMOVE on a phone",
+   "notes": [
+    "Pexels 6279154 (Artem Podrez) 4.00 s +70 f",
+    "capture zu-ph-hold f75+"
+   ],
+   "src": {
+    "type": "frames",
+    "dir": "../work/s3e_zu_phone"
+   },
+   "n": 70,
+   "crop": [
+    438,
+    413,
+    2648,
+    1490
+   ],
+   "crop_end": [
+    470,
+    430,
+    2580,
+    1451
+   ],
+   "feather": 120,
+   "ev": 0.95,
+   "sat": 0.7,
+   "wb": [
+    0.97,
+    1.0,
+    1.03
+   ],
+   "site_gain": 1.0
+  },
+  {
+   "id": "S4",
+   "label": "HOW · a camera takes the photo (placeholder)",
+   "notes": [
+    "Pexels 9218101 (PNW Production) 1.13 s +50 f",
+    "tracked blur: LCD overlays + mark only"
+   ],
+   "src": {
+    "type": "clip",
+    "path": "../../pexels/clips/9218101/9218101.mp4",
+    "in": 1.13
+   },
+   "n": 50,
+   "crop": [
+    -560,
+    -90,
+    2240,
+    1260
+   ],
+   "crop_end": [
+    -520,
+    -70,
+    2160,
+    1215
+   ],
+   "feather": 240,
+   "ev": 0.58,
+   "sat": 0.9,
+   "wb": [
+    1.1,
+    1.0,
+    0.84
+   ],
+   "vig": 0.3,
+   "track": [
+    740,
+    350,
+    260,
+    170
+   ],
+   "blur": [
+    [
+     650,
+     445,
+     50,
+     50,
+     6
+    ],
+    [
+     634,
+     532,
+     376,
+     56,
+     3.5
+    ],
+    [
+     634,
+     560,
+     52,
+     166,
+     3.5
+    ],
+    [
+     938,
+     580,
+     68,
+     200,
+     4.5
+    ],
+    [
+     634,
+     743,
+     376,
+     90,
+     5.0
+    ]
+   ]
+  },
+  {
+   "id": "S5",
+   "label": "HOW · one key, struck",
+   "notes": [
+    "Pexels 8774518 (PureRaw) 6.30 s +30 f"
+   ],
+   "src": {
+    "type": "clip",
+    "path": "../../pexels/clips/8774518/8774518.mp4",
+    "in": 6.3
+   },
+   "n": 30,
+   "crop": [
+    -600,
+    0,
+    3840,
+    2160
+   ],
+   "crop_end": [
+    -560,
+    24,
+    3770,
+    2121
+   ],
+   "feather": 240,
+   "ev": 1.0,
+   "sat": 0.8
+  },
+  {
+   "id": "S6",
+   "label": "PROOF · ZüriKey loads (his own web app)",
+   "notes": [
+    "Pexels 6279143 (Artem Podrez) 1.00 s +70 f",
+    "zk-d14-intro frames 6..72 (+72 held x3), gain 0.95"
+   ],
+   "src": {
+    "type": "frames",
+    "dir": "../work/s6b_zk_pov"
+   },
+   "n": 70,
+   "crop": [
+    -860,
+    -60,
+    4000,
+    2250
+   ],
+   "crop_end": [
+    -800,
+    -30,
+    3880,
+    2183
+   ],
+   "feather": 220,
+   "ev": 0.92,
+   "sat": 0.93,
+   "wb": [
+    1.11,
+    1.0,
+    0.86
+   ],
+   "bezel": {
+    "track": "../work/s6b_zk_pov/sm_corners.npy",
+    "t": [
+     0.4,
+     0.6
+    ],
+    "d": [
+     10,
+     60
+    ],
+    "sigma": 30
+   }
+  }
+ ]
+}
