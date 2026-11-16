@@ -1,0 +1,220 @@
+/* Launcher of the AI assistant + the widget's theme mapping.
+   Loaded with the page (the launcher is server-rendered); the panel's styles live in
+   assistant.module.css and arrive with the lazy panel chunk. */
+
+/* Widget root. No box of its own (display: contents), so it never shifts the host page; it only
+   carries the theme: the raw palettes from theme.ts are mapped onto the --mda-* tokens here and
+   inherited by the launcher and the panel. */
+.root {
+  display: contents;
+
+  --mda-accent: var(--mda-light-accent);
+  --mda-accent-text: var(--mda-light-accent-text);
+  --mda-bg: var(--mda-light-bg);
+  --mda-surface: var(--mda-light-surface);
+  --mda-text: var(--mda-light-text);
+  --mda-muted: var(--mda-light-muted);
+  --mda-line: var(--mda-light-line);
+  --mda-highlight: var(--mda-light-highlight);
+  --mda-danger: var(--mda-light-danger);
+  --mda-shadow-color: var(--mda-light-text);
+  /* Logos are drawn for light backgrounds: the avatar stays light in both palettes. */
+  --mda-avatar: var(--mda-light-surface);
+  --mda-avatar-ink: var(--mda-light-text);
+  color-scheme: light;
+
+  /* Derived tokens, resolved against whichever palette is active on this element.
+     The gold itself is decorative (about 3:1 on cream); mixed 70/30 with the text colour it
+     becomes an AA-safe "gold ink" for small text and focus rings (5:1 on the default cream). */
+  --mda-ring: color-mix(in srgb, var(--mda-highlight) 70%, var(--mda-text));
+  --mda-gold-line: color-mix(in srgb, var(--mda-highlight) 55%, transparent);
+  --mda-line-strong: color-mix(in srgb, var(--mda-text) 22%, transparent);
+  /* Edges of the input fields and the composer: 3:1 or more on the field and on its card
+     (WCAG 1.4.11; about 3.4:1 on the default cream), darker on hover. */
+  --mda-line-field: color-mix(in srgb, var(--mda-text) 50%, transparent);
+  --mda-line-field-hover: color-mix(in srgb, var(--mda-text) 65%, transparent);
+  --mda-hover: color-mix(in srgb, var(--mda-text) 6%, transparent);
+  --mda-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.root[data-theme="dark"] {
+  --mda-accent: var(--mda-dark-accent);
+  --mda-accent-text: var(--mda-dark-accent-text);
+  --mda-bg: var(--mda-dark-bg);
+  --mda-surface: var(--mda-dark-surface);
+  --mda-text: var(--mda-dark-text);
+  --mda-muted: var(--mda-dark-muted);
+  --mda-line: var(--mda-dark-line);
+  --mda-highlight: var(--mda-dark-highlight);
+  --mda-danger: var(--mda-dark-danger);
+  --mda-shadow-color: #000;
+  --mda-avatar: var(--mda-dark-text);
+  --mda-avatar-ink: var(--mda-dark-accent-text);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  .root[data-theme="auto"] {
+    --mda-accent: var(--mda-dark-accent);
+    --mda-accent-text: var(--mda-dark-accent-text);
+    --mda-bg: var(--mda-dark-bg);
+    --mda-surface: var(--mda-dark-surface);
+    --mda-text: var(--mda-dark-text);
+    --mda-muted: var(--mda-dark-muted);
+    --mda-line: var(--mda-dark-line);
+    --mda-highlight: var(--mda-dark-highlight);
+    --mda-danger: var(--mda-dark-danger);
+    --mda-shadow-color: #000;
+    --mda-avatar: var(--mda-dark-text);
+    --mda-avatar-ink: var(--mda-dark-accent-text);
+    color-scheme: dark;
+  }
+}
+
+/* ----- Launcher button ---------------------------------------------------------------------- */
+
+/* Host offset: a host page with its own bar fixed to the bottom of the screen sets
+   --mda-bottom-offset (any tenant), or this site's --mds-sticky-h (the homepage's mobile sticky bar
+   publishes its height there while visible). Defaults to 0, so nothing moves on other pages. */
+.launcher {
+  position: fixed;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  bottom: calc(24px + var(--mda-bottom-offset, var(--mds-sticky-h, 0px)) + env(safe-area-inset-bottom, 0px));
+  z-index: 55; /* above the nav (50), below the mobile menu overlay (60) */
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mda-accent);
+  color: var(--mda-accent-text);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--mda-shadow-color) 14%, transparent),
+    0 12px 30px -10px color-mix(in srgb, var(--mda-shadow-color) 50%, transparent);
+  transition:
+    transform 0.25s var(--mda-ease),
+    box-shadow 0.25s var(--mda-ease),
+    bottom 0.25s var(--mda-ease);
+}
+
+/* The thin gold ring: a gap in the page colour, then a hairline of gold. */
+.launcher:hover,
+.launcher:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 3px var(--mda-bg),
+    0 0 0 4.5px var(--mda-highlight),
+    0 14px 34px -10px color-mix(in srgb, var(--mda-shadow-color) 55%, transparent);
+}
+
+.launcher:focus-visible {
+  outline: 2px solid var(--mda-ring);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.launcher:active {
+  transform: scale(0.96);
+}
+
+/* The chat glyph and the close glyph share one cell and cross-fade with a small turn. */
+.icon {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  transition:
+    opacity 0.2s ease,
+    transform 0.3s var(--mda-ease);
+}
+
+.icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.launcher[data-open="true"] .icon[data-icon="chat"],
+.launcher[data-open="false"] .icon[data-icon="close"] {
+  opacity: 0;
+  transform: rotate(-60deg) scale(0.6);
+}
+
+/* While the panel chunk loads: a gold arc travels around the button. */
+.launcher[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1.5px solid transparent;
+  border-top-color: var(--mda-highlight);
+  border-radius: 999px;
+  animation: mda-spin 0.8s linear infinite;
+}
+
+@keyframes mda-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* "Could not load" note, anchored above the launcher. */
+.loadError {
+  position: fixed;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  bottom: calc(24px + 56px + 12px + var(--mda-bottom-offset, var(--mds-sticky-h, 0px)) + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  box-sizing: border-box;
+  max-width: min(320px, calc(100vw - 48px));
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--mda-line);
+  border-radius: 14px;
+  background: var(--mda-surface);
+  color: var(--mda-text);
+  font-family: var(--mda-font);
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 12px 30px -12px color-mix(in srgb, var(--mda-shadow-color) 40%, transparent);
+}
+
+/* Where the panel goes full screen (MOBILE_QUERY in assistant-panel.tsx). */
+@media (max-width: 639.98px), (max-height: 499.98px) {
+  .launcher {
+    width: 52px;
+    height: 52px;
+  }
+
+  .loadError {
+    bottom: calc(24px + 52px + 12px + var(--mda-bottom-offset, var(--mds-sticky-h, 0px)) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Full screen the panel has its own close button; the launcher would sit on the composer. */
+  .launcher[data-open="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher,
+  .icon {
+    transition: opacity 0.15s linear;
+  }
+
+  .launcher:hover,
+  .launcher:focus-visible {
+    transform: none;
+  }
+
+  .launcher[data-open="true"] .icon[data-icon="chat"],
+  .launcher[data-open="false"] .icon[data-icon="close"] {
+    transform: none;
+  }
+
+  .launcher[aria-busy="true"]::after {
+    animation-duration: 2.4s;
+  }
+}

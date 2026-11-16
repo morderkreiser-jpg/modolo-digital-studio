@@ -120,7 +120,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
   privacy: {
     en: {
       title: "Privacy Policy",
-      date: "June 2026",
+      date: "November 2026",
       sections: [
         {
           heading: "Overview and data controller",
@@ -142,9 +142,19 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
+          heading: "AI chat assistant",
+          body: [
+            "Our website offers a chat assistant based on artificial intelligence (AI). The messages you write in the chat are sent to Anthropic Ireland, Limited (Ireland), which generates the replies as our data processor; Anthropic may also process this data in the United States. Together with your messages we send the page you are on (without parameters), the chat language and your price region (Switzerland or Italy). Anthropic keeps messages and replies for a limited period under its own terms, mainly to detect and prevent misuse, and then deletes them. Under Anthropic's commercial terms, data sent through its API is not used to train its models.",
+            "Our server does not store the conversation: our website keeps it only in your browser's session storage until you close the tab. Our logs contain only technical data such as counts, timings and estimated costs. To prevent abuse, we count requests per IP address, per chat session and, for quote requests, per email address; we store only pseudonymised values (hashes) or a random session identifier, and these counters expire after about 24 hours.",
+            "Please do not enter sensitive personal data (such as health information) in the chat. The assistant is an AI and can make mistakes.",
+            "If you request a quote through the form shown in the chat, your details are emailed to us at info@modolodigitalstudio.ch via Resend, in the same way as contact form enquiries, together with the page, language and region of the chat. We keep quote requests for as long as needed to process your request and for any follow-up, but for no longer than 12 months unless a contract is concluded.",
+            "Where the GDPR applies, the legal basis for the chat is our legitimate interest in answering enquiries about our services (Art. 6(1)(f) GDPR); for quote requests, it is taking steps at your request prior to entering into a contract (Art. 6(1)(b) GDPR).",
+          ],
+        },
+        {
           heading: "Transfer abroad",
           body: [
-            "Because Vercel, Resend and Formspree are based in the United States, your data may be processed outside Switzerland and the EU. These providers commit to appropriate safeguards (such as standard contractual clauses) to ensure an adequate level of data protection.",
+            "Because Vercel, Resend and Formspree are based in the United States, and Anthropic may also process data there, your data may be processed outside Switzerland and the EU. These providers commit to appropriate safeguards (such as standard contractual clauses) to ensure an adequate level of data protection.",
           ],
         },
         {
@@ -181,7 +191,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
     },
     de: {
       title: "Datenschutzerklärung",
-      date: "Juni 2026",
+      date: "November 2026",
       sections: [
         {
           heading: "Überblick und Verantwortlicher",
@@ -203,9 +213,19 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
+          heading: "KI-Chat-Assistent",
+          body: [
+            "Auf unserer Website steht Ihnen ein Chat-Assistent zur Verfügung, der auf künstlicher Intelligenz (KI) basiert. Die Nachrichten, die Sie im Chat schreiben, werden an die Anthropic Ireland, Limited (Irland) übermittelt, die als unsere Auftragsbearbeiterin die Antworten erzeugt; Anthropic kann diese Daten auch in den USA verarbeiten. Zusammen mit Ihren Nachrichten übermitteln wir die Seite, auf der Sie sich befinden (ohne Parameter), die Sprache des Chats und Ihre Preisregion (Schweiz oder Italien). Anthropic bewahrt Nachrichten und Antworten gemäss ihren eigenen Bedingungen für eine begrenzte Zeit auf, vor allem um Missbrauch zu erkennen und zu verhindern, und löscht sie danach. Gemäss ihren kommerziellen Nutzungsbedingungen verwendet Anthropic über die API übermittelte Daten nicht zum Training ihrer Modelle.",
+            "Unser Server speichert den Gesprächsverlauf nicht: Die Website legt ihn nur im Sitzungsspeicher Ihres Browsers ab, bis Sie den Tab schliessen. Unsere Logfiles enthalten nur technische Angaben wie Zählwerte, Zeitangaben und geschätzte Kosten. Zum Schutz vor Missbrauch zählen wir Anfragen pro IP-Adresse, pro Chat-Sitzung und, bei Offertanfragen, pro E-Mail-Adresse; dabei speichern wir nur pseudonymisierte Werte (Hashes) oder eine zufällige Sitzungskennung, und diese Zähler verfallen nach etwa 24 Stunden.",
+            "Bitte geben Sie im Chat keine besonders schützenswerten Personendaten (etwa Angaben zur Gesundheit) ein. Der Assistent ist eine KI und kann Fehler machen.",
+            "Wenn Sie über das im Chat angezeigte Formular eine Offerte anfragen, werden Ihre Angaben wie beim Kontaktformular über Resend per E-Mail an info@modolodigitalstudio.ch gesendet, zusammen mit der Seite, der Sprache und der Region des Chats. Wir bewahren Offertanfragen so lange auf, wie es zur Bearbeitung Ihrer Anfrage und für allfällige Rückfragen notwendig ist, höchstens jedoch 12 Monate, sofern kein Vertrag zustande kommt.",
+            "Soweit die DSGVO anwendbar ist, stützen wir den Chat auf unser berechtigtes Interesse, Anfragen zu unseren Dienstleistungen zu beantworten (Art. 6 Abs. 1 lit. f DSGVO), und Offertanfragen auf die Durchführung vorvertraglicher Massnahmen auf Ihre Anfrage (Art. 6 Abs. 1 lit. b DSGVO).",
+          ],
+        },
+        {
           heading: "Datenübermittlung ins Ausland",
           body: [
-            "Da Vercel, Resend und Formspree ihren Sitz in den USA haben, können Ihre Daten ausserhalb der Schweiz und der EU verarbeitet werden. Diese Anbieter verpflichten sich zu angemessenen Garantien (etwa Standardvertragsklauseln), um ein angemessenes Datenschutzniveau sicherzustellen.",
+            "Da Vercel, Resend und Formspree ihren Sitz in den USA haben und auch Anthropic Daten dort verarbeiten kann, können Ihre Daten ausserhalb der Schweiz und der EU verarbeitet werden. Diese Anbieter verpflichten sich zu angemessenen Garantien (etwa Standardvertragsklauseln), um ein angemessenes Datenschutzniveau sicherzustellen.",
           ],
         },
         {
@@ -242,7 +262,7 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
     },
     it: {
       title: "Informativa sulla privacy",
-      date: "Giugno 2026",
+      date: "Novembre 2026",
       sections: [
         {
           heading: "Panoramica e titolare del trattamento",
@@ -264,9 +284,19 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
           ],
         },
         {
+          heading: "Assistente AI in chat",
+          body: [
+            "Sul nostro sito è disponibile un assistente in chat basato sull'intelligenza artificiale (AI). I messaggi che scrivi nella chat vengono inviati ad Anthropic Ireland, Limited (Irlanda), che genera le risposte in qualità di nostro responsabile del trattamento; Anthropic può trattare questi dati anche negli Stati Uniti. Insieme ai tuoi messaggi inviamo la pagina in cui ti trovi (senza parametri), la lingua della chat e la tua regione dei prezzi (Svizzera o Italia). Anthropic conserva messaggi e risposte per un periodo limitato secondo le proprie condizioni, soprattutto per individuare e prevenire abusi, e poi li cancella. In base alle condizioni commerciali di Anthropic, i dati inviati tramite la sua API non vengono utilizzati per addestrare i suoi modelli.",
+            "Il nostro server non conserva la conversazione: il sito la salva solo nella memoria di sessione del tuo browser, finché non chiudi la scheda. I nostri log contengono solo dati tecnici come conteggi, tempi e costi stimati. Per prevenire abusi contiamo le richieste per indirizzo IP, per sessione di chat e, per le richieste di preventivo, per indirizzo e-mail; conserviamo solo valori pseudonimizzati (hash) o un identificativo di sessione casuale, e questi contatori scadono dopo circa 24 ore.",
+            "Ti chiediamo di non inserire nella chat dati personali sensibili (ad esempio informazioni sulla salute). L'assistente è un'intelligenza artificiale e può commettere errori.",
+            "Se richiedi un preventivo tramite il modulo che compare nella chat, i dati che inserisci ci vengono inviati per e-mail a info@modolodigitalstudio.ch tramite Resend, come le richieste del modulo di contatto, insieme alla pagina, alla lingua e alla regione della chat. Conserviamo le richieste di preventivo per il tempo necessario a gestire la tua richiesta ed eventuali contatti successivi, al massimo 12 mesi, a meno che non ne nasca un contratto.",
+            "Dove si applica il GDPR, la base giuridica della chat è il nostro legittimo interesse a rispondere alle richieste sui nostri servizi (art. 6, par. 1, lett. f GDPR); per le richieste di preventivo è l'esecuzione di misure precontrattuali adottate su tua richiesta (art. 6, par. 1, lett. b GDPR).",
+          ],
+        },
+        {
           heading: "Trasferimento dei dati all'estero",
           body: [
-            "Poiché Vercel, Resend e Formspree hanno sede negli Stati Uniti, i tuoi dati possono essere trattati al di fuori della Svizzera e dell'UE. Questi fornitori si impegnano ad adottare garanzie adeguate (come le clausole contrattuali tipo) per assicurare un livello di protezione dei dati adeguato.",
+            "Poiché Vercel, Resend e Formspree hanno sede negli Stati Uniti, e anche Anthropic può trattare dati in quel Paese, i tuoi dati possono essere trattati al di fuori della Svizzera e dell'UE. Questi fornitori si impegnano ad adottare garanzie adeguate (come le clausole contrattuali tipo) per assicurare un livello di protezione dei dati adeguato.",
           ],
         },
         {

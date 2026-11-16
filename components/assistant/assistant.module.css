@@ -1,0 +1,1472 @@
+/* AI assistant panel. Arrives with the lazy panel chunk.
+   Every colour is a --mda-* token mapped in launcher.module.css from the tenant branding, so
+   another business can re-skin the widget without touching this file. Gold (--mda-highlight) is
+   only ever a line or a small accent, never a fill. No dependency on the host's utility CSS:
+   the few resets the widget needs are written here. */
+
+/* ----- Shell ---------------------------------------------------------------------------------- */
+
+.panel {
+  position: fixed;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  /* Same host offset as the launcher (see launcher.module.css), so the panel stays anchored to it. */
+  bottom: calc(24px + 56px + 16px + var(--mda-bottom-offset, var(--mds-sticky-h, 0px)) + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: calc(100vw - 48px);
+  height: min(680px, calc(100dvh - 120px - var(--mda-bottom-offset, var(--mds-sticky-h, 0px))));
+  overflow: hidden;
+  /* The wheel over the header or the footer must not scroll the page behind. */
+  overscroll-behavior: contain;
+  border: 1px solid var(--mda-line);
+  border-radius: 20px;
+  background: var(--mda-bg);
+  color: var(--mda-text);
+  font-family: var(--mda-font);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: normal;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--mda-shadow-color) 6%, transparent),
+    0 14px 36px -14px color-mix(in srgb, var(--mda-shadow-color) 24%, transparent),
+    0 44px 90px -36px color-mix(in srgb, var(--mda-shadow-color) 32%, transparent);
+  transform-origin: bottom right;
+  /* Closed until data-open says otherwise (the first render can be a closed one). */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.panel *,
+.panel *::before,
+.panel *::after {
+  box-sizing: border-box;
+}
+
+.panel[data-open="true"] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: mda-panel-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.panel[data-open="false"][data-seen] {
+  animation: mda-panel-out 160ms ease-in both;
+}
+
+/* A short gold rule along the top edge: the site's "measure" line, as an accent only. */
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 28px;
+  right: 28px;
+  z-index: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mda-gold-line) 20%, var(--mda-gold-line) 80%, transparent);
+  pointer-events: none;
+}
+
+.panel:focus {
+  outline: none;
+}
+
+/* One focus treatment for every control inside the widget. */
+.panel :focus-visible {
+  outline: 2px solid var(--mda-ring);
+  outline-offset: 2px;
+}
+
+@keyframes mda-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mda-panel-out {
+  from {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+
+@keyframes mda-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mda-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mda-fade-out {
+  from {
+    visibility: visible;
+    opacity: 1;
+  }
+  to {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+@keyframes mda-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----- Utilities ------------------------------------------------------------------------------ */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Bot trap: off-screen, out of the tab order, hidden from assistive technology. */
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: mda-spin 0.7s linear infinite;
+}
+
+/* ----- Header --------------------------------------------------------------------------------- */
+
+.header {
+  position: relative;
+  flex: none;
+  padding: 16px 16px 0;
+  border-bottom: 1px solid var(--mda-line);
+  background: var(--mda-bg);
+}
+
+.headerMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border: 1px solid var(--mda-line);
+  border-radius: 999px;
+  background: var(--mda-avatar);
+}
+
+.avatarImage {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.avatarInitial {
+  color: var(--mda-avatar-ink);
+  font-family: var(--mda-font-heading, var(--mda-font));
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.titleBlock {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--mda-text);
+  font-family: var(--mda-font-heading, var(--mda-font));
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.titleText {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.badge {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--mda-gold-line);
+  border-radius: 999px;
+  color: var(--mda-ring);
+  font-family: var(--mda-font);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--mda-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.iconButton {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 -8px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mda-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.iconButton:hover {
+  background: var(--mda-hover);
+  color: var(--mda-text);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* Language switch: three marks on the header's hairline, a gold tick under the active one. */
+.languages {
+  position: relative;
+  display: flex;
+  margin-left: -8px;
+}
+
+.language {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mda-muted);
+  font-family: var(--mda-font-heading, var(--mda-font));
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.language:hover,
+.language[aria-pressed="true"] {
+  color: var(--mda-text);
+}
+
+.languageTick {
+  position: absolute;
+  left: 12px;
+  bottom: -1px;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mda-highlight);
+  transform: translateX(calc(var(--mda-lang-index, 0) * 44px));
+  transition: transform 0.3s var(--mda-ease);
+  pointer-events: none;
+}
+
+.toolButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  margin: 0 -10px 0 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mda-muted);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.toolButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolButton:hover:not(:disabled) {
+  background: var(--mda-hover);
+  color: var(--mda-text);
+}
+
+.toolButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--mda-line);
+  background: var(--mda-surface);
+  animation: mda-fade 0.2s ease both;
+}
+
+.confirm p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ----- Conversation --------------------------------------------------------------------------- */
+
+.body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.list {
+  position: relative; /* offsetParent of the cards, for scrolling a form into view */
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 20px 16px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mda-line-strong) transparent;
+}
+
+.list:focus-visible {
+  outline-offset: -4px;
+}
+
+.message {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  animation: mda-rise 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.message[data-role="user"] {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border: 1px solid var(--mda-line);
+  border-radius: 18px 18px 18px 6px;
+  background: var(--mda-surface);
+  color: var(--mda-text);
+  overflow-wrap: anywhere;
+}
+
+.message[data-role="user"] .bubble {
+  border-color: transparent;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--mda-accent);
+  color: var(--mda-accent-text);
+}
+
+.userText {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.messageNote {
+  margin: 6px 6px 0;
+  color: var(--mda-muted);
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* A refused question: still readable, visibly no longer part of the conversation. */
+.message[data-role="user"][data-excluded] .bubble {
+  border: 1px dashed var(--mda-line-field);
+  background: transparent;
+  color: var(--mda-muted);
+}
+
+/* Assistant text (markdown subset). */
+.rich {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rich p,
+.rich ul,
+.rich ol {
+  margin: 0;
+}
+
+.rich ul,
+.rich ol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 1.15em;
+}
+
+.rich ul {
+  list-style: none;
+}
+
+/* Bullets are short gold dashes, the same mark the site uses for its rulers. */
+.rich ul > li {
+  position: relative;
+}
+
+.rich ul > li::before {
+  content: "";
+  position: absolute;
+  top: 0.78em;
+  left: -1em;
+  width: 7px;
+  height: 1px;
+  background: var(--mda-highlight);
+}
+
+.rich ol {
+  list-style: decimal;
+}
+
+.rich ol > li::marker {
+  color: var(--mda-ring);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rich strong {
+  font-weight: 600;
+}
+
+.inlineLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--mda-highlight);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.inlineLink:hover {
+  text-decoration-color: currentColor;
+}
+
+.starters {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+  animation: mda-rise 0.4s 0.06s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chip {
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--mda-line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mda-text);
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.2s var(--mda-ease);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--mda-highlight);
+  background: var(--mda-surface);
+  transform: translateY(-1px);
+}
+
+.chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 15px 16px;
+}
+
+.typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--mda-muted);
+  opacity: 0.3;
+  animation: mda-dot 1.2s ease-in-out infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes mda-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: none;
+  }
+  30% {
+    opacity: 0.9;
+    transform: translateY(-3px);
+  }
+}
+
+.notice {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--mda-line);
+  border-left: 2px solid var(--mda-danger);
+  border-radius: 14px;
+  background: var(--mda-surface);
+  font-size: 14px;
+  line-height: 1.5;
+  animation: mda-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.notice[data-tone="quiet"] {
+  border-left-color: var(--mda-highlight);
+}
+
+.noticeIcon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--mda-danger);
+}
+
+.noticeBody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.noticeBody p {
+  margin: 0;
+}
+
+.noticeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactsIntro {
+  margin: 0;
+  color: var(--mda-muted);
+  font-size: 13px;
+}
+
+.contactList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contactLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 13px 6px 11px;
+  border: 1px solid var(--mda-line-strong);
+  border-radius: 999px;
+  color: var(--mda-text);
+  font-size: 13px;
+  line-height: 1.3;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.contactLink svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--mda-ring);
+}
+
+.contactLink:hover {
+  border-color: var(--mda-highlight);
+  background: var(--mda-bg);
+}
+
+.pill {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--mda-line);
+  border-radius: 999px;
+  background: var(--mda-surface);
+  color: var(--mda-text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  transform: translateX(-50%);
+  cursor: pointer;
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--mda-shadow-color) 40%, transparent);
+  animation: mda-pill-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pill svg {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes mda-pill-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ----- Buttons -------------------------------------------------------------------------------- */
+
+.primaryButton,
+.secondaryButton,
+.ghostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s var(--mda-ease);
+}
+
+.primaryButton {
+  padding: 0 20px;
+  border: 0;
+  background: var(--mda-accent);
+  color: var(--mda-accent-text);
+}
+
+.primaryButton:hover {
+  box-shadow:
+    0 0 0 2px var(--mda-surface),
+    0 0 0 3px var(--mda-highlight);
+}
+
+.primaryButton:active {
+  transform: scale(0.98);
+}
+
+.primaryButton[data-busy] {
+  cursor: progress;
+}
+
+.secondaryButton {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--mda-line-strong);
+  background: transparent;
+  color: var(--mda-text);
+  font-size: 13.5px;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--mda-highlight);
+}
+
+.secondaryButton:disabled {
+  color: var(--mda-muted);
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+
+.ghostButton {
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--mda-muted);
+}
+
+.ghostButton:hover:not(:disabled) {
+  background: var(--mda-hover);
+  color: var(--mda-text);
+}
+
+.ghostButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ----- Footer and composer -------------------------------------------------------------------- */
+
+.footer {
+  /* Safety net: whatever the conversation does when space runs out, it never covers the controls. */
+  position: relative;
+  z-index: 1;
+  flex: none;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--mda-line);
+  background: var(--mda-bg);
+}
+
+.footerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 8px;
+}
+
+/* Only the (empty) status region inside: no gap above the composer. */
+.footerMeta[data-empty] {
+  margin-bottom: 0;
+}
+
+.quoteChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 13px 0 10px;
+  border: 1px solid var(--mda-gold-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mda-ring);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.quoteChip svg {
+  width: 15px;
+  height: 15px;
+}
+
+.quoteChip:hover {
+  border-color: var(--mda-highlight);
+  background: var(--mda-surface);
+}
+
+.remaining {
+  margin: 0;
+  color: var(--mda-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.composer {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 5px 5px 5px 15px;
+  border: 1px solid var(--mda-line-field);
+  border-radius: 24px;
+  background: var(--mda-surface);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.composer:hover {
+  border-color: var(--mda-line-field-hover);
+}
+
+.composer:focus-within {
+  border-color: var(--mda-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mda-highlight) 18%, transparent);
+}
+
+.composer[data-disabled] {
+  opacity: 0.6;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Five lines, then the field scrolls. */
+  max-height: calc(1.5em * 5 + 18px);
+  margin: 0;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--mda-text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
+}
+
+.input::placeholder {
+  color: var(--mda-muted);
+  opacity: 1;
+}
+
+/* Message limit reached: the field stays focusable but takes no input. */
+.input[readonly] {
+  cursor: default;
+}
+
+/* The composer frame carries the focus ring for the field. */
+.panel .input:focus-visible {
+  outline: none;
+}
+
+.sendButton,
+.stopButton {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.2s var(--mda-ease);
+}
+
+/* 44px hit area around a 40px disc. */
+.sendButton::after,
+.stopButton::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+
+.sendButton svg,
+.stopButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sendButton {
+  border: 0;
+  background: var(--mda-accent);
+  color: var(--mda-accent-text);
+}
+
+.sendButton:not([aria-disabled="true"]):active,
+.stopButton:active {
+  transform: scale(0.94);
+}
+
+/* aria-disabled, not :disabled: the button keeps keyboard focus (see composer.tsx). */
+.sendButton[aria-disabled="true"] {
+  background: var(--mda-hover);
+  color: var(--mda-muted);
+  cursor: default;
+}
+
+.stopButton {
+  border: 1px solid var(--mda-line-strong);
+  background: var(--mda-surface);
+  color: var(--mda-text);
+}
+
+.counter {
+  margin: 6px 6px 0;
+  color: var(--mda-muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.counter[data-full] {
+  color: var(--mda-danger);
+}
+
+.disclaimer {
+  margin: 8px 4px 0;
+  color: var(--mda-muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.disclaimerLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--mda-line-strong);
+  text-underline-offset: 2px;
+}
+
+.disclaimerLink:hover {
+  color: var(--mda-text);
+}
+
+/* ----- Quote form ----------------------------------------------------------------------------- */
+
+.formCard {
+  position: relative;
+  flex: none;
+  padding: 18px 16px 16px;
+  border: 1px solid var(--mda-line);
+  border-radius: 18px;
+  background: var(--mda-surface);
+  animation: mda-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Gold tick on the card's top edge. */
+.formCard::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 20px;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mda-highlight);
+}
+
+.formHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.formMark,
+.successMark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--mda-gold-line);
+  border-radius: 10px;
+  color: var(--mda-ring);
+}
+
+.formMark svg,
+.successMark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.successMark {
+  margin-bottom: 10px;
+  border-radius: 999px;
+}
+
+.formTitle {
+  margin: 0;
+  color: var(--mda-text);
+  font-family: var(--mda-font-heading, var(--mda-font));
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.panel .formTitle:focus-visible {
+  outline: none;
+}
+
+.formIntro {
+  margin: 3px 0 0;
+  color: var(--mda-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.formSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  color: var(--mda-text);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.optional {
+  color: var(--mda-muted);
+  font-weight: 400;
+}
+
+.textInput,
+.select,
+.textArea {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  /* The border is the field's only visible edge (its fill is close to the card's): 3:1 or more. */
+  border: 1px solid var(--mda-line-field);
+  border-radius: 12px;
+  background-color: var(--mda-bg);
+  color: var(--mda-text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color 0.15s ease;
+}
+
+.textInput:hover,
+.select:hover,
+.textArea:hover {
+  border-color: var(--mda-line-field-hover);
+}
+
+.textInput:focus,
+.select:focus,
+.textArea:focus {
+  border-color: var(--mda-ring);
+}
+
+.textInput[aria-invalid="true"],
+.select[aria-invalid="true"],
+.textArea[aria-invalid="true"] {
+  border-color: var(--mda-danger);
+}
+
+.textArea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+/* Native select restyled: the chevron is drawn with two gradients so it follows the tokens. */
+.select {
+  padding-right: 38px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--mda-muted) 50%),
+    linear-gradient(135deg, var(--mda-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 50%,
+    calc(100% - 15px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.fieldHint {
+  margin: 0;
+  color: var(--mda-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.fieldError {
+  margin: 0;
+  color: var(--mda-danger);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.consent {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 6px 10px;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--mda-accent);
+  cursor: pointer;
+}
+
+.consentLabel {
+  color: var(--mda-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.consent .fieldError {
+  grid-column: 2;
+}
+
+.formStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--mda-danger);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--mda-danger) 6%, transparent);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.formStatus p {
+  margin: 0;
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 28px 20px;
+}
+
+.fallback p {
+  margin: 0;
+}
+
+/* ----- Small screens: full-screen modal ------------------------------------------------------- */
+
+/* Narrow or short (phones in landscape, zoomed-in laptops). Same query as MOBILE_QUERY in
+   assistant-panel.tsx and the launcher's in launcher.module.css. */
+@media (max-width: 639.98px), (max-height: 499.98px) {
+  .panel {
+    top: var(--mda-vv-top, 0px);
+    right: 0;
+    bottom: auto;
+    left: 0;
+    z-index: 95; /* a modal: above the site's own overlays (menu 60, cookie banner 90) */
+    width: 100%;
+    max-width: none;
+    height: var(--mda-vv-height, 100dvh);
+    border: 0;
+    border-radius: 0;
+    transform-origin: center bottom;
+  }
+
+  .panel::before {
+    display: none;
+  }
+
+  .header {
+    padding: calc(10px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px)) 0
+      calc(16px + env(safe-area-inset-left, 0px));
+  }
+
+  .confirm {
+    margin: 0 calc(-16px - env(safe-area-inset-right, 0px)) 0 calc(-16px - env(safe-area-inset-left, 0px));
+  }
+
+  .list {
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  }
+
+  .footer {
+    padding: 10px calc(12px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px))
+      calc(12px + env(safe-area-inset-left, 0px));
+  }
+
+  .bubble {
+    max-width: 88%;
+  }
+}
+
+/* Short screens, full screen or not: every line of chrome costs conversation. The header loses
+   its subtitle and some padding, the disclaimer keeps to one line, and below a floor for the
+   conversation the whole panel scrolls instead of clipping the composer. */
+@media (max-height: 560px) {
+  .panel {
+    overflow-y: auto;
+  }
+
+  .header {
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .toolbar {
+    margin-top: 0;
+  }
+
+  .body {
+    min-height: 120px;
+  }
+
+  .footer {
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .disclaimer {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+
+  /* The text gives way (ellipsis), the privacy link stays. */
+  .disclaimerText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* On-screen keyboard open (data-keyboard, set from the visual viewport): the conversation and the
+   composer get the room; the subtitle, the disclaimer and the quote chip step aside. */
+.panel[data-keyboard] .subtitle,
+.panel[data-keyboard] .disclaimer,
+.panel[data-keyboard] .quoteChip {
+  display: none;
+}
+
+/* The remaining-messages note is a live region: moved off-screen, not removed, so it is still read. */
+.panel[data-keyboard] .footerMeta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Touch input: 44px targets everywhere, and 16px text so iOS does not zoom into focused fields. */
+@media (pointer: coarse) {
+  .chip,
+  .contactLink,
+  .quoteChip,
+  .secondaryButton,
+  .pill {
+    min-height: 44px;
+  }
+
+  .input,
+  .textInput,
+  .select,
+  .textArea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 639.98px), (max-height: 499.98px) {
+  .input,
+  .textInput,
+  .select,
+  .textArea {
+    font-size: 16px;
+  }
+}
+
+/* ----- Reduced motion: fades only ------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .panel[data-open="true"] {
+    animation: mda-fade 160ms linear both;
+  }
+
+  .panel[data-open="false"][data-seen] {
+    animation: mda-fade-out 120ms linear both;
+  }
+
+  .message,
+  .starters,
+  .notice,
+  .formCard,
+  .confirm {
+    animation: mda-fade 160ms linear both;
+  }
+
+  .pill {
+    animation: none;
+  }
+
+  .typing span {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  .spinner {
+    animation-duration: 2s;
+  }
+
+  .languageTick,
+  .chip,
+  .primaryButton,
+  .sendButton,
+  .stopButton {
+    transition: none;
+  }
+
+  .chip:hover:not(:disabled),
+  .primaryButton:active,
+  .sendButton:not([aria-disabled="true"]):active,
+  .stopButton:active {
+    transform: none;
+  }
+}

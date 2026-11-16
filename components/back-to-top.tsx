@@ -26,7 +26,8 @@ export default function BackToTop({ label = "Back to top" }: { label?: string })
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
           transition={{ duration: reduce ? 0 : 0.2 }}
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-[#1F1B16] text-[#F7F3EC] shadow-lg flex items-center justify-center hover:bg-[#33291E] transition-colors"
+          // Hidden (and out of the tab order) while the AI assistant's panel is open over it.
+          className="fixed bottom-[calc(6rem+var(--mds-sticky-h,0px))] right-7 z-40 w-12 h-12 rounded-full bg-[#1F1B16] text-[#F7F3EC] shadow-lg flex items-center justify-center hover:bg-[#33291E] transition-colors [html[data-assistant-open]_&]:hidden"
         >
           <ArrowUp className="w-5 h-5" aria-hidden="true" />
         </motion.button>

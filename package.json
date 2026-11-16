@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:assistant": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs --test \"tests/assistant/*.test.ts\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
