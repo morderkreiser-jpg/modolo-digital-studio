@@ -318,20 +318,20 @@ export default function Home({ lang }: { lang: Lang }) {
   const region = useRegion();
   const whatsapp = whatsappHref(region, SITE.phone, SITE.phoneIt, t.contact.whatsappMsg);
 
-  // Portfolio as a curated monograph — real, borderless site captures.
+  // Portfolio as a curated monograph — real, borderless site captures. Only sites that are online:
+  // the section promises "online right now, open them". SaporiVivi is out while saporivivi.ch is
+  // suspended (SiteGround, Nov 2026); its copy (t.saporivivi) and poster stay, ready to come back.
   const PROJECTS = [
     { num: "01", name: "ZüriKey", href: "https://zurikey.ch", host: "zurikey.ch", data: t.zurikey, poster: "/portfolio-zurikey-poster.webp" },
-    { num: "02", name: "SaporiVivi", href: "https://saporivivi.ch", host: "saporivivi.ch", data: t.saporivivi, poster: "/portfolio-saporivivi-hero.webp" },
-    { num: "03", name: "BJ Studio", href: "https://bjstudiodebelleza.ch", host: "bjstudiodebelleza.ch", data: t.bjstudio, poster: "/portfolio-bjstudio-poster.webp" },
+    { num: "02", name: "BJ Studio", href: "https://bjstudiodebelleza.ch", host: "bjstudiodebelleza.ch", data: t.bjstudio, poster: "/portfolio-bjstudio-poster.webp" },
   ];
 
-  // Hero proof — the real client sites shown live in the browser frame (SaporiVivi first: the
-  // restaurant is the most relatable to the core audience, and the static/mobile frame).
-  const SHOWCASE = [
-    { name: "SaporiVivi", host: "saporivivi.ch", poster: "/portfolio-saporivivi-hero.webp", href: "https://saporivivi.ch", caption: t.saporivivi.meta },
-    { name: "ZüriKey", host: "zurikey.ch", poster: "/portfolio-zurikey-poster.webp", href: "https://zurikey.ch", caption: t.zurikey.meta },
-    { name: "BJ Studio", host: "bjstudiodebelleza.ch", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.ch", caption: t.bjstudio.meta },
-  ];
+  // Hero proof — the real sites shown live in the browser frame. The first frame is the LCP image
+  // and the only one under reduced motion, so it matches the page language: BJ Studio (a local
+  // client, poster of its Italian page) leads on /it, ZüriKey (German page) on /de and /.
+  const showcaseBj = { name: "BJ Studio", host: "bjstudiodebelleza.ch", poster: "/portfolio-bjstudio-poster.webp", href: "https://bjstudiodebelleza.ch", caption: t.bjstudio.meta };
+  const showcaseZk = { name: "ZüriKey", host: "zurikey.ch", poster: "/portfolio-zurikey-poster.webp", href: "https://zurikey.ch", caption: t.zurikey.meta };
+  const SHOWCASE = lang === "it" ? [showcaseBj, showcaseZk] : [showcaseZk, showcaseBj];
 
   // Move focus to the success panel so screen-reader and keyboard users are told the message sent.
   useEffect(() => {
@@ -475,7 +475,7 @@ export default function Home({ lang }: { lang: Lang }) {
               </h2>
               <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60 md:text-lg">{t.servicesSection.sub}</p>
             </div>
-            <span className="micro-caps tnum text-[#17130e]/40">01 / 04</span>
+            <span className="micro-caps tnum text-[#17130e]/40">01 / {String(t.services.length).padStart(2, "0")}</span>
           </motion.div>
 
           <div className="border-b border-[color:var(--gold-line)]">
@@ -530,10 +530,10 @@ export default function Home({ lang }: { lang: Lang }) {
               </h2>
               <p data-reveal-fade className="mt-6 max-w-2xl text-base font-light leading-relaxed text-[#17130e]/60">{t.portfolioSection.sub}</p>
             </div>
-            <span data-reveal-fade className="micro-caps tnum inline-block text-[#17130e]/40">{t.portfolioSection.indexLabel} — 01 / 03</span>
+            <span data-reveal-fade className="micro-caps tnum inline-block text-[#17130e]/40">{t.portfolioSection.indexLabel} — 01 / {String(PROJECTS.length).padStart(2, "0")}</span>
           </Reveal>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={`grid gap-6 sm:grid-cols-2 ${PROJECTS.length > 2 ? "lg:grid-cols-3" : ""}`}>
             {PROJECTS.map((p) => (
               <motion.a
                 key={p.num}
@@ -546,8 +546,8 @@ export default function Home({ lang }: { lang: Lang }) {
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="group flex flex-col overflow-hidden rounded-[6px] border border-[color:var(--gold-line)] bg-[var(--ink-panel)]/40 transition-all duration-500 hover:-translate-y-1.5 hover:border-[var(--color-gold)]/40 hover:shadow-[0_26px_50px_-28px_rgba(126,93,36,0.55)]"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#17130e]">
-                  <Image src={p.poster} alt={`${p.name} — ${p.data.meta}`} fill sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw" className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"}`} />
+                <div className="relative aspect-[16/10] overflow-hidden bg-[var(--ink-panel)]">
+                  <Image src={p.poster} alt={`${p.name} — ${p.data.meta}`} fill sizes={PROJECTS.length > 2 ? "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw" : "(max-width: 640px) 92vw, 46vw"} className={`object-cover object-top ${reduce ? "" : "transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"}`} />
                   <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 font-[var(--font-space)] text-[10px] text-[#5b5142] backdrop-blur" style={{ background: "rgba(251,248,242,0.9)" }}>
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#3fae6a" }} />{p.host}
                   </span>

@@ -7,7 +7,7 @@ import { useReducedMotion } from "framer-motion";
 /**
  * Hero PROOF — the real client sites shown LIVE inside a browser frame: the actual domain in the
  * URL bar + a green "Live" dot, the whole frame a clickable link to the live site. It cross-fades
- * through the three real Swiss businesses on every device, and on touch you can also SWIPE to flip
+ * through the real sites on every device, and on touch you can also SWIPE to flip
  * through them (dots below show where you are). Desktop adds a cursor-following 3D tilt. Pure
  * DOM/CSS + next/image posters (tiny webp, no WebGL/video) → fast, mobile-safe. Reduced-motion →
  * a single static frame, no motion.
@@ -108,10 +108,10 @@ export default function HeroShowcase({ items, browseLabel }: { items: ShowcaseIt
               fill
               sizes="(max-width: 768px) 92vw, 620px"
               // Next 16: priority is deprecated. For a cross-fade stack (one poster visible),
-              // fetchPriority="high" flags the LCP candidate without preloading all three —
+              // fetchPriority="high" flags the LCP candidate without preloading every poster —
               // but next/image still defaults to loading="lazy", which defers the very request
-              // fetchPriority is there to prioritise. eager on the first poster only: the other
-              // two stay lazy and load when the cross-fade reaches them.
+              // fetchPriority is there to prioritise. eager on the first poster only: the others
+              // stay lazy and load when the cross-fade reaches them.
               fetchPriority={idx === 0 ? "high" : undefined}
               loading={idx === 0 ? "eager" : undefined}
               className="hsw-shot"
@@ -163,7 +163,7 @@ const CSS = `
 .hsw-live { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: #3fae6a;
   box-shadow: 0 0 7px rgba(63,174,106,0.7); }
 
-.hsw-body { position: relative; width: 100%; aspect-ratio: 1280 / 700; background: #17130e; }
+.hsw-body { position: relative; width: 100%; aspect-ratio: 1280 / 700; background: var(--ink-bg); }
 .hsw-shot { object-fit: cover; object-position: top center; transition: opacity 1.1s ease-in-out; }
 
 .hsw-foot { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }

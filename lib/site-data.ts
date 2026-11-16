@@ -11,7 +11,7 @@ export const FAQS: Record<Locale, QA[]> = {
   en: [
     {
       q: "How much does a website cost?",
-      a: "Fixed prices, agreed before we start. Google listing sorted: CHF 390, or CHF 690 if I come to you and shoot the photos myself. A 3-6 page website: CHF 1,690. A complete website: CHF 4,200. I am not VAT-registered, so the price you read is the final price, and a subscription is never required.",
+      a: "Fixed prices, agreed before we start. Google listing sorted: CHF 390, or CHF 690 if I come to you and shoot the photos myself. One-page website: from CHF 1,690. Website of up to 6 pages: from CHF 4,200. I am not VAT-registered, so the price you read is the final price, and a subscription is never required.",
     },
     {
       q: "Do I own the website?",
@@ -37,7 +37,7 @@ export const FAQS: Record<Locale, QA[]> = {
   de: [
     {
       q: "Was kostet eine Website?",
-      a: "Feste Preise, vor dem Start vereinbart. Google-Eintrag eingerichtet: CHF 390, oder CHF 690, wenn ich für die Fotos zu dir komme. Website mit 3 bis 6 Seiten: CHF 1’690. Komplette Website: CHF 4’200. Ich bin nicht mehrwertsteuerpflichtig, der genannte Preis ist also der Endpreis — und ein Abo ist nie Pflicht.",
+      a: "Feste Preise, vor dem Start vereinbart. Google-Eintrag eingerichtet: CHF 390, oder CHF 690, wenn ich für die Fotos zu dir komme. Website mit einer Seite: ab CHF 1'690. Website mit bis zu 6 Seiten: ab CHF 4'200. Ich bin nicht mehrwertsteuerpflichtig, der genannte Preis ist also der Endpreis — und ein Abo ist nie Pflicht.",
     },
     {
       q: "Gehört die Website danach mir?",
@@ -63,7 +63,7 @@ export const FAQS: Record<Locale, QA[]> = {
   it: [
     {
       q: "Quanto costa realizzare un sito web?",
-      a: "Prezzi fissi, decisi prima di iniziare. Scheda Google sistemata: CHF 390, oppure CHF 690 se vengo io a fare le foto da te. Sito di 3-6 pagine: CHF 1’690. Sito completo: CHF 4’200. Non sono soggetto a IVA, quindi il prezzo che leggi è quello finale, e nessun abbonamento è mai obbligatorio.",
+      a: "Prezzi fissi, decisi prima di iniziare. Scheda Google sistemata: CHF 390, oppure CHF 690 se vengo io a fare le foto da te. Sito di una pagina: da CHF 1'690. Sito fino a 6 pagine: da CHF 4'200. Non sono soggetto a IVA, quindi il prezzo che leggi è quello finale, e nessun abbonamento è mai obbligatorio.",
     },
     {
       q: "Il sito resta mio?",
