@@ -7,7 +7,7 @@ import {
   canonicalizeSlugPath,
   type Locale,
 } from "@/lib/i18n";
-import { REGION_COOKIE, DEFAULT_REGION } from "@/lib/region";
+import { REGION_COOKIE, DEFAULT_REGION, isRegion } from "@/lib/region";
 
 // Locale routing (Next 16 renamed "middleware" → "proxy").
 // URL scheme: default locale (en) is served WITHOUT a prefix at the root; de/it are prefixed.
@@ -55,13 +55,23 @@ function negotiateLocale(header: string | null, fallback: Locale = DEFAULT_LOCAL
 // which is what is already indexed.
 const CARD_PATH = "/biglietto";
 
-// Set the pricing-region cookie from the visitor's country (Vercel geo header) on first
-// visit, unless they already have one (an explicit currency-toggle choice persists).
-// IT visitors -> Italian/EUR prices; everyone else -> Swiss/CHF.
+// The region cookie follows the visitor's CURRENT country (Vercel geo header): IT -> "it" (the
+// Italian WhatsApp number and address), everyone else -> "ch". Prices are CHF for every region.
+// It is re-checked on every request: the CHF/EUR toggle that once made a stored choice worth keeping
+// was removed in July 2026, and a cookie kept from a visit in Italy showed the Italian number for a
+// year to someone back in Switzerland. Without a geo header (local dev) a valid cookie stays.
 function ensureRegion(request: NextRequest, res: NextResponse) {
-  if (!request.cookies.get(REGION_COOKIE)) {
-    const country = request.headers.get("x-vercel-ip-country");
-    res.cookies.set(REGION_COOKIE, country === "IT" ? "it" : DEFAULT_REGION, {
+  const country = request.headers.get("x-vercel-ip-country");
+  const current = request.cookies.get(REGION_COOKIE)?.value;
+  const region = country
+    ? country === "IT"
+      ? "it"
+      : DEFAULT_REGION
+    : current && isRegion(current)
+      ? current
+      : DEFAULT_REGION;
+  if (current !== region) {
+    res.cookies.set(REGION_COOKIE, region, {
       path: "/",
       maxAge: ONE_YEAR,
       sameSite: "lax",
