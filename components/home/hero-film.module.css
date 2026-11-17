@@ -903,8 +903,13 @@
     }
   }
 
-  /* Short phones: the low scrim starts 24 px earlier (the band shows more of the device's lower half). */
+  /* Short phones: the low scrim starts 24 px earlier (the band shows more of the device's lower half).
+     14 px more between the actions and the rail (taken from the band): the secondary link's 44 px tap box then
+     ends 10 px above the AI launcher (52 px at right/bottom 24), not 4 px inside its circle (360 × 640). */
   @media (max-height: 700px) {
+    .rail {
+      margin-top: 22px;
+    }
     .bottom::before {
       top: -114px;
       background: linear-gradient(

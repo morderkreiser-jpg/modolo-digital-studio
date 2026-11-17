@@ -54,7 +54,7 @@ export const OFFER: Record<Locale, OfferCopy> = {
   de: {
     kicker: "02 · Angebot & Preise",
     h2: ["Zuerst Google.", "Dann die Website."],
-    lead: "Viele Kunden sehen zuerst deinen Google-Eintrag und erst danach deine Website. Darum fange ich oft dort an. Alle Preise sind Fix- und Endpreise, du bekommst sie schriftlich vor dem Start.",
+    lead: "Viele Kunden sehen zuerst deinen Google-Eintrag und erst danach deine Website. Darum fange ich oft dort an. Der Preis für die Arbeit ist fix, du bekommst ihn schriftlich vor dem Start. Für eine Website zahlst du danach nur noch Domain und Hosting, einmal im Jahr.",
     check: {
       step: "Schritt 0 · CHF 0",
       h3: "Gratis-Check per Video",
@@ -64,6 +64,7 @@ export const OFFER: Record<Locale, OfferCopy> = {
       button: "Video anfordern",
       micro: "Ein Video von mir, keine automatische Analyse. Kein Termin, kein Abo. WhatsApp öffnet sich mit dem fertigen Text, du kannst ihn vor dem Senden ändern.",
     },
+    // The two websites are one step in two sizes (you pick one), so both cards say «Schritt 2».
     rungs: (p) => [
       {
         step: "Schritt 1", h3: "Google-Profil", price: p.start, // no "ab": Start is a fixed price (pricing.ts from:false)
@@ -73,13 +74,13 @@ export const OFFER: Record<Locale, OfferCopy> = {
         link: "Google-Profil anfragen",
       },
       {
-        step: "Schritt 2", h3: "Website mit einer Seite", price: `ab ${p.essential}`,
+        step: "Schritt 2 · eine Seite", h3: "Website mit einer Seite", price: `ab ${p.essential}`,
         text: "Alles, was ein neuer Kunde wissen muss, auf einer Seite: Angebot, Preise, Öffnungszeiten, Anfahrt und ein WhatsApp-Knopf. Eigenes Design, gebaut mit Framer.",
         meta: "Etwa 1 bis 2 Wochen, sobald Texte und Fotos da sind",
         link: "Eine Seite anfragen",
       },
       {
-        step: "Schritt 3", h3: "Website bis 6 Seiten", price: `ab ${p.business}`,
+        step: "Schritt 2 · bis 6 Seiten", h3: "Website bis 6 Seiten", price: `ab ${p.business}`,
         text: "Für Betriebe mit mehr Angebot: eigene Seiten für Leistungen, Team und Galerie. News und Aktionen trägst du später selbst ein. Gebaut mit Framer.",
         meta: "Etwa 3 bis 4 Wochen",
         link: "Website bis 6 Seiten anfragen",
@@ -95,7 +96,7 @@ export const OFFER: Record<Locale, OfferCopy> = {
   it: {
     kicker: "02 · Servizi e prezzi",
     h2: ["Prima Google.", "Poi il sito."],
-    lead: "Molti clienti vedono prima la tua scheda Google e solo dopo il sito. Per questo spesso comincio da lì. Tutti i prezzi sono fissi e finali, e li hai per iscritto prima di iniziare.",
+    lead: "Molti clienti vedono prima la tua scheda Google e solo dopo il sito. Per questo spesso comincio da lì. Il prezzo del lavoro è fisso e lo hai per iscritto prima di iniziare. Per un sito, poi, paghi solo dominio e hosting, una volta all'anno.",
     check: {
       step: "Passo 0 · CHF 0",
       h3: "Controllo Google gratuito, in video",
@@ -114,13 +115,13 @@ export const OFFER: Record<Locale, OfferCopy> = {
         link: "Chiedi il profilo Google",
       },
       {
-        step: "Passo 2", h3: "Sito di una pagina", price: `da ${p.essential}`,
+        step: "Passo 2 · una pagina", h3: "Sito di una pagina", price: `da ${p.essential}`,
         text: "Tutto quello che un nuovo cliente deve sapere, in una pagina: cosa offri, prezzi, orari, come arrivare e un pulsante WhatsApp. Design su misura, realizzato con Framer.",
         meta: "Circa 1–2 settimane, da quando testi e foto sono pronti",
         link: "Chiedi il sito di una pagina",
       },
       {
-        step: "Passo 3", h3: "Sito fino a 6 pagine", price: `da ${p.business}`,
+        step: "Passo 2 · fino a 6 pagine", h3: "Sito fino a 6 pagine", price: `da ${p.business}`,
         text: "Per chi ha più cose da mostrare: pagine per servizi, team e galleria. Novità e promozioni le aggiorni tu. Realizzato con Framer.",
         meta: "Circa 3–4 settimane",
         link: "Chiedi il sito fino a 6 pagine",
@@ -136,7 +137,7 @@ export const OFFER: Record<Locale, OfferCopy> = {
   en: {
     kicker: "02 · Services & prices",
     h2: ["Google first.", "Then the website."],
-    lead: "Many customers see your Google listing first and your website only after that. That's why I often start there. Every price is fixed and final, and you get it in writing before I start.",
+    lead: "Many customers see your Google listing first and your website only after that. That's why I often start there. The price for the work is fixed, and you get it in writing before I start. For a website, all you pay after that is domain and hosting, once a year.",
     check: {
       step: "Step 0 · CHF 0",
       h3: "Free Google check, on video",
@@ -155,13 +156,13 @@ export const OFFER: Record<Locale, OfferCopy> = {
         link: "Ask about the Google profile",
       },
       {
-        step: "Step 2", h3: "One-page website", price: `from ${p.essential}`,
+        step: "Step 2 · one page", h3: "One-page website", price: `from ${p.essential}`,
         text: "Everything a new customer needs to know, on one page: what you offer, prices, opening hours, directions and a WhatsApp button. Your own design, built with Framer.",
         meta: "About 1–2 weeks once texts and photos are ready",
         link: "Ask about a one-page site",
       },
       {
-        step: "Step 3", h3: "Website up to 6 pages", price: `from ${p.business}`,
+        step: "Step 2 · up to 6 pages", h3: "Website up to 6 pages", price: `from ${p.business}`,
         text: "For businesses with more to show: pages for services, team and gallery. You update news and offers yourself. Built with Framer.",
         meta: "About 3–4 weeks",
         link: "Ask about the 6-page website",

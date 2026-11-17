@@ -26,8 +26,10 @@ type Props = {
  *   (then the toggle offers «Film abspielen» and a click is an explicit opt-in),
  * - otherwise after window `load` + 400 ms, while the hero is on screen and the tab is visible.
  * AV1 first, H.264 second; 9:16 under PORTRAIT_MQ, 16:9 1080 from 1280 px, else 16:9 720.
+ * An AV1 file the browser picks but then cannot decode does not move on to the next <source>, so the
+ * <video> switches once to the H.264 file of the same rendition (see onError).
  * It pauses off-screen and in hidden tabs, and only the VIDEO fades in, on its first `playing`.
- * If play() is refused (iOS Low Power Mode) or no source loads, the poster simply stays.
+ * If play() is refused (iOS Low Power Mode) or no file plays, the poster simply stays.
  * Every presented frame reports its shot to the film store, so the live credit under the H1 names the
  * website that is on screen right now (requestVideoFrameCallback; `timeupdate` where it is missing).
  */
@@ -108,9 +110,17 @@ export default function BackgroundFilm({ lang, className = "" }: Props) {
         report(meta.mediaTime);
         id = v.requestVideoFrameCallback(tick);
       };
-      id = v.requestVideoFrameCallback(tick);
+      // (Re)armed on every loaded file too: after the H.264 fallback's load() the loop keeps exactly one
+      // callback even in an engine that drops pending callbacks with the old file.
+      const arm = () => {
+        v.cancelVideoFrameCallback(id);
+        id = v.requestVideoFrameCallback(tick);
+      };
+      arm();
+      v.addEventListener("loadeddata", arm);
       return () => {
         live = false;
+        v.removeEventListener("loadeddata", arm);
         v.cancelVideoFrameCallback(id);
       };
     }
@@ -179,8 +189,31 @@ export default function BackgroundFilm({ lang, className = "" }: Props) {
             // React hands a <source>'s `error` to this handler too (its events bubble through the component
             // tree, the native one does not). The AV1 <source> errors on every browser without AV1 (most
             // iPhones: unsupported type) and when its request fails; the browser then moves on to H.264.
-            // So only the <video>'s own error (decode) refuses the film here; the last <source> reports below.
-            if (e.target === e.currentTarget) filmStore.setStatus("refused");
+            // So only the <video>'s own error counts here; the last <source> reports below.
+            if (e.target !== e.currentTarget) return;
+            const v = e.currentTarget;
+            const code = v.error?.code;
+            // The <video>'s own error comes after a file was chosen, and the browser never tries the next
+            // <source> then. An AV1 file that cannot be decoded (a WebKit build that claims AV1, a damaged
+            // file) gets one more chance: this rendition's H.264 file, set as src. The status stays as it is
+            // (no «refused» flash): the video fades out over the poster, the credit names the poster's shot,
+            // and the first `playing` of the H.264 file fades it back in. If H.264 fails too, its error
+            // lands here with currentSrc = H.264, and the film is refused.
+            if (
+              (code === MediaError.MEDIA_ERR_DECODE || code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) &&
+              v.currentSrc.endsWith(sources[0].src)
+            ) {
+              seekedRef.current = false; // the H.264 file starts where the poster is, like a fresh film
+              setShownKey(null);
+              filmStore.setShot(filmShotAt(FILM.startAt[lang]));
+              v.src = sources[1].src;
+              v.load();
+              // load() pauses and re-arms autoplay: play only if the film is still wanted.
+              if (wantPlayRef.current) v.play().catch(onPlayRejected);
+              else v.pause();
+              return;
+            }
+            filmStore.setStatus("refused");
           }}
         >
           <source src={sources[0].src} type={sources[0].type} />

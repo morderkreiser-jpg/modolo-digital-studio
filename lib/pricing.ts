@@ -64,10 +64,10 @@ export const PRICING_UI: Record<
     metaTitle: "Website prices in CHF",
     currencyLabel: "Currency",
     metaDescription:
-      "Fixed prices in CHF for Google profiles, websites, care plans and branding. Final price, nothing added. Web design from Winterthur.",
+      "Fixed prices in CHF for Google profiles, websites, care plans and branding. Only domain and hosting come on top, once a year. Web design from Winterthur.",
     heading1: "Services & ",
     headingAccent: "pricing",
-    subtitle: "Prices in {cur} · final price, nothing added · valid 2026",
+    subtitle: "Prices in {cur} · fixed prices, plus only domain and hosting yearly · valid 2026",
     from: "from",
     perMonth: "/month",
     regionNote: "Showing {region} prices",
@@ -85,10 +85,10 @@ export const PRICING_UI: Record<
     metaTitle: "Website-Preise in CHF",
     currencyLabel: "Währung",
     metaDescription:
-      "Fixpreise in CHF für Google-Profile, Websites, Betreuung und Branding. Endpreis, es kommt nichts dazu. Webdesign aus Winterthur.",
+      "Fixpreise in CHF für Google-Profile, Websites, Betreuung und Branding. Dazu kommen nur Domain und Hosting, einmal im Jahr. Webdesign aus Winterthur.",
     heading1: "Leistungen & ",
     headingAccent: "Preise",
-    subtitle: "Preise in {cur} · Endpreis, es kommt nichts dazu · gültig 2026",
+    subtitle: "Preise in {cur} · Fixpreise, dazu nur Domain und Hosting pro Jahr · gültig 2026",
     from: "ab",
     perMonth: "/Monat",
     regionNote: "{region}-Preise werden angezeigt",
@@ -106,10 +106,10 @@ export const PRICING_UI: Record<
     metaTitle: "Prezzi dei siti in CHF",
     currencyLabel: "Valuta",
     metaDescription:
-      "Prezzi fissi in CHF per profili Google, siti web, assistenza e branding. Prezzo finale, non si aggiunge nulla. Web design da Winterthur.",
+      "Prezzi fissi in CHF per profili Google, siti web, assistenza e branding. In più si pagano solo dominio e hosting, una volta all'anno. Web design da Winterthur.",
     heading1: "Servizi e ",
     headingAccent: "prezzi",
-    subtitle: "Prezzi in {cur} · prezzo finale, non si aggiunge nulla · validi 2026",
+    subtitle: "Prezzi in {cur} · prezzi fissi, in più solo dominio e hosting all'anno · validi 2026",
     from: "da",
     perMonth: "/mese",
     regionNote: "Stai vedendo i prezzi per {region}",
@@ -422,6 +422,15 @@ export const GOOD_TO_KNOW: GoodToKnow[] = [
       en: "every project has a fixed quote",
       de: "jedes Projekt hat einen Fixpreis",
       it: "ogni progetto ha un preventivo fisso",
+    },
+  },
+  {
+    // Same facts as the homepage FAQ «Muss ich ein Abo abschliessen?» (lib/site-data.ts): no amount here.
+    label: { en: "Domain & hosting", de: "Domain & Hosting", it: "Dominio e hosting" },
+    value: {
+      en: "the only running costs of a website: something every year, and I give you the amount in the offer. Care is optional.",
+      de: "die einzigen laufenden Kosten einer Website: etwas pro Jahr, den Betrag nenne ich dir in der Offerte. Betreuung ist freiwillig.",
+      it: "gli unici costi ricorrenti di un sito: un costo annuale, che ti indico nell'offerta. L'assistenza è facoltativa.",
     },
   },
   {

@@ -383,6 +383,14 @@ const content: Record<LegalKind, Record<Lang, Doc>> = {
   },
 };
 
+// Page title. From 414 px: clamp(2.25rem, 5vw, 4rem). Below 414 px a one-word title is too wide for the phone
+// at 36 px («Datenschutzerklärung» is 10.2 em: the page scrolled sideways by 30 px at 360 and touched the screen
+// edge at 390), so the size follows the content width (viewport − 2 × 24 px) and the word stays whole.
+// overflow-wrap/hyphens only catch a fallback font.
+const LEGAL_H1_CSS = `.mds-legal-h1{font-size:clamp(2.25rem,5vw,4rem)}
+@media (max-width:413.98px){.mds-legal-h1{font-size:max(1.5rem,(100vw - 3rem) / 10.5);overflow-wrap:anywhere}
+.mds-legal-h1:lang(de){-webkit-hyphens:auto;hyphens:auto}}`;
+
 export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang }) {
   const doc = content[kind][lang];
   const u = ui[lang];
@@ -401,7 +409,8 @@ export default function LegalPage({ kind, lang }: { kind: LegalKind; lang: Lang 
 
         <div className="mt-12 max-w-3xl">
           <span className="micro-caps text-[var(--gilt)]">{u.kicker}</span>
-          <h1 className="display-space mt-4 text-[#17130e]" style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}>{doc.title}</h1>
+          <style href="mds-legal-h1" precedence="medium">{LEGAL_H1_CSS}</style>
+          <h1 className="mds-legal-h1 display-space mt-4 text-[#17130e]">{doc.title}</h1>
           <p className="micro-caps mt-5 text-[#17130e]/45">{u.updated} · {doc.date}</p>
         </div>
 
