@@ -10,10 +10,10 @@ import { renderKnowledge } from "@/lib/assistant/server/knowledge";
 import { buildSystem, buildTools } from "@/lib/assistant/server/prompt";
 import { toPublicConfig } from "@/lib/assistant/server/public-config";
 import { DEFAULT_TENANT_ID, getTenant, listTenantIds } from "@/lib/assistant/tenants";
-import { PUBLISHED_PRICE_REGIONS, THIRD_PERSON, formatAmount } from "@/lib/assistant/tenants/modolo/knowledge";
+import { PRICE_LIST_REGION, THIRD_PERSON, formatAmount } from "@/lib/assistant/tenants/modolo/knowledge";
 import { ASSISTANT_CHAT_ENDPOINT, ASSISTANT_LEAD_ENDPOINT, ASSISTANT_LOCALES, DEFAULT_LIMITS } from "@/lib/assistant/types";
 import type { AssistantLocale, TenantConfig } from "@/lib/assistant/types";
-import { BRANDING, CARE, GOOD_TO_KNOW, INCLUDED, WEBSITES } from "@/lib/pricing";
+import { BRANDING, CARE, GOOD_TO_KNOW, INCLUDED, INCLUDED_TITLE, PRICING_UI, WEBSITES } from "@/lib/pricing";
 import { isRegion } from "@/lib/region";
 import { makeLimits, makeTenant } from "./fixtures";
 
@@ -38,6 +38,8 @@ const FIRST_PERSON: Record<AssistantLocale, RegExp> = {
   de: WORD("ich|mir|mich|mein\\p{L}*", "i"),
   it: WORD("io|me|mi|mio|mia|miei|mie", "i"),
 };
+// Italian first-person verbs carry no pronoun; these are the ones lib/pricing.ts uses.
+const IT_FIRST_PERSON_VERBS = WORD("collego|configuro|dico|faccio|imposto|indico|mando|metto|penso|restituisco|scrivo|vengo", "i");
 
 /** Every string stored under `locale` anywhere in a nested value (the Tri texts of lib/pricing.ts). */
 function textsFor(value: unknown, locale: string, out: string[] = []): string[] {
@@ -185,11 +187,11 @@ describe("Modolo knowledge: price list in the third person", () => {
     }
   });
 
-  it("has no first-person pronoun in the price list or the website inclusions, in any locale or region", () => {
+  it("has no first-person pronoun in the price list, the website inclusions or the terms, in any locale or region", () => {
     const tenant = modolo();
     for (const locale of tenant.locales) {
       for (const region of tenant.regions.ids) {
-        const text = renderSections(tenant, ["pricing", "included"], locale, region);
+        const text = renderSections(tenant, ["pricing", "included", "terms"], locale, region);
         const hit = FIRST_PERSON[locale].exec(text);
         const around = hit ? text.slice(Math.max(0, hit.index - 60), hit.index + 60) : "";
         assert.equal(hit, null, `${locale}/${region}: first person «${hit?.[0]}» in …${around}…`);
@@ -197,10 +199,33 @@ describe("Modolo knowledge: price list in the third person", () => {
       }
     }
   });
+
+  it("lets no first-person passage of lib/pricing.ts reach the knowledge, in any section, locale or region", () => {
+    // Markers: every passage a pair rewrites, and every clause of lib/pricing.ts copy with a
+    // first-person pronoun or, in Italian, a first-person verb («ti restituisco l'acconto»).
+    const tenant = modolo();
+    const firstPerson = (clause: string, locale: AssistantLocale) =>
+      FIRST_PERSON[locale].test(clause) || (locale === "it" && IT_FIRST_PERSON_VERBS.test(clause));
+    for (const locale of tenant.locales) {
+      const source = [...Object.values(PRICING_UI[locale]), ...textsFor([INCLUDED_TITLE, WEBSITES, CARE, BRANDING, GOOD_TO_KNOW, INCLUDED], locale)];
+      const clauses = source
+        .flatMap((text) => text.split(/[.;:!?—·]|,\s/))
+        .map((clause) => clause.trim())
+        .filter((clause) => firstPerson(clause, locale));
+      assert.ok(clauses.length > 0, `${locale}: lib/pricing.ts has first-person clauses to look for`);
+      const markers = [...THIRD_PERSON[locale].map(([from]) => from), ...clauses];
+      for (const region of tenant.regions.ids) {
+        const text = renderKnowledge(tenant.knowledge(), locale, region, tenant.defaultLocale);
+        for (const marker of markers) {
+          assert.ok(!text.includes(marker), `${locale}/${region}: «${marker}» from lib/pricing.ts reaches the knowledge`);
+        }
+      }
+    }
+  });
 });
 
 describe("Modolo knowledge: prices and running costs", () => {
-  it("opens the Websites group with where website packages start, only where prices are published", () => {
+  it("opens the Websites group with where website packages start, in CHF for every region", () => {
     const tenant = modolo();
     const first = WEBSITES.items.find((item) => item.from);
     assert.ok(first, "a website package priced 'from'");
@@ -212,12 +237,8 @@ describe("Modolo knowledge: prices and running costs", () => {
         const heading = lines.findIndex((line) => line.startsWith(`**${WEBSITES.title[locale]}**`));
         assert.ok(heading >= 0, `${locale}/${region}: Websites heading`);
         const next = lines[heading + 1] ?? "";
-        if (!PUBLISHED_PRICE_REGIONS.includes(region)) {
-          assert.ok(next.startsWith("- "), `${locale}/${region}: no summary line without published prices: ${next}`);
-          continue;
-        }
         assert.ok(!next.startsWith("- "), `${locale}/${region}: a summary line follows the heading`);
-        assert.ok(next.includes(formatAmount(first.price[region], region, locale)), `${locale}/${region}: ${next}`);
+        assert.ok(next.includes(formatAmount(first.price[PRICE_LIST_REGION], PRICE_LIST_REGION, locale)), `${locale}/${region}: ${next}`);
         for (const item of [first, ...entryServices]) assert.ok(next.includes(`**${item.name[locale]}**`), `${locale}/${region}: ${next}`);
       }
     }
@@ -233,11 +254,22 @@ describe("Modolo knowledge: prices and running costs", () => {
     assert.doesNotMatch(first.name.en, /google|book/i, "the first package priced 'from' must be a website");
   });
 
-  it("quotes no amount for a region whose prices the website does not publish", () => {
+  it("gives every region the CHF price list the website shows to every visitor, and never a euro amount", () => {
+    // The site prices in CHF for every region (components/pricing-page.tsx, components/home/offer.tsx);
+    // the EUR amounts of lib/pricing.ts are published nowhere, so they must never reach the model.
     const tenant = modolo();
-    for (const region of tenant.regions.ids.filter((id) => isRegion(id) && !PUBLISHED_PRICE_REGIONS.includes(id))) {
-      for (const locale of tenant.locales) {
-        assert.doesNotMatch(renderSections(tenant, ["pricing"], locale, region), /(?:CHF|EUR|€)\s?\d|\d\s?(?:CHF|EUR|€)/, `${locale}/${region}`);
+    for (const locale of tenant.locales) {
+      const [first, ...others] = tenant.regions.ids.map((region) => renderSections(tenant, ["pricing"], locale, region));
+      for (const text of others) assert.equal(text, first, `${locale}: the same price list for every region`);
+      for (const item of [...WEBSITES.items, ...BRANDING.items]) {
+        const amount = formatAmount(item.price[PRICE_LIST_REGION], PRICE_LIST_REGION, locale);
+        // The site's own format: "CHF 1’690", U+2019 as the thousands mark and a no-break space.
+        assert.match(amount, /^CHF\xa0\d{1,3}(?:’\d{3})*$/, `${locale}: ${amount}`);
+        assert.ok(first.includes(amount), `${locale}: ${item.name.en} at ${amount}`);
+      }
+      for (const region of tenant.regions.ids) {
+        const text = renderKnowledge(tenant.knowledge(), locale, region, tenant.defaultLocale);
+        assert.doesNotMatch(text, /€|\bEUR\b/, `${locale}/${region}: a euro amount or label`);
       }
     }
   });

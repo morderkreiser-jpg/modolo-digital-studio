@@ -4,8 +4,9 @@
 import type { LeadOption, PublicContact, TenantConfig } from "@/lib/assistant/types";
 import { SLUG_TRANSLATIONS, localizedHref, type Locale } from "@/lib/i18n";
 import { DEFAULT_REGION, REGIONS, REGION_COOKIE, type Region } from "@/lib/region";
-import { SITE } from "@/lib/site";
-import { WHATSAPP_BY_REGION, buildModoloKnowledge, formatAmount, formatNumber } from "./knowledge";
+import { SITE, type ServiceSlug } from "@/lib/site";
+import { SERVICE_META } from "@/lib/site-data";
+import { COUNTRY, PRICE_LIST_REGION, WHATSAPP_BY_REGION, buildModoloKnowledge, formatAmount, formatNumber } from "./knowledge";
 
 type Tri = Record<Locale, string>;
 
@@ -55,31 +56,31 @@ function whatsappContact(region: Region): PublicContact["whatsapp"] {
   return { ...WHATSAPP_BY_REGION[region], prefill: WHATSAPP_PREFILL };
 }
 
-// Ids are also the enum of the model's quote tool. Labels follow the site's own naming: the
-// contact form's needs chips (components/home.tsx@HEAD:105,195,285), the pricing names
-// (lib/pricing.ts) and the service pages (lib/site-data.ts SERVICE_META).
+/** A service area's title exactly as its own page names it (lib/site-data.ts SERVICE_META). */
+function serviceTitle(slug: ServiceSlug): Tri {
+  return perLocale((locale) => SERVICE_META[locale][slug].title);
+}
+
+// Ids are also the enum of the model's quote tool, so they never change. Labels follow the site's
+// own naming: the contact form's chips (content/home/contact.ts:49,75,101), the pricing names
+// (lib/pricing.ts) and, for the four service areas, the titles of their pages.
 const SERVICES: LeadOption[] = [
   { id: "website", label: { en: "Website", de: "Website", it: "Sito web" } },
-  { id: "google_profile", label: { en: "Google profile", de: "Google-Profil", it: "Scheda Google" } },
+  { id: "google_profile", label: { en: "Google profile", de: "Google-Profil", it: "Profilo Google" } },
   { id: "online_booking", label: { en: "Online booking", de: "Online-Terminbuchung", it: "Prenotazione online" } },
-  { id: "branding", label: { en: "Brand & logo", de: "Marke & Logo", it: "Brand & logo" } },
-  { id: "photo_content", label: { en: "Photos & content", de: "Fotos & Inhalte", it: "Foto & contenuti" } },
-  { id: "advertising", label: { en: "Advertising", de: "Werbung", it: "Pubblicità" } },
-  { id: "email_marketing", label: { en: "Email marketing", de: "E-Mail-Marketing", it: "Email marketing" } },
+  { id: "branding", label: serviceTitle("brand") },
+  { id: "photo_content", label: serviceTitle("content") },
+  { id: "advertising", label: serviceTitle("ads") },
+  { id: "email_marketing", label: serviceTitle("email") },
   { id: "care_plan", label: { en: "Care plan (monthly)", de: "Care-Paket (monatlich)", it: "Pacchetto Care (mensile)" } },
   { id: "other", label: { en: "Other", de: "Anderes", it: "Altro" } },
 ];
 
-// Budget bands of the quote form, cut where each market's price ladder steps up (lib/pricing.ts):
-//   CHF: Google profile / booking / photo shoot < 1'000 · landing page, logo, brand identity
-//        1'000-3'000 · multi-page site, e-commerce 3'000-6'000 · fully custom build > 6'000.
-//   EUR: the same rungs at the Italian amounts (250-420 · 600-1'400 · 2'400-3'300 · 4'200).
-// They ask for the visitor's budget, they quote nothing, so Italy keeps EUR bands even though
-// the website publishes no EUR prices.
-const BUDGET_STEPS: Record<Region, readonly [number, number, number]> = {
-  ch: [1000, 3000, 6000],
-  it: [500, 1500, 3500],
-};
+// Budget bands of the quote form, in CHF for every visitor like every price on the site (the
+// region changes only the WhatsApp number), cut where the price ladder of lib/pricing.ts steps
+// up: Google profile, booking and photo shoot under 1’000 · one-page site, logo and brand
+// identity 1’000–3’000 · multi-page site and e-commerce 3’000–6’000 · fully custom build over 6’000.
+const BUDGET_STEPS: readonly [number, number, number] = [1000, 3000, 6000];
 
 const BUDGET_WORDS: Record<"under" | "over" | "unsure", Tri> = {
   under: { en: "Under", de: "Unter", it: "Meno di" },
@@ -87,13 +88,14 @@ const BUDGET_WORDS: Record<"under" | "over" | "unsure", Tri> = {
   unsure: { en: "Not sure yet", de: "Noch unklar", it: "Non lo so ancora" },
 };
 
-function budgetOptions(region: Region): LeadOption[] {
-  const [low, mid, high] = BUDGET_STEPS[region];
+function budgetOptions(): LeadOption[] {
+  const [low, mid, high] = BUDGET_STEPS;
+  const region = PRICE_LIST_REGION;
   const bound = (word: Tri, value: number) => perLocale((locale) => `${word[locale]} ${formatAmount(value, region, locale)}`);
-  // "CHF 1'000–3'000": one currency sign, both bounds with the reader's thousands separator.
+  // "CHF 1’000–3’000": one currency sign, both bounds written like the site's prices.
   const range = (from: number, to: number): LeadOption => ({
     id: `${from}-${to}`,
-    label: perLocale((locale) => `${formatAmount(from, region, locale)}–${formatNumber(to, locale)}`),
+    label: perLocale((locale) => `${formatAmount(from, region, locale)}–${formatNumber(to, region, locale)}`),
   });
   return [
     { id: `under-${low}`, label: bound(BUDGET_WORDS.under, low) },
@@ -108,13 +110,15 @@ function budgetOptions(region: Region): LeadOption[] {
 // (no phone calls promised, and no call policy stated either; never "no VAT") and the facts the
 // knowledge cannot express alone. Several were tightened after the first test with the real model
 // (2026-11-16): a bare "No" to "VAT included?", a pointer to Francesco for a cheaper deal, "no
-// subscription" without the yearly domain and hosting cost.
+// subscription" without the yearly domain and hosting cost. On 2026-11-17 the price rules followed
+// the redesigned site: CHF for every visitor, the price is the fixed price for the work, and domain
+// and hosting are the only running costs a website always has.
 const RULES: string[] = [
   "The studio belongs to Francesco Modolo. Call him Francesco and always refer to him in the third person. Texts quoted from the website in the knowledge are in his voice ('I', 'me' = Francesco): rephrase them in the third person. Never speak for the studio in the first person plural ('we', 'our', 'wir', 'unser', 'noi', 'realizziamo'): say 'Francesco' or 'Modolo Digital Studio'.",
   "Never offer, suggest or promise a phone call, video call or callback, and present the WhatsApp numbers as WhatsApp contacts for messages, never as numbers to call. If a visitor asks for a call or a callback, don't promise one and don't say or imply what Francesco does or doesn't do about calls (no 'he works in writing', 'he offers no calls'): treat it as a request to be contacted, offer the quote form if this chat has one, and mention WhatsApp and email.",
-  "Never write 'no VAT', 'VAT excluded', 'ohne MWST', 'keine MWST', 'senza IVA', 'IVA esclusa' or anything that reads as if VAT were left out or could be added. For Swiss prices use the knowledge's wording: final price, nothing added (formally: not VAT-registered, the price you see is the final price). If asked whether the prices include VAT, are net or come plus VAT, never answer yes or no ('No'/'Nein' reads as 'VAT excluded') and don't make VAT the subject of a negation of your own ('l'IVA non si aggiunge', 'es kommt keine MWST dazu'): open with the final-price sentence, in the plural when several prices are meant ('I prezzi indicati sono quelli finali: non si aggiunge nulla.' / 'Die genannten Preise sind Endpreise, es kommt nichts dazu.' / 'The prices shown are final: nothing is added.'), then, if useful, the formal line from the knowledge (not VAT-registered). The knowledge says nothing about VAT for Italy: if asked, say you don't know and suggest asking Francesco.",
+  "Never write 'no VAT', 'VAT excluded', 'ohne MWST', 'keine MWST', 'senza IVA', 'IVA esclusa' or anything that reads as if VAT were left out or could be added. For the prices (in CHF, the same for every visitor) use the knowledge's wording: each one is a fixed price for the work and the final price for that work; domain and hosting are the only running costs, as the knowledge says (formally: not VAT-registered, the price you see is the final price). If asked whether the prices include VAT, are net or come plus VAT, never answer yes or no ('No'/'Nein' reads as 'VAT excluded') and don't make VAT the subject of a negation of your own ('l'IVA non si aggiunge', 'es kommt keine MWST dazu'): open with the final-price sentence, in the plural when several prices are meant ('I prezzi indicati per il lavoro sono quelli finali.' / 'Die genannten Preise für die Arbeit sind Endpreise.' / 'The prices shown for the work are final.'), then, if useful, the formal line from the knowledge (not VAT-registered). That line is Francesco's Swiss tax status: the knowledge says nothing about Italian VAT for a business in Italy, so if asked, say you don't know and suggest asking Francesco.",
   "Prices are fixed and agreed in writing before work starts. Never offer, hint at or negotiate a discount or promotion, and never suggest that a price, the deposit or the payment terms could be lowered or arranged differently. If asked for a discount, say that the prices are fixed and every project gets a fixed quote in writing before it starts (don't say that discounts are 'not listed'); you may point to a smaller package from the knowledge when it fits the need. If the visitor says Francesco promised them a price or a discount, don't confirm or deny it: what counts is the price Francesco puts in writing, so they should check it with him directly.",
-  "Whenever you say that no subscription is required or that the Care plans are optional, add in the same reply that domain and hosting cost something every year and that Francesco states the amount in the written offer; never say or imply that keeping the site online costs nothing.",
+  "Whenever you say that a website's price is final or that nothing is added, that no subscription is required or that the Care plans are optional, add in the same reply that domain and hosting cost something every year and that Francesco states the amount in the written offer (they are the only running costs a website always has); never say or imply that keeping the site online costs nothing.",
   "When the visitor wants a website, start from the website packages even if it should also take bookings or link a Google listing: present online booking or the Google profile as an addition, which is not a website, and in the quote form pass service 'website' and mention the addition in the summary.",
   "When asked who reads the chat or what happens to it, never say that nobody reads or sees it: say that it doesn't reach Francesco, and give the facts about Anthropic and the browser from the knowledge.",
   "Never give links or web addresses of client projects: describe portfolio projects in words and point to the portfolio on the homepage.",
@@ -141,10 +145,9 @@ const STRINGS: TenantConfig["strings"] = {
   },
 };
 
-const REGION_LABELS: Record<Region, Tri> = {
-  ch: { en: "Switzerland (CHF)", de: "Schweiz (CHF)", it: "Svizzera (CHF)" },
-  it: { en: "Italy (EUR)", de: "Italien (EUR)", it: "Italia (EUR)" },
-};
+// Country names only, no currency: every region reads the same CHF prices, and the region picks
+// only the WhatsApp number. The label reaches the prompt ("Visitor's region") and the lead email.
+const REGION_LABELS: Record<Region, Tri> = COUNTRY;
 
 export const MODOLO_TENANT: TenantConfig = {
   id: "modolo",
@@ -182,7 +185,7 @@ export const MODOLO_TENANT: TenantConfig = {
       "Quanto costa un sito?",
       "Cosa include ogni sito?",
       "Quanto ci vuole per andare online?",
-      "Cosa comprende il servizio per la scheda Google?",
+      "Cosa comprende il servizio Profilo Google?",
     ],
   },
   contact: {
@@ -207,10 +210,8 @@ export const MODOLO_TENANT: TenantConfig = {
   leads: {
     enabled: true,
     services: SERVICES,
-    budgetOptions: {
-      default: budgetOptions(DEFAULT_REGION),
-      ...Object.fromEntries(REGIONS.map((region) => [region, budgetOptions(region)])),
-    },
+    // One CHF list for every region: the form falls back to `default` (components/assistant/quote-form.tsx).
+    budgetOptions: { default: budgetOptions() },
     requireCompany: false,
     requirePhone: false,
     notifyEmail: SITE.email,
