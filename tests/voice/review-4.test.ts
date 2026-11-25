@@ -1,6 +1,6 @@
 // Regression tests of the closing round (review findings alerts-no-keepalive and typed-field-lang,
 // and the browser check's defects R3-B1, R3-B2, R3-B3, R3-B5 and R3-B6; the React and CSS parts are
-// measured in a browser as well, research/revisione/browser 21-24). Finding S2-11 with two details
+// measured in a browser as well). Finding S2-11 with two details
 // corrected at once is covered next to the booking rules, in tools.test.ts. Nothing here calls a
 // real provider or sends email: every sender is a fake, and fetch is replaced where a route would
 // reach Resend.

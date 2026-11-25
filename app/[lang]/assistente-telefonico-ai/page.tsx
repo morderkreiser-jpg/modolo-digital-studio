@@ -9,7 +9,7 @@ import { isVoiceLandingOn, voiceLandingGraph, voiceLandingMetadata } from "@/lib
 // /ai-receptionist, /de/ki-telefonassistent and /it/assistente-telefonico-ai (SLUG_TRANSLATIONS in
 // lib/i18n.ts, rewritten by proxy.ts).
 //
-// Off unless VOICE_LANDING is switched on (DECISIONS.md D12): then the page answers 404, carries
+// Off unless VOICE_LANDING is switched on: while it is off the page answers 404, carries
 // noindex and stays out of the sitemap. Prerendered like the other pages, so the switch is read at
 // build time and a change takes a new deployment.
 

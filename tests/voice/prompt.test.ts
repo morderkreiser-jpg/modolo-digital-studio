@@ -111,16 +111,20 @@ describe("buildVoiceSystem: the Modolo tenant", () => {
         }
       });
 
-      it("offers only the written handoff, with the tenant's own promise in every language", () => {
+      // The written reply stays the default, and a
+      // callback wish may be taken and promised. This test said "only the written handoff" before.
+      it("offers the written handoff and a callback wish, with the tenant's own promises in every language", () => {
         for (const code of tenant.locales) {
           const promise = tenant.handoff.written.promise?.[code];
           assert.ok(promise && staticText.includes(`«${promise}»`), `written promise in ${code}`);
+          const callback = tenant.handoff.callback.promise?.[code];
+          assert.ok(callback && staticText.includes(`«${callback}»`), `callback promise in ${code}`);
           const emergency = tenant.handoff.emergency.message[code];
           assert.ok(emergency && staticText.includes(`«${emergency}»`), `emergency message in ${code}`);
         }
         assert.ok(!staticText.includes("transfer_call"));
-        assert.ok(!staticText.includes("request_callback"));
-        assert.match(staticText, /Never offer, suggest or promise a callback or a phone call/);
+        assert.match(staticText, /You can leave a callback request with request_callback/);
+        assert.doesNotMatch(staticText, /Never offer, suggest or promise a callback or a phone call/);
         assert.match(staticText, /Never offer or promise to put the caller through to a person/);
       });
 

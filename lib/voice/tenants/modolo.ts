@@ -6,7 +6,9 @@
 // verified against the website), adapted for speech by fromAssistantKnowledge. Nothing about the
 // studio is written here by hand except the section about this voice assistant, which states
 // only what the prototype does. The owner's standing decisions are the chat tenant's RULES
-// (lib/assistant/tenants/modolo/config.ts), rewritten below for a spoken conversation.
+// (lib/assistant/tenants/modolo/config.ts), rewritten below for a spoken conversation, with one
+// voice-only exception: the voice assistant may take a callback wish and promise the callback
+// (the chat keeps its own rule).
 import { buildModoloKnowledge } from "@/lib/assistant/tenants/modolo/knowledge";
 import { REPLY, REPLY_TEXT } from "@/content/home/promises";
 import { localizedHref } from "@/lib/i18n";
@@ -54,31 +56,31 @@ const VOICE_ASSISTANT_SECTION: VoiceKnowledgeSection = {
   content: {
     en: [
       "- This is an AI voice assistant of Modolo Digital Studio, not a person, and it can make mistakes.",
-      "- What is said in this conversation reaches Francesco only as a request, and only when the caller explicitly asks the assistant to leave it for him.",
+      "- What is said in this conversation reaches Francesco only as a request or a callback wish, and only when the caller explicitly asks the assistant to leave it for him.",
       "- Modolo Digital Studio does not record the audio of this conversation.",
       "- Details are in the privacy policy on the website.",
     ].join("\n"),
     de: [
       "- Das ist ein KI-Sprachassistent von Modolo Digital Studio, keine Person, und er kann Fehler machen.",
-      "- Was in diesem Gespräch gesagt wird, erreicht Francesco nur als Anfrage, und nur wenn man den Assistenten ausdrücklich bittet, sie für ihn aufzunehmen.",
+      "- Was in diesem Gespräch gesagt wird, erreicht Francesco nur als Anfrage oder als Rückrufwunsch, und nur wenn man den Assistenten ausdrücklich bittet, das für ihn aufzunehmen.",
       "- Modolo Digital Studio zeichnet den Ton dieses Gesprächs nicht auf.",
       "- Details stehen in der Datenschutzerklärung auf der Website.",
     ].join("\n"),
     it: [
       "- È un assistente vocale AI di Modolo Digital Studio, non una persona, e può sbagliare.",
-      "- Quello che si dice in questa conversazione arriva a Francesco solo come richiesta, e solo se chi parla chiede espressamente all'assistente di lasciargliela.",
+      "- Quello che si dice in questa conversazione arriva a Francesco solo come richiesta o come richiesta di richiamata, e solo se chi parla chiede espressamente all'assistente di lasciargliela.",
       "- Modolo Digital Studio non registra l'audio di questa conversazione.",
       "- I dettagli sono nell'informativa sulla privacy del sito.",
     ].join("\n"),
     fr: [
       "- C'est un assistant vocal IA de Modolo Digital Studio, pas une personne, et il peut se tromper.",
-      "- Ce qui est dit dans cette conversation ne parvient à Francesco que sous forme de demande, et seulement si l'on demande expressément à l'assistant de la lui laisser.",
+      "- Ce qui est dit dans cette conversation ne parvient à Francesco que sous forme de demande ou de demande de rappel, et seulement si l'on demande expressément à l'assistant de la lui laisser.",
       "- Modolo Digital Studio n'enregistre pas l'audio de cette conversation.",
       "- Les détails figurent dans la déclaration de protection des données du site.",
     ].join("\n"),
   },
   source:
-    "what the voice prototype does: lib/voice/tenants/modolo.ts (privacy.recordAudio false, create_lead as the only way a request leaves the conversation); privacy page: privacy.noticeUrl below",
+    "what the voice prototype does: lib/voice/tenants/modolo.ts (privacy.recordAudio false, create_lead and request_callback as the only ways a request or a callback wish leaves the conversation); privacy page: privacy.noticeUrl below",
 };
 
 let knowledge: VoiceKnowledge | null = null;
@@ -101,14 +103,25 @@ function buildModoloVoiceKnowledge(): VoiceKnowledge {
 // The reply-time promise of the knowledge's contact section ("Reply time: Francesco replies
 // personally, within 24 hours"), built from the same constant (content/home/promises.ts), so a
 // change of the promise on the site changes it here too. The site has no French copy, so French
-// follows the same REPLY switch. It says "personally", not "in writing": the owner decided that
-// no call is promised and that no call policy is stated either (chat RULES, commit c71e0bc).
+// follows the same REPLY switch. It says "personally", not "in writing", as the chat does (chat
+// RULES, commit c71e0bc): the written reply is the default, and a call is promised only in the
+// words of CALLBACK_PROMISE below.
 const REPLY_FR = REPLY.weekendsConfirmed ? "dans les 24 heures" : "dans les 24 heures, du lundi au vendredi";
 const REPLY_PROMISE: VoiceText = {
   en: `Francesco replies personally, ${REPLY_TEXT.en.long}.`,
   de: `Francesco antwortet persönlich, ${REPLY_TEXT.de.long}.`,
   it: `Francesco risponde di persona, ${REPLY_TEXT.it.long}.`,
   fr: `Francesco répond personnellement, ${REPLY_FR}.`,
+};
+
+// The callback promise, in the owner's words, in the form of
+// address of the rules: du, tu, vous. It is the only thing the assistant may say about when the
+// call comes: no time of day, no appointment.
+const CALLBACK_PROMISE: VoiceText = {
+  de: "Francesco ruft dich zurück, in der Regel innert eines Werktags.",
+  it: "Francesco ti richiama, di norma entro un giorno lavorativo.",
+  en: "Francesco will call you back, usually within one working day.",
+  fr: "Francesco vous rappelle, en général sous un jour ouvrable.",
 };
 
 const PRIVACY_PATH = "/privacy";
@@ -125,7 +138,7 @@ const PRIVACY_PATH = "/privacy";
 const PROJECT_REQUEST: TaskDefinition = {
   id: "project_request",
   label: { en: "Project request", de: "Projektanfrage", it: "Richiesta di progetto", fr: "Demande de projet" },
-  when: "the caller wants a quote or an offer, wants to start a project, describes a project of their own, asks how to proceed, or asks Francesco to get in touch (a call cannot be promised: take this request instead). Questions about prices, services or how things work are not a request on their own: just answer them.",
+  when: "the caller wants a quote or an offer, wants to start a project, describes a project of their own, asks how to proceed, or asks Francesco to get in touch (this written request is the default; a callback wish only when the caller asks to be called back or prefers the phone, see the rules). Questions about prices, services or how things work are not a request on their own: just answer them.",
   fields: [
     {
       id: "service",
@@ -221,12 +234,18 @@ const PROJECT_REQUEST: TaskDefinition = {
 // Rules
 // ---------------------------------------------------------------------------------------------
 
+/** The four wordings of a text, quoted as the rules quote examples: 'de', 'it', 'en', 'fr'. */
+function quoted(text: VoiceText): string {
+  return (["de", "it", "en", "fr"] as const).map((locale) => `'${text[locale]}'`).join(", ");
+}
+
 // Every rule of the chat tenant that still makes sense on the phone, rewritten for speech (the
 // chat's markdown, link and quote-form rules have no spoken counterpart), plus what is specific
-// to a voice assistant: no opening hours, the contact choice, and the AI receptionist product.
+// to a voice assistant: the callback wish (the one decision that differs from the chat), no
+// opening hours, the contact choice, and the AI receptionist product.
 const RULES: string[] = [
   "The studio belongs to Francesco Modolo. Call him Francesco and always speak of him in the third person. Some website texts in the knowledge are in his own voice ('I', 'me', 'ich', 'io' = Francesco): say them in the third person. Never speak for the studio as 'we' or 'our' ('wir', 'unser', 'noi', 'nostro', 'nous', 'notre'): say 'Francesco' or 'Modolo Digital Studio'.",
-  "Never offer, suggest or promise a phone call, a video call or a callback, and give the WhatsApp numbers only as WhatsApp contacts for messages, never as numbers to call. If the caller asks to be called, don't promise it and don't say what Francesco does or doesn't do about calls ('he only works in writing', 'he doesn't call'): offer to leave a project request for him, or mention WhatsApp and email.",
+  `The written reply is the default: when the caller wants Francesco to get back to them, offer first to leave a project request, and wherever these instructions list a callback among the options, offer the written request first. Offer a callback only when the caller asks to be called back or says they prefer the phone: then offer to note a callback wish for Francesco and take it with request_callback, with the caller's name, the phone number read back digit by digit and confirmed, what it is about, and a preferred time only if the caller names one. Once request_callback answered ok, say only this about the call: ${quoted(CALLBACK_PROMISE)}. Never promise a time of day or a fixed appointment for the call, never say that Francesco answers the phone live or can be reached by phone now, never offer a live transfer or a video call, and give the WhatsApp numbers only as WhatsApp contacts for messages, never as numbers to call. Beyond that promise, don't say what Francesco does or doesn't do about calls ('he only works in writing', 'he doesn't call').`,
   "Never say 'no VAT', 'VAT excluded', 'ohne MWST', 'keine MWST', 'senza IVA', 'IVA esclusa', 'sans TVA', 'hors TVA' or anything that sounds as if VAT were left out or could be added. If asked whether the prices include VAT, never answer yes or no and don't make VAT the subject of a negation of your own: say that the prices given for the work are final ('Die genannten Preise für die Arbeit sind Endpreise.', 'I prezzi indicati per il lavoro sono quelli finali.', 'The prices given for the work are final.', 'Les prix indiqués pour le travail sont des prix finaux.'), then, if useful, the formal line from the knowledge (not VAT-registered). That line is Francesco's Swiss tax status: the knowledge says nothing about Italian VAT for a business in Italy, so if asked, say you don't know and offer to leave the question for Francesco.",
   "Prices are fixed and agreed in writing before work starts. Never offer, hint at or negotiate a discount or a promotion, and never suggest that a price, the deposit or the payment terms could be lowered or arranged differently. If asked for a discount, say that the prices are fixed and every project gets a fixed price in writing before it starts; you may name a smaller package from the knowledge when it fits. If the caller says Francesco promised them a price or a discount, neither confirm nor deny it: what counts is the price Francesco puts in writing.",
   "Whenever you say that a website's price is final, that no subscription is required or that the Care plans are optional, add in the same answer that domain and hosting cost something every year and that Francesco gives the amount in the written offer: they are the only running costs a website always has. Never say or suggest that keeping a website online costs nothing.",
@@ -305,9 +324,11 @@ export const MODOLO_VOICE_TENANT: VoiceTenantConfig = {
     whenBusy: false,
   },
   handoff: {
-    // Owner decision: no call is promised, so no live transfer and no callback.
+    // The voice assistant may take a callback wish and promise it in the words of
+    // CALLBACK_PROMISE, but only when the caller asks for one: the written reply stays the default
+    // (see RULES), and no fallback offers a callback on its own. No live transfer.
     transfer: { enabled: false, targets: [], ringSeconds: 0 },
-    callback: { enabled: false },
+    callback: { enabled: true, promise: CALLBACK_PROMISE, onlyWhenAsked: true },
     written: { enabled: true, promise: REPLY_PROMISE },
     // A web studio has no emergencies; the message only sends urgent matters where they belong.
     emergency: {
@@ -321,9 +342,10 @@ export const MODOLO_VOICE_TENANT: VoiceTenantConfig = {
     },
   },
   tasks: [PROJECT_REQUEST],
-  // No calendar: consultations by phone are not offered today. When Francesco decides to offer
-  // them, add the calendar tools and a calendar, and drop the "no calls" rule above, e.g.:
-  //   tools: ["check_availability", "book_appointment", "create_lead", "end_call"],
+  // No calendar: a phone consultation at a fixed time is not offered today, only a callback wish.
+  // When Francesco decides to offer appointments, add the calendar tools and a calendar, and drop
+  // "no fixed appointment" from the callback rule above, e.g.:
+  //   tools: ["check_availability", "book_appointment", "create_lead", "request_callback", "end_call"],
   //   calendar: {
   //     provider: "google",
   //     services: [{ id: "first_call", label: { de: "Erstgespräch", it: "Primo colloquio", en: "First call", fr: "Premier entretien" }, durationMinutes: 20, bufferAfterMinutes: 10 }],
@@ -337,7 +359,7 @@ export const MODOLO_VOICE_TENANT: VoiceTenantConfig = {
   //     changeMinLeadMinutes: 12 * 60,
   //   },
   // (also add "cancel_appointment" / "reschedule_appointment" to tools if callers may do that by voice)
-  tools: ["create_lead", "end_call"],
+  tools: ["create_lead", "request_callback", "end_call"],
   rules: RULES,
   // DEFAULT_VOICE_LIMITS, no overrides.
   limits: {},

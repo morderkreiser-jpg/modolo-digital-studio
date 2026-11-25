@@ -119,7 +119,9 @@ describe("validateVoiceTenant", () => {
       /"cancel_appointment" needs calendar.allowCancel/,
     ],
     ["transfer tool without targets", (t) => (t.tools = [...t.tools, "transfer_call"]), /"transfer_call" needs handoff.transfer/],
-    ["callback tool with callbacks off", (t) => (t.tools = [...t.tools, "request_callback"]), /"request_callback" needs handoff.callback/],
+    // Modolo already lists request_callback: switch the callbacks off instead of adding the tool.
+    ["callback tool with callbacks off", (t) => (t.handoff.callback = { enabled: false }), /"request_callback" needs handoff.callback/],
+    ["callback promise missing a language", (t) => delete t.handoff.callback.promise?.fr, /handoff.callback.promise is missing for "fr"/],
     ["create_lead without tasks", (t) => (t.tasks = []), /"create_lead" needs at least one task/],
     ["task id not snake_case", (t) => (task(t).id = "Project-Request"), /task "Project-Request": id must be snake_case/],
     ["task id twice", (t) => (t.tasks = [task(t), structuredClone(task(t))]), /task id "project_request" is used twice/],
@@ -259,16 +261,24 @@ describe("disclosesAi", () => {
 });
 
 describe("MODOLO_VOICE_TENANT", () => {
-  it("is the live studio tenant in four languages, German first, with only a written handoff", () => {
+  // A callback wish besides the written handoff (this
+  // test asserted "only a written handoff" and no request_callback before).
+  it("is the live studio tenant in four languages, German first, with a written handoff and a callback wish", () => {
     assert.equal(modolo.id, "modolo");
     assert.equal(modolo.kind, "live");
     assert.equal(modolo.business.sector, "studio");
     assert.deepEqual(modolo.locales, ["de", "it", "en", "fr"]);
     assert.equal(modolo.defaultLocale, "de");
-    assert.deepEqual(modolo.tools, ["create_lead", "end_call"]);
+    assert.deepEqual(modolo.tools, ["create_lead", "request_callback", "end_call"]);
     assert.equal(modolo.calendar, undefined);
     assert.equal(modolo.handoff.transfer.enabled, false);
-    assert.equal(modolo.handoff.callback.enabled, false);
+    assert.equal(modolo.handoff.callback.enabled, true);
+    assert.deepEqual(modolo.handoff.callback.promise, {
+      de: "Francesco ruft dich zurück, in der Regel innert eines Werktags.",
+      it: "Francesco ti richiama, di norma entro un giorno lavorativo.",
+      en: "Francesco will call you back, usually within one working day.",
+      fr: "Francesco vous rappelle, en général sous un jour ouvrable.",
+    });
     assert.equal(modolo.handoff.written.enabled, true);
     assert.deepEqual(modolo.handoff.emergency.triggers, []);
     assert.equal(modolo.answerPolicy.always, true);
@@ -298,6 +308,7 @@ describe("MODOLO_VOICE_TENANT", () => {
       modolo.greeting,
       modolo.persona.assistantName,
       modolo.handoff.written.promise,
+      modolo.handoff.callback.promise,
       modolo.handoff.emergency.message,
       modolo.tasks.map((t) => [t.label, t.fields.map((f) => [f.label, f.choices?.map((c) => c.label)])]),
       modolo.business.description,
@@ -337,7 +348,10 @@ describe("MODOLO_VOICE_TENANT", () => {
     const rules = modolo.rules.join("\n");
     for (const pattern of [
       /third person/,
-      /Never offer, suggest or promise a phone call, a video call or a callback/,
+      // The earlier rule (was: "Never offer, suggest or promise a phone call, a video call or a callback").
+      /The written reply is the default/,
+      /Offer a callback only when the caller asks to be called back or says they prefer the phone/,
+      /never offer a live transfer or a video call/,
       /'no VAT'/,
       /discount/,
       /domain and hosting cost something every year/,
@@ -352,6 +366,7 @@ describe("MODOLO_VOICE_TENANT", () => {
     ]) {
       assert.match(rules, pattern);
     }
+    assert.doesNotMatch(rules, /Never offer, suggest or promise a phone call/);
     assert.ok(!rules.includes("ß"));
   });
 

@@ -184,7 +184,7 @@ describe("structured data", () => {
   }
 
   it("has no price, offer, rating or review anywhere while the plans are hidden", () => {
-    assert.equal(VOICE_LANDING_SHOW_PLANS, false, "the plans are a proposal and stay hidden");
+    assert.equal(VOICE_LANDING_SHOW_PLANS, false, "the confirmed plans stay hidden during the pilot phase");
     for (const locale of LOCALES) {
       const graph = voiceLandingGraph(locale);
       const keys = allKeys(graph);
@@ -250,6 +250,91 @@ describe("the copy", () => {
     assert.match(kept, /25 Sekunden/);
     assert.match(kept, /24 Stunden/);
     assert.match(kept, /CHF 149/);
+  });
+});
+
+// The plans block is hidden by default, and the visible copy never shows a price.
+type VoiceLandingPlanItems = (typeof VOICE_LANDING)["de"]["plans"]["items"];
+
+describe("prices on the page", () => {
+  const ALL = ["de", "it", "en", "fr"] as const;
+
+  /** Every string of the copy a visitor can see today: everything but the hidden plans block. */
+  function visibleTexts(locale: (typeof ALL)[number]): string[] {
+    const { plans, ...visible } = VOICE_LANDING[locale];
+    void plans;
+    const out: string[] = [];
+    const walk = (value: unknown): void => {
+      if (typeof value === "string") out.push(value);
+      else if (Array.isArray(value)) value.forEach(walk);
+      else if (value !== null && typeof value === "object") Object.values(value).forEach(walk);
+    };
+    walk(visible);
+    if (locale !== "fr") walk(LANDING_UI[locale]);
+    return out;
+  }
+
+  // "Er erfindet keine Preise" (it makes up no prices) is about the assistant and stays allowed.
+  const NO_PRICE_LIST = /Preisliste|listino|price list|liste de prix|pas encore de prix|noch keine? Preis/i;
+  const FRANCS = /\bCHF\b|\bFr\.\s?\d|Franken|franchi|\bfrancs?\b|\d\s?\.[-–]/i;
+
+  function figuresOf(items: VoiceLandingPlanItems): Array<Array<string | undefined>> {
+    return items.map((plan) =>
+      [plan.price, plan.minutes, plan.extra, plan.setup].map((text) => text.replace(/[’']/g, "").match(/\d+(?:\.\d+)?/)?.[0]),
+    );
+  }
+
+  it("keeps the plans block hidden", () => {
+    assert.equal(VOICE_LANDING_SHOW_PLANS, false);
+  });
+
+  for (const locale of ALL) {
+    it(`${locale}: no visible text shows a price in francs or says that no price list exists`, () => {
+      const texts = visibleTexts(locale);
+      assert.ok(texts.length > 80, `${locale}: the copy was walked`);
+      for (const text of texts) {
+        assert.doesNotMatch(text, FRANCS, `${locale}: ${text}`);
+        assert.doesNotMatch(text, NO_PRICE_LIST, `${locale}: ${text}`);
+      }
+    });
+  }
+
+  it("says in every language that the pilot is agreed in person and the regular prices come in the conversation", () => {
+    const expected: Record<(typeof ALL)[number], string> = {
+      de: "Preis und Bedingungen für die Pilotphase machen wir persönlich ab. Die regulären Preise nenne ich dir im Gespräch.",
+      it: "Le condizioni per la fase pilota le concordiamo di persona. I prezzi regolari te li dico quando ne parliamo.",
+      en: "We agree the pilot terms in person. I'll tell you the regular prices when we talk.",
+      fr: "Nous fixons ensemble les conditions du pilote, de vive voix. Je vous indique les prix habituels lors de notre entretien.",
+    };
+    for (const locale of ALL) {
+      const copy = VOICE_LANDING[locale];
+      assert.equal(copy.pilot.priceNote, expected[locale], `${locale}: pilot section`);
+      // The FAQ answer about the price, the fifth question and the same sentence.
+      assert.equal(copy.faq.items[5].a, expected[locale], `${locale}: FAQ about the price`);
+    }
+    assert.doesNotMatch(VOICE_LANDING.de.pilot.priceNote, /ß|!/);
+  });
+
+  it("keeps the same plans and figures in every language of the hidden block, with its note", () => {
+    const notes = {
+      de: "Kündigst du in den ersten 30 Tagen, bekommst du die Einrichtungsgebühr zurück.",
+      it: "Se disdici nei primi 30 giorni, l'installazione ti viene rimborsata.",
+      en: "If you cancel within the first 30 days, you get the setup fee back.",
+      fr: "Si vous résiliez dans les 30 premiers jours, l'installation vous est remboursée.",
+    };
+    for (const locale of ALL) {
+      const plans = VOICE_LANDING[locale].plans;
+      assert.equal(plans.note, notes[locale], locale);
+      assert.doesNotMatch(plans.note, /Vorschlag|bestätigt|Proposta|confermat|Proposal|confirmed|Proposition|confirmée/i, locale);
+      assert.deepEqual(
+        plans.items.map((plan) => plan.name),
+        ["Starter", "Professional", "Business"],
+      );
+      // The figures live only in the copy: here every one is present and matches the German block.
+      const numbers = figuresOf(plans.items);
+      assert.ok(numbers.every((row) => row.length === 4 && row.every((value) => value !== undefined)), locale);
+      assert.deepEqual(numbers, figuresOf(VOICE_LANDING.de.plans.items), locale);
+    }
   });
 });
 

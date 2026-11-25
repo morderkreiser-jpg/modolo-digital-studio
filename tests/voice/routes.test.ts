@@ -168,7 +168,8 @@ describe("POST /api/voice/session", () => {
     assert.match(grant.realtime?.token ?? "", /^mock_/);
     assert.equal(provider.calls[0].tenantId, "modolo");
     assert.equal(provider.calls[0].toolWebhookUrl, "https://site.example/api/voice/tool");
-    assert.deepEqual(provider.calls[0].toolNames, ["create_lead", "end_call"]);
+    // Modolo lists request_callback: it takes a callback wish when the caller asks for one.
+    assert.deepEqual(provider.calls[0].toolNames, ["create_lead", "request_callback", "end_call"]);
 
     provider.failWith("upstream");
     const failed = await handleSessionRequest(post("/api/voice/session", sessionBody({ mode: "realtime" })), deps);

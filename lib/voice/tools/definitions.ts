@@ -132,7 +132,7 @@ function define(tenant: VoiceTenantConfig, name: VoiceToolName): VoiceToolDefini
     case "create_lead":
       return createLead(tenant);
     case "request_callback":
-      return requestCallback();
+      return requestCallback(tenant);
     case "transfer_call":
       return transferCall(tenant);
     case "end_call":
@@ -400,11 +400,13 @@ function typeHint(field: TaskField, fallback: VoiceLocale): string {
   }
 }
 
-function requestCallback(): VoiceToolDefinition {
+function requestCallback(tenant: VoiceTenantConfig): VoiceToolDefinition {
+  const when = tenant.handoff.callback.onlyWhenAsked === true
+    ? "only when the caller asks to be called back or says they prefer the phone."
+    : "when the caller wants a person and no transfer is possible, or for a question you cannot answer.";
   return tool(
     "request_callback",
-    "Asks a person from the business to call the caller back: when the caller wants a person and no transfer is " +
-      "possible, or for a question you cannot answer. Before calling, read back the name and the number and wait for " +
+    `Asks a person from the business to call the caller back: ${when} Before calling, read back the name and the number and wait for ` +
       "the caller's yes. Never say the callback request was passed on unless this tool answered ok, and promise no " +
       "time beyond the wording this tool gives you.",
     {

@@ -235,8 +235,8 @@ export function Pilot({ lang, copy }: SectionProps) {
 }
 
 /**
- * The proposed plans. Rendered only while VOICE_LANDING_SHOW_PLANS is true (content/voice/
- * landing.ts): the prices are a proposal the owner has not confirmed, and the copy's note says so.
+ * The plans. Rendered only while VOICE_LANDING_SHOW_PLANS is true (content/voice/landing.ts);
+ * the note under them comes from the copy.
  */
 export function Plans({ copy }: SectionProps) {
   const plans = copy.plans;

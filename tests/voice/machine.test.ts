@@ -409,7 +409,7 @@ describe("recovery", () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Findings of the review (research/revisione/revisione-1.json)
+// Findings of the first review
 // ---------------------------------------------------------------------------------------------
 
 describe("the running tool (interfaccia F2)", () => {

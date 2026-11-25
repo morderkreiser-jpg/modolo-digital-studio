@@ -159,6 +159,8 @@ function formalityOf(tenant: VoiceTenantConfig, locale: VoiceLocale): Formality 
 interface HandoffOptions {
   transfer: boolean;
   callback: boolean;
+  /** The callback is taken only when the caller asks for it, never offered as a fallback. */
+  callbackOnlyWhenAsked: boolean;
   written: boolean;
 }
 
@@ -168,6 +170,7 @@ function handoffOptions(tenant: VoiceTenantConfig, channel: VoiceChannel): Hando
     // A live transfer only exists on a phone call (HandoffRules.transfer).
     transfer: channel === "phone" && transfer.enabled && transfer.targets.length > 0 && has(tenant, "transfer_call"),
     callback: callback.enabled && has(tenant, "request_callback"),
+    callbackOnlyWhenAsked: callback.onlyWhenAsked === true,
     written: written.enabled && has(tenant, "create_lead") && tenant.tasks.length > 0,
   };
 }
@@ -175,7 +178,7 @@ function handoffOptions(tenant: VoiceTenantConfig, channel: VoiceChannel): Hando
 function handoffOffer(options: HandoffOptions): string {
   const offers: string[] = [];
   if (options.transfer) offers.push("a transfer to a person");
-  if (options.callback) offers.push("a callback request");
+  if (options.callback && !options.callbackOnlyWhenAsked) offers.push("a callback request");
   if (options.written) offers.push("to leave a request for the business");
   return offers.length > 0 ? offers.join(" or ") : "the contacts in the knowledge";
 }

@@ -3,7 +3,7 @@
 //   N4  a business chosen through the hash stays chosen across a later in-page link
 //   N7  the sales page scrolls natively (no Lenis, no GSAP)
 //   N2  a written example ends with what the business receives, in the real e-mail format
-// The React parts are checked in a browser (research/revisione/browser); here the rules they use.
+// The React parts are checked in a browser; here the rules they use.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";

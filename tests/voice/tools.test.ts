@@ -791,7 +791,7 @@ describe("executeTool: failing backends", () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Regressions of the review (research/revisione/revisione-1.json)
+// Regressions of the first review
 // ---------------------------------------------------------------------------------------------
 
 /** The booking reference of an outcome, "" when it failed. */

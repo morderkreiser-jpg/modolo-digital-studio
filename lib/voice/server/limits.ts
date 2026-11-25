@@ -2,10 +2,10 @@
 // to cost. Server-only. Everything works on the KVStore passed in (memory or Upstash, see
 // lib/assistant/server/store.ts), which never throws and has no scan and no delete.
 //
-// A BRAKE, NOT AN INVOICE (decision D18). The minute and spend counters below exist to stop abuse
+// A BRAKE, NOT AN INVOICE. The minute and spend counters below exist to stop abuse
 // and runaway costs. They run on UTC days and UTC months, the spend is an estimate that errs high,
 // and a session is charged to the day it was admitted on. Minutes billed to a customer will be
-// counted separately, on the calendar month of Zurich, when billing exists (phase 5).
+// counted separately, on the calendar month of Zurich, when billing exists.
 //
 // Stores. The per-IP windows live in the SHARED store (anyone can create them). Everything else
 // here lives in the ACCOUNTING store (stores.ts): only admitted sessions and the counters write to

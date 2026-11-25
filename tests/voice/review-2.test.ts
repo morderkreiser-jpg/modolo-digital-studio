@@ -1,4 +1,4 @@
-// Regression tests of the second review (research/revisione/revisione-2.json) that are not about
+// Regression tests of the second review that are not about
 // abuse of the limits (those are in limits-abuse.test.ts): the stage a page mounts (N1), the
 // realtime prompt's opening hours (S2-5), the tool route's time budget and delivery ids (S2-7),
 // and a lead whose email went unanswered (S2-8). Nothing calls a real provider or sends email.

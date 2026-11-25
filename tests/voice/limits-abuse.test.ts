@@ -1,4 +1,4 @@
-// The security review's abuse scenarios (research/revisione/revisione-1.json, lens "sicurezza"),
+// The security review's abuse scenarios (first security review),
 // replayed through the HTTP handlers: what a script can do to the money and the minutes, and what
 // it cannot do any more. Time is injected; nothing calls a real model or sends a real email.
 import assert from "node:assert/strict";
@@ -440,7 +440,7 @@ describe("sicurezza/F7: parallel turns of one session", () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Second review (research/revisione/revisione-2.json): S2-1, S2-2, S2-4, S2-6
+// Second review: S2-1, S2-2, S2-4, S2-6
 // ---------------------------------------------------------------------------------------------
 
 describe("review S2-1 (and sicurezza/F4, F8 for realtime): a realtime call is charged on the provider's word", () => {

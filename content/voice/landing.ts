@@ -1,12 +1,12 @@
 // Sales page copy of «Modolo Voice AI», the AI phone assistant (KI-Telefonassistent).
 //
 // The website has pages in en/de/it. The French text is ready here, but no French page is routed
-// yet (see DECISIONS.md D9 in the private project folder).
+// yet.
 //
 // Every sentence in this file is a promise to a customer. Facts come only from the list of what is
 // true today: pilot phase with three businesses in the Winterthur / Zurich region, the demo plays
-// written example conversations, the live voice is switched on with the pilot businesses, no price
-// list is shown, live transfer is planned, systems beyond calendar and email are «on request, later».
+// written example conversations, the live voice is switched on with the pilot businesses, live
+// transfer is planned, systems beyond calendar and email are «on request, later».
 // No statistics, no guarantees of results, no quotes, logos or ratings, no named providers or
 // countries, no «Swiss hosting» or compliance claims. Change a fact here only when it is true.
 //
@@ -34,7 +34,7 @@ export interface VoiceLandingContent {
   };
 }
 
-/** Shown only when true. The prices are a proposal the owner has not confirmed yet. */
+/** Shows the plans block when true. */
 export const VOICE_LANDING_SHOW_PLANS = false;
 
 const DE: VoiceLandingContent = {
@@ -200,7 +200,7 @@ const DE: VoiceLandingContent = {
       "Die Erlaubnis, im ersten Monat die Zusammenfassungen der Anrufe mit dir durchzugehen.",
       "Am Ende, wenn du magst, eine ehrliche öffentliche Bewertung.",
     ],
-    priceNote: "Preis und Bedingungen für die Pilotphase machen wir persönlich ab. Eine Preisliste gibt es noch nicht.",
+    priceNote: "Preis und Bedingungen für die Pilotphase machen wir persönlich ab. Die regulären Preise nenne ich dir im Gespräch.",
     cta: "Pilotplatz anfragen",
   },
   privacy: {
@@ -238,7 +238,7 @@ const DE: VoiceLandingContent = {
       },
       {
         q: "Was kostet es?",
-        a: "Preis und Bedingungen für die Pilotphase machen wir persönlich ab. Eine Preisliste gibt es noch nicht.",
+        a: "Preis und Bedingungen für die Pilotphase machen wir persönlich ab. Die regulären Preise nenne ich dir im Gespräch.",
       },
       {
         q: "Was passiert bei einem Notfall?",
@@ -267,7 +267,7 @@ const DE: VoiceLandingContent = {
   },
   plans: {
     title: "Preise",
-    note: "Vorschlag, noch nicht bestätigt",
+    note: "Kündigst du in den ersten 30 Tagen, bekommst du die Einrichtungsgebühr zurück.",
     items: [
       {
         name: "Starter",
@@ -460,7 +460,7 @@ const IT: VoiceLandingContent = {
       "Il permesso di rivedere insieme a te i riassunti delle chiamate nel primo mese.",
       "Alla fine, se ti va, una recensione pubblica sincera.",
     ],
-    priceNote: "Le condizioni per la fase pilota le concordiamo di persona. Un listino prezzi per ora non c'è.",
+    priceNote: "Le condizioni per la fase pilota le concordiamo di persona. I prezzi regolari te li dico quando ne parliamo.",
     cta: "Chiedi un posto nella fase pilota",
   },
   privacy: {
@@ -498,7 +498,7 @@ const IT: VoiceLandingContent = {
       },
       {
         q: "Quanto costa?",
-        a: "Le condizioni per la fase pilota le concordiamo di persona. Un listino prezzi per ora non c'è.",
+        a: "Le condizioni per la fase pilota le concordiamo di persona. I prezzi regolari te li dico quando ne parliamo.",
       },
       {
         q: "E in caso di emergenza?",
@@ -527,7 +527,7 @@ const IT: VoiceLandingContent = {
   },
   plans: {
     title: "Prezzi",
-    note: "Proposta, non ancora confermata",
+    note: "Se disdici nei primi 30 giorni, l'installazione ti viene rimborsata.",
     items: [
       {
         name: "Starter",
@@ -720,7 +720,7 @@ const EN: VoiceLandingContent = {
       "Permission to go through the call summaries with you during the first month.",
       "At the end, if you're willing, an honest public review.",
     ],
-    priceNote: "We agree the pilot terms in person. There is no price list yet.",
+    priceNote: "We agree the pilot terms in person. I'll tell you the regular prices when we talk.",
     cta: "Ask for a pilot place",
   },
   privacy: {
@@ -758,7 +758,7 @@ const EN: VoiceLandingContent = {
       },
       {
         q: "What does it cost?",
-        a: "We agree the pilot terms in person. There is no price list yet.",
+        a: "We agree the pilot terms in person. I'll tell you the regular prices when we talk.",
       },
       {
         q: "What happens in an emergency?",
@@ -787,7 +787,7 @@ const EN: VoiceLandingContent = {
   },
   plans: {
     title: "Prices",
-    note: "Proposal, not yet confirmed",
+    note: "If you cancel within the first 30 days, you get the setup fee back.",
     items: [
       {
         name: "Starter",
@@ -982,7 +982,7 @@ const FR: VoiceLandingContent = {
       "L'autorisation de relire avec vous les résumés des appels pendant le premier mois.",
       "À la fin, si vous le voulez bien, un avis public honnête.",
     ],
-    priceNote: "Nous fixons ensemble les conditions du pilote, de vive voix. Il n'y a pas encore de liste de prix.",
+    priceNote: "Nous fixons ensemble les conditions du pilote, de vive voix. Je vous indique les prix habituels lors de notre entretien.",
     cta: "Demander une place pilote",
   },
   privacy: {
@@ -1020,7 +1020,7 @@ const FR: VoiceLandingContent = {
       },
       {
         q: "Combien ça coûte ?",
-        a: "Nous fixons ensemble les conditions du pilote, de vive voix. Il n'y a pas encore de liste de prix.",
+        a: "Nous fixons ensemble les conditions du pilote, de vive voix. Je vous indique les prix habituels lors de notre entretien.",
       },
       {
         q: "Et en cas d'urgence ?",
@@ -1049,7 +1049,7 @@ const FR: VoiceLandingContent = {
   },
   plans: {
     title: "Prix",
-    note: "Proposition, pas encore confirmée",
+    note: "Si vous résiliez dans les 30 premiers jours, l'installation vous est remboursée.",
     items: [
       {
         name: "Starter",

@@ -6,7 +6,7 @@
 //
 // One VoiceTenantConfig per business. Tenants are plain data in code for now (like the chat
 // assistant in lib/assistant); the same shape maps 1:1 onto database rows when the product becomes
-// a multi-tenant SaaS (see ARCHITECTURE.md in the private project folder).
+// a multi-tenant SaaS.
 //
 // Vocabulary used across the module:
 //   session  — one conversation (a web demo or, later, a phone call)
@@ -115,8 +115,12 @@ export interface HandoffTarget {
 export interface HandoffRules {
   /** Live transfer of a phone call. Not available on the web channel. */
   transfer: { enabled: boolean; targets: HandoffTarget[]; ringSeconds: number };
-  /** A person calls back. `promise` is the only wording the assistant may use about timing. */
-  callback: { enabled: boolean; promise?: VoiceText };
+  /**
+   * A person calls back. `promise` is the only wording the assistant may use about timing.
+   * `onlyWhenAsked`: the assistant never offers a callback on its own (fallbacks, unknown answers,
+   * time running out); it takes one only when the caller asks to be called back.
+   */
+  callback: { enabled: boolean; promise?: VoiceText; onlyWhenAsked?: boolean };
   /** A person answers in writing (email or messaging). */
   written: { enabled: boolean; promise?: VoiceText };
   /**

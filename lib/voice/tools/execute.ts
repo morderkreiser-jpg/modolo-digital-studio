@@ -915,7 +915,8 @@ function canonical(value: unknown): unknown {
 function fallbackOffer(ctx: ToolContext, exclude?: "callback" | "written"): string {
   const tools = enabledTools(ctx.tenant);
   const offers: string[] = [];
-  if (exclude !== "callback" && tools.includes("request_callback")) offers.push("a callback");
+  const callbackOffered = tools.includes("request_callback") && ctx.tenant.handoff.callback.onlyWhenAsked !== true;
+  if (exclude !== "callback" && callbackOffered) offers.push("a callback");
   if (exclude !== "written" && ctx.tenant.handoff.written.enabled && tools.includes("create_lead")) {
     offers.push("a written follow-up");
   }

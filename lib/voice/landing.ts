@@ -3,7 +3,7 @@
 //   /ai-receptionist · /de/ki-telefonassistent · /it/assistente-telefonico-ai
 //   (route folder app/[lang]/assistente-telefonico-ai, public slugs in lib/i18n.ts)
 //
-// The page promises a product that is a prototype today (DECISIONS.md D12), so it is OFF unless
+// The page is OFF unless
 // VOICE_LANDING is clearly switched on: off, the route answers 404 and the sitemap leaves it out,
 // and merging the branch publishes nothing by accident. The page and the sitemap are prerendered,
 // so the switch is read when the site is built: changing it takes a new deployment.
@@ -66,9 +66,9 @@ const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
  * schema.org graph of the page: the Service (provided by the organisation every other page
  * describes, same @id), the breadcrumb and the FAQ built from the copy's ten questions.
  *
- * Deliberately absent: offers, prices, ratings and reviews. There is no price list yet (the plans
- * block is a proposal the owner has not confirmed, and stays out of structured data even when it is
- * shown), and reviews hosted on the reviewed business's own site never qualify (see lib/json-ld.ts).
+ * Deliberately absent: offers, prices, ratings and reviews. The plans block stays out of
+ * structured data even when it is shown, and reviews hosted on the reviewed business's own site
+ * never qualify (see lib/json-ld.ts).
  */
 export function voiceLandingGraph(locale: Locale) {
   const copy = VOICE_LANDING[locale];

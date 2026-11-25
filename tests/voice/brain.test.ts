@@ -332,7 +332,8 @@ describe("runTurn with the Anthropic SDK against a mock API", () => {
     assert.equal(first.system[1].cache_control, undefined);
     assert.deepEqual(
       first.tools.map((tool) => tool.name),
-      ["create_lead", "end_call"],
+      // Modolo lists request_callback: it takes a callback wish when the caller asks for one.
+      ["create_lead", "request_callback", "end_call"],
     );
 
     // Round two: the assistant's blocks unchanged (thinking with its signature), then the results.

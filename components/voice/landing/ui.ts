@@ -3,7 +3,7 @@
 // and is used exactly as written there.
 //
 // Plain strings (safe for server and client). German in Swiss spelling ("ss"), "du" like the copy;
-// Italian "tu". Only the three site languages: the French page is not routed (D9).
+// Italian "tu". Only the three site languages: the French page is not routed.
 import type { Locale } from "@/lib/i18n";
 
 export interface LandingUi {

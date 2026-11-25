@@ -37,7 +37,7 @@ function languagesFor(path: string) {
   };
 }
 
-// The voice sales page is listed only while its switch is on (DECISIONS.md D12): read here, at call
+// The voice sales page is listed only while its switch is on: read here, at call
 // time, so the sitemap and the page (which answers 404 when off) can never disagree.
 const VOICE_PAGE = { path: VOICE_LANDING_PATH, changeFrequency: "monthly" as ChangeFrequency, priority: 0.8 };
 
