@@ -988,7 +988,10 @@ describe("acquireSessionLock and createSessionCaps", () => {
     assert.ok(held);
     const before = calls.length;
     const started = Date.now();
-    assert.equal(await acquireSessionLock(store, SID, { clock: () => NOW, waitMs: 400, pollMs: 50 }), null);
+    // Real timers: the deadline sits just under the fifth try, so the fourth still comes when the
+    // machine is busy and its timers fire up to 350 ms late (at 400 ms the margin was 50 ms, and
+    // the test failed under load with three tries).
+    assert.equal(await acquireSessionLock(store, SID, { clock: () => NOW, waitMs: 700, pollMs: 50 }), null);
     const waited = calls.slice(before);
     assert.ok(waited.every((call) => call.op === "get"), JSON.stringify(waited.map((call) => call.op)));
     // Tries at 0, 50, 150 and 350 ms; the next one (750 ms) would come after the deadline.

@@ -417,10 +417,14 @@ function readable(value: string, l: Labels): string {
   return E164.test(value) ? spacedPhone(value) : value;
 }
 
+/** Swiss service numbers, written 0800 123 456: free (0800), shared cost (084x), premium (090x). */
+const SWISS_SERVICE_PREFIX = /^(?:800|84\d|90\d)/;
+
 /**
- * "+41790000060" -> "+41 79 000 00 60" (and "+41 800 123 456" for the 08xx numbers), the way Swiss
- * numbers are written. Another country's number gets a space after its country code only: its own
- * grouping is not known here.
+ * "+41790000060" -> "+41 79 000 00 60", the way Swiss numbers are written: an area or mobile code
+ * of two digits (081 for Graubünden included), then 3-2-2. Only the service numbers have a prefix
+ * of three digits: "+41 800 123 456". Another country's number gets a space after its country
+ * code only: its own grouping is not known here.
  */
 export function spacedPhone(e164: string): string {
   const match = E164.exec(e164);
@@ -428,7 +432,7 @@ export function spacedPhone(e164: string): string {
   const digits = match[1];
   if (digits.startsWith("41") && digits.length === 11) {
     const national = digits.slice(2);
-    return national.startsWith("8")
+    return SWISS_SERVICE_PREFIX.test(national)
       ? `+41 ${national.slice(0, 3)} ${national.slice(3, 6)} ${national.slice(6)}`
       : `+41 ${national.slice(0, 2)} ${national.slice(2, 5)} ${national.slice(5, 7)} ${national.slice(7)}`;
   }

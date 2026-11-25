@@ -423,8 +423,12 @@ async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutc
     const seats = usesSeats(ctx.tenant);
     const sameName = sameTime.find(([, booking]) => booking.person === undefined || booking.person.name === person.name);
     if (!seats || separateParty !== true || sameName !== undefined) {
-      const [ref, booking] = sameName ?? closestBooking(sameTime, person);
-      return alreadyBooked(ctx, ref, booking, seats, seats && separateParty === true);
+      const meant = sameName ?? bookingMeant(sameTime, person);
+      // Several bookings at this time and neither the name nor the contact says which one the
+      // call corrects: no reference is named, or the model would be told to cancel another
+      // group's table (final review).
+      if (meant === null) return alreadyBookedSeveral(ctx, sameTime, seats);
+      return alreadyBooked(ctx, meant[0], meant[1], seats, seats && separateParty === true);
     }
   }
   if (!repeat && !(await takeActionCap(ctx, "bookings"))) return failure("limit_reached", NO_MORE_BOOKINGS);
@@ -498,11 +502,35 @@ function personOf(ctx: ToolContext, name: string, contact: string): BookingPerso
 }
 
 /**
- * Of several bookings at one time, the one a corrected call most likely meant, for the conflict
- * say: the one with the same contact, else the latest one made.
+ * Of the bookings at one time, the one a call with other details refers to, for the conflict say:
+ * the one with the same contact, else the only one there is. null when several are booked and
+ * nothing says which one is meant: the say then names none of them (alreadyBookedSeveral).
  */
-function closestBooking(sameTime: Array<[string, SessionBooking]>, person: BookingPerson): [string, SessionBooking] {
-  return sameTime.find(([, booking]) => booking.person?.contact === person.contact) ?? sameTime[sameTime.length - 1];
+function bookingMeant(sameTime: Array<[string, SessionBooking]>, person: BookingPerson): [string, SessionBooking] | null {
+  const sameContact = sameTime.find(([, booking]) => booking.person?.contact === person.contact);
+  if (sameContact !== undefined) return sameContact;
+  return sameTime.length === 1 ? sameTime[0] : null;
+}
+
+/**
+ * The say when this conversation holds several bookings at this time and the call matches none of
+ * them by name or contact (a caller of the first group correcting both, after a second group was
+ * booked). It lists the references and has the model ask which one is meant, instead of pointing
+ * at one of them.
+ */
+function alreadyBookedSeveral(ctx: ToolContext, sameTime: Array<[string, SessionBooking]>, seats: boolean): ToolOutcome {
+  const { date, time } = spokenStart(sameTime[0][1].start, ctx.tenant.hours.timezone);
+  const refs = sameTime.map(([ref]) => ref).join(", ");
+  const change = enabledTools(ctx.tenant).includes("cancel_appointment")
+    ? " To change the name, contact, party size or notes of one of them, first ask the caller which booking they mean, then cancel that reference with cancel_appointment and book again."
+    : " Their details cannot be changed here; tell the caller the bookings stand as they were made.";
+  const other = seats
+    ? " Only if the caller confirms they want one more booking for a different group, in addition to these, call book_appointment again with that group's own name and separate_party: true."
+    : "";
+  return failure(
+    "conflict",
+    `This conversation already booked this time more than once: ${date} at ${time}, references ${refs}, each with the details given then. Nothing new was booked and none of them was changed. The details of this call match none of them, so it is not known which one it is about.${change}${other}`,
+  );
 }
 
 async function cancelAppointment(ctx: ToolContext, input: Input): Promise<ToolOutcome> {

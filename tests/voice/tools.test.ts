@@ -938,6 +938,28 @@ describe("review S2-11: a second party at the same time on a calendar with seats
     assert.match(corrected.say, new RegExp(`reference ${refOf(meier)}`));
   });
 
+  it("with two tables at one time, a correction of the name AND the contact points at neither (the final review's probe)", async () => {
+    const ctx = makeContext(RESTAURANT, { limits: { ...DEFAULT_VOICE_LIMITS, bookingsPerSession: 5 } });
+    const collins = await executeTool(ctx, call("book_appointment", COLLINS));
+    const meier = await executeTool(ctx, call("book_appointment", MEIER_GROUP));
+    assert.ok(collins.ok && meier.ok, meier.say);
+    // Collins corrects her misheard name and one digit of her number: neither hash matches a booking.
+    const corrected = await executeTool(ctx, call("book_appointment", { ...COLLINS, name: "Sara Kollins", contact: "+41780000045" }));
+    assert.ok(!corrected.ok && corrected.code === "conflict", corrected.say);
+    // Both references, in the order they were booked, and no instruction to cancel one of them.
+    assert.match(corrected.say, new RegExp(`booked this time more than once: Tuesday 15 December 2026 at 13:30, references ${refOf(collins)}, ${refOf(meier)},`));
+    assert.doesNotMatch(corrected.say, /cancel reference MV-/);
+    assert.match(corrected.say, /first ask the caller which booking they mean, then cancel that reference with cancel_appointment and book again/);
+    assert.match(corrected.say, /Only if the caller confirms they want one more booking for a different group/);
+    assert.equal(ctx.counters.bookings, 2);
+    assert.equal(ctx.outcomes.filter((outcome) => outcome.kind === "booking").length, 2);
+    // With the same name or the same contact as one of them, that one is still named.
+    const sameContact = await executeTool(ctx, call("book_appointment", { ...COLLINS, name: "Sara Kollins" }));
+    assert.ok(!sameContact.ok && sameContact.code === "conflict", sameContact.say);
+    assert.match(sameContact.say, new RegExp(`reference ${refOf(collins)}, with the details given then`));
+    assert.match(sameContact.say, new RegExp(`cancel reference ${refOf(collins)} with cancel_appointment`));
+  });
+
   it("the mark exists only where a time holds several bookings", () => {
     const seats = Object.fromEntries(toolDefinitions(RESTAURANT).map((tool) => [tool.name, tool]));
     assert.equal((seats.book_appointment.inputSchema.properties.separate_party as { type: string }).type, "boolean");

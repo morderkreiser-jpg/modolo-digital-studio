@@ -392,6 +392,12 @@ describe("browser check R3-B3: dates and phone numbers in the email are easy to 
     assert.equal(spacedPhone("+41790000060"), "+41 79 000 00 60");
     assert.equal(spacedPhone("+41521234567"), "+41 52 123 45 67");
     assert.equal(spacedPhone("+41800123456"), "+41 800 123 456");
+    // Only service numbers have a prefix of three digits: 081 is the area code of Graubünden
+    // (final review: it was grouped like an 0800 number).
+    assert.equal(spacedPhone("+41812345678"), "+41 81 234 56 78");
+    assert.equal(spacedPhone("+41848123456"), "+41 848 123 456");
+    assert.equal(spacedPhone("+41901234567"), "+41 901 234 567");
+    assert.equal(spacedPhone("+41441234567"), "+41 44 123 45 67");
     assert.equal(spacedPhone("+393331234567"), "+39 3331234567");
     assert.equal(spacedPhone("+4915112345678"), "+49 15112345678");
     assert.equal(spacedPhone("+12125551234"), "+1 2125551234");
