@@ -686,7 +686,11 @@
   background: var(--v-gilt);
 }
 
-.choiceInput:focus-visible + .choiceBody {
+/* The ring of the focused trade. WebKit moves the focus on an arrow key without :focus-visible:
+   while the chooser is used with keys (data-keys, demo-chooser.tsx) :focus draws it as well
+   (browser check R3-B5). */
+.choiceInput:focus-visible + .choiceBody,
+.chooser[data-keys] .choiceInput:focus + .choiceBody {
   outline: 2px solid var(--color-gold-ink, #7e5d24);
   outline-offset: 2px;
 }
@@ -749,7 +753,8 @@
     color: var(--v-cream-muted);
   }
 
-  .choiceInput:focus-visible + .choiceBody {
+  .choiceInput:focus-visible + .choiceBody,
+  .chooser[data-keys] .choiceInput:focus + .choiceBody {
     outline-offset: 2px;
   }
 }

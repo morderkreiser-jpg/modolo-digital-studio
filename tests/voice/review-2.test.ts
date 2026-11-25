@@ -4,7 +4,6 @@
 // and a lead whose email went unanswered (S2-8). Nothing calls a real provider or sends email.
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it, mock } from "node:test";
-import { maxDuration as toolRouteMaxDuration } from "@/app/api/voice/tool/route";
 import { DEMO_TENANTS, scriptsFor } from "@/lib/voice/demos";
 import { availableModes } from "@/lib/voice/server/env";
 import {
@@ -24,7 +23,17 @@ import { signWebhook, wasSeen } from "@/lib/voice/server/webhook";
 import { MODOLO_VOICE_TENANT } from "@/lib/voice/tenants/modolo";
 import { executeTool, type ToolContext, type ToolSinks } from "@/lib/voice/tools/execute";
 import { DEFAULT_VOICE_LIMITS, type CallSummary, type SessionGrant } from "@/lib/voice/types";
-import { captureLogs, post, readGrant, sessionBody, setVoiceEnv, TEST_SECRET, testDeps, WEBHOOK_SECRET } from "./voice-fixtures";
+import {
+  captureLogs,
+  importVoiceRoute,
+  post,
+  readGrant,
+  sessionBody,
+  setVoiceEnv,
+  TEST_SECRET,
+  testDeps,
+  WEBHOOK_SECRET,
+} from "./voice-fixtures";
 
 /** Wednesday 2 December 2026, 10:00 in Zurich. */
 const T0 = Date.UTC(2026, 11, 2, 9, 0, 0);
@@ -153,7 +162,10 @@ describe("review S2-5: the realtime provider is told whether the business is ope
 // ---------------------------------------------------------------------------------------------
 
 describe("review S2-7: a tool call fits in its route's time, and its delivery counts once it is done", () => {
-  it("the wait for the lock plus the slowest email leave room within maxDuration", () => {
+  it("the wait for the lock plus the slowest email leave room within maxDuration", async () => {
+    // The route file imports next/server since it keeps the function alive (keep-alive.ts): it is
+    // loaded through the fixture's resolve hook.
+    const { maxDuration: toolRouteMaxDuration } = await importVoiceRoute("tool");
     // Two seconds of margin for the store round trips and the rest of the request.
     assert.ok(TOOL_LOCK_WAIT_MS + EMAIL_TIMEOUT_MS + 2_000 <= toolRouteMaxDuration * 1000, `${TOOL_LOCK_WAIT_MS} + ${EMAIL_TIMEOUT_MS}`);
   });

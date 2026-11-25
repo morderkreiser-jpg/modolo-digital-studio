@@ -83,6 +83,20 @@ export interface VoiceStrings {
   watchExample: string;
   contact: string;
   loading: string;
+  /**
+   * After a written example: what the business receives. A label for the e-mails (shown in the
+   * page's language; the e-mails themselves are in the business's), the subject's label, a note
+   * when the e-mails are in another language than the page, a sentence for an example after which
+   * nothing reaches the business, and a screen-reader hint read with the end of the example.
+   */
+  afterCallTitle: string;
+  /** With its colon (French typography wants a no-break space before it). */
+  afterCallSubject: string;
+  afterCallLanguage: string;
+  afterCallNone: string;
+  afterCallFollows: string;
+  /** The four languages named in this language ("tedesco"), for afterCallLanguage. */
+  languageNames: Record<VoiceLocale, string>;
 }
 
 /** Each language named in itself, for the language switch. */
@@ -219,6 +233,13 @@ const DE: VoiceStrings = {
   watchExample: "Beispiel ansehen",
   contact: "Direkter Kontakt",
   loading: "Wird geladen",
+  afterCallTitle: "Beispiel: Das bekommt der Betrieb per E-Mail",
+  afterCallSubject: "Betreff:",
+  afterCallLanguage: "Auf {language}, in der Sprache des Betriebs.",
+  afterCallNone:
+    "Nach diesem Gespräch bekommt der Betrieb keine E-Mail: Es gab keine Anfrage, keinen Termin und keinen Rückrufwunsch.",
+  afterCallFollows: "Darunter steht, was der Betrieb per E-Mail bekommt.",
+  languageNames: { de: "Deutsch", it: "Italienisch", en: "Englisch", fr: "Französisch" },
 };
 
 const IT: VoiceStrings = {
@@ -348,6 +369,13 @@ const IT: VoiceStrings = {
   watchExample: "Guarda un esempio",
   contact: "Contatto diretto",
   loading: "Caricamento",
+  afterCallTitle: "Esempio: cosa riceve l'attività per e-mail",
+  afterCallSubject: "Oggetto:",
+  afterCallLanguage: "In {language}, la lingua dell'attività.",
+  afterCallNone:
+    "Dopo questa chiamata l'attività non riceve nessuna e-mail: non c'erano richieste, appuntamenti o richiamate.",
+  afterCallFollows: "Qui sotto c'è cosa riceve l'attività per e-mail.",
+  languageNames: { de: "tedesco", it: "italiano", en: "inglese", fr: "francese" },
 };
 
 const EN: VoiceStrings = {
@@ -476,6 +504,12 @@ const EN: VoiceStrings = {
   watchExample: "Watch an example",
   contact: "Direct contact",
   loading: "Loading",
+  afterCallTitle: "Example: what the business gets by e-mail",
+  afterCallSubject: "Subject:",
+  afterCallLanguage: "In {language}, the business's language.",
+  afterCallNone: "After this call the business gets no e-mail: there was no request, appointment or callback.",
+  afterCallFollows: "Below it: what the business gets by e-mail.",
+  languageNames: { de: "German", it: "Italian", en: "English", fr: "French" },
 };
 
 // French: the usual "vous", and a no-break space before "?" as French typography wants.
@@ -607,6 +641,12 @@ const FR: VoiceStrings = {
   watchExample: "Voir un exemple",
   contact: "Contact direct",
   loading: "Chargement",
+  afterCallTitle: "Exemple : ce que l'entreprise reçoit par e-mail",
+  afterCallSubject: "Objet :",
+  afterCallLanguage: "En {language}, la langue de l'entreprise.",
+  afterCallNone: "Après cet appel, l'entreprise ne reçoit aucun e-mail : il n'y avait ni demande, ni rendez-vous, ni rappel.",
+  afterCallFollows: "Juste en dessous : ce que l'entreprise reçoit par e-mail.",
+  languageNames: { de: "allemand", it: "italien", en: "anglais", fr: "français" },
 };
 
 const TABLES: Record<VoiceLocale, VoiceStrings> = { de: DE, it: IT, en: EN, fr: FR };

@@ -17,7 +17,14 @@ import type {
 import { createMemoryCalendar } from "@/lib/voice/calendar";
 import { toolDefinitions } from "@/lib/voice/tools/definitions";
 import { hasPhoneNumber, isValidEmail, normalizePhone, validateToolInput, withoutPhoneNumbers } from "@/lib/voice/tools/validate";
-import { createMemorySinks, executeTool, type ToolContext, type ToolSinks } from "@/lib/voice/tools/execute";
+import {
+  createMemorySinks,
+  executeTool,
+  exportToolMemory,
+  importToolMemory,
+  type ToolContext,
+  type ToolSinks,
+} from "@/lib/voice/tools/execute";
 
 // ---------------------------------------------------------------------------------------------
 // Fixtures
@@ -835,6 +842,146 @@ describe("review correttezza/F1: booking the same appointment again with a corre
     const corrected = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, name: "Anna Muster-Keller" }));
     assert.ok(!corrected.ok);
     assert.match(corrected.say, /the booking stands as it was made/);
+  });
+});
+
+describe("review S2-11: a second party at the same time on a calendar with seats", () => {
+  const COLLINS = { service: "table", start: "2026-12-15T13:30:00+01:00", name: "Sarah Collins", contact: "+41780000044", party_size: 4 };
+  const MEIER = { service: "table", start: "2026-12-15T13:30:00+01:00", name: "Peter Meier", contact: "+41780000077", party_size: 6 };
+  /** What the model sends once the caller confirmed an extra table for another group. */
+  const MEIER_GROUP = { ...MEIER, separate_party: true };
+  const ASK_FIRST = /Only if the caller confirms they want an extra booking for a different group, in addition to this one, call book_appointment again with that group's own name and separate_party: true\./;
+
+  it("books a table for another group at the same time once the model marks it so, within the bookings cap", async () => {
+    const ctx = makeContext(RESTAURANT, { limits: { ...DEFAULT_VOICE_LIMITS, bookingsPerSession: 2 } });
+    const first = await executeTool(ctx, call("book_appointment", COLLINS));
+    assert.ok(first.ok, first.say);
+    // Unmarked, another name and contact may be a correction of both: refused, with the way to an extra table.
+    const unmarked = await executeTool(ctx, call("book_appointment", MEIER));
+    assert.ok(!unmarked.ok && unmarked.code === "conflict", unmarked.say);
+    assert.match(unmarked.say, ASK_FIRST);
+    const second = await executeTool(ctx, call("book_appointment", MEIER_GROUP));
+    assert.ok(second.ok, second.say);
+    assert.notEqual(refOf(second), refOf(first));
+    assert.equal(second.data?.party_size, 6);
+    assert.equal(ctx.counters.bookings, 2);
+    assert.equal(ctx.outcomes.filter((outcome) => outcome.kind === "booking").length, 2);
+    // The same call again, with or without the mark, is a repeat, not a third table.
+    for (const again of [MEIER_GROUP, MEIER]) {
+      const repeat = await executeTool(ctx, call("book_appointment", again));
+      assert.ok(repeat.ok, repeat.say);
+      assert.equal(refOf(repeat), refOf(second));
+    }
+    assert.equal(ctx.counters.bookings, 2);
+    // A third party is held to the cap.
+    const third = await executeTool(ctx, call("book_appointment", { ...MEIER_GROUP, name: "Lea Frei", contact: "lea@example.ch", party_size: 2 }));
+    assert.ok(!third.ok && third.code === "limit_reached", third.say);
+  });
+
+  it("the same name, however it is written, or the same contact is still a correction (correttezza/F1)", async () => {
+    const ctx = makeContext(RESTAURANT);
+    assert.ok((await executeTool(ctx, call("book_appointment", COLLINS))).ok);
+    const corrections = [
+      { ...COLLINS, contact: "+41780000045" },
+      { ...COLLINS, name: "collins sarah", contact: "+41780000045", party_size: 5 },
+      { ...COLLINS, name: "Sarah Cöllins", contact: "sarah@example.ch" },
+      { ...COLLINS, name: "Sarah Meier", party_size: 6 },
+    ];
+    for (const input of corrections) {
+      const outcome = await executeTool(ctx, call("book_appointment", input));
+      assert.ok(!outcome.ok && outcome.code === "conflict", `${JSON.stringify(input)}: ${outcome.say}`);
+      assert.match(outcome.say, /already booked this time/);
+      assert.match(outcome.say, ASK_FIRST);
+    }
+    assert.equal(ctx.counters.bookings, 1);
+    assert.equal(ctx.outcomes.length, 1);
+  });
+
+  it("a correction of the name AND the contact holds one table, not two (the verifier's probe)", async () => {
+    const ctx = makeContext(RESTAURANT);
+    const misheard = { ...COLLINS, name: "Sara Moller", contact: "+41780000044" };
+    const first = await executeTool(ctx, call("book_appointment", misheard));
+    assert.ok(first.ok, first.say);
+    for (const corrected of [
+      { ...misheard, name: "Sarah Müller", contact: "+41780000045" },
+      { ...misheard, name: "Sarah Müller", contact: "sara@example.ch" },
+    ]) {
+      const outcome = await executeTool(ctx, call("book_appointment", corrected));
+      assert.ok(!outcome.ok && outcome.code === "conflict", `${JSON.stringify(corrected)}: ${outcome.say}`);
+      assert.match(outcome.say, new RegExp(`already booked this time: Tuesday 15 December 2026 at 13:30, reference ${refOf(first)}`));
+      assert.match(outcome.say, /cancel reference MV-[2-9A-HJ-NP-Z]{4} with cancel_appointment, then book again/);
+    }
+    assert.equal(ctx.counters.bookings, 1);
+    assert.equal(ctx.outcomes.filter((outcome) => outcome.kind === "booking").length, 1);
+    // Eight seats would have been held for one party: only four are.
+    const check = await executeTool(ctx, call("check_availability", { service: "table", date: "2026-12-15", party_size: 8 }));
+    assert.ok(check.ok, check.say);
+  });
+
+  it("marked as another group under a name that already holds the time, it is still the same booking", async () => {
+    const ctx = makeContext(RESTAURANT);
+    const first = await executeTool(ctx, call("book_appointment", COLLINS));
+    const marked = await executeTool(ctx, call("book_appointment", { ...COLLINS, name: "COLLINS Sarah", contact: "+41780000099", separate_party: true }));
+    assert.ok(!marked.ok && marked.code === "conflict", marked.say);
+    assert.match(marked.say, new RegExp(`reference ${refOf(first)}`));
+    assert.match(marked.say, /This name already holds this time, so it is not another group/);
+    assert.equal(ctx.counters.bookings, 1);
+  });
+
+  it("with two tables at one time, a correction names the booking with the same contact", async () => {
+    const ctx = makeContext(RESTAURANT);
+    const collins = await executeTool(ctx, call("book_appointment", COLLINS));
+    const meier = await executeTool(ctx, call("book_appointment", MEIER_GROUP));
+    assert.ok(collins.ok && meier.ok, meier.say);
+    const corrected = await executeTool(ctx, call("book_appointment", { ...MEIER, name: "Petra Maier", party_size: 5 }));
+    assert.ok(!corrected.ok && corrected.code === "conflict", corrected.say);
+    assert.match(corrected.say, new RegExp(`reference ${refOf(meier)}`));
+  });
+
+  it("the mark exists only where a time holds several bookings", () => {
+    const seats = Object.fromEntries(toolDefinitions(RESTAURANT).map((tool) => [tool.name, tool]));
+    assert.equal((seats.book_appointment.inputSchema.properties.separate_party as { type: string }).type, "boolean");
+    assert.ok(!seats.book_appointment.inputSchema.required.includes("separate_party"));
+    const single = Object.fromEntries(toolDefinitions(SALON).map((tool) => [tool.name, tool]));
+    assert.ok(!("separate_party" in single.book_appointment.inputSchema.properties));
+    const refused = validateToolInput(SALON, "book_appointment", { ...BOOK_INPUT, separate_party: true }, { now: NOW });
+    assert.ok(!refused.ok);
+    const kept = validateToolInput(RESTAURANT, "book_appointment", MEIER_GROUP, { now: NOW });
+    assert.ok(kept.ok && kept.value.separate_party === true);
+    const dropped = validateToolInput(RESTAURANT, "book_appointment", { ...MEIER, separate_party: false }, { now: NOW });
+    assert.ok(dropped.ok && !("separate_party" in dropped.value));
+    assert.ok(!validateToolInput(RESTAURANT, "book_appointment", { ...MEIER, separate_party: "yes" }, { now: NOW }).ok);
+  });
+
+  it("where one time takes one booking, another name and contact are refused as already booked", async () => {
+    const ctx = makeContext();
+    const first = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok(first.ok);
+    const other = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, name: "Peter Meier", contact: "peter@example.ch" }));
+    assert.ok(!other.ok && other.code === "conflict", other.say);
+    assert.match(other.say, new RegExp(`already booked this time: .*reference ${refOf(first)}`));
+    assert.match(other.say, /This time takes only one booking: for someone else, check availability and offer other times\./);
+    assert.equal(ctx.counters.bookings, 1);
+  });
+
+  it("who a booking is for travels with the replay memory as hashes; an older snapshot counts as the same person", async () => {
+    const ctx = makeContext(RESTAURANT);
+    assert.ok((await executeTool(ctx, call("book_appointment", COLLINS))).ok);
+    const snapshot = exportToolMemory(ctx.counters);
+    const text = JSON.stringify(snapshot);
+    assert.ok(!text.includes("Collins") && !text.includes("780000044"), "no name or number in the memory");
+    // The next request of the session, with the memory restored onto new counters.
+    const next = makeContext(RESTAURANT, { calendar: ctx.calendar });
+    importToolMemory(next.counters, snapshot);
+    assert.ok((await executeTool(next, call("book_appointment", MEIER_GROUP))).ok);
+    const sameName = await executeTool(next, call("book_appointment", { ...COLLINS, contact: "+41780000046", separate_party: true }));
+    assert.ok(!sameName.ok && sameName.code === "conflict", sameName.say);
+    // A snapshot written before people were remembered: the safe direction, a correction.
+    const old = makeContext(RESTAURANT, { calendar: ctx.calendar });
+    const [[ref, booking]] = snapshot.bookings ?? [];
+    importToolMemory(old.counters, { ...snapshot, bookings: [[ref, { ...booking, person: undefined }]] });
+    const unknown = await executeTool(old, call("book_appointment", { ...MEIER_GROUP, name: "Lea Frei", contact: "lea@example.ch" }));
+    assert.ok(!unknown.ok && unknown.code === "conflict", unknown.say);
   });
 });
 

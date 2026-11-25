@@ -20,7 +20,10 @@ import type { DemoScript } from "@/lib/voice/types";
 import VoiceStage from "./voice-stage";
 
 export interface VoiceMountProps {
-  /** The page's language (the site has en/de/it); the widget can switch to the tenant's others. */
+  /**
+   * The page's language (the site has en/de/it). The stage's controls and notices are always in
+   * it; the conversation can switch to the tenant's other languages, and an example plays in its own.
+   */
   locale: Locale;
   tenantId?: string;
   variant?: "stage" | "compact";
@@ -46,6 +49,8 @@ export default function VoiceMount({ locale, tenantId, variant = "stage", script
     <VoiceStage
       config={setup.config}
       scripts={setup.scripts}
+      uiLocale={setup.uiLocale}
+      afterCalls={setup.afterCalls}
       variant={variant}
       contactUrl={contactUrl ?? localizedHref(locale, "/#contatti")}
       headingLevel={headingLevel}

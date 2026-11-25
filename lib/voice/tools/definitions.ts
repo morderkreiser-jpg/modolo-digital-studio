@@ -227,6 +227,15 @@ function bookAppointment(tenant: VoiceTenantConfig): VoiceToolDefinition {
     maxLength: TOOL_TEXT_LIMITS.notes,
     description: "Anything the caller wants the business to know for this appointment. Optional.",
   };
+  if (seats) {
+    // A second booking of a time this conversation already booked is refused as a correction
+    // unless this is set (execute.ts, review finding S2-11).
+    properties.separate_party = {
+      type: "boolean",
+      description:
+        "Leave it out, except for an extra booking at a time this conversation has already booked: then true, and only after the caller confirmed it is for a different group, in addition to the first booking and not a change of it.",
+    };
+  }
   return tool(
     "book_appointment",
     "Books one appointment. Use only a start time that check_availability returned in this conversation. " +

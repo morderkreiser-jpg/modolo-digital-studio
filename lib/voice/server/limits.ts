@@ -177,12 +177,20 @@ export interface SessionReservation {
   at: number;
 }
 
+/** A month spend in CHF before and after one charge, for spendThresholdsCrossed(). */
+export interface SpendStep {
+  beforeChf: number;
+  afterChf: number;
+}
+
 export type AdmissionResult =
   | {
       ok: true;
       reservation: SessionReservation;
-      /** Month spend before and after this reservation (live modes only), for spendThresholdsCrossed(). */
-      spend?: { beforeChf: number; afterChf: number };
+      /** The tenant's month spend before and after this reservation (live modes only). */
+      spend?: SpendStep;
+      /** Everybody's month spend (all tenants together) before and after it (live modes only). */
+      globalSpend?: SpendStep;
     }
   | { ok: false; code: "rate_limited" | "busy" | "budget_exhausted"; retryAfter?: number };
 
@@ -352,6 +360,7 @@ export async function admitSession(args: {
       at: now,
     },
     spend: { beforeChf: (spendMicro - reservedMicroChf) / 1e6, afterChf: spendMicro / 1e6 },
+    globalSpend: { beforeChf: (globalSpend - reservedMicroChf) / 1e6, afterChf: globalSpend / 1e6 },
   };
 }
 
@@ -439,10 +448,10 @@ export async function confirmRealtimeCall(args: {
 }
 
 /** The tenant's month spend before and after a charge (CHF), for spendThresholdsCrossed(). */
-export interface SpendChange {
+export interface SpendChange extends SpendStep {
   month: string;
-  beforeChf: number;
-  afterChf: number;
+  /** Everybody's month spend before and after the same charge. */
+  globalSpend: SpendStep;
 }
 
 /**
@@ -582,7 +591,7 @@ export async function reserveTurnSpend(args: {
   micro: number;
   now?: number;
 }): Promise<
-  | { ok: true; reservation: TurnSpendReservation; spend: { beforeChf: number; afterChf: number } }
+  | { ok: true; reservation: TurnSpendReservation; spend: SpendStep; globalSpend: SpendStep }
   | { ok: false; code: "budget_exhausted"; retryAfter: number }
 > {
   const { store, tenantId, sessionId, limits } = args;
@@ -604,6 +613,7 @@ export async function reserveTurnSpend(args: {
     ok: true,
     reservation: { tenantId, sessionId, month, micro },
     spend: { beforeChf: (tenantSpend - micro) / 1e6, afterChf: tenantSpend / 1e6 },
+    globalSpend: { beforeChf: (globalSpend - micro) / 1e6, afterChf: globalSpend / 1e6 },
   };
 }
 
@@ -673,6 +683,20 @@ export async function globalUsageSnapshot(
 ): Promise<{ minutesToday: number; spendChfThisMonth: number }> {
   const [today, spend] = await Promise.all([store.get(globalSecondsKey(utcDay(now))), store.get(globalSpendKey(utcMonth(now)))]);
   return { minutesToday: parseCount(today) / 60, spendChfThisMonth: parseCount(spend) / 1e6 };
+}
+
+/**
+ * The month spend (CHF) of one tenant and of all tenants together, two reads: for the alert of a
+ * charge the ceiling refused (alerts.ts, reportCeilingRefusal).
+ */
+export async function monthSpendChf(
+  store: KVStore,
+  tenantId: string,
+  now: number = Date.now(),
+): Promise<{ month: string; tenantChf: number; globalChf: number }> {
+  const month = utcMonth(now);
+  const [tenant, global] = await Promise.all([store.get(spendKey(tenantId, month)), store.get(globalSpendKey(month))]);
+  return { month, tenantChf: parseCount(tenant) / 1e6, globalChf: parseCount(global) / 1e6 };
 }
 
 /**
@@ -939,9 +963,14 @@ async function chargeUpTo(store: KVStore, r: SessionReservation, seconds: number
   const addSeconds = toCount(seconds - heldSeconds);
   if (addSeconds === 0) return null;
   const addMicro = Math.max(0, microChf(heldSeconds + addSeconds, r.costChfPerMinute) - heldMicro);
-  const [, , , spendMicro] = await apply(store, chargeWrites(r, addSeconds, addMicro));
+  const [, , , spendMicro, globalMicro] = await apply(store, chargeWrites(r, addSeconds, addMicro));
   await addToLedger(store, r, addSeconds, addMicro);
-  return { month: r.month, beforeChf: (spendMicro - addMicro) / 1e6, afterChf: spendMicro / 1e6 };
+  return {
+    month: r.month,
+    beforeChf: (spendMicro - addMicro) / 1e6,
+    afterChf: spendMicro / 1e6,
+    globalSpend: { beforeChf: (globalMicro - addMicro) / 1e6, afterChf: globalMicro / 1e6 },
+  };
 }
 
 /**

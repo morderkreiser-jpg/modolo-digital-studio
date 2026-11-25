@@ -6,8 +6,9 @@
 // examples only, no microphone, no network, no cost.
 //
 // Language: the examples in the page's language when the business has them, else the German ones
-// (examplesForPage). The stage then runs in German, so the page says so in words, next to the
-// trade and above the stage, not only with a language code.
+// (examplesForPage). The stage's controls and notices stay in the page's language (VoiceMount
+// passes it as uiLocale); only the conversation is then German, so the page says so in words,
+// next to the trade and above the stage, not only with a language code.
 import VoiceMount from "@/components/voice/voice-mount";
 import type { VoiceLandingContent } from "@/content/voice/landing";
 import { localizedHref, type Locale } from "@/lib/i18n";

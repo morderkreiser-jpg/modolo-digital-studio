@@ -86,8 +86,14 @@ export interface VoiceEnv {
   chfPerUsd: number;
   /** VOICE_GLOBAL_MINUTES_PER_DAY and VOICE_GLOBAL_BUDGET_CHF_PER_MONTH. */
   global: VoiceGlobalLimits;
-  /** Where budget alerts go (server-only). */
+  /** VOICE_ALERT_EMAIL: where the spend alerts go (alerts.ts). Server only. */
   alertEmail: string | null;
+  /**
+   * VOICE_DEV_OUTBOX, outside production only: without an email service, the emails of live
+   * tenants go to an in-memory outbox printed on the server console (outbox.ts) and count as
+   * delivered. Always false in production, whatever the variable says.
+   */
+  devOutbox: boolean;
   /** VOICE_LAB: the internal test page exists. */
   lab: boolean;
   /** Env overrides of the main limits; resolveVoiceLimits() merges and clamps them. */
@@ -259,12 +265,17 @@ function readVoiceEnv(): VoiceEnv {
   });
   const mode: VoiceMode = degradedReason === null ? requestedMode : "scripted";
   const enabled = readFlag("VOICE_ENABLED");
+  // The development outbox would tell callers "passed on" while nothing leaves the server: never
+  // in production.
+  const devOutboxAsked = readFlag("VOICE_DEV_OUTBOX");
+  const devOutbox = devOutboxAsked && !production;
 
   // One line per process, and only when it matters: a switched-on feature running below what was
   // asked for. Names of the missing pieces only, never values.
   if (enabled && degradedReason !== null) {
     logVoiceEvent({ warn: "voice_mode_degraded", requested: requestedMode, mode, reason: degradedReason });
   }
+  if (devOutboxAsked) logVoiceEvent({ warn: production ? "voice_dev_outbox_ignored" : "voice_dev_outbox_on" });
 
   return {
     enabled,
@@ -286,6 +297,7 @@ function readVoiceEnv(): VoiceEnv {
     chfPerUsd: readClampedDecimal("VOICE_CHF_PER_USD", MIN_CHF_PER_USD, MAX_CHF_PER_USD) ?? DEFAULT_CHF_PER_USD,
     global: readGlobalLimits(),
     alertEmail: readEmail("VOICE_ALERT_EMAIL"),
+    devOutbox,
     lab: readFlag("VOICE_LAB"),
     limits: readLimitOverrides(),
     hashSalt: readHashSalt(secret, anthropicApiKey),

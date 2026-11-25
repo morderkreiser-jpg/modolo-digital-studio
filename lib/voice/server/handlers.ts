@@ -35,6 +35,7 @@ import {
   settleTurnSpend,
   usdToMicroChf,
   type SessionReservation,
+  type SpendChange,
   type TurnSpendReservation,
 } from "./limits";
 import { logVoiceEvent } from "./log";
@@ -49,12 +50,14 @@ import {
   openSession,
   originAllowed,
   refuse,
-  reportSpend,
+  alertDelivery,
   type Refusal,
   type VoiceDeps,
 } from "./session";
+import { reportCeilingRefusal, reportSpend } from "./alerts";
 import { clearState, loadState, saveState, stateTtlSeconds, type VoiceSessionState } from "./state";
 import { voiceStores } from "./stores";
+import { deliverLateOutcomes } from "./summary";
 import { verifySessionToken, type SessionClaims } from "./token";
 import { DEFAULT_WEBHOOK_TOLERANCE_SECONDS, seenBefore, verifyWebhook, wasSeen } from "./webhook";
 
@@ -178,7 +181,7 @@ export async function handleTurnRequest(request: Request, deps: VoiceDeps = {}):
     if (!gate.ok) return errorResponse(refuse(429, gate.code, tenant.id, gate.retryAfter));
     const lock = await acquireSessionLock(store, claims.sid, { clock, waitMs: deps.lockWaitMs ?? TURN_LOCK_WAIT_MS });
     if (lock === null) return errorResponse(refuse(409, "turn_in_progress", tenant.id));
-    const prepared = await prepareTurn({ claims, tenant, limits, env, store, now, opening, text, locale }).catch(
+    const prepared = await prepareTurn({ claims, tenant, limits, env, deps, store, now, opening, text, locale }).catch(
       async (error: unknown) => {
         await lock.release();
         throw error;
@@ -189,6 +192,8 @@ export async function handleTurnRequest(request: Request, deps: VoiceDeps = {}):
       return errorResponse(prepared.refusal);
     }
     const { state, remainingTurns, spend } = prepared;
+    // What the turn finds already done: anything after it is this turn's (persistUnlessEnded).
+    const late = lateOutcomes({ state, tenant, since: state.outcomes.length, deps });
 
     const model = opening ? null : (deps.model ?? defaultModel(env))(tenant, locale);
     const calendar = (deps.calendar ?? getCalendar)(tenant);
@@ -244,14 +249,14 @@ export async function handleTurnRequest(request: Request, deps: VoiceDeps = {}):
           now: clock,
         })) {
           if (event.type === "done" || event.type === "error") {
-            saved = await persistUnlessEnded(store, state, ttl);
+            saved = await persistUnlessEnded(store, state, ttl, late);
             // Saved: the next turn may start as soon as the widget reads this event.
             await lock.release();
             if (event.type === "done" && event.ended) ended = true;
           }
           send(event);
         }
-        if (!saved) await persistUnlessEnded(store, state, ttl);
+        if (!saved) await persistUnlessEnded(store, state, ttl, late);
         await lock.release();
         // The assistant ended the call: close it here, so the summary goes out even if the
         // widget's end report never arrives.
@@ -310,6 +315,7 @@ async function prepareTurn(args: {
   tenant: VoiceTenantConfig;
   limits: VoiceLimits;
   env: VoiceEnv;
+  deps: VoiceDeps;
   store: KVStore;
   now: number;
   opening: boolean;
@@ -361,17 +367,40 @@ async function prepareTurn(args: {
     tools: turnTools(tenant),
     messages: [...toApiMessages(state.history), { role: "user", content: args.text }],
   });
+  const worstMicro = usdToMicroChf(worstUsd, env.chfPerUsd);
   const reserved = await reserveTurnSpend({
     store,
     tenantId: tenant.id,
     sessionId: claims.sid,
     limits,
     global: env.global,
-    micro: usdToMicroChf(worstUsd, env.chfPerUsd),
+    micro: worstMicro,
     now,
   });
-  if (!reserved.ok) return { ok: false, refusal: refuse(503, "budget_exhausted", tenant.id, reserved.retryAfter) };
-  await reportSpend(store, tenant.id, reserved.reservation.month, reserved.spend, limits.budgetChfPerMonth);
+  if (!reserved.ok) {
+    // The turn that would pass a ceiling is refused before it counts: the 100% line may never be
+    // crossed, so the refusal reports it (alerts.ts).
+    await reportCeilingRefusal({
+      store,
+      tenantId: tenant.id,
+      roomChf: worstMicro / 1e6,
+      budgetChf: limits.budgetChfPerMonth,
+      globalBudgetChf: env.global.budgetChfPerMonth,
+      now,
+      delivery: alertDelivery(env, args.deps),
+    });
+    return { ok: false, refusal: refuse(503, "budget_exhausted", tenant.id, reserved.retryAfter) };
+  }
+  await reportSpend({
+    store,
+    tenantId: tenant.id,
+    month: reserved.reservation.month,
+    spend: reserved.spend,
+    budgetChf: limits.budgetChfPerMonth,
+    globalSpend: reserved.globalSpend,
+    globalBudgetChf: env.global.budgetChfPerMonth,
+    delivery: alertDelivery(env, args.deps),
+  });
   return { ok: true, state, remainingTurns, spend: reserved.reservation };
 }
 
@@ -390,16 +419,55 @@ function defaultModel(env: VoiceEnv): (tenant: VoiceTenantConfig, locale: VoiceL
  * the save; it marks the session as ending before it reads the state, so whichever way they
  * interleave, one of the two checks sees it or the end reads (and removes) what was saved. A
  * session that is closed but still waits for this turn is saved as usual: its summary needs it.
+ *
+ * Found ending at the first check, this request saved nothing, so the summary was made without
+ * what it did: `late` sends that as an addendum (deliverLateOutcomes). The stored state is left to
+ * the end, which removes it once it has read it: removing it here could come first and leave the
+ * summary with nothing at all. Found ending only after the save, the end may or may not have read
+ * what was saved, so no addendum is sent (a race of one store round trip).
  */
-async function persistUnlessEnded(store: KVStore, state: VoiceSessionState, ttl: number): Promise<boolean> {
+async function persistUnlessEnded(
+  store: KVStore,
+  state: VoiceSessionState,
+  ttl: number,
+  late?: () => Promise<void>,
+): Promise<boolean> {
   if (await isSessionEnding(store, state.sessionId)) {
-    await clearState(store, state.sessionId);
+    await late?.();
     return true;
   }
   const ok = await saveState(store, state.sessionId, state, ttl);
   if (!ok) logVoiceEvent({ warn: "voice_state_not_saved", tenant: state.tenantId });
   if (await isSessionEnding(store, state.sessionId)) await clearState(store, state.sessionId);
   return ok;
+}
+
+/**
+ * The `late` step of persistUnlessEnded: what a request did beyond the first `since` outcomes of
+ * the state it loaded, as an addendum to the summary. Never throws.
+ */
+function lateOutcomes(args: {
+  state: VoiceSessionState;
+  tenant: VoiceTenantConfig;
+  since: number;
+  deps: VoiceDeps;
+}): () => Promise<void> {
+  return async () => {
+    try {
+      const delivery = await deliverLateOutcomes({
+        state: args.state,
+        tenant: args.tenant,
+        since: args.since,
+        resend: args.deps.resend,
+        send: args.deps.sendEmail,
+        now: (args.deps.now ?? Date.now)(),
+      });
+      if (delivery === null) return;
+      logVoiceEvent({ op: "late_outcomes", tenant: args.tenant.id, delivery: delivery.sent ? "sent" : delivery.reason });
+    } catch (error) {
+      logVoiceEvent({ warn: "voice_late_outcomes_failed", tenant: args.tenant.id, errorName: errorName(error) });
+    }
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -487,10 +555,10 @@ export async function handleToolRequest(request: Request, deps: VoiceDeps = {}):
       const reservation = await realtimeReservation(store, claims, env);
       if (event.type === "started") {
         const spend = reservation ? await confirmRealtimeCall({ store, reservation, limits, now }) : null;
-        if (spend) await reportSpend(store, tenant.id, spend.month, spend, limits.budgetChfPerMonth);
+        await reportCharge({ store, tenantId: tenant.id, spend, limits, env, deps });
       } else {
         const spend = reservation ? await settleReportedCall({ store, reservation, reportedSeconds: event.seconds, limits, now }) : null;
-        if (spend) await reportSpend(store, tenant.id, spend.month, spend, limits.budgetChfPerMonth);
+        await reportCharge({ store, tenantId: tenant.id, spend, limits, env, deps });
         await finishSession({ claims, reason: "provider", env, deps, now });
       }
       logVoiceEvent({ op: "provider_event", tenant: tenant.id, kind: event.type });
@@ -525,10 +593,11 @@ export async function handleToolRequest(request: Request, deps: VoiceDeps = {}):
       const limits = resolveVoiceLimits(tenant, env);
       const ttl = stateTtlSeconds(limits);
       const state = await loadOrRecoverState(store, claims);
+      const late = lateOutcomes({ state, tenant, since: state.outcomes.length, deps });
       // A call the provider signed is a connected call.
       const reservation = state.reservation ?? reservationFromClaims(claims, voiceCostChfPerMinute(env, "realtime"));
       const spend = reservation ? await confirmRealtimeCall({ store, reservation, limits, now }) : null;
-      if (spend) await reportSpend(store, tenant.id, spend.month, spend, limits.budgetChfPerMonth);
+      await reportCharge({ store, tenantId: tenant.id, spend, limits, env, deps });
       const counters = state.counters;
       importToolMemory(counters, state.toolMemory);
       const ctx: ToolContext = {
@@ -550,7 +619,7 @@ export async function handleToolRequest(request: Request, deps: VoiceDeps = {}):
       };
       const result = await executeTool(ctx, { id: call.id, name: call.name, input: call.input });
       state.toolMemory = exportToolMemory(counters);
-      await persistUnlessEnded(store, state, ttl);
+      await persistUnlessEnded(store, state, ttl, late);
       // Done: from now on this delivery is a replay.
       await seenBefore(shared, deliveryKey, 2 * DEFAULT_WEBHOOK_TOLERANCE_SECONDS);
       logVoiceEvent({
@@ -580,6 +649,29 @@ function parseProviderEvent(event: Record<string, unknown>): ProviderEvent | nul
   const seconds = event.seconds;
   if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0 || seconds > MAX_REPORTED_SECONDS) return null;
   return { type: "ended", seconds };
+}
+
+/** The spend alerts of a realtime charge (alerts.ts), when it charged anything. */
+async function reportCharge(args: {
+  store: KVStore;
+  tenantId: string;
+  spend: SpendChange | null;
+  limits: VoiceLimits;
+  env: VoiceEnv;
+  deps: VoiceDeps;
+}): Promise<void> {
+  const { spend, env } = args;
+  if (spend === null) return;
+  await reportSpend({
+    store: args.store,
+    tenantId: args.tenantId,
+    month: spend.month,
+    spend,
+    budgetChf: args.limits.budgetChfPerMonth,
+    globalSpend: spend.globalSpend,
+    globalBudgetChf: env.global.budgetChfPerMonth,
+    delivery: alertDelivery(env, args.deps),
+  });
 }
 
 /**

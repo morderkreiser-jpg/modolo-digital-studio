@@ -45,9 +45,9 @@ import {
   reservationFromClaims,
   sessionLifetimeSeconds,
   settleSession,
-  spendThresholdsCrossed,
   usdToMicroChf,
 } from "./limits";
+import { reportCeilingRefusal, reportSpend, type AlertDelivery } from "./alerts";
 import { logVoiceEvent } from "./log";
 import { getRealtimeProvider, openProviderSession, type RealtimeProvider } from "./providers";
 import { clearState, createSessionState, loadState, saveState, stateTtlSeconds, type VoiceSessionState } from "./state";
@@ -63,7 +63,6 @@ import {
   type SummaryDelivery,
 } from "./summary";
 import { MAX_SESSION_TOKEN_LIFETIME_SECONDS, signSessionToken, verifySessionToken, type SessionClaims } from "./token";
-import { seenBefore } from "./webhook";
 
 /** An end report may arrive this long after the token expired and still close the session. */
 export const END_GRACE_SECONDS = 10 * 60;
@@ -93,8 +92,11 @@ export interface VoiceDeps {
   lockWaitMs?: number;
   /** Clock in unix ms. */
   now?: () => number;
-  /** Keeps the function alive for work that ends after the response (Next's after()). */
-  keepAlive?: (work: Promise<unknown>) => void;
+  /**
+   * Keeps the function alive for work that ends after the response (Next's after(), keep-alive.ts).
+   * Answers false when it could not take the work; then a spend alert is awaited (alerts.ts).
+   */
+  keepAlive?: (work: Promise<unknown>) => boolean | void;
   model?: (tenant: VoiceTenantConfig, locale: VoiceLocale) => BrainModel | null;
   calendar?: (tenant: VoiceTenantConfig) => CalendarProvider | null;
   sinks?: (tenant: VoiceTenantConfig) => ToolSinks;
@@ -152,6 +154,9 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
   const ip = clientIp(request);
   // IPv6 visitors are counted per /64 (rateLimitSubject); only the salted hash is ever stored.
   const ipHash = ip ? hashId(rateLimitSubject(ip), env.hashSalt) : null;
+  const costChfPerMinute = voiceCostChfPerMinute(env, mode);
+  // A "local" conversation must be able to pay for at least one turn of the model.
+  const headroomMicro = mode === "local" ? usdToMicroChf(firstTurnWorstCaseUsd(tenant, locale, limits, env, now), env.chfPerUsd) : 0;
   const admission = await admitSession({
     store: accounting,
     ipStore: shared,
@@ -160,21 +165,44 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
     global: env.global,
     ipHash,
     mode,
-    costChfPerMinute: voiceCostChfPerMinute(env, mode),
-    // A "local" conversation must be able to pay for at least one turn of the model.
-    spendHeadroomMicroChf: mode === "local" ? usdToMicroChf(firstTurnWorstCaseUsd(tenant, locale, limits, env, now), env.chfPerUsd) : 0,
+    costChfPerMinute,
+    spendHeadroomMicroChf: headroomMicro,
     providerConfirmsCalls: provider?.confirmsCalls === true,
     now,
   });
   if (!admission.ok) {
+    if (admission.code === "budget_exhausted" && mode !== "scripted") {
+      // Refused before it counts, so the 100% line may never be crossed: reported here
+      // (alerts.ts). What had to fit: the first turn, or a realtime session's whole call.
+      await reportCeilingRefusal({
+        store: accounting,
+        tenantId: tenant.id,
+        roomChf: mode === "local" ? headroomMicro / 1e6 : (costChfPerMinute * limits.maxCallSeconds) / 60,
+        budgetChf: limits.budgetChfPerMonth,
+        globalBudgetChf: env.global.budgetChfPerMonth,
+        now,
+        delivery: alertDelivery(env, deps),
+      });
+    }
     // A tenant at capacity is not the visitor misbehaving: 503, like the chat's spent budget.
     const status = admission.code === "rate_limited" ? 429 : 503;
     return refuse(status, admission.code, tenant.id, admission.retryAfter);
   }
   const reservation = admission.reservation;
   const sessionId = reservation.sessionId;
-  // The alert markers are few (per tenant, month and threshold): kept with the counters.
-  if (admission.spend) await reportSpend(accounting, tenant.id, reservation.month, admission.spend, limits.budgetChfPerMonth);
+  // The alert markers are few (per scope, month and threshold): kept with the counters.
+  if (admission.spend) {
+    await reportSpend({
+      store: accounting,
+      tenantId: tenant.id,
+      month: reservation.month,
+      spend: admission.spend,
+      budgetChf: limits.budgetChfPerMonth,
+      globalSpend: admission.globalSpend,
+      globalBudgetChf: env.global.budgetChfPerMonth,
+      delivery: alertDelivery(env, deps),
+    });
+  }
 
   // From here on a failure must give the reservation back.
   const giveBack = (): Promise<void> => cancelReservation(accounting, reservation, now);
@@ -268,20 +296,11 @@ function firstTurnWorstCaseUsd(tenant: VoiceTenantConfig, locale: VoiceLocale, l
 }
 
 /**
- * One log line per spend threshold crossed this month, once per tenant, month and threshold.
- * Never an email from here: VOICE_ALERT_EMAIL is not wired to a sender yet.
+ * Where a spend alert of this request goes (alerts.ts): VOICE_ALERT_EMAIL, through the request's
+ * email service, kept alive by its keepAlive.
  */
-export async function reportSpend(
-  store: KVStore,
-  tenantId: string,
-  month: string,
-  spend: { beforeChf: number; afterChf: number },
-  budget: number,
-): Promise<void> {
-  for (const percent of spendThresholdsCrossed(spend.beforeChf, spend.afterChf, budget)) {
-    if (await seenBefore(store, `alert:${tenantId}:${month}:${percent}`, 40 * 86_400)) continue;
-    logVoiceEvent({ warn: "voice_spend_threshold", tenant: tenantId, percent });
-  }
+export function alertDelivery(env: Pick<VoiceEnv, "alertEmail">, deps: VoiceDeps): AlertDelivery {
+  return { alertEmail: env.alertEmail, resend: deps.resend, send: deps.sendEmail, keepAlive: deps.keepAlive };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -329,9 +348,9 @@ export async function finishSession(args: {
   // lock too (review findings S2-4 and S2-6).
   if ((await store.incrBy(closedKey(claims.sid), 1, CLOSED_TTL_SECONDS)) !== 1) return false;
   // A turn that is still running finishes first and saves its state, so the summary has what it
-  // did. One that runs longer finds the session ending when it saves, and removes its state
-  // instead (handlers.ts, persistUnlessEnded): the summary below is made from the state as it is
-  // now, and the conversation must not be kept after it.
+  // did. One that runs longer finds the session ending when it saves, and saves nothing (handlers.ts,
+  // persistUnlessEnded): the summary below is made from the state as it is now, the conversation
+  // must not be kept after it, and what that turn did goes out as an addendum.
   const lock = await acquireSessionLock(store, claims.sid, {
     clock: deps.now ?? Date.now,
     waitMs: deps.lockWaitMs ?? END_LOCK_WAIT_MS,
@@ -366,7 +385,7 @@ export async function finishSession(args: {
       seconds: Math.max(0, Math.round((now - startedAt) / 1000)),
       turns: valid ? state.turns : undefined,
       outcomes: valid ? state.outcomes.length : undefined,
-      delivery: delivery === null ? "none" : delivery.sent ? "sent" : delivery.reason,
+      delivery: endDelivery(delivery, valid ? state.outcomes.length : 0),
     });
     return true;
   } catch (error) {
@@ -375,6 +394,17 @@ export async function finishSession(args: {
   } finally {
     await lock?.release();
   }
+}
+
+/**
+ * The end log's word for the summary. "requests_only": the call had outcomes, but they were all
+ * requests or callback wishes, which went out the moment they were taken, so no summary was due
+ * (logged as "no_outcome" before, next to "outcomes":1: right, but misleading; browser check R3-B6).
+ */
+function endDelivery(delivery: SummaryDelivery | null, outcomes: number): string {
+  if (delivery === null) return "none";
+  if (delivery.sent) return "sent";
+  return delivery.reason === "no_outcome" && outcomes > 0 ? "requests_only" : delivery.reason;
 }
 
 /** True once the session was closed: no turn and no tool may run in it any more. */
@@ -411,7 +441,8 @@ function endingKey(sessionId: string): string {
  * business the moment the tool takes it (deliverRequest): it must not depend on the session
  * ending properly, since the end report may never come. The tool reports success, and the
  * assistant says it was passed on, only when the email service accepted the message; without a
- * recipient or an email service nothing is accepted. A demo business is invented: its requests
+ * recipient or an email service nothing is accepted (in development, VOICE_DEV_OUTBOX may stand
+ * in for the email service: summary.ts, outbox.ts). A demo business is invented: its requests
  * stay in the demo. There is no telephony on the web: a transfer never connects.
  */
 export function createSessionSinks(

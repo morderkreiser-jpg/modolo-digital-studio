@@ -150,9 +150,15 @@
   white-space: nowrap;
 }
 
+/* Heard, not seen: the heading's name reads "…Beispielhof, KI" (voice-stage.tsx TitleWithBadge).
+   With the space after it, it is the gap before the badge (about 10px). */
+.titleComma {
+  opacity: 0;
+}
+
 .badge {
   display: inline-block;
-  margin-left: 10px;
+  margin-left: 0;
   padding: 1px 8px;
   border: 1px solid rgb(232 200 119 / 0.55);
   border-radius: 999px;
@@ -357,7 +363,7 @@
 }
 
 /* Empty live regions stay in the DOM; this takes back the gap they would add. */
-.captions:empty,
+.captions[data-empty],
 .notice:empty {
   margin-bottom: -16px;
 }
@@ -405,7 +411,9 @@
   font-size: 14px;
 }
 
-.captions {
+/* The box of lines (.captions) holds the live log of the lines and, after a written example, what
+   the business receives. */
+.log {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -415,7 +423,8 @@
    follows the newest line): a new line never pushes the end button away from the visitor's finger,
    and nothing on the page moves. Lines are only added below, so the ones already there stay put.
    Once earlier lines scroll out, the top edge fades. Sized from the examples: three lines need
-   about 280 px at the median on a phone (measured 25.11.2026). */
+   about 280 px at the median on a phone (measured 25.11.2026). The end of a written example and
+   the e-mails after it are added below the lines too, in the same box: the stage keeps its height. */
 .captions[data-reserve] {
   height: var(--mv-captions-h, 17.5rem);
   margin-bottom: 0;
@@ -428,6 +437,19 @@
 .captions[data-reserve][data-scrolled] {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem);
   mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem);
+}
+
+/* More below what the box shows (lines after an earlier one the visitor scrolled up to, the rest
+   of an e-mail at the end of an example): the bottom edge fades too, so the box shows that it
+   scrolls (browser check R3-B2). */
+.captions[data-reserve][data-more] {
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 2rem);
+  mask-image: linear-gradient(to top, transparent 0, #000 2rem);
+}
+
+.captions[data-reserve][data-scrolled][data-more] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem, #000 calc(100% - 2rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem, #000 calc(100% - 2rem), transparent 100%);
 }
 
 .caption {
@@ -504,6 +526,147 @@
 
 .notice .endNote {
   border-left-color: var(--mv-line);
+}
+
+/* ----- After a written example: what the business receives ----------------------------------- */
+
+/* The end of the example, as the last entry of the log. */
+.endMark {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--mv-line);
+  color: var(--mv-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.afterNone {
+  margin: 0;
+  color: var(--mv-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The e-mails, set apart from the conversation like a message opened in a mail program: a
+   surface, the subject first, the body as plain text with its own line breaks. */
+.after {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--mv-hair);
+  border-radius: 14px;
+  background: var(--mv-surface);
+  animation: mv-rise 0.35s var(--mv-ease) both;
+}
+
+/* In the box of lines the label of the e-mails stays at the top edge while the e-mail scrolls
+   under it: what the visitor reads always has its name. Its ground is the card's own (the surface
+   over the stage's colour), so pinned it reads as the top of the card that stayed. */
+.captions[data-reserve] .afterHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: -14px -16px 0;
+  padding: 14px 16px 9px;
+  border-bottom: 1px solid transparent;
+  border-radius: 13px 13px 0 0;
+  background: linear-gradient(var(--mv-surface), var(--mv-surface)), var(--mv-bg);
+}
+
+.captions[data-reserve][data-pinned] .afterHead {
+  border-bottom-color: var(--mv-hair);
+}
+
+/* Under the pinned label the e-mail fades in, so a line cut by the label's edge does not read as
+   a mistake. The colour is the card's ground as one opaque colour (the surface's 4.5% of cream
+   over the stage's colour); where color-mix is not known there is no fade, only the hairline. */
+.captions[data-reserve][data-pinned] .afterHead::after {
+  content: "";
+  position: absolute;
+  inset: calc(100% + 1px) 0 auto;
+  height: 14px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--mv-cream) 4.5%, var(--mv-bg)), transparent);
+  pointer-events: none;
+}
+
+/* While the label is pinned, the top edge of the box does not fade over it. */
+.captions[data-reserve][data-scrolled][data-pinned] {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.captions[data-reserve][data-scrolled][data-pinned][data-more] {
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 2rem);
+  mask-image: linear-gradient(to top, transparent 0, #000 2rem);
+}
+
+.afterTitle {
+  margin: 0;
+  color: var(--mv-gold-hi);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.afterNote {
+  margin: 0;
+  color: var(--mv-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mailList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mailList > li + li {
+  padding-top: 14px;
+  border-top: 1px solid var(--mv-hair);
+}
+
+.mail {
+  min-width: 0;
+}
+
+.mailSubject {
+  margin: 0;
+  color: var(--mv-cream);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.mailLabel {
+  color: var(--mv-muted);
+  font-weight: 400;
+}
+
+.mailBody {
+  margin: 6px 0 0;
+  color: var(--mv-text);
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.transcriptAfter {
+  margin-top: 16px;
+}
+
+.transcriptAfter .after {
+  margin-top: 0;
+  animation: none;
 }
 
 .card,
@@ -1020,7 +1183,8 @@
 @media (prefers-reduced-motion: reduce) {
   .caption,
   .card,
-  .alert {
+  .alert,
+  .after {
     animation: none;
   }
 

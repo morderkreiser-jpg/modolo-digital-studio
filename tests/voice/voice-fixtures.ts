@@ -1,5 +1,6 @@
 // Shared helpers of the voice integration tests (brain, session, routes, isolation, summary):
 // a fully controlled environment, Request builders and a reader for the turn stream.
+import { register } from "node:module";
 import { mock } from "node:test";
 import { createMemoryStore, type KVStore } from "@/lib/assistant/server/store";
 import { resetCalendarsForTests } from "@/lib/voice/calendar";
@@ -104,6 +105,28 @@ export function captureLogs(): string[] {
 export function testDeps(overrides: Partial<VoiceDeps> = {}): VoiceDeps & { store: KVStore } {
   const store = overrides.store ?? createMemoryStore();
   return { store, accountingStore: store, resend: null, ...overrides };
+}
+
+/** What a voice route file exports. */
+export interface VoiceRouteModule {
+  POST(request: Request): Promise<Response>;
+  runtime: string;
+  maxDuration: number;
+}
+
+let routeHooksRegistered = false;
+
+/**
+ * Loads app/api/voice/<name>/route.ts as the site serves it. A route imports "next/server", which
+ * Node resolves only with the hook in next-hooks.mjs: it is registered on the first call, so the
+ * route has to be imported here, dynamically, not with a static import.
+ */
+export async function importVoiceRoute(name: "session" | "tool" | "turn" | "end"): Promise<VoiceRouteModule> {
+  if (!routeHooksRegistered) {
+    register("./next-hooks.mjs", import.meta.url);
+    routeHooksRegistered = true;
+  }
+  return (await import(`@/app/api/voice/${name}/route`)) as VoiceRouteModule;
 }
 
 export function post(path: string, body: unknown, headers: Record<string, string> = {}): Request {

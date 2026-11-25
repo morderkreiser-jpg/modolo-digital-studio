@@ -10,12 +10,13 @@
 //
 // The choice follows the URL hash (#demo-hotel): the trade links of the sectors section point
 // there, a link to one example can be shared, and no effect is needed to follow it. The server
-// renders the default business; after hydration a hash that names another one takes over.
+// renders the default business; after hydration a hash that names another one takes over, and
+// stays chosen when the visitor then follows a link to another part of the page (#contact).
 //
 // Native radios in a fieldset: one tab stop, arrow keys, the legend as the group's name, and
 // nothing to re-implement for screen readers.
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { selectDemoId, type PickedDemo } from "./demo-choice";
+import { rememberHashChoice, selectDemoId, type PickedDemo } from "./demo-choice";
 import s from "./landing.module.css";
 
 export interface DemoChoice {
@@ -62,15 +63,23 @@ function serverHash(): string {
 
 export default function DemoChooser({ name, legend, choices, defaultId, note }: DemoChooserProps) {
   const hash = useSyncExternalStore(subscribe, readHash, serverHash);
-  // A choice made here, with the hash it left behind (rules in demo-choice.ts).
+  const ids = choices.map((choice) => choice.id);
+  // The business chosen last, with the hash it left behind (rules in demo-choice.ts): a radio of
+  // this list, or a hash that names a business.
   const [picked, setPicked] = useState<PickedDemo | null>(null);
+  // The hash `picked` was last brought up to date with. Adjusted while rendering, React's pattern
+  // for state that follows a changing value: no effect and no extra paint. It starts empty, as the
+  // server and the hydration render see the hash, so a hash that names a business on arrival (a
+  // shared link) counts as a choice once the real hash is read.
+  const [seenHash, setSeenHash] = useState("");
+  let remembered = picked;
+  if (hash !== seenHash) {
+    remembered = rememberHashChoice(ids, seenHash, hash, picked);
+    setSeenHash(hash);
+    if (remembered !== picked) setPicked(remembered);
+  }
 
-  const selectedId = selectDemoId(
-    choices.map((choice) => choice.id),
-    hash,
-    picked,
-    defaultId,
-  );
+  const selectedId = selectDemoId(ids, hash, remembered, defaultId);
   const selected = choices.find((choice) => choice.id === selectedId) ?? choices[0];
 
   // On a phone the trades are one row that scrolls sideways (landing.module.css): bring the chosen
@@ -104,7 +113,15 @@ export default function DemoChooser({ name, legend, choices, defaultId, note }: 
 
   return (
     <>
-      <fieldset className={s.chooser}>
+      {/* data-keys while the chooser is used with keys: WebKit moves the focus to the next trade on
+          an arrow key without :focus-visible, so the CSS draws the ring on :focus too while this
+          is set (browser check R3-B5). A pointer clears it: no ring after a click. Set on the DOM
+          node, not in state: nothing re-renders for it. */}
+      <fieldset
+        className={s.chooser}
+        onKeyDown={(event) => event.currentTarget.setAttribute("data-keys", "")}
+        onPointerDown={(event) => event.currentTarget.removeAttribute("data-keys")}
+      >
         <legend className={s.chooserLegend}>{legend}</legend>
         <ul ref={listRef} className={s.choiceList} role="list">
           {choices.map((choice) => (

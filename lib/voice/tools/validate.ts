@@ -139,7 +139,7 @@ function checkAvailability(tenant: VoiceTenantConfig, input: Input, errors: stri
 function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   const seats = usesSeats(tenant);
   const keys = ["service", "start", "name", "contact", "notes"];
-  if (seats) keys.push("party_size");
+  if (seats) keys.push("party_size", "separate_party");
   onlyKeys(input, keys, "", errors);
   const value: Record<string, unknown> = {
     service: serviceId(tenant, input, errors),
@@ -150,7 +150,19 @@ function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string
   if (seats) value.party_size = partySize(input, errors);
   const notes = freeText(input, "notes", TOOL_TEXT_LIMITS.notes, false, errors);
   if (notes !== undefined) value.notes = notes;
+  // Only "true" is kept: false and absent mean the same (execute.ts, review finding S2-11).
+  if (seats && flagValue(input, "separate_party", errors) === true) value.separate_party = true;
   return value;
+}
+
+/** An optional yes/no flag: a boolean (or the words "true"/"false" some models send), else absent. */
+function flagValue(input: Input, key: string, errors: string[]): boolean | undefined {
+  const raw = input[key];
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw === "boolean") return raw;
+  if (raw === "true" || raw === "false") return raw === "true";
+  errors.push(`"${key}" must be true or false.`);
+  return undefined;
 }
 
 function cancelAppointment(input: Input, errors: string[]): Record<string, unknown> {

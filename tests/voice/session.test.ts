@@ -212,7 +212,8 @@ describe("recovering and sinks", () => {
     assert.ok(sent[0].text.includes("anna@example.ch"));
     assert.deepEqual(await withEmail.callback(CALLBACK), { ok: true });
     assert.equal(sent.length, 2);
-    assert.ok(sent[1].text.includes("+41791234567"));
+    // Printed with spaces, the way Swiss numbers are written (browser check R3-B3).
+    assert.ok(sent[1].text.includes("+41 79 123 45 67"));
 
     const refusing: SendEmail = async () => false;
     const failing = createSessionSinks(MODOLO_VOICE_TENANT, RESEND, { send: refusing });

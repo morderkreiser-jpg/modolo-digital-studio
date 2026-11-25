@@ -5,6 +5,7 @@ import VoiceMount from "@/components/voice/voice-mount";
 import { isLocale, localizedHref } from "@/lib/i18n";
 import { DEMO_SCRIPTS, DEMO_SECTOR_LABELS, DEMO_TENANTS } from "@/lib/voice/demos";
 import { availableModes, getVoiceEnv } from "@/lib/voice/server/env";
+import { voiceEmailTransport } from "@/lib/voice/server/summary";
 
 // Internal workbench of the voice widget: the Modolo stage and every demo business with its
 // example conversations, side by side with what the server is configured to offer. Not linked
@@ -45,6 +46,14 @@ export default async function VoiceLabPage({
     ["Degraded because", env.degradedReason ?? "-"],
     ["Brain", env.brain],
     ["Realtime provider", env.provider],
+    [
+      "Dev outbox",
+      !env.devOutbox
+        ? "off"
+        : voiceEmailTransport() === "dev_outbox"
+          ? "on: requests and summaries are printed on the server console, nothing is sent"
+          : "on, unused: Resend is configured",
+    ],
   ];
 
   return (

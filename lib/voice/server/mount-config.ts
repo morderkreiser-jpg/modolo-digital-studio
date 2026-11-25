@@ -8,20 +8,46 @@
 //   voice off, scripts given → the written examples still play: a scripted-only stage built from
 //                              the scripts' tenant (no microphone, no network, no model)
 //   voice off, no scripts    → nothing
+//
+// Two more things travel with the stage:
+//   uiLocale    the page's language: every control, status and notice is written in it, whatever
+//               language the conversation or the example is in (review finding N3)
+//   afterCalls  for every example, the e-mails the business would get after it, written by the
+//               formatter of the real e-mails (demo-mails.ts; review finding N2)
+import type { DemoAfterCall } from "@/lib/voice/after-call";
 import { DEFAULT_VOICE_TENANT_ID, getVoiceTenant } from "@/lib/voice/tenants";
 import type { DemoScript, VoiceLocale, VoicePublicConfig, VoiceTenantConfig } from "@/lib/voice/types";
+import { demoAfterCall } from "./demo-mails";
 import { availableModes, resolveVoiceLimits, type VoiceEnv } from "./env";
+import { logVoiceEvent } from "./log";
 import { toVoicePublicConfig } from "./public-config";
 
 export interface VoiceStageSetup {
   config: VoicePublicConfig;
   /** The tenant's own playable examples. */
   scripts: DemoScript[];
+  /** The language of the page: the stage's controls and notices use it. */
+  uiLocale: VoiceLocale;
+  /** What the business receives after each example, by script id. */
+  afterCalls: Record<string, DemoAfterCall>;
 }
 
 /** A script the stage can play: some lines, each with text. */
 function isPlayable(script: DemoScript): boolean {
   return script.lines.some((line) => line.text.trim() !== "");
+}
+
+/** The e-mails of each example. One that cannot be built is left out: the example still plays. */
+function afterCallsOf(scripts: readonly DemoScript[], tenant: VoiceTenantConfig): Record<string, DemoAfterCall> {
+  const out: Record<string, DemoAfterCall> = {};
+  for (const script of scripts) {
+    try {
+      out[script.id] = demoAfterCall(script, tenant);
+    } catch (error) {
+      logVoiceEvent({ warn: "demo_mails_failed", tenant: tenant.id, errorName: error instanceof Error ? error.name : typeof error });
+    }
+  }
+  return out;
 }
 
 /**
@@ -58,5 +84,6 @@ export function voiceStageSetup(args: {
   }
   // Only the tenant's own examples may play on its stage.
   const ownerId = tenant.id;
-  return { config, scripts: examples.filter((script) => script.tenantId === ownerId) };
+  const scripts = examples.filter((script) => script.tenantId === ownerId);
+  return { config, scripts, uiLocale: locale, afterCalls: afterCallsOf(scripts, tenant) };
 }

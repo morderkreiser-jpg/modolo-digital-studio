@@ -32,6 +32,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
+import { afterCallView, scriptIdOfCaption, type AfterCallView, type DemoAfterCall } from "@/lib/voice/after-call";
 import { formatVoiceString, getVoiceStrings, VOICE_LANGUAGE_NAMES, type VoiceStrings } from "@/lib/voice/i18n";
 import {
   VOICE_LANG_TAG,
@@ -42,6 +43,8 @@ import {
   type VoiceText,
   type VoiceToolName,
 } from "@/lib/voice/types";
+import { afterCallScrollTop, firstRequestSpan, MORE_BELOW_PX, type ContentSpan } from "./caption-scroll";
+import { stageTitle } from "./stage-text";
 import type { VoiceTransport } from "./transports/types";
 import {
   activationAllowed,
@@ -68,6 +71,14 @@ export interface VoiceStageProps {
   config: VoicePublicConfig;
   /** Example conversations of this tenant; needed for the "scripted" mode. */
   scripts?: DemoScript[];
+  /**
+   * The page's language: every control, status and notice is written in it (review finding N3).
+   * The conversation keeps its own language (state.locale), an example plays in its own, and
+   * their texts carry their lang attribute. Omitted: the controls follow the conversation.
+   */
+  uiLocale?: VoiceLocale;
+  /** What the business receives after each example, by script id (lib/voice/after-call.ts). */
+  afterCalls?: Readonly<Record<string, DemoAfterCall>>;
   variant?: "stage" | "compact";
   /** Where "direct contact" leads. Omitted: the error card offers no contact link. */
   contactUrl?: string;
@@ -167,10 +178,6 @@ function pickText(text: VoiceText, locale: VoiceLocale, fallback: VoiceLocale): 
   return pickLocalized(text, locale, fallback)?.text ?? "";
 }
 
-function capitalize(text: string): string {
-  return text ? text.charAt(0).toLocaleUpperCase() + text.slice(1) : text;
-}
-
 /** Same-site paths and https links only: the config is ours, but a bad value must not become a javascript: link. */
 function safeHref(href: string | undefined): string | null {
   const value = href?.trim();
@@ -239,6 +246,64 @@ function statusText(state: VoiceMachineState, strings: VoiceStrings, recentTool:
   if (recentTool !== null && (state.status === "thinking" || state.status === "speaking")) return strings.tools[recentTool];
   const base = strings.status[state.status];
   return state.muted && isActive(state.status) ? `${base} · ${strings.mutedStatus}` : base;
+}
+
+/**
+ * Where the caption box scrolls when a written example ends (caption-scroll.ts): the end mark and,
+ * as far as the box allows, the first request of the e-mail, measured where it is laid out.
+ */
+function afterCallTop(box: HTMLElement, mark: HTMLElement): number {
+  const origin = box.getBoundingClientRect().top - box.scrollTop;
+  return afterCallScrollTop({
+    endMark: mark.getBoundingClientRect().top - origin,
+    request: firstRequestBox(box, origin),
+    viewHeight: box.clientHeight,
+    head: box.querySelector<HTMLElement>("[data-after-head]")?.getBoundingClientRect().height ?? 0,
+  });
+}
+
+/**
+ * The first request in the box's first e-mail, in the box's scroll coordinates, where it is laid
+ * out: the card is measured as it starts to rise into place (mv-rise moves it down a few pixels),
+ * so that offset is taken off. null if there is none.
+ */
+function firstRequestBox(box: HTMLElement, origin: number): ContentSpan | null {
+  const card = box.querySelector<HTMLElement>("[data-after-call]");
+  const text = card?.querySelector("[data-mail-body]")?.firstChild;
+  if (!card || !text || text.nodeType !== Node.TEXT_NODE) return null;
+  const span = firstRequestSpan(text.textContent ?? "");
+  if (span === null) return null;
+  try {
+    const range = document.createRange();
+    range.setStart(text, span.start);
+    range.setEnd(text, span.end);
+    const rect = range.getBoundingClientRect();
+    const transform = getComputedStyle(card).transform;
+    const rise = transform && transform !== "none" ? new DOMMatrixReadOnly(transform).m42 : 0;
+    return rect.height > 0 ? { top: rect.top - rise - origin, bottom: rect.bottom - rise - origin } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Faded edges of the caption box where lines are hidden above (data-scrolled) or below (data-more).
+ * No faded top edge while the label of the e-mails is pinned there (data-pinned): the box has
+ * scrolled past the top of the e-mail card, and the label is what says what the visitor reads.
+ */
+function markCaptionEdges(box: HTMLElement): void {
+  box.toggleAttribute("data-scrolled", box.scrollTop > 0);
+  box.toggleAttribute("data-more", box.scrollHeight - box.scrollTop - box.clientHeight > MORE_BELOW_PX);
+  const card = box.querySelector<HTMLElement>("[data-after-call]");
+  box.toggleAttribute("data-pinned", card !== null && card.getBoundingClientRect().top < box.getBoundingClientRect().top);
+}
+
+function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return false;
+  }
 }
 
 /** Codes where waiting a while is the honest advice. */
@@ -348,9 +413,80 @@ function TitleWithBadge({ title, badge }: { title: string; badge: string }) {
       {head}
       <span className={tail.length <= BADGE_TAIL_MAX ? styles.titleTail : undefined}>
         {tail}
+        {/* Without a separator the heading's name runs the two together ("…BeispielhofKI"). A
+            comma for the ear only (in the flow but transparent: taken out of the flow, as the
+            usual visually-hidden text is, Chromium names it "Beispielhof , KI") and a real space,
+            both kept on the line by the no-wrap span; together they are the badge's gap. */}
+        <span className={styles.titleComma}>,</span>{" "}
         <span className={styles.badge}>{badge}</span>
       </span>
     </span>
+  );
+}
+
+/**
+ * What the business receives after a written example (afterCallView): the e-mails, labelled as an
+ * example and in the business's language, or the note that it gets none. In the caption box (a
+ * focusable group, so a keyboard can reach it and scroll the box) and in the full transcript.
+ */
+function AfterCall({
+  view,
+  strings,
+  uiLocale,
+  heading,
+  focusable,
+}: {
+  view: AfterCallView;
+  strings: VoiceStrings;
+  uiLocale: VoiceLocale;
+  /** The label's element: a heading one level under the stage's, or a paragraph in the transcript. */
+  heading: "h3" | "h4" | "p";
+  focusable: boolean;
+}) {
+  const labelId = useId();
+  if (view.kind === "none") return <p className={styles.afterNone}>{strings.afterCallNone}</p>;
+  const tag = VOICE_LANG_TAG[view.locale];
+  const Label = heading;
+  const mails = view.mails.map((mail, index) => (
+    // Index keys: the list is fixed for one view and never reordered.
+    <div key={index} className={styles.mail}>
+      {mail.subject ? (
+        <p className={styles.mailSubject}>
+          <span className={styles.mailLabel}>{strings.afterCallSubject}</span>{" "}
+          <span lang={tag}>{mail.subject}</span>
+        </p>
+      ) : null}
+      {/* One text node: the stage finds the first request in it (caption-scroll.ts). */}
+      <p className={styles.mailBody} lang={tag} data-mail-body="">
+        {mail.text}
+      </p>
+    </div>
+  ));
+  return (
+    <div className={styles.after} role="group" aria-labelledby={labelId} tabIndex={focusable ? 0 : undefined} data-after-call="">
+      {/* The label: in the caption box it stays at the top edge while the e-mail scrolls under it
+          (voice-stage.module.css, caption-scroll.ts). The note on the language scrolls away with
+          the e-mail: pinned as well, the two took a third of the box on a small phone. */}
+      <div className={styles.afterHead} data-after-head="">
+        <Label id={labelId} className={styles.afterTitle}>
+          {strings.afterCallTitle}
+        </Label>
+      </div>
+      {view.locale !== uiLocale ? (
+        <p className={styles.afterNote}>
+          {formatVoiceString(strings.afterCallLanguage, { language: strings.languageNames[view.locale] })}
+        </p>
+      ) : null}
+      {mails.length > 1 ? (
+        <ol className={styles.mailList}>
+          {mails.map((mail, index) => (
+            <li key={index}>{mail}</li>
+          ))}
+        </ol>
+      ) : (
+        mails
+      )}
+    </div>
   );
 }
 
@@ -371,7 +507,15 @@ function CaptionLine({ caption, label }: { caption: VoiceCaption; label: string 
 // Stage
 // ---------------------------------------------------------------------------------------------
 
-function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLevel = 2 }: VoiceStageProps) {
+function Stage({
+  config,
+  scripts = [],
+  uiLocale: pageLocale,
+  afterCalls,
+  variant = "stage",
+  contactUrl,
+  headingLevel = 2,
+}: VoiceStageProps) {
   // ----- What can run here ---------------------------------------------------------------------
   const canScript = config.modes.includes("scripted") && scripts.length > 0;
   const liveMode = config.modes.find((mode): mode is "local" | "realtime" => isLiveMode(mode)) ?? null;
@@ -399,8 +543,11 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   /** The last tool started, kept for TOOL_STATUS_MIN_MS (see statusText). */
   const [recentTool, setRecentTool] = useState<{ name: VoiceToolName; at: number } | null>(null);
 
+  /** The conversation's language (or the example's): what is said, and what the transport hears. */
   const locale = state.locale;
-  const strings = useMemo(() => getVoiceStrings(locale), [locale]);
+  /** The language of the controls, statuses and notices: the page's (see VoiceStageProps.uiLocale). */
+  const uiLocale = pageLocale ?? locale;
+  const strings = useMemo(() => getVoiceStrings(uiLocale), [uiLocale]);
   const shownMode = state.status === "idle" ? mode : (state.mode ?? mode);
   const localeScripts = useMemo(() => scripts.filter((script) => script.locale === locale), [scripts, locale]);
   const script = localeScripts.find((candidate) => candidate.id === scriptId) ?? localeScripts[0] ?? null;
@@ -640,7 +787,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   };
 
   /** Starts again at once: the visitor already consented on this page. */
-  const restart = (nextMode: VoiceMode, input: Input) => {
+  const restart = (nextMode: VoiceMode, input: Input, nextScriptId: string | null = scriptId) => {
     release("user");
     dispatch({ type: "RESET" });
     setMode(nextMode);
@@ -652,7 +799,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         dispatch({ type: "SET_LOCALE", locale: startLocale });
       }
       const candidates = scripts.filter((candidate) => candidate.locale === startLocale);
-      chosen = candidates.find((candidate) => candidate.id === scriptId) ?? candidates[0] ?? null;
+      chosen = candidates.find((candidate) => candidate.id === nextScriptId) ?? candidates[0] ?? null;
       if (!chosen) return;
     }
     dispatch({ type: "START", mode: nextMode });
@@ -667,6 +814,18 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
     release("user");
     attemptRef.current += 1;
     dispatch({ type: "RESET" });
+  };
+
+  /**
+   * Another example of this business. Before the start it is only chosen; while one plays, or
+   * after it, the chosen one plays at once (the list stays where it is in both states, so the
+   * stage keeps its height when an example ends).
+   */
+  const chooseScript = (id: string) => {
+    setScriptId(id);
+    if (state.mode !== "scripted" || (status !== "ended" && !(isActive(status) && status !== "consent"))) return;
+    if (status !== "ended" && id === script?.id) return; // already playing
+    restart("scripted", "voice", id);
   };
 
   const chooseMode = (next: VoiceMode) => {
@@ -755,16 +914,50 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
     const box = captionsRef.current;
     if (!box) return;
     followRef.current = box.scrollHeight - box.scrollTop - box.clientHeight < 24;
-    // Faded top edge only once earlier lines are above it, so the first line is never dimmed.
-    box.toggleAttribute("data-scrolled", box.scrollTop > 0);
+    // Faded top edge only once earlier lines are above it, so the first line is never dimmed; a
+    // faded bottom edge while more lies below, so the box shows that it scrolls.
+    markCaptionEdges(box);
   }, []);
   useLayoutEffect(() => {
     followRef.current = true; // every new conversation starts at its first line
   }, [state.run]);
+
+  // A written example that has stopped shows what the business receives (review finding N2): the
+  // e-mails of the tool steps whose lines were shown. They go into the same box, after the last
+  // line, so the stage keeps its height and nothing below it moves.
+  const scriptedEnd = status === "ended" && state.mode === "scripted";
+  const endReason = state.endReason;
+  const afterView = useMemo((): AfterCallView | null => {
+    if (!scriptedEnd || captions.length === 0) return null;
+    const played = scriptIdOfCaption(captions[0].id);
+    if (played === null) return null;
+    return afterCallView(
+      afterCalls?.[played],
+      captions.map((caption) => caption.id),
+      endReason === "complete",
+    );
+  }, [scriptedEnd, captions, afterCalls, endReason]);
+  const endMarkRef = useRef<HTMLParagraphElement>(null);
+  const showsAfter = afterView !== null;
+
   useLayoutEffect(() => {
     const box = captionsRef.current;
-    if (box && reserveCaptions && followRef.current) box.scrollTop = box.scrollHeight;
-  }, [captions, reserveCaptions]);
+    if (!box || !reserveCaptions) return;
+    if (followRef.current) {
+      const mark = scriptedEnd && showsAfter ? endMarkRef.current : null;
+      if (mark) {
+        // The end of the example comes to the top of the box, just under its faded edge, and what
+        // the business receives follows it; the box goes further when that keeps the first
+        // request whole in view (caption-scroll.ts). Smooth, unless the visitor asked for less
+        // motion (then the scroll event marks the edges as well).
+        box.scrollTo({ top: afterCallTop(box, mark), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      } else {
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+    // A line added below a visitor who scrolled up, or a scroll that did not move: no scroll event.
+    markCaptionEdges(box);
+  }, [captions, reserveCaptions, scriptedEnd, showsAfter]);
 
   // Recognition gave up mid-call: the field takes over, so put the caret there.
   const typed = state.typed;
@@ -775,14 +968,14 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   // ----- Render -----------------------------------------------------------------------------------
   if (firstMode === null) return null;
 
-  const tag = VOICE_LANG_TAG[locale];
+  const tag = VOICE_LANG_TAG[uiLocale];
   const Heading = headingLevel === 3 ? "h3" : "h2";
-  const assistantTitle =
-    capitalize(pickText(config.assistantName, locale, config.locale)) ||
-    formatVoiceString(strings.assistantFallback, { business: config.businessName });
+  const SubHeading = headingLevel === 3 ? "h4" : "h3";
+  // The title is part of the page: always in the page's language (stage-text.ts).
+  const assistantTitle = stageTitle(config, uiLocale);
   const modeLabel =
     shownMode === "scripted" ? strings.modeScripted : shownMode === "local" ? strings.modeLocal : strings.modeRealtime;
-  const privacyHref = safeHref(pickText(config.privacyUrl, locale, config.locale));
+  const privacyHref = safeHref(pickText(config.privacyUrl, uiLocale, config.locale));
   const contactHref = safeHref(contactUrl);
   const callerLabel = state.mode === "scripted" || (state.status === "idle" && mode === "scripted") ? strings.roleCaller : strings.roleYou;
   const minutes = Math.max(1, Math.ceil(state.limits.maxCallSeconds / 60));
@@ -869,7 +1062,8 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         : strings.handoff[state.handoff.kind];
 
   // The other examples of this business. Before the start they come before the button (choose,
-  // then play); after an example they come after it, so "play again" stays where it was.
+  // then play); from the start on they come after it, the same while one plays and after it ends,
+  // so the stage does not grow when an example ends by itself and "play again" stays where it was.
   const scriptChooser =
     shownMode === "scripted" && localeScripts.length > 1 ? (
       <div className={styles.scripts} role="group" aria-label={strings.examplesLabel}>
@@ -880,7 +1074,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
             className={styles.scriptButton}
             aria-pressed={candidate.id === script?.id}
             lang={VOICE_LANG_TAG[candidate.locale]}
-            onClick={() => setScriptId(candidate.id)}
+            onClick={() => chooseScript(candidate.id)}
           >
             <span className={styles.scriptTitle}>{candidate.title}</span>
             <span className={styles.scriptShows}>{candidate.shows}</span>
@@ -953,26 +1147,47 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
       <div className={styles.body}>
         {preview}
 
-        {/* Always rendered, empty before the first line: a live region that appears together with
-            its first text is often not read out. From the start of a conversation it keeps a
-            fixed height (data-reserve) that scrolls to its newest line, so the controls under it do
-            not jump with every new line while the visitor may be reaching for "end". */}
+        {/* The box of lines. The log inside is always rendered, empty before the first line: a
+            live region that appears together with its first text is often not read out. From the
+            start of a conversation the box keeps a fixed height (data-reserve) and scrolls to its
+            newest line, so the controls under it do not jump with every new line while the
+            visitor may be reaching for "end". A written example ends inside the box too: its end,
+            and what the business receives after it, take no room the box does not have. */}
         <div
           ref={captionsRef}
           className={styles.captions}
-          role="log"
-          aria-live="polite"
-          aria-label={strings.captionsLabel}
           data-reserve={reserveCaptions ? "" : undefined}
+          data-empty={visibleCaptions.length === 0 && !scriptedEnd ? "" : undefined}
           onScroll={reserveCaptions ? onCaptionsScroll : undefined}
         >
-          {visibleCaptions.map((caption) => (
-            <CaptionLine
-              key={`${caption.id}:${caption.final ? "f" : "i"}`}
-              caption={caption}
-              label={caption.role === "assistant" ? strings.roleAssistant : callerLabel}
-            />
-          ))}
+          <div className={styles.log} role="log" aria-live="polite" aria-label={strings.captionsLabel}>
+            {visibleCaptions.map((caption) => (
+              <CaptionLine
+                key={`${caption.id}:${caption.final ? "f" : "i"}`}
+                caption={caption}
+                label={caption.role === "assistant" ? strings.roleAssistant : callerLabel}
+              />
+            ))}
+            {/* Read out once, politely, with the hint that the e-mails follow (they are not in the
+                log: read out whole they would drown the end of the call). */}
+            {scriptedEnd && endReason !== null ? (
+              <p ref={endMarkRef} className={styles.endMark}>
+                {strings.ended[endReason]}
+                {afterView?.kind === "mails" ? (
+                  <>
+                    {" "}
+                    <span className={styles.srOnly}>{strings.afterCallFollows}</span>
+                  </>
+                ) : null}
+              </p>
+            ) : null}
+            {afterView?.kind === "none" ? (
+              <AfterCall view={afterView} strings={strings} uiLocale={uiLocale} heading={SubHeading} focusable={false} />
+            ) : null}
+          </div>
+          {afterView?.kind === "mails" ? (
+            <AfterCall view={afterView} strings={strings} uiLocale={uiLocale} heading={SubHeading} focusable />
+          ) : null}
         </div>
 
         {/* Always in the DOM: a live region inserted together with its text is often not read. */}
@@ -980,7 +1195,10 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
           {state.notice !== null ? <p>{strings.notices[state.notice]}</p> : null}
           {/* Shortly before a long silence ends the call; any activity of the caller clears it. */}
           {silenceWarningVisible(state) ? <p>{strings.silenceWarning}</p> : null}
-          {status === "ended" && state.endReason !== null ? <p className={styles.endNote}>{strings.ended[state.endReason]}</p> : null}
+          {/* A written example says it in its box (above); a live conversation says it here. */}
+          {status === "ended" && state.endReason !== null && !scriptedEnd ? (
+            <p className={styles.endNote}>{strings.ended[state.endReason]}</p>
+          ) : null}
         </div>
 
         {status === "consent" && state.mode !== null ? (
@@ -1103,10 +1321,14 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
             <label htmlFor={inputId} className={styles.srOnly}>
               {strings.typeLabel}
             </label>
+            {/* What is typed here is said in the conversation's language, not the page's: spell
+                checking and screen readers follow lang (review finding typed-field-lang). The
+                label, a control, stays in the page's language. */}
             <input
               ref={inputRef}
               id={inputId}
               className={styles.field}
+              lang={VOICE_LANG_TAG[locale]}
               type="text"
               value={draft}
               maxLength={state.limits.maxTurnChars}
@@ -1154,7 +1376,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
           ) : null}
         </div>
 
-        {status === "ended" ? scriptChooser : null}
+        {running || status === "ended" ? scriptChooser : null}
 
         {/* There from the start of a conversation, not from its first line: appearing later it
             would push the controls down once more. Empty, it says so. */}
@@ -1178,6 +1400,11 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
                   empty={strings.transcriptEmpty}
                   assistantLabel={strings.roleAssistant}
                   callerLabel={callerLabel}
+                  after={
+                    afterView ? (
+                      <AfterCall view={afterView} strings={strings} uiLocale={uiLocale} heading="p" focusable={false} />
+                    ) : null
+                  }
                 />
               ) : (
                 <p id={transcriptId} className={styles.transcriptEmpty}>

@@ -19,7 +19,10 @@
 // of a second one; a repeated lead or callback returns the first answer without reaching the sink
 // again; an outcome is recorded and counted once. A booking of the same service at the same time
 // with OTHER details (the caller corrected a phone number) is not a second booking either: the
-// model is told the time is already booked in this conversation and how to change it.
+// model is told the time is already booked in this conversation and how to change it. Only on a
+// calendar with seats, when the model marks the call as another group (separate_party) under a
+// name that does not hold the time yet, is it a second party, booked like any other
+// (bookAppointment).
 //
 // The caps live in ctx.counters, one object per session. When the session is kept in a shared
 // store between requests, ctx.caps counts them atomically there as well, so requests of one
@@ -46,8 +49,9 @@ import type {
   VoiceText,
   VoiceToolName,
 } from "@/lib/voice/types";
+import { nameKey } from "@/lib/voice/calendar/memory";
 import { isHoliday, isOpenAt, parseIsoInstant, weekdayOf, zonedParts } from "@/lib/voice/hours";
-import { enabledTools, englishText } from "./definitions";
+import { enabledTools, englishText, usesSeats } from "./definitions";
 import { normalizePhone, validateToolInput } from "./validate";
 
 export interface SessionCounters {
@@ -143,6 +147,19 @@ export interface SessionBooking {
   /** Idempotency key of the book_appointment call that made it ("" when it was only moved here). */
   key: string;
   status: "confirmed" | "cancelled";
+  /**
+   * Who it is booked for, as two short hashes (personOf): of the normalised name and of the
+   * contact, never the name or the contact themselves. A second group at the same time needs a
+   * name other than this one; the contact picks the booking a correction refers to (review
+   * finding S2-11). Absent in snapshots written before; such a booking counts as the same
+   * person, the safe direction.
+   */
+  person?: BookingPerson;
+}
+
+export interface BookingPerson {
+  name: string;
+  contact: string;
 }
 
 // What one session has already done, for replays. Keyed by the session's counters object (one per
@@ -186,8 +203,18 @@ export function exportToolMemory(counters: SessionCounters): ToolMemorySnapshot 
   return {
     recorded: [...memory.recorded].slice(-MAX_MEMORY_ENTRIES),
     replies: [...memory.replies].slice(-MAX_MEMORY_ENTRIES),
-    bookings: [...memory.bookings].slice(-MAX_MEMORY_ENTRIES).map(([ref, booking]) => [ref, { ...booking }]),
+    bookings: [...memory.bookings]
+      .slice(-MAX_MEMORY_ENTRIES)
+      .map(([ref, booking]) => [ref, { ...booking, ...(booking.person ? { person: { ...booking.person } } : {}) }]),
   };
+}
+
+const PERSON_HASH_RE = /^[0-9a-f]{16}$/;
+
+function isBookingPerson(value: unknown): value is BookingPerson {
+  if (typeof value !== "object" || value === null) return false;
+  const { name, contact } = value as Partial<BookingPerson>;
+  return typeof name === "string" && PERSON_HASH_RE.test(name) && typeof contact === "string" && PERSON_HASH_RE.test(contact);
 }
 
 /**
@@ -222,7 +249,14 @@ export function importToolMemory(counters: SessionCounters, snapshot: unknown): 
         typeof booking.key === "string" &&
         (booking.status === "confirmed" || booking.status === "cancelled")
       ) {
-        memory.bookings.set(entry[0], { serviceId: booking.serviceId, start: booking.start, key: booking.key, status: booking.status });
+        const person = isBookingPerson(booking.person) ? { name: booking.person.name, contact: booking.person.contact } : undefined;
+        memory.bookings.set(entry[0], {
+          serviceId: booking.serviceId,
+          start: booking.start,
+          key: booking.key,
+          status: booking.status,
+          ...(person ? { person } : {}),
+        });
       }
     }
   }
@@ -362,19 +396,37 @@ async function checkAvailability(ctx: ToolContext, input: Input): Promise<ToolOu
 async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutcome> {
   if (ctx.calendar === null) return calendarFailure(ctx, "book", "unavailable");
   const memory = memoryOf(ctx.counters);
-  const key = idempotencyKey(ctx, "book_appointment", input);
+  // The flag says what the call is for, not what is booked: the same details with or without it
+  // are the same booking, so it stays out of the key.
+  const { separate_party: separateParty, ...details } = input;
+  const key = idempotencyKey(ctx, "book_appointment", details);
   const serviceId = input.service as string;
   const start = input.start as string;
+  const person = personOf(ctx, input.name as string, input.contact as string);
 
-  // The same appointment again. With the same details it is a repeat, and the calendar's
-  // idempotency hands the first booking back. With other details (a corrected phone number) a
-  // second booking would hold a second table, or meet the caller's own booking as "taken": tell
-  // the model what stands and how to change it instead.
-  const own = [...memory.bookings.entries()].find(
+  // This conversation's bookings of the same service at the same time. With the same details it
+  // is a repeat, and the calendar's idempotency hands the first booking back. With other details
+  // it is taken for a correction (a misheard name, a phone number or the party size fixed): a
+  // second booking would hold a second table, or meet the caller's own booking as "taken", so the
+  // model is told what stands and how to change it (review correttezza/F1). Which details changed
+  // cannot tell a correction from another group: the name and the contact are kept only as hashes,
+  // and a caller may correct both at once ("Sara Moller", +41...44 → "Sarah Müller", +41...45).
+  // So on a calendar with seats a second group at the same time is booked only when the model
+  // says so (separate_party, after the caller confirmed it) and gives that group's own name;
+  // within the bookings cap (review finding S2-11). Where one time takes one booking, every other
+  // booking of it is refused.
+  const sameTime = [...memory.bookings.entries()].filter(
     ([, booking]) => booking.status === "confirmed" && booking.serviceId === serviceId && booking.start === start,
   );
-  if (own !== undefined && own[1].key !== key) return alreadyBooked(ctx, own[0], own[1]);
-  const repeat = own !== undefined;
+  const repeat = sameTime.some(([, booking]) => booking.key === key);
+  if (!repeat && sameTime.length > 0) {
+    const seats = usesSeats(ctx.tenant);
+    const sameName = sameTime.find(([, booking]) => booking.person === undefined || booking.person.name === person.name);
+    if (!seats || separateParty !== true || sameName !== undefined) {
+      const [ref, booking] = sameName ?? closestBooking(sameTime, person);
+      return alreadyBooked(ctx, ref, booking, seats, seats && separateParty === true);
+    }
+  }
   if (!repeat && !(await takeActionCap(ctx, "bookings"))) return failure("limit_reached", NO_MORE_BOOKINGS);
 
   const result = await safely(
@@ -401,7 +453,7 @@ async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutc
     // The calendar answered with a booking this session already has: nothing new was booked.
     await returnActionCap(ctx, "bookings");
   }
-  memory.bookings.set(booking.ref, { serviceId: booking.serviceId, start: booking.start, key, status: "confirmed" });
+  memory.bookings.set(booking.ref, { serviceId: booking.serviceId, start: booking.start, key, status: "confirmed", person });
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   const party = booking.partySize === undefined ? "" : ` For ${booking.partySize} ${booking.partySize === 1 ? "person" : "people"}.`;
   return {
@@ -411,16 +463,46 @@ async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutc
   };
 }
 
-/** The say for a booking of this very appointment with other details (see bookAppointment). */
-function alreadyBooked(ctx: ToolContext, ref: string, booking: SessionBooking): ToolOutcome {
+/**
+ * The say for a booking of a time this conversation already booked, with other details (see
+ * bookAppointment). It also says what a booking for someone else needs: on a calendar with seats
+ * the caller's confirmation and that group's own name (`flagged`: the model said it was another
+ * group, under a name that already holds this time), elsewhere another time.
+ */
+function alreadyBooked(ctx: ToolContext, ref: string, booking: SessionBooking, seats: boolean, flagged = false): ToolOutcome {
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   const change = enabledTools(ctx.tenant).includes("cancel_appointment")
     ? ` To change the name, contact, party size or notes, cancel reference ${ref} with cancel_appointment, then book again.`
     : " Its details cannot be changed here; tell the caller the booking stands as it was made.";
+  const other = !seats
+    ? " This time takes only one booking: for someone else, check availability and offer other times."
+    : flagged
+      ? " This name already holds this time, so it is not another group: an extra booking for a different group needs that group's own name."
+      : " Only if the caller confirms they want an extra booking for a different group, in addition to this one, call book_appointment again with that group's own name and separate_party: true.";
   return failure(
     "conflict",
-    `This conversation already booked this time: ${date} at ${time}, reference ${ref}, with the details given then. Nothing new was booked and that booking was not changed.${change}`,
+    `This conversation already booked this time: ${date} at ${time}, reference ${ref}, with the details given then. Nothing new was booked and that booking was not changed.${change}${other}`,
   );
+}
+
+/**
+ * Who a booking is for, as two short hashes (SessionBooking.person): of the name as the calendar
+ * matches it (nameKey: case, accents and word order do not count) and of the contact (already
+ * normalised by validate.ts: E.164 or a lower-case address). Salted with the tenant and the
+ * session, like the idempotency keys.
+ */
+function personOf(ctx: ToolContext, name: string, contact: string): BookingPerson {
+  const hash = (part: string, value: string): string =>
+    createHash("sha256").update(JSON.stringify([ctx.tenant.id, ctx.sessionId, part, value])).digest("hex").slice(0, 16);
+  return { name: hash("name", nameKey(String(name ?? ""))), contact: hash("contact", String(contact ?? "").trim().toLowerCase()) };
+}
+
+/**
+ * Of several bookings at one time, the one a corrected call most likely meant, for the conflict
+ * say: the one with the same contact, else the latest one made.
+ */
+function closestBooking(sameTime: Array<[string, SessionBooking]>, person: BookingPerson): [string, SessionBooking] {
+  return sameTime.find(([, booking]) => booking.person?.contact === person.contact) ?? sameTime[sameTime.length - 1];
 }
 
 async function cancelAppointment(ctx: ToolContext, input: Input): Promise<ToolOutcome> {
@@ -462,8 +544,18 @@ async function rescheduleAppointment(ctx: ToolContext, input: Input): Promise<To
   const memory = memoryOf(ctx.counters);
   const known = memory.bookings.get(booking.ref);
   if (known === undefined || known.start !== booking.start) safeRecord(ctx, { kind: "reschedule", booking });
-  if (known) known.start = booking.start;
-  else memory.bookings.set(booking.ref, { serviceId: booking.serviceId, start: booking.start, key: "", status: "confirmed" });
+  if (known) {
+    known.start = booking.start;
+    known.person ??= personOf(ctx, booking.name, booking.contact);
+  } else {
+    memory.bookings.set(booking.ref, {
+      serviceId: booking.serviceId,
+      start: booking.start,
+      key: "",
+      status: "confirmed",
+      person: personOf(ctx, booking.name, booking.contact),
+    });
+  }
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   return {
     ok: true,

@@ -17,8 +17,12 @@ import { stripLocale } from "@/lib/i18n";
  * (lib/i18n.ts). Matching whole paths instead would miss the canonical-segment URLs, which Next
  * also serves: /de/biglietto and /it/visitenkarte render the same page as /de/visitenkarte, and
  * momentum scrolling would come back depending only on how the link was written.
+ *
+ * The voice sales page (every spelling in SLUG_TRANSLATIONS["assistente-telefonico-ai"]) is native
+ * too: nothing on it is scroll-driven, it is meant to be opened from a shared link on a phone, and
+ * its anchors land under the nav through scroll-margin-top (globals.css, landing.module.css).
  */
-const NATIVE_SCROLL = /(^|\/)(card|visitenkarte|biglietto)\/?$/;
+const NATIVE_SCROLL = /(^|\/)(card|visitenkarte|biglietto|ai-receptionist|ki-telefonassistent|assistente-telefonico-ai)\/?$/;
 
 /**
  * The homepage scrolls natively too (SPEC §5.7 / D22, Nov 2026): the hero film, the sticky panel of

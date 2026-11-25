@@ -6,6 +6,7 @@
 // schedule() is pure and unit-tested (tests/voice/scripted.test.ts): it turns a DemoScript into
 // machine events at fixed offsets, so replaying them through the reducer must end the example in
 // "ended" with every line captioned.
+import { scriptCaptionId } from "@/lib/voice/after-call";
 import type { DemoScript } from "@/lib/voice/types";
 import type { VoiceTransportEvent } from "../voice-machine";
 import { requestSession } from "./http";
@@ -71,7 +72,8 @@ export function lineDuration(text: string, timing: ScheduleTiming = SCRIPT_TIMIN
  *   ...          between parties: LISTENING when the caller is next, THINKING before an answer;
  *                a tool step: THINKING, TOOL started, (toolMs), TOOL ok/failed, then the line
  *   end + tail   END "complete"
- * Caption ids are "<script id>#<line index>", so a replay never mixes two runs.
+ * Caption ids are "<script id>#<line index>" (scriptCaptionId), so a replay never mixes two runs,
+ * and the stage knows which tool steps of the example have run (lib/voice/after-call.ts).
  */
 export function schedule(script: DemoScript, overrides?: Partial<ScheduleTiming>): ScriptSchedule {
   const timing: ScheduleTiming = { ...SCRIPT_TIMING, ...overrides };
@@ -102,7 +104,7 @@ export function schedule(script: DemoScript, overrides?: Partial<ScheduleTiming>
     push(t, line.role === "assistant" ? { type: "SPEAKING" } : { type: "LISTENING" });
     push(t, {
       type: "CAPTION",
-      caption: { id: `${script.id}#${index}`, role: line.role, text, final: true, locale: script.locale },
+      caption: { id: scriptCaptionId(script.id, index), role: line.role, text, final: true, locale: script.locale },
     });
     const duration = lineDuration(text, timing);
     windows.push({ from: t, to: t + duration, role: line.role, text });

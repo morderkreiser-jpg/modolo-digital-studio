@@ -2,7 +2,9 @@
 
 // The full transcript of the conversation, behind the stage's "show the whole conversation"
 // toggle. A lazy chunk: most visitors never open it. Each line carries its own lang attribute,
-// and who said it is written out, not shown by colour alone.
+// and who said it is written out, not shown by colour alone. After a written example it ends with
+// what the business receives (`after`, rendered by the stage), as the caption box does.
+import type { ReactNode } from "react";
 import { VOICE_LANG_TAG } from "@/lib/voice/types";
 import type { VoiceCaption } from "./voice-machine";
 import styles from "./voice-stage.module.css";
@@ -14,9 +16,11 @@ export interface VoiceTranscriptProps {
   empty: string;
   assistantLabel: string;
   callerLabel: string;
+  /** Shown after the last line: what the business receives after a written example. */
+  after?: ReactNode;
 }
 
-export default function VoiceTranscript({ id, captions, title, empty, assistantLabel, callerLabel }: VoiceTranscriptProps) {
+export default function VoiceTranscript({ id, captions, title, empty, assistantLabel, callerLabel, after }: VoiceTranscriptProps) {
   return (
     // Focusable, so a keyboard can scroll a long transcript.
     <section id={id} className={styles.transcript} aria-label={title} tabIndex={0} data-lenis-prevent="">
@@ -34,6 +38,7 @@ export default function VoiceTranscript({ id, captions, title, empty, assistantL
           ))}
         </ol>
       )}
+      {after ? <div className={styles.transcriptAfter}>{after}</div> : null}
     </section>
   );
 }
