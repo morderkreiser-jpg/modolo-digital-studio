@@ -99,8 +99,17 @@ export interface HandoffTarget {
   label: VoiceText;
   /** E.164. SERVER-ONLY: never sent to the browser, never spoken, never given to the model. */
   number: string;
-  /** When this target takes transfers (tenant zone). Omitted = whenever the business is open. */
+  /**
+   * When this target takes transfers (tenant zone). Omitted = whenever the business is open. The
+   * tenant's holidays close it and the tenant's exception days limit it (their hours intersect
+   * these), unless `onCall` is set.
+   */
   available?: WeeklySchedule;
+  /**
+   * An on-call line: `available` alone decides, also on the tenant's holidays and exception days.
+   * Without it a holiday never rings a closed office.
+   */
+  onCall?: boolean;
 }
 
 export interface HandoffRules {
@@ -150,6 +159,13 @@ export interface TaskField {
   /** For "integer": inclusive bounds. */
   min?: number;
   max?: number;
+  /**
+   * For "date": a date before today (tenant zone) is accepted. Off by default: the dates a caller
+   * leaves with a request (an arrival, a cleaning day, an event) lie ahead.
+   */
+  allowPast?: boolean;
+  /** For "date": the id of another date field of the task that this date must come after (a departure after the arrival). */
+  after?: string;
 }
 
 export type ContactNeed = "required" | "optional" | "none";
@@ -163,6 +179,16 @@ export interface TaskDefinition {
   fields: TaskField[];
   /** Contact details the task needs. Ask only for what is necessary. */
   contact: { name: ContactNeed; phone: ContactNeed; email: ContactNeed; company: ContactNeed };
+  /**
+   * At least one of these contact details must be given, although each is optional on its own
+   * (a phone OR an email: without either nobody can answer the request).
+   */
+  contactAtLeastOne?: Array<"phone" | "email">;
+  /**
+   * What the caller may be told about when the business follows this request up, in the tenant's
+   * words. Wins over handoff.written.promise for this task. Omitted = no timing is promised.
+   */
+  followUp?: VoiceText;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -188,7 +214,12 @@ export interface CalendarConfig {
   provider: "memory" | "google" | "microsoft";
   services: CalendarService[];
   capacity: CalendarCapacity;
-  /** When appointments may START (tenant zone). Omitted = the opening hours. */
+  /**
+   * The window inside which the WHOLE appointment, buffers included, must fit (tenant zone): one
+   * range of the day has to hold it from the start of its buffer before to the end of its buffer
+   * after. Omitted = the opening hours. A holiday closes it; an exception day intersects it with
+   * the exception's hours.
+   */
   bookable?: WeeklySchedule;
   /** Grid of possible start times in minutes: 15, 30 or 60. */
   slotStepMinutes: number;
@@ -240,6 +271,9 @@ export type CalendarResult<T> = { ok: true; value: T } | { ok: false; code: Cale
 /**
  * A calendar backend. Implementations must be idempotent on `idempotencyKey`: repeating a call
  * with the same key returns the first result instead of creating a second booking.
+ * Every call must answer within 4 seconds, with its own timeout: the tool route has to finish
+ * inside its maxDuration (15 s) after waiting for the session's lock, or the killed function
+ * keeps that lock (review finding S2-7). The built-in memory calendar answers at once.
  */
 export interface CalendarProvider {
   findSlots(query: {
@@ -346,7 +380,7 @@ export interface VoiceLimits {
   maxTurnsPerSession: number;
   /** Characters of one caller turn (text fallback, transcripts). */
   maxTurnChars: number;
-  /** New sessions per IP. */
+  /** New sessions per IP, counted across every tenant (the limit of the tenant asked for applies). */
   sessionsPerIpPerHour: number;
   sessionsPerIpPerDay: number;
   /** Conversations running at the same time, per tenant. */
@@ -354,7 +388,10 @@ export interface VoiceLimits {
   /** Conversation minutes per tenant (UTC day / UTC month). */
   minutesPerDay: number;
   minutesPerMonth: number;
-  /** Estimated spend ceiling per tenant and month, in CHF. Reaching it stops new sessions. */
+  /**
+   * Estimated spend ceiling per tenant and month, in CHF. Reaching it stops new sessions and new
+   * turns. A brake against abuse and runaway costs, not an invoice (see lib/voice/server/limits.ts).
+   */
   budgetChfPerMonth: number;
   /** Per-session caps on actions. */
   toolCallsPerSession: number;
@@ -536,7 +573,8 @@ export type VoiceErrorCode =
   | "unavailable" // voice disabled / not configured / provider down
   | "upstream"
   | "timeout"
-  | "refused";
+  | "refused"
+  | "turn_in_progress"; // the session's previous turn is still running: one turn at a time (HTTP 409)
 
 export interface VoiceApiError {
   ok: false;
@@ -623,6 +661,8 @@ export interface CallSummary {
   outcomes: Array<
     | { kind: "lead"; taskId: string; ref: string; fields: Record<string, string>; contact: Record<string, string> }
     | { kind: "booking"; booking: Booking }
+    /** An existing appointment moved; `booking` is its state after this move (same ref, new time). */
+    | { kind: "reschedule"; booking: Booking }
     | { kind: "cancellation"; ref: string }
     | { kind: "callback"; name: string; phone: string; topic: string; preferredTime?: string }
     | { kind: "transfer"; targetId: string; connected: boolean }

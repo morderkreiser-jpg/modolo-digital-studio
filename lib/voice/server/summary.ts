@@ -2,9 +2,15 @@
 //
 //   buildCallSummary()    the structured result (CallSummary) from the session state
 //   renderSummaryEmail()  a plain-text email in the tenant's default language: facts only
-//   deliverSummary()      sends it, but ONLY for a live tenant with a recipient, at least one
-//                         outcome and an email service configured; otherwise it does nothing and
-//                         says why. Demo tenants never send email: their businesses are invented.
+//   deliverRequest()      a request or callback wish, sent to the business the moment the tool
+//                         takes it: it must not depend on the session ending properly (the end
+//                         report may never come). The caller is told it was passed on only when
+//                         the email service accepted it.
+//   deliverSummary()      the summary at the end, but ONLY for a live tenant with a recipient, at
+//                         least one outcome and an email service configured; otherwise it does
+//                         nothing and says why. Demo tenants never send email: their businesses
+//                         are invented. endOfCallSummary() leaves out what deliverRequest() sent
+//                         already, so no request reaches the business twice.
 //
 // The email carries what the caller gave the tools (names, numbers, addresses): it goes to the
 // business's own address and nowhere else, and nothing of it is logged. The sending follows the
@@ -20,7 +26,8 @@ import { logVoiceEvent } from "./log";
 import type { VoiceSessionState } from "./state";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
-const EMAIL_TIMEOUT_MS = 8_000;
+/** How long one email may take before its outcome counts as unknown. */
+export const EMAIL_TIMEOUT_MS = 8_000;
 const MAX_VALUE_CHARS = 1000;
 
 type Outcome = CallSummary["outcomes"][number];
@@ -42,6 +49,18 @@ export function buildCallSummary(state: VoiceSessionState, tenant: VoiceTenantCo
   };
 }
 
+/** Outcome kinds delivered to the business the moment they happen (deliverRequest). */
+const DELIVERED_AT_ONCE: ReadonlySet<Outcome["kind"]> = new Set(["lead", "callback"]);
+
+/**
+ * The summary emailed when the session ends: everything except what was already sent while the
+ * call ran (requests and callback wishes). `noOutcome` still describes the whole call.
+ */
+export function endOfCallSummary(state: VoiceSessionState, tenant: VoiceTenantConfig, endedAt: Date | number): CallSummary {
+  const summary = buildCallSummary(state, tenant, endedAt);
+  return { ...summary, outcomes: summary.outcomes.filter((outcome) => !DELIVERED_AT_ONCE.has(outcome.kind)) };
+}
+
 // ---------------------------------------------------------------------------------------------
 // The email
 // ---------------------------------------------------------------------------------------------
@@ -49,6 +68,9 @@ export function buildCallSummary(state: VoiceSessionState, tenant: VoiceTenantCo
 interface Labels {
   assistant: string;
   intro: string;
+  /** Intro of a request sent while the call still runs. */
+  requestIntro: string;
+  reschedule: string;
   started: string;
   duration: (minutes: number, seconds: number) => string;
   language: string;
@@ -82,6 +104,8 @@ const LABELS: Record<VoiceLocale, Labels> = {
   de: {
     assistant: "Sprachassistent",
     intro: "Der KI-Sprachassistent hat dieses Gespräch geführt.",
+    requestIntro: "Der KI-Sprachassistent hat diese Anfrage während eines Gesprächs aufgenommen.",
+    reschedule: "Termin verschoben",
     started: "Beginn",
     duration: (m, s) => `Dauer: ${m} Min. ${s} Sek.`,
     language: "Sprache",
@@ -113,6 +137,8 @@ const LABELS: Record<VoiceLocale, Labels> = {
   it: {
     assistant: "Assistente vocale",
     intro: "L'assistente vocale AI ha condotto questa conversazione.",
+    requestIntro: "L'assistente vocale AI ha raccolto questa richiesta durante una conversazione.",
+    reschedule: "Appuntamento spostato",
     started: "Inizio",
     duration: (m, s) => `Durata: ${m} min ${s} s`,
     language: "Lingua",
@@ -144,6 +170,8 @@ const LABELS: Record<VoiceLocale, Labels> = {
   en: {
     assistant: "Voice assistant",
     intro: "The AI voice assistant handled this conversation.",
+    requestIntro: "The AI voice assistant took this request during a conversation.",
+    reschedule: "Appointment moved",
     started: "Started",
     duration: (m, s) => `Duration: ${m} min ${s} s`,
     language: "Language",
@@ -175,6 +203,8 @@ const LABELS: Record<VoiceLocale, Labels> = {
   fr: {
     assistant: "Assistant vocal",
     intro: "L'assistant vocal IA a mené cette conversation.",
+    requestIntro: "L'assistant vocal IA a pris cette demande pendant une conversation.",
+    reschedule: "Rendez-vous déplacé",
     started: "Début",
     duration: (m, s) => `Durée : ${m} min ${s} s`,
     language: "Langue",
@@ -209,7 +239,11 @@ const LABELS: Record<VoiceLocale, Labels> = {
  * The summary as a plain-text email in the tenant's default language. The subject is built from
  * our own labels and references only, never from what the caller said.
  */
-export function renderSummaryEmail(summary: CallSummary, tenant: VoiceTenantConfig): { subject: string; text: string } {
+export function renderSummaryEmail(
+  summary: CallSummary,
+  tenant: VoiceTenantConfig,
+  options: { request?: boolean } = {},
+): { subject: string; text: string } {
   const locale = tenant.defaultLocale;
   const l = LABELS[locale] ?? LABELS.de;
   const zone = tenant.hours?.timezone || "Europe/Zurich";
@@ -220,10 +254,11 @@ export function renderSummaryEmail(summary: CallSummary, tenant: VoiceTenantConf
     headlines.length > 1 ? ` (${l.more(headlines.length - 1)})` : ""
   }`;
 
-  const lines: string[] = [l.intro, ""];
+  const lines: string[] = [options.request ? l.requestIntro : l.intro, ""];
   const started = Date.parse(summary.startedAt);
   if (Number.isFinite(started)) lines.push(`${l.started}: ${localDateTime(new Date(started), zone, l)} (${zone})`);
-  lines.push(l.duration(Math.floor(summary.durationSeconds / 60), summary.durationSeconds % 60));
+  // A request goes out while the call still runs: its length is not known yet.
+  if (!options.request) lines.push(l.duration(Math.floor(summary.durationSeconds / 60), summary.durationSeconds % 60));
   lines.push(`${l.language}: ${l.languages[summary.locale] ?? summary.locale}`);
   lines.push(`${l.channel}: ${l.channels[summary.channel] ?? summary.channel}`);
   lines.push(`${l.session}: ${summary.sessionId}`);
@@ -252,6 +287,8 @@ function headline(outcome: Outcome, tenant: VoiceTenantConfig, l: Labels): strin
     }
     case "booking":
       return `${l.booking}: ${serviceLabel(outcome.booking.serviceId, tenant)}, ${l.reference} ${outcome.booking.ref}`;
+    case "reschedule":
+      return `${l.reschedule}: ${serviceLabel(outcome.booking.serviceId, tenant)}, ${l.reference} ${outcome.booking.ref}`;
     case "cancellation":
       return `${l.cancellation}, ${l.reference} ${outcome.ref}`;
     case "callback":
@@ -285,7 +322,8 @@ function details(outcome: Outcome, tenant: VoiceTenantConfig, l: Labels, zone: s
       for (const [key, value] of Object.entries(outcome.contact)) add(l.contactKeys[key] ?? key, value);
       break;
     }
-    case "booking": {
+    case "booking":
+    case "reschedule": {
       const booking = outcome.booking;
       const start = Date.parse(booking.start);
       if (Number.isFinite(start)) add(l.started, localDateTime(new Date(start), zone, l));
@@ -338,14 +376,30 @@ function oneLine(value: string): string {
 // Delivery
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * "send_unknown": the email service did not answer in time, so it may or may not have accepted
+ * the message. A request in that state must not be called lost (it may have arrived), nor passed
+ * on; sent again with the same idempotency key it is not delivered twice (review finding S2-8).
+ */
 export type SummaryDelivery =
   | { sent: true }
-  | { sent: false; reason: "demo_tenant" | "no_recipient" | "no_outcome" | "email_not_configured" | "send_failed" };
+  | { sent: false; reason: "demo_tenant" | "no_recipient" | "no_outcome" | "email_not_configured" | "send_failed" | "send_unknown" };
 
 export type ResendConfig = { apiKey: string; from: string };
 
-/** Sends one email; true when the service accepted it. Never throws. */
-export type SendEmail = (email: { from: string; to: string; replyTo?: string; subject: string; text: string }) => Promise<boolean>;
+/**
+ * Sends one email: true when the service accepted it, false when it did not, "unknown" when no
+ * answer came in time. `idempotencyKey`, when given, makes a repeat of the same message within a
+ * day a no-op at the service. Never throws.
+ */
+export type SendEmail = (email: {
+  from: string;
+  to: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+  idempotencyKey?: string;
+}) => Promise<boolean | "unknown">;
 
 /** The email service of the site's configuration, or null. */
 export function summaryEmailConfig(): ResendConfig | null {
@@ -366,12 +420,55 @@ export function canDeliverSummary(tenant: VoiceTenantConfig, resend: ResendConfi
   return typeof tenant.notifyEmail === "string" && tenant.notifyEmail !== "" && resend !== null;
 }
 
+/**
+ * Sends one request or callback wish to the business at once (see the header), as a one-outcome
+ * summary of the running call. Same conditions as deliverSummary(); `sent` only when the email
+ * service accepted it. Never throws.
+ */
+export async function deliverRequest(args: {
+  outcome: Extract<Outcome, { kind: "lead" | "callback" }>;
+  tenant: VoiceTenantConfig;
+  session: { sessionId: string; channel: CallSummary["channel"]; locale: VoiceLocale; startedAt: number };
+  resend?: ResendConfig | null;
+  send?: SendEmail;
+  /**
+   * The tool call's own idempotency key (execute.ts): the same request sent again, after an
+   * email service that did not answer in time, reaches the business once.
+   */
+  idempotencyKey?: string;
+}): Promise<SummaryDelivery> {
+  const { session } = args;
+  const started = Number.isFinite(session.startedAt) ? session.startedAt : Date.now();
+  const summary: CallSummary = {
+    tenant: args.tenant.id,
+    sessionId: session.sessionId,
+    channel: session.channel,
+    startedAt: new Date(started).toISOString(),
+    durationSeconds: 0,
+    locale: session.locale,
+    outcomes: [args.outcome],
+    noOutcome: false,
+  };
+  return deliverSummary({
+    summary,
+    tenant: args.tenant,
+    resend: args.resend,
+    send: args.send,
+    request: true,
+    ...(args.idempotencyKey ? { idempotencyKey: `mva-request-${args.idempotencyKey}` } : {}),
+  });
+}
+
 /** Sends the summary when every condition holds (see the header); otherwise says why not. Never throws. */
 export async function deliverSummary(args: {
   summary: CallSummary;
   tenant: VoiceTenantConfig;
   resend?: ResendConfig | null;
   send?: SendEmail;
+  /** Rendered as a request taken during a running call (deliverRequest). */
+  request?: boolean;
+  /** Passed to the email service: a repeat with the same key is not delivered twice. */
+  idempotencyKey?: string;
 }): Promise<SummaryDelivery> {
   const { summary, tenant } = args;
   if (tenant.kind !== "live") return { sent: false, reason: "demo_tenant" };
@@ -381,10 +478,21 @@ export async function deliverSummary(args: {
   if (resend === null) return { sent: false, reason: "email_not_configured" };
 
   try {
-    const { subject, text } = renderSummaryEmail(summary, tenant);
+    const { subject, text } = renderSummaryEmail(summary, tenant, { request: args.request === true });
     const send = args.send ?? sendWithResend(resend);
-    const ok = await send({ from: resend.from, to: tenant.notifyEmail, replyTo: replyAddress(summary), subject, text });
-    if (!ok) {
+    const ok = await send({
+      from: resend.from,
+      to: tenant.notifyEmail,
+      replyTo: replyAddress(summary),
+      subject,
+      text,
+      ...(args.idempotencyKey ? { idempotencyKey: args.idempotencyKey } : {}),
+    });
+    if (ok === "unknown") {
+      logVoiceEvent({ warn: "summary_send_unknown", tenant: tenant.id });
+      return { sent: false, reason: "send_unknown" };
+    }
+    if (ok !== true) {
       logVoiceEvent({ warn: "summary_not_sent", tenant: tenant.id });
       return { sent: false, reason: "send_failed" };
     }
@@ -399,18 +507,29 @@ export async function deliverSummary(args: {
 function replyAddress(summary: CallSummary): string | undefined {
   for (const outcome of summary.outcomes) {
     const candidate =
-      outcome.kind === "lead" ? outcome.contact.email : outcome.kind === "booking" ? outcome.booking.contact : undefined;
+      outcome.kind === "lead"
+        ? outcome.contact.email
+        : outcome.kind === "booking" || outcome.kind === "reschedule"
+          ? outcome.booking.contact
+          : undefined;
     if (typeof candidate === "string" && isValidEmail(candidate)) return candidate;
   }
   return undefined;
 }
 
-function sendWithResend(resend: ResendConfig): SendEmail {
+/**
+ * Resend's REST API. With an idempotency key, Resend answers a repeat of the same message within
+ * 24 hours with the first answer instead of sending it again. Our own timeout leaves the outcome
+ * open ("unknown"): Resend may have accepted the message and only answered late.
+ */
+export function sendWithResend(resend: ResendConfig): SendEmail {
   return async (email) => {
     try {
+      const headers: Record<string, string> = { Authorization: `Bearer ${resend.apiKey}`, "Content-Type": "application/json" };
+      if (email.idempotencyKey) headers["Idempotency-Key"] = email.idempotencyKey;
       const response = await fetch(RESEND_ENDPOINT, {
         method: "POST",
-        headers: { Authorization: `Bearer ${resend.apiKey}`, "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           from: email.from,
           to: [email.to],
@@ -425,8 +544,11 @@ function sendWithResend(resend: ResendConfig): SendEmail {
       if (!response.ok) logVoiceEvent({ warn: "summary_email_rejected", status: response.status });
       return response.ok;
     } catch (error) {
-      logVoiceEvent({ warn: "summary_email_failed", errorName: error instanceof Error ? error.name : typeof error });
-      return false;
+      const errorName = error instanceof Error ? error.name : typeof error;
+      logVoiceEvent({ warn: "summary_email_failed", errorName });
+      // A timeout may have come after Resend accepted the message; any other failure (no
+      // connection, a refused request) happened before it could.
+      return errorName === "TimeoutError" ? "unknown" : false;
     }
   };
 }

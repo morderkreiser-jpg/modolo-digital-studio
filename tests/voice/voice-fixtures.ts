@@ -26,6 +26,9 @@ export const VOICE_TEST_ENV_KEYS = [
   "VOICE_MINUTES_PER_MONTH",
   "VOICE_BUDGET_CHF_PER_MONTH",
   "VOICE_MAX_CONCURRENT",
+  "VOICE_GLOBAL_MINUTES_PER_DAY",
+  "VOICE_GLOBAL_BUDGET_CHF_PER_MONTH",
+  "VOICE_CHF_PER_USD",
   "ANTHROPIC_API_KEY",
   "ANTHROPIC_BASE_URL",
   "ASSISTANT_HASH_SALT",
@@ -92,9 +95,15 @@ export function captureLogs(): string[] {
   return lines;
 }
 
-/** Fresh dependencies for one test: its own store, so tests never share counters. */
+/**
+ * Fresh dependencies for one test: its own store, so tests never share counters. One store plays
+ * both parts (shared and accounting), as Upstash does in production, so a test can read the
+ * counters and the state from `deps.store`. The memory store's separate accounting companion is
+ * tested on its own (limits-abuse.test.ts).
+ */
 export function testDeps(overrides: Partial<VoiceDeps> = {}): VoiceDeps & { store: KVStore } {
-  return { store: createMemoryStore(), resend: null, ...overrides };
+  const store = overrides.store ?? createMemoryStore();
+  return { store, accountingStore: store, resend: null, ...overrides };
 }
 
 export function post(path: string, body: unknown, headers: Record<string, string> = {}): Request {

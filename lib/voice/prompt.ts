@@ -9,6 +9,7 @@
 // The prompt is read on every turn, so it stays compact: English instructions, with spoken
 // example phrases in the language the call starts in.
 import { pickVoiceText, renderVoiceKnowledge } from "@/lib/voice/knowledge";
+import { withoutPhoneNumbers } from "@/lib/voice/tools/validate";
 import {
   DEFAULT_VOICE_LIMITS,
   VOICE_LOCALES,
@@ -329,8 +330,10 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
   const handoff = tenant.handoff;
   const handoffLines: string[] = [];
   if (options.transfer) {
+    // A label never carries the line it stands for to the model (tenants/validate.ts refuses
+    // such labels; this holds even for one that slipped through).
     const targets = handoff.transfer.targets.map(
-      (target) => `${target.id} = ${pickVoiceText(target.label, locale, fallback) || target.id}`,
+      (target) => `${target.id} = ${withoutPhoneNumbers(pickVoiceText(target.label, locale, fallback)) || target.id}`,
     );
     handoffLines.push(
       `You can transfer the call with transfer_call to: ${targets.join("; ")}. Transfer only when the caller asks for a person or you cannot help, and only while the business is open (see the context). Say to whom before you transfer.`,

@@ -217,7 +217,7 @@ function bookAppointment(tenant: VoiceTenantConfig): VoiceToolDefinition {
     },
     name: personName("The caller's first and last name."),
     contact: text(
-      "A phone number (e.g. 079 123 45 67 or +41 79 123 45 67) or an email address where the business can reach the caller.",
+      "A phone number (e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code, e.g. +39 ...) or an email address where the business can reach the caller.",
       TOOL_TEXT_LIMITS.contact,
     ),
   };
@@ -306,7 +306,7 @@ function createLead(tenant: VoiceTenantConfig): VoiceToolDefinition {
   };
   const contactDescriptions: Record<ContactKey, Record<string, unknown>> = {
     name: personName("The caller's first and last name."),
-    phone: text("The caller's phone number, e.g. 079 123 45 67 or +41 79 123 45 67.", 40),
+    phone: text("The caller's phone number, e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code.", 40),
     email: text("The caller's email address.", 254),
     company: text("The caller's company, if they call for one.", TOOL_TEXT_LIMITS.company),
   };
@@ -356,7 +356,7 @@ function typeHint(field: TaskField, fallback: VoiceLocale): string {
     case "name":
       return "A person's name.";
     case "phone":
-      return "A phone number, e.g. 079 123 45 67.";
+      return "A phone number, e.g. 079 123 45 67; a number from another country always with its country code.";
     case "email":
       return "An email address.";
     case "date":
@@ -400,7 +400,7 @@ function requestCallback(): VoiceToolDefinition {
       "time beyond the wording this tool gives you.",
     {
       name: personName("The caller's first and last name."),
-      phone: text("The number to call back, e.g. 079 123 45 67 or +41 79 123 45 67.", 40),
+      phone: text("The number to call back, e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code.", 40),
       topic: text("What the call back is about, in a few words.", TOOL_TEXT_LIMITS.topic),
       preferred_time: {
         type: "string",

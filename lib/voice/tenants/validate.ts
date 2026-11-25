@@ -6,6 +6,7 @@
 // in every language, every tool the model is given can actually work, demo tenants never record,
 // and no number reaches the model in a shape the telephony could misdial.
 import { validateHours } from "@/lib/voice/hours";
+import { hasPhoneNumber } from "@/lib/voice/tools/validate";
 import {
   VOICE_LOCALES,
   VOICE_PLANS,
@@ -72,7 +73,7 @@ function duplicates(values: string[]): string[] {
   return [...repeated];
 }
 
-function checkTasks(tasks: TaskDefinition[], problems: string[]): void {
+function checkTasks(tasks: TaskDefinition[], locales: VoiceLocale[], problems: string[]): void {
   for (const id of duplicates(tasks.map((task) => task.id))) problems.push(`task id "${id}" is used twice`);
   for (const task of tasks) {
     const where = `task "${task.id}"`;
@@ -80,6 +81,20 @@ function checkTasks(tasks: TaskDefinition[], problems: string[]): void {
     if (!task.when?.trim()) problems.push(`${where}: "when" is empty`);
     for (const key of ["name", "phone", "email", "company"] as const) {
       if (!CONTACT_NEEDS.has(task.contact?.[key])) problems.push(`${where}: contact.${key} must be required, optional or none`);
+    }
+    for (const key of task.contactAtLeastOne ?? []) {
+      if (key !== "phone" && key !== "email") problems.push(`${where}: contactAtLeastOne may list only phone and email`);
+      else if (task.contact?.[key] === "none") problems.push(`${where}: contactAtLeastOne lists ${key}, which the task does not ask for`);
+    }
+    if (task.followUp) {
+      for (const locale of locales) if (!text(task.followUp, locale)) problems.push(`${where}: followUp is missing for "${locale}"`);
+    }
+    for (const field of task.fields) {
+      if (field.after === undefined) continue;
+      const earlier = task.fields.find((candidate) => candidate.id === field.after);
+      if (field.type !== "date" || earlier?.type !== "date") {
+        problems.push(`${where}, field "${field.id}": "after" must name another date field of the task`);
+      }
     }
     for (const id of duplicates(task.fields.map((field) => field.id))) problems.push(`${where}: field id "${id}" is used twice`);
     for (const field of task.fields) {
@@ -171,6 +186,11 @@ function checkHandoff(tenant: VoiceTenantConfig, locales: VoiceLocale[], problem
     if (!target.id?.trim()) problems.push("a transfer target has no id");
     // Never print the number itself: problems end up in logs and test output.
     if (!E164.test(target.number)) problems.push(`transfer target "${target.id}": number is not in E.164 form (+41...)`);
+    // The label goes to the model and to the browser; the number must not ride along in it.
+    for (const locale of VOICE_LOCALES) {
+      const label = text(target.label, locale);
+      if (label && hasPhoneNumber(label)) problems.push(`transfer target "${target.id}": the ${locale} label contains a phone number`);
+    }
   }
   if (transfer.enabled && !isWholeNumber(transfer.ringSeconds, 5, 60)) {
     problems.push("handoff.transfer.ringSeconds must be 5 to 60");
@@ -219,7 +239,7 @@ function checkUnsafe(tenant: VoiceTenantConfig): string[] {
   }
 
   checkTools(tenant, problems);
-  checkTasks(tenant.tasks, problems);
+  checkTasks(tenant.tasks, locales, problems);
   if (tenant.calendar) checkCalendar(tenant.calendar, problems);
   checkHandoff(tenant, locales, problems);
 

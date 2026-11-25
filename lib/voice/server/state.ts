@@ -8,8 +8,10 @@
 //
 //   - It lives only for the length of the session plus a short margin (stateTtlSeconds()), and is
 //     overwritten with an empty value when the session ends (clearState()). Nothing is archived.
-//   - With the in-memory store it sits in the server's process memory. With Upstash (the shared
-//     store, lib/assistant/server/store.ts) it is stored at a THIRD PARTY for that time. Before
+//   - It lives in the accounting store (stores.ts), where only admitted sessions write, so a flood
+//     of free keys cannot push it out. With the in-memory store it sits in the server's process
+//     memory. With Upstash (lib/assistant/server/store.ts) it is stored at a THIRD PARTY for that
+//     time. Before
 //     this runs in production with real callers, the privacy notice must say so (provider, place,
 //     duration): see the TODO in lib/voice/tenants/modolo.ts.
 //   - Realtime sessions keep only the accounting part here (reservation, counters, outcomes): the
@@ -73,7 +75,11 @@ export interface VoiceSessionState {
   toolMemory: ToolMemorySnapshot;
   /** What happened, in order: the call summary is built from this. */
   outcomes: CallSummary["outcomes"];
-  /** What admitSession() reserved; settled when the session ends. null for "scripted". */
+  /**
+   * Who the session is and its prices, as admitSession() reserved it; null for "scripted". The
+   * amounts settlement gives back come from the session's ledger in the store (limits.ts), so a
+   * lost state never loses track of a reservation.
+   */
   reservation: SessionReservation | null;
 }
 
@@ -116,7 +122,7 @@ export function createSessionState(args: {
     greeted: false,
     history: [],
     counters: { toolCalls: 0, bookings: 0, leads: 0 },
-    toolMemory: { recorded: [], replies: [] },
+    toolMemory: { recorded: [], replies: [], bookings: [] },
     outcomes: [],
     reservation: args.reservation,
   };
@@ -231,11 +237,12 @@ function parseState(value: unknown): VoiceSessionState | null {
 }
 
 function parseToolMemory(value: unknown): ToolMemorySnapshot {
-  if (!isRecord(value)) return { recorded: [], replies: [] };
+  if (!isRecord(value)) return { recorded: [], replies: [], bookings: [] };
   return {
     recorded: Array.isArray(value.recorded) ? value.recorded.filter((key): key is string => typeof key === "string") : [],
     // Checked entry by entry by importToolMemory().
     replies: Array.isArray(value.replies) ? (value.replies as ToolMemorySnapshot["replies"]) : [],
+    bookings: Array.isArray(value.bookings) ? (value.bookings as NonNullable<ToolMemorySnapshot["bookings"]>) : [],
   };
 }
 

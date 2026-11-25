@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE, SERVICE_SLUGS } from "@/lib/site";
 import { LOCALES, localizedHref } from "@/lib/i18n";
 import { LOCAL_CITIES } from "@/lib/local-seo";
+import { isVoiceLandingOn, VOICE_LANDING_PATH } from "@/lib/voice/landing";
 
 // Absolute URL for a locale-aware path. abs("/") -> SITE.url ; abs("/de") -> SITE.url + "/de".
 const abs = (path: string) => SITE.url + (path === "/" ? "" : path);
@@ -36,9 +37,14 @@ function languagesFor(path: string) {
   };
 }
 
+// The voice sales page is listed only while its switch is on (DECISIONS.md D12): read here, at call
+// time, so the sitemap and the page (which answers 404 when off) can never disagree.
+const VOICE_PAGE = { path: VOICE_LANDING_PATH, changeFrequency: "monthly" as ChangeFrequency, priority: 0.8 };
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  return PAGES.flatMap((p) =>
+  const pages = isVoiceLandingOn() ? [...PAGES, VOICE_PAGE] : PAGES;
+  return pages.flatMap((p) =>
     LOCALES.map((locale) => ({
       url: abs(localizedHref(locale, p.path)),
       lastModified: now,

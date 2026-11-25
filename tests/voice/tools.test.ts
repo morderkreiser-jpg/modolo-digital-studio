@@ -16,7 +16,7 @@ import type {
 } from "@/lib/voice/types";
 import { createMemoryCalendar } from "@/lib/voice/calendar";
 import { toolDefinitions } from "@/lib/voice/tools/definitions";
-import { isValidEmail, normalizePhone, validateToolInput } from "@/lib/voice/tools/validate";
+import { hasPhoneNumber, isValidEmail, normalizePhone, validateToolInput, withoutPhoneNumbers } from "@/lib/voice/tools/validate";
 import { createMemorySinks, executeTool, type ToolContext, type ToolSinks } from "@/lib/voice/tools/execute";
 
 // ---------------------------------------------------------------------------------------------
@@ -475,8 +475,11 @@ describe("executeTool: happy paths", () => {
     assert.ok(moved.ok, moved.say);
     assert.equal(moved.say, `Moved: the appointment ${ref} is now on Friday 4 December 2026 at 10:00.`);
     assert.equal(ctx.counters.bookings, 1, "a move is not a new booking");
+    // A move is recorded as a move (review finding correttezza/F4: this asserted a second
+    // "booking" outcome for the same reference, which the summary listed as a new appointment).
     const movedOutcome = ctx.outcomes[1];
-    assert.ok(movedOutcome.kind === "booking" && movedOutcome.booking.start === "2026-12-04T10:00:00+01:00");
+    assert.ok(movedOutcome.kind === "reschedule" && movedOutcome.booking.start === "2026-12-04T10:00:00+01:00");
+    assert.equal(ctx.outcomes.filter((outcome) => outcome.kind === "booking").length, 1, "one booking per reference");
 
     const cancelled = await executeTool(ctx, call("cancel_appointment", { reference: ref, name: "Anna Muster" }));
     assert.ok(cancelled.ok, cancelled.say);
@@ -489,17 +492,20 @@ describe("executeTool: happy paths", () => {
     const outcome = await executeTool(ctx, call("create_lead", LEAD_INPUT));
     assert.ok(outcome.ok, outcome.say);
     assert.match(outcome.say, /^Stored and passed on to the team, reference LD-2222\./);
-    assert.deepEqual(ctx.memorySinks.leads, [
-      {
-        tenant: "test-salon",
-        sessionId: "session-1",
-        taskId: "quote_request",
-        fields: { occasion: "wedding", event_date: "2027-06-12", guests: "3" },
-        contact: { name: "Anna Muster", phone: "+41791234567" },
-        summary: LEAD_INPUT.summary,
-        locale: "de",
-      },
-    ]);
+    // The record carries the call's idempotency key too (review finding S2-8): the sink passes it
+    // to the email service, so the same request sent again reaches the business once.
+    assert.equal(ctx.memorySinks.leads.length, 1);
+    const { idempotencyKey, ...record } = ctx.memorySinks.leads[0] as Record<string, unknown>;
+    assert.match(String(idempotencyKey), /^[0-9a-f]{32}$/);
+    assert.deepEqual(record, {
+      tenant: "test-salon",
+      sessionId: "session-1",
+      taskId: "quote_request",
+      fields: { occasion: "wedding", event_date: "2027-06-12", guests: "3" },
+      contact: { name: "Anna Muster", phone: "+41791234567" },
+      summary: LEAD_INPUT.summary,
+      locale: "de",
+    });
     assert.equal(ctx.counters.leads, 1);
     assert.deepEqual(ctx.outcomes, [
       { kind: "lead", taskId: "quote_request", ref: "LD-2222", fields: { occasion: "wedding", event_date: "2027-06-12", guests: "3" }, contact: { name: "Anna Muster", phone: "+41791234567" } },
@@ -774,5 +780,293 @@ describe("executeTool: failing backends", () => {
       assert.equal(typeof outcome.say, "string");
     }
     assert.equal(({} as Record<string, unknown>).polluted, undefined);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Regressions of the review (research/revisione/revisione-1.json)
+// ---------------------------------------------------------------------------------------------
+
+/** The booking reference of an outcome, "" when it failed. */
+const refOf = (outcome: ToolOutcome): string => (outcome.ok ? String(outcome.data?.reference ?? "") : "");
+
+describe("review correttezza/F1: booking the same appointment again with a corrected detail", () => {
+  const TABLE = { service: "table", start: "2026-12-15T13:30:00+01:00", name: "Sarah Collins", contact: "+41780000044", party_size: 4 };
+
+  it("holds one table, not two, and says how to change the details", async () => {
+    const ctx = makeContext(RESTAURANT);
+    const first = await executeTool(ctx, call("book_appointment", TABLE));
+    assert.ok(first.ok, first.say);
+    const corrected = await executeTool(ctx, call("book_appointment", { ...TABLE, contact: "+41780000045" }));
+    assert.ok(!corrected.ok && corrected.code === "conflict", corrected.say);
+    assert.match(corrected.say, /already booked this time: Tuesday 15 December 2026 at 13:30, reference MV-/);
+    assert.match(corrected.say, /Nothing new was booked and that booking was not changed\./);
+    assert.match(corrected.say, /cancel reference MV-[2-9A-HJ-NP-Z]{4} with cancel_appointment, then book again/);
+    assert.equal(ctx.counters.bookings, 1);
+    assert.equal(ctx.outcomes.filter((outcome) => outcome.kind === "booking").length, 1);
+    // Eight seats would have been held for one party: only four are.
+    const check = await executeTool(ctx, call("check_availability", { service: "table", date: "2026-12-15", party_size: 8 }));
+    assert.ok(check.ok, check.say);
+  });
+
+  it("on a single resource answers 'already booked', never 'no longer free', and rebooking after a cancel works", async () => {
+    const ctx = makeContext();
+    const first = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok(first.ok);
+    const ref = first.data?.reference as string;
+    const corrected = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, contact: "079 123 45 68" }));
+    assert.ok(!corrected.ok);
+    assert.doesNotMatch(corrected.say, /no longer free/);
+    assert.match(corrected.say, new RegExp(`reference ${ref}`));
+    // The salon lets callers change bookings more than 24 hours ahead: cancel, then book anew.
+    const early = makeContext(SALON, { now: new Date("2026-12-01T08:00:00Z") });
+    const booked = await executeTool(early, call("book_appointment", BOOK_INPUT));
+    const bookedRef = refOf(booked);
+    assert.ok((await executeTool(early, call("cancel_appointment", { reference: bookedRef, name: "Anna Muster" }))).ok);
+    const again = await executeTool(early, call("book_appointment", { ...BOOK_INPUT, contact: "079 123 45 68" }));
+    assert.ok(again.ok, again.say);
+    assert.notEqual(again.data?.reference, bookedRef);
+  });
+
+  it("a tenant that cannot cancel by phone says the booking stands as made", async () => {
+    const noCancel = makeTenant({ calendar: { ...SALON_CALENDAR, allowCancel: false }, tools: ["book_appointment", "check_availability", "end_call"] });
+    const ctx = makeContext(noCancel);
+    assert.ok((await executeTool(ctx, call("book_appointment", BOOK_INPUT))).ok);
+    const corrected = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, name: "Anna Muster-Keller" }));
+    assert.ok(!corrected.ok);
+    assert.match(corrected.say, /the booking stands as it was made/);
+  });
+});
+
+describe("review correttezza/F3: a repeat at the cap is not reported as not done", () => {
+  it("a repeated booking at the booking cap answers with the booking", async () => {
+    const ctx = makeContext(SALON, { limits: { ...DEFAULT_VOICE_LIMITS, bookingsPerSession: 1 } });
+    const first = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    const again = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok(first.ok && again.ok, again.say);
+    assert.equal(again.data?.reference, first.data?.reference);
+    // A genuinely new booking is still capped.
+    const other = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, start: "2026-12-03T15:30:00+01:00" }));
+    assert.ok(!other.ok && other.code === "limit_reached");
+  });
+
+  it("two bookings, then a repeat of the first, with the default cap of two", async () => {
+    const ctx = makeContext(SALON, { limits: { ...DEFAULT_VOICE_LIMITS, bookingsPerSession: 2 } });
+    const first = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok((await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, start: "2026-12-03T15:30:00+01:00" }))).ok);
+    const repeat = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok(repeat.ok, repeat.say);
+    assert.equal(refOf(repeat), refOf(first));
+  });
+
+  it("a repeated lead at the lead cap answers with the first answer, and the sink holds it once", async () => {
+    const ctx = makeContext(SALON, { limits: { ...DEFAULT_VOICE_LIMITS, leadsPerSession: 1 } });
+    const first = await executeTool(ctx, call("create_lead", LEAD_INPUT));
+    const again = await executeTool(ctx, call("create_lead", LEAD_INPUT));
+    assert.ok(first.ok);
+    assert.deepEqual(again, first);
+    assert.equal(ctx.memorySinks.leads.length, 1);
+  });
+
+  it("with the caps in a store, a failed action gives its unit back", async () => {
+    const taken: string[] = [];
+    const given: string[] = [];
+    const caps = {
+      async take(kind: string) {
+        taken.push(kind);
+        return true;
+      },
+      async giveBack(kind: string) {
+        given.push(kind);
+      },
+    };
+    const sinks: ToolSinks = { ...createMemorySinks(), lead: async () => ({ ok: false, ref: "" }) };
+    const ctx = makeContext(SALON, { caps, sinks });
+    assert.equal((await executeTool(ctx, call("create_lead", LEAD_INPUT))).ok, false);
+    assert.deepEqual(taken, ["toolCalls", "leads"]);
+    assert.deepEqual(given, ["leads"]);
+  });
+});
+
+describe("review correttezza/F4: moves are recorded as moves, always with the latest time", () => {
+  it("book, move away and move back: one booking and two moves, the last at the real time", async () => {
+    const ctx = makeContext(RESTAURANT);
+    const booked = await executeTool(ctx, call("book_appointment", { service: "table", start: "2026-12-15T13:30:00+01:00", name: "Sarah Collins", contact: "+41780000044", party_size: 4 }));
+    const ref = refOf(booked);
+    const away = await executeTool(ctx, call("reschedule_appointment", { reference: ref, name: "Sarah Collins", new_start: "2026-12-16T13:30:00+01:00" }));
+    const back = await executeTool(ctx, call("reschedule_appointment", { reference: ref, name: "Sarah Collins", new_start: "2026-12-15T13:30:00+01:00" }));
+    assert.ok(away.ok && back.ok, back.say);
+    assert.deepEqual(
+      ctx.outcomes.map((outcome) => (outcome.kind === "booking" || outcome.kind === "reschedule" ? [outcome.kind, outcome.booking.ref, outcome.booking.start] : [outcome.kind])),
+      [
+        ["booking", ref, "2026-12-15T13:30:00+01:00"],
+        ["reschedule", ref, "2026-12-16T13:30:00+01:00"],
+        ["reschedule", ref, "2026-12-15T13:30:00+01:00"],
+      ],
+    );
+    // A repeat of the last move changes nothing and records nothing.
+    await executeTool(ctx, call("reschedule_appointment", { reference: ref, name: "Sarah Collins", new_start: "2026-12-15T13:30:00+01:00" }));
+    assert.equal(ctx.outcomes.length, 3);
+  });
+
+  it("a booking moved to a time of its own conversation cannot be booked twice there", async () => {
+    const ctx = makeContext();
+    const booked = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    const ref = refOf(booked);
+    assert.ok((await executeTool(ctx, call("reschedule_appointment", { reference: ref, name: "Anna Muster", new_start: "2026-12-04T10:00:00+01:00" }))).ok);
+    const again = await executeTool(ctx, call("book_appointment", { ...BOOK_INPUT, start: "2026-12-04T10:00:00+01:00" }));
+    assert.ok(!again.ok && again.code === "conflict");
+    assert.match(again.say, /already booked this time/);
+  });
+});
+
+describe("review correttezza/F5: a transfer target follows the tenant's holidays and special days", () => {
+  const OWNER_WEEK = { mon: WORKDAY, tue: WORKDAY, wed: WORKDAY, thu: WORKDAY, fri: WORKDAY, sat: [], sun: [] };
+  const withTarget = (extra: Partial<{ onCall: boolean }> = {}, hours: BusinessHours = HOURS) =>
+    makeTenant({
+      hours,
+      handoff: {
+        ...SALON.handoff,
+        transfer: { enabled: true, ringSeconds: 20, targets: [{ id: "owner", label: { de: "die Inhaberin" }, number: OWNER_NUMBER, available: OWNER_WEEK, ...extra }] },
+      },
+    });
+
+  it("rings nobody on a holiday, even inside the target's own hours", async () => {
+    const christmas = new Date("2026-12-25T09:00:00Z"); // a Friday, 10:00 in Zurich
+    const ctx = makeContext(withTarget(), { now: christmas, sinks: createMemorySinks({ transferConnected: true }) });
+    const outcome = await executeTool(ctx, call("transfer_call", { target: "owner", reason: "Question" }));
+    assert.ok(!outcome.ok && outcome.code === "not_available");
+    assert.equal(ctx.memorySinks.transfers.length, 0);
+  });
+
+  it("on a day with special hours, rings only inside them", async () => {
+    const shortDay: BusinessHours = { ...HOURS, exceptions: [{ date: "2026-12-24", ranges: [{ from: "09:00", to: "12:00" }] }] };
+    const morning = makeContext(withTarget({}, shortDay), { now: new Date("2026-12-24T09:00:00Z"), sinks: createMemorySinks({ transferConnected: true }) });
+    assert.ok((await executeTool(morning, call("transfer_call", { target: "owner", reason: "Question" }))).ok);
+    const afternoon = makeContext(withTarget({}, shortDay), { now: new Date("2026-12-24T13:30:00Z"), sinks: createMemorySinks({ transferConnected: true }) });
+    const late = await executeTool(afternoon, call("transfer_call", { target: "owner", reason: "Question" }));
+    assert.ok(!late.ok && late.code === "not_available");
+  });
+
+  it("an on-call line follows its own hours, holidays included", async () => {
+    const ctx = makeContext(withTarget({ onCall: true }), { now: new Date("2026-12-25T09:00:00Z"), sinks: createMemorySinks({ transferConnected: true }) });
+    assert.ok((await executeTool(ctx, call("transfer_call", { target: "owner", reason: "Burst pipe" }))).ok);
+  });
+});
+
+describe("review correttezza/F6: a foreign number written without its country code", () => {
+  it("in an Italian call, a national-form number is not stored before the country is asked", async () => {
+    const ctx = makeContext(SALON, { locale: "it" as const });
+    const outcome = await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "02 1234 5678", topic: "Prezzi" }));
+    assert.ok(!outcome.ok && outcome.code === "invalid_input");
+    assert.match(outcome.say, /"phone" has no country code\. Ask the caller whether it is a Swiss number/);
+    assert.equal(ctx.memorySinks.callbacks.length, 0);
+    // Confirmed as Swiss, or given with its own country code, it goes through.
+    assert.ok((await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "+41 21 234 56 78", topic: "Prezzi" }))).ok);
+    assert.ok((await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "+39 02 1234 5678", topic: "Prezzi" }))).ok);
+    const booked = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+    assert.ok(!booked.ok && /"contact" has no country code/.test(booked.say));
+  });
+
+  it("a national-form number whose prefix is not Swiss is refused in any call", async () => {
+    const ctx = makeContext();
+    const outcome = await executeTool(ctx, call("request_callback", { name: "Anna Muster", phone: "035 123 45 67", topic: "Price" }));
+    assert.ok(!outcome.ok && outcome.code === "invalid_input");
+    assert.match(outcome.say, /"phone" is not a Swiss number\. If it is from another country, ask the caller for the country code/);
+    // A German call keeps taking Swiss numbers as they are said.
+    assert.ok((await executeTool(ctx, call("request_callback", { name: "Anna Muster", phone: "044 123 45 67", topic: "Price" }))).ok);
+  });
+
+  it("normalizePhone keeps only the prefixes of the Swiss numbering plan", () => {
+    assert.equal(normalizePhone("035 123 45 67"), null);
+    assert.equal(normalizePhone("0901 123 456"), null, "premium rate: a callback would cost the business");
+    assert.equal(normalizePhone("06 1234 5678"), "+41612345678", "the shape of a Basel number: only the call's language tells");
+    assert.equal(normalizePhone("0848 123 456"), "+41848123456");
+    assert.equal(normalizePhone("+41 74 123 45 67"), "+41741234567", "with the country code, any Swiss number");
+  });
+
+  // Review finding S2-9: premium rate was refused only in the national form, and checkPhone's own
+  // hint ("send it with +41") turned a refused 0900 into an accepted +41 900.
+  it("normalizePhone refuses premium-rate numbers with the country code too", () => {
+    for (const number of ["+41 900 123 456", "0041 906 123 456", "+41 901 234 567", "+41 (0)900 123 456", "+41 0900 123 456", "0900 123 456"]) {
+      assert.equal(normalizePhone(number), null, number);
+    }
+    assert.equal(normalizePhone("+41 800 123 456"), "+41800123456", "free numbers stay");
+    assert.equal(normalizePhone("+41 79 123 45 67"), "+41791234567");
+  });
+});
+
+describe("review correttezza/F9, F11, F12: what a request needs", () => {
+  it("a task that needs a phone or an email refuses a request with neither", async () => {
+    const task: TaskDefinition = { ...GIFT_TASK, id: "one_way", contactAtLeastOne: ["phone", "email"] };
+    const tenant = makeTenant({ tasks: [QUOTE_TASK, task] });
+    const errors = errorsOf(validateToolInput(tenant, "create_lead", { task: "one_way", fields: { amount: "50" }, name: "Anna Muster", summary: "Gift" }));
+    assert.match(errors, /"phone" or "email" is required for this task: ask the caller for one of them\./);
+    assert.ok(validateToolInput(tenant, "create_lead", { task: "one_way", fields: { amount: "50" }, name: "Anna Muster", email: "anna@example.ch", summary: "Gift" }).ok);
+  });
+
+  it("a garbled detail the task does not ask for never blocks the request", () => {
+    const noEmail: TaskDefinition = { ...GIFT_TASK, id: "gift_no_email", contact: { ...GIFT_TASK.contact, email: "none" } };
+    const tenant = makeTenant({ tasks: [QUOTE_TASK, noEmail] });
+    const value = valueOf(
+      validateToolInput(tenant, "create_lead", { task: "gift_no_email", fields: { amount: "100" }, name: "Anna Muster", email: "weber at gmx", summary: "Gift" }),
+    );
+    assert.equal(value.email, undefined);
+  });
+
+  it("a date in the past is refused when the call's clock is known, unless the field allows it", () => {
+    const past = { ...LEAD_INPUT, fields: { ...LEAD_INPUT.fields, event_date: "2025-12-18" } };
+    assert.match(errorsOf(validateToolInput(SALON, "create_lead", past, { now: NOW })), /"fields\.event_date" lies in the past \(today is 2026-12-01\)/);
+    assert.ok(validateToolInput(SALON, "create_lead", past).ok, "without a clock (the demo scripts) nothing is compared");
+    assert.ok(validateToolInput(SALON, "create_lead", { ...past, fields: { ...past.fields, event_date: "2026-12-01" } }, { now: NOW }).ok, "today is fine");
+    const accident: TaskDefinition = { ...QUOTE_TASK, fields: QUOTE_TASK.fields.map((field) => (field.id === "event_date" ? { ...field, allowPast: true } : field)) };
+    assert.ok(validateToolInput(makeTenant({ tasks: [accident, GIFT_TASK] }), "create_lead", past, { now: NOW }).ok);
+  });
+
+  it("a departure before the arrival is refused", () => {
+    const stay: TaskDefinition = {
+      id: "room_request",
+      label: { en: "Room request" },
+      when: "The caller wants a room.",
+      fields: [
+        { id: "arrival_date", label: { en: "Arrival" }, type: "date", required: true },
+        { id: "departure_date", label: { en: "Departure" }, type: "date", required: true, after: "arrival_date" },
+      ],
+      contact: { name: "required", phone: "required", email: "none", company: "none" },
+    };
+    const tenant = makeTenant({ tasks: [stay] });
+    const input = (arrival: string, departure: string) => ({
+      task: "room_request",
+      fields: { arrival_date: arrival, departure_date: departure },
+      name: "Anna Muster",
+      phone: "079 123 45 67",
+      summary: "Room",
+    });
+    assert.match(errorsOf(validateToolInput(tenant, "create_lead", input("2027-01-10", "2027-01-08"))), /"fields\.departure_date" must come after "fields\.arrival_date"/);
+    assert.match(errorsOf(validateToolInput(tenant, "create_lead", input("2027-01-10", "2027-01-10"))), /must come after/);
+    assert.ok(validateToolInput(tenant, "create_lead", input("2027-01-10", "2027-01-12")).ok);
+  });
+});
+
+describe("review correttezza/F7: a request's follow-up in the tenant's own words", () => {
+  it("uses the task's follow-up, else the written promise, else promises nothing the business information does not say", async () => {
+    const withFollowUp = makeTenant({ tasks: [{ ...QUOTE_TASK, followUp: { de: "Wir melden uns am nächsten Arbeitstag.", en: "We get back to you on the next working day." } }, GIFT_TASK] });
+    const ctx = makeContext(withFollowUp);
+    const stored = await executeTool(ctx, call("create_lead", LEAD_INPUT));
+    assert.ok(stored.ok);
+    assert.match(stored.say, /About timing, say only: "Wir melden uns am nächsten Arbeitstag\."/);
+    const plain = await executeTool(makeContext(), call("create_lead", LEAD_INPUT));
+    assert.ok(plain.ok);
+    assert.match(plain.say, /Do not promise when the business will get back, beyond what the business information states about requests\./);
+  });
+});
+
+describe("review sicurezza/F11: a transfer label never carries the number", () => {
+  it("the label is cleaned wherever it goes", () => {
+    assert.equal(withoutPhoneNumbers("Inhaberin (052 123 45 67)"), "Inhaberin");
+    assert.equal(withoutPhoneNumbers("Pikett +41 79 000 00 01"), "Pikett");
+    assert.equal(withoutPhoneNumbers("Team 2"), "Team 2");
+    assert.equal(hasPhoneNumber("Inhaberin (052 123 45 67)"), true);
+    assert.equal(hasPhoneNumber("die Inhaberin"), false);
   });
 });

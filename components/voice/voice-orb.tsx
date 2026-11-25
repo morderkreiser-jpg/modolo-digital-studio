@@ -11,10 +11,14 @@
 // Canvas 2D, device-pixel-ratio aware, no WebGL and no library. Loaded lazily by the stage (it
 // is the animation loop); the stage paints a still CSS orb until it arrives.
 //
-// The loop only runs while the canvas is on screen and the tab is visible. With
-// prefers-reduced-motion nothing moves: one still frame per state, redrawn on state changes.
-// The canvas is decorative (aria-hidden): the stage announces the state in text.
+// The loop only runs while the canvas is on screen and the tab is visible, and only as fast as
+// the state needs (orb-motion.ts): full rate in a conversation, a few frames a second for the idle
+// breathing, not at all once an ended or failed orb has dimmed. With prefers-reduced-motion
+// nothing moves: one still frame per state, redrawn on state changes. The canvas size is read
+// from the ResizeObserver, never in the frame loop (that would force a layout every frame while
+// captions stream in). The canvas is decorative (aria-hidden): the stage announces the state in text.
 import { useLayoutEffect, useRef } from "react";
+import { ease, easeLook, lookSettled, orbCadence, SLOW_FRAME_MS, stillLook, targetLook, type Look } from "./orb-motion";
 import type { VoiceStatus } from "./voice-machine";
 
 export interface VoiceOrbProps {
@@ -35,51 +39,6 @@ const MAJOR_EVERY = 8;
 /** Higher pixel densities cost fill rate and add nothing visible to soft gradients. */
 const MAX_DPR = 2;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
-/** What the frame looks like; every field eases towards the state's target. */
-interface Look {
-  /** Corona brightness, 0..1. */
-  glow: number;
-  /** Corona reach, in disc radii. */
-  reach: number;
-  /** Gold ring opacity. */
-  ring: number;
-  /** How far the ticks follow the level (listening only). */
-  ticks: number;
-  /** Opacity of the travelling glint. */
-  glint: number;
-  /** Turns per second of the glint. */
-  spin: number;
-  /** Rim light on the disc's edge. */
-  rim: number;
-}
-
-function targetLook(status: VoiceStatus, level: number, muted: boolean): Look {
-  switch (status) {
-    case "listening":
-      return { glow: 0.5, reach: 1.62, ring: 0.62, ticks: muted ? 0 : 1, glint: 0, spin: 0.08, rim: 0.5 };
-    case "thinking":
-      return { glow: 0.42, reach: 1.55, ring: 0.5, ticks: 0, glint: 1, spin: 0.22, rim: 0.42 };
-    case "speaking":
-      return { glow: 0.55 + 0.45 * level, reach: 1.6 + 0.32 * level, ring: 0.46, ticks: 0, glint: 0, spin: 0.08, rim: 0.55 + 0.35 * level };
-    case "consent":
-    case "requesting_mic":
-    case "connecting":
-      return { glow: 0.5, reach: 1.58, ring: 0.5, ticks: 0, glint: 0.55, spin: 0.12, rim: 0.45 };
-    case "ended":
-      return { glow: 0.26, reach: 1.45, ring: 0.28, ticks: 0, glint: 0, spin: 0, rim: 0.3 };
-    case "error":
-      return { glow: 0.2, reach: 1.42, ring: 0.22, ticks: 0, glint: 0, spin: 0, rim: 0.25 };
-    case "idle":
-    default:
-      return { glow: 0.52, reach: 1.6, ring: 0.42, ticks: 0, glint: 0, spin: 0, rim: 0.48 };
-  }
-}
-
-/** The still frame of a state (reduced motion): what a mid-sentence moment of it looks like. */
-function stillLook(status: VoiceStatus, muted: boolean): Look {
-  return targetLook(status, status === "speaking" ? 0.5 : 0, muted);
-}
 
 interface Frame {
   look: Look;
@@ -187,38 +146,20 @@ function drawOrb(context: CanvasRenderingContext2D, width: number, height: numbe
   }
 }
 
-/** Moves `value` towards `target` with time constant `tau` (seconds), frame-rate independent. */
-function ease(value: number, target: number, dt: number, tau: number): number {
-  return value + (target - value) * (1 - Math.exp(-dt / tau));
-}
-
-function easeLook(current: Look, target: Look, dt: number): Look {
-  const tau = 0.35;
-  return {
-    glow: ease(current.glow, target.glow, dt, 0.12),
-    reach: ease(current.reach, target.reach, dt, 0.14),
-    ring: ease(current.ring, target.ring, dt, tau),
-    ticks: ease(current.ticks, target.ticks, dt, tau),
-    glint: ease(current.glint, target.glint, dt, tau),
-    spin: ease(current.spin, target.spin, dt, 0.6),
-    rim: ease(current.rim, target.rim, dt, 0.12),
-  };
-}
-
 export default function VoiceOrb({ status, getLevel, muted = false, className }: VoiceOrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // The loop reads these through refs, so a state change never restarts it.
   const statusRef = useRef(status);
   const mutedRef = useRef(muted);
   const getLevelRef = useRef(getLevel);
-  const redrawRef = useRef<() => void>(() => undefined);
+  /** Set by the loop: a state change redraws the still frame, or wakes a stopped or slow loop. */
+  const changedRef = useRef<() => void>(() => undefined);
 
   useLayoutEffect(() => {
     statusRef.current = status;
     mutedRef.current = muted;
     getLevelRef.current = getLevel;
-    // Reduced motion: a new state is a new still frame.
-    redrawRef.current();
+    changedRef.current();
   }, [status, muted, getLevel]);
 
   useLayoutEffect(() => {
@@ -231,6 +172,7 @@ export default function VoiceOrb({ status, getLevel, muted = false, className }:
     let onScreen = true;
     let pageVisible = document.visibilityState !== "hidden";
     let frameId = 0;
+    let slowTimer: ReturnType<typeof setTimeout> | undefined;
     let lastTime = 0;
     let clock = 0;
     let angle = -Math.PI / 2;
@@ -239,12 +181,21 @@ export default function VoiceOrb({ status, getLevel, muted = false, className }:
     let width = 0;
     let height = 0;
     let dpr = 1;
+    /** CSS size of the canvas, from the ResizeObserver (or one measurement without it). */
+    let cssWidth = 0;
+    let cssHeight = 0;
 
-    const resize = (): boolean => {
+    const measure = () => {
       const rect = canvas.getBoundingClientRect();
+      cssWidth = rect.width;
+      cssHeight = rect.height;
+    };
+
+    /** Sizes the backing store to the CSS size; true when it changed (and was cleared). */
+    const resize = (): boolean => {
       dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-      const nextWidth = Math.max(1, Math.round(rect.width * dpr));
-      const nextHeight = Math.max(1, Math.round(rect.height * dpr));
+      const nextWidth = Math.max(1, Math.round(cssWidth * dpr));
+      const nextHeight = Math.max(1, Math.round(cssHeight * dpr));
       if (nextWidth === width && nextHeight === height) return false;
       width = nextWidth;
       height = nextHeight;
@@ -277,29 +228,48 @@ export default function VoiceOrb({ status, getLevel, muted = false, className }:
       } catch {
         raw = 0;
       }
+      const status = statusRef.current;
       const target = Number.isFinite(raw) ? Math.min(1, Math.max(0, raw)) : 0;
       // Fast attack, slower release: the dial jumps with a syllable and settles calmly.
       level = ease(level, target, dt, target > level ? 0.05 : 0.22);
-      look = easeLook(look, targetLook(statusRef.current, level, mutedRef.current), dt);
+      const goal = targetLook(status, level, mutedRef.current);
+      look = easeLook(look, goal, dt);
       angle += look.spin * dt * Math.PI * 2;
+      // Without a ResizeObserver the size has to be read here (a forced layout, the old way).
+      if (resizeObserver === null) measure();
       resize();
       drawOrb(context, width, height, dpr, {
         look,
         level,
         time: clock,
         angle,
-        breathe: statusRef.current === "idle",
+        breathe: status === "idle",
       });
-      schedule();
+      const cadence = orbCadence(status, lookSettled(look, goal, level), reduced);
+      if (cadence === "slow") scheduleSlow();
+      else if (cadence === "full") schedule();
+      // "stop": the last frame stays on the canvas; a state change wakes the loop (changedRef).
     };
 
+    const canRun = () => !reduced && onScreen && pageVisible;
+
     const schedule = () => {
-      if (frameId === 0 && !reduced && onScreen && pageVisible) frameId = requestAnimationFrame(tick);
+      if (frameId === 0 && slowTimer === undefined && canRun()) frameId = requestAnimationFrame(tick);
+    };
+
+    const scheduleSlow = () => {
+      if (frameId !== 0 || slowTimer !== undefined || !canRun()) return;
+      slowTimer = setTimeout(() => {
+        slowTimer = undefined;
+        schedule();
+      }, SLOW_FRAME_MS);
     };
 
     const pause = () => {
       if (frameId !== 0) cancelAnimationFrame(frameId);
       frameId = 0;
+      clearTimeout(slowTimer);
+      slowTimer = undefined;
       lastTime = 0;
     };
 
@@ -314,8 +284,18 @@ export default function VoiceOrb({ status, getLevel, muted = false, className }:
       }
     };
 
-    redrawRef.current = () => {
-      if (reduced) drawStill();
+    changedRef.current = () => {
+      if (reduced) {
+        // A new state is a new still frame.
+        drawStill();
+        return;
+      }
+      // A stopped or slowed loop runs at full rate again until the new look has settled.
+      if (slowTimer !== undefined) {
+        clearTimeout(slowTimer);
+        slowTimer = undefined;
+      }
+      schedule();
     };
 
     const onMotionChange = () => {
@@ -337,23 +317,41 @@ export default function VoiceOrb({ status, getLevel, muted = false, className }:
       });
       intersection.observe(canvas);
     }
+    // A resized canvas is cleared: redraw it at once, also when the loop is stopped or slow.
+    const redrawAfterResize = () => {
+      if (!resize()) return;
+      if (reduced) drawStill();
+      else changedRef.current();
+    };
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        if (resize() && reduced) drawStill();
+      resizeObserver = new ResizeObserver((entries) => {
+        const box = entries[entries.length - 1]?.contentRect;
+        if (box) {
+          cssWidth = box.width;
+          cssHeight = box.height;
+        } else {
+          measure();
+        }
+        redrawAfterResize();
       });
       resizeObserver.observe(canvas);
     }
+    // Zoom and moving the window to another screen change the pixel ratio, not the CSS size.
+    const onWindowResize = () => redrawAfterResize();
+    window.addEventListener("resize", onWindowResize);
 
     // First paint before the browser shows the canvas: no empty frame after the still CSS orb.
+    measure();
     drawStill();
     update();
 
     return () => {
       pause();
-      redrawRef.current = () => undefined;
+      changedRef.current = () => undefined;
       motionQuery.removeEventListener("change", onMotionChange);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("resize", onWindowResize);
       intersection?.disconnect();
       resizeObserver?.disconnect();
     };

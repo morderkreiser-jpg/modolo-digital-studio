@@ -72,6 +72,10 @@ export const VOICE_SERVER_ERROR_CODES = [
   "upstream",
   "timeout",
   "refused",
+  // One turn at a time per session (HTTP 409). The local transport waits and sends the turn again
+  // (a barge-in leaves the cut turn running on the server for a moment); only a turn that stays
+  // blocked reaches the widget as this failure.
+  "turn_in_progress",
 ] as const satisfies readonly VoiceErrorCode[];
 
 export type VoiceFailureCode = VoiceErrorCode | VoiceClientErrorCode;
@@ -120,6 +124,11 @@ export interface VoiceMachineState {
   captions: VoiceCaption[];
   /** Live modes only, from CONNECTED on. */
   secondsLeft: number | null;
+  /**
+   * The seconds left at the moment the remaining-time indicator appeared, said once to screen
+   * readers. Captured then, not a constant: the server can drop the count straight to 8.
+   */
+  timerAnnounced: number | null;
   /** Seconds the caller has been silent while it was their turn. */
   silentSeconds: number;
   limits: VoiceMachineLimits;
@@ -195,6 +204,11 @@ export type VoiceTransportEvent = Extract<
 export const MAX_CAPTIONS = 200;
 /** The remaining-time indicator shows up from here on. */
 export const TIMER_VISIBLE_FROM_SECONDS = 30;
+/**
+ * A button that just changed what it does (start → end, end → new conversation) ignores clicks
+ * for this long: the second click of a double-click must not end the example it just started.
+ */
+export const ACTIVATION_GUARD_MS = 450;
 
 const FALLBACK_LIMITS: VoiceMachineLimits = {
   maxCallSeconds: 180,
@@ -244,6 +258,34 @@ export function timerVisible(state: VoiceMachineState): boolean {
   );
 }
 
+/**
+ * Seconds of silence after which the visitor is asked whether they are still there: up to 10 s
+ * before the silence limit ends the conversation, never in its first half.
+ */
+export function silenceWarningAt(silenceTimeoutSeconds: number): number {
+  return Math.max(1, silenceTimeoutSeconds - Math.min(10, Math.floor(silenceTimeoutSeconds / 2)));
+}
+
+/** The "still there?" hint: shown while it is the caller's turn and the silence limit is near. */
+export function silenceWarningVisible(state: VoiceMachineState): boolean {
+  return (
+    isLiveMode(state.mode) &&
+    state.status === "listening" &&
+    !state.muted &&
+    state.silentSeconds >= silenceWarningAt(state.limits.silenceTimeoutSeconds)
+  );
+}
+
+/**
+ * Whether a click on a button that changes role may act: not the second click of a double-click
+ * (`clickCount` is the event's detail; 0 for keyboard activation), and not within
+ * ACTIVATION_GUARD_MS of the role change (`sinceRoleChangeMs`, null when it never changed).
+ */
+export function activationAllowed(sinceRoleChangeMs: number | null, clickCount: number): boolean {
+  if (clickCount > 1) return false;
+  return sinceRoleChangeMs === null || !(sinceRoleChangeMs < ACTIVATION_GUARD_MS);
+}
+
 /** The reason the end endpoint is told (it knows the contract's reasons only). */
 export function toEndRequestReason(reason: VoiceEndReason): EndRequestBody["reason"] {
   if (reason === "complete") return "user";
@@ -286,6 +328,7 @@ export function recoveryFor(
     case "busy":
     case "upstream":
     case "timeout":
+    case "turn_in_progress":
     case "load_failed":
       actions.push("retry");
       break;
@@ -331,6 +374,7 @@ export function initVoiceState(options: {
     typed: false,
     captions: [],
     secondsLeft: null,
+    timerAnnounced: null,
     silentSeconds: 0,
     limits: mergeLimits(FALLBACK_LIMITS, options.limits),
     errorCode: null,
@@ -344,6 +388,17 @@ export function initVoiceState(options: {
 }
 
 export function voiceReducer(state: VoiceMachineState, event: VoiceEvent): VoiceMachineState {
+  const next = step(state, event);
+  return next === state ? state : withTimerAnnouncement(next);
+}
+
+/** Captures the seconds left once, when the remaining-time indicator first appears. */
+function withTimerAnnouncement(state: VoiceMachineState): VoiceMachineState {
+  if (state.timerAnnounced !== null || state.secondsLeft === null || !timerVisible(state)) return state;
+  return { ...state, timerAnnounced: Math.max(0, Math.ceil(state.secondsLeft)) };
+}
+
+function step(state: VoiceMachineState, event: VoiceEvent): VoiceMachineState {
   switch (event.type) {
     case "START": {
       if (state.status !== "idle") return state;
@@ -391,8 +446,9 @@ export function voiceReducer(state: VoiceMachineState, event: VoiceEvent): Voice
     case "LISTENING":
       if (state.status === "listening") return state;
       if (state.status !== "thinking" && state.status !== "speaking") return state;
-      // The caller's turn starts now: silence is counted from here.
-      return { ...state, status: "listening", silentSeconds: 0 };
+      // The caller's turn starts now: silence is counted from here, and whatever tool the reply
+      // used is over (its "ok" may never come, e.g. after an aborted stream).
+      return { ...state, status: "listening", silentSeconds: 0, activeTool: null };
 
     case "THINKING":
       if (state.status !== "listening" && state.status !== "speaking") return state;
@@ -404,7 +460,8 @@ export function voiceReducer(state: VoiceMachineState, event: VoiceEvent): Voice
 
     case "INTERRUPT":
       if (state.status !== "speaking") return state;
-      return { ...state, status: "listening", silentSeconds: 0, notice: null };
+      // The reply was cut, its stream with it: a tool it had started will never report back.
+      return { ...state, status: "listening", silentSeconds: 0, notice: null, activeTool: null };
 
     case "CAPTION": {
       if (!acceptsTransportEvents(state.status)) return state;
@@ -447,8 +504,11 @@ export function voiceReducer(state: VoiceMachineState, event: VoiceEvent): Voice
       if (!Number.isFinite(seconds) || seconds <= 0) return state;
       const secondsLeft = Math.max(0, state.secondsLeft - seconds);
       if (secondsLeft === 0) return end({ ...state, secondsLeft }, "timeout");
-      // Silence is the caller's: it only counts while it is their turn to speak.
-      const silentSeconds = state.status === "listening" ? state.silentSeconds + seconds : state.silentSeconds;
+      // Silence is the caller's: it only counts while it is their turn to speak, and not while
+      // they muted the microphone on purpose (to answer someone in the room). The call limit
+      // still ends a conversation left muted.
+      const counting = state.status === "listening" && !state.muted;
+      const silentSeconds = counting ? state.silentSeconds + seconds : state.silentSeconds;
       if (silentSeconds >= state.limits.silenceTimeoutSeconds) return end({ ...state, secondsLeft, silentSeconds }, "silence");
       return { ...state, secondsLeft, silentSeconds };
     }
@@ -536,12 +596,25 @@ function upsertCaption(captions: VoiceCaption[], caption: VoiceCaption): VoiceCa
   return next;
 }
 
+/**
+ * The smallest value of each limit the widget takes from the server, as the server may send it
+ * (lib/voice/server/env.ts VOICE_LIMIT_RANGES): no end warning (0) is valid, a zero-length call is not.
+ */
+const LIMIT_MINIMUM: Record<keyof VoiceMachineLimits, number> = {
+  maxCallSeconds: 1,
+  warnBeforeEndSeconds: 0,
+  silenceTimeoutSeconds: 1,
+  maxTurnChars: 1,
+};
+
 function mergeLimits(base: VoiceMachineLimits, overrides: Partial<VoiceMachineLimits> | undefined): VoiceMachineLimits {
   if (!overrides) return base;
   const merged = { ...base };
   for (const key of Object.keys(base) as Array<keyof VoiceMachineLimits>) {
     const value = overrides[key];
-    if (typeof value === "number" && Number.isFinite(value) && value > 0) merged[key] = Math.floor(value);
+    if (typeof value === "number" && Number.isFinite(value) && Math.floor(value) >= LIMIT_MINIMUM[key]) {
+      merged[key] = Math.floor(value);
+    }
   }
   return merged;
 }

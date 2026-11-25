@@ -2,7 +2,8 @@
    Always dark, like the homepage film: espresso field, cream type, gold only as a hairline, a
    tick or a small label, never a fill. Self-contained: no dependency on the host's utility CSS.
    Contrast on #17130e, measured: cream 16:1, muted text (cream at .72) 8.8:1, gold #e8c877
-   11:1, field borders (cream at .46) 4.2:1. */
+   11:1, field borders (cream at .46) 4.2:1, button outlines (cream at .42) 3.6:1 (at .32 they were
+   2.7:1, under the 3:1 a control's edge needs). */
 
 .stage {
   --mv-bg: #17130e;
@@ -11,7 +12,7 @@
   --mv-text: rgb(246 241 231 / 0.9);
   --mv-muted: rgb(246 241 231 / 0.72);
   --mv-hair: rgb(246 241 231 / 0.14);
-  --mv-line: rgb(246 241 231 / 0.32);
+  --mv-line: rgb(246 241 231 / 0.42);
   --mv-field: rgb(246 241 231 / 0.46);
   --mv-gold: #c9992f;
   --mv-gold-hi: #e8c877;
@@ -46,6 +47,13 @@
   box-sizing: border-box;
 }
 
+/* No hyphens from the host page (the sales page hyphenates its running text): a caption or a
+   status split as "Bei-spiel" reads badly. A word too long for a phone still wraps. */
+.stage p {
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+
 /* The site's measure line: a short gold rule along the top edge. */
 .stage::before {
   content: "";
@@ -63,6 +71,13 @@
 .stage :focus-visible {
   outline: 2px solid var(--mv-gold-hi);
   outline-offset: 3px;
+}
+
+/* The stage itself takes focus only from a click on its text or background (tabindex -1), so that
+   Escape still reaches it; it is never a tab stop and needs no ring. (The consent card, focused as
+   a whole when it appears, gets the ring above for keyboard users only.) */
+.stage:focus {
+  outline: none;
 }
 
 .layout {
@@ -115,10 +130,6 @@
 
 .title {
   grid-area: title;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 12px;
   margin: 6px 0 0;
   color: var(--mv-cream);
   font-family: var(--font-space), system-ui, sans-serif;
@@ -134,8 +145,14 @@
   overflow-wrap: anywhere;
 }
 
+/* The last word and the badge: they wrap together, so the badge never stands alone on a line. */
+.titleTail {
+  white-space: nowrap;
+}
+
 .badge {
-  flex: none;
+  display: inline-block;
+  margin-left: 10px;
   padding: 1px 8px;
   border: 1px solid rgb(232 200 119 / 0.55);
   border-radius: 999px;
@@ -146,7 +163,7 @@
   line-height: 1.6;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  transform: translateY(-3px);
+  vertical-align: 0.3em;
 }
 
 .fictional {
@@ -392,6 +409,25 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* During a conversation the lines live in a box of fixed height that scrolls (voice-stage.tsx
+   follows the newest line): a new line never pushes the end button away from the visitor's finger,
+   and nothing on the page moves. Lines are only added below, so the ones already there stay put.
+   Once earlier lines scroll out, the top edge fades. Sized from the examples: three lines need
+   about 280 px at the median on a phone (measured 25.11.2026). */
+.captions[data-reserve] {
+  height: var(--mv-captions-h, 17.5rem);
+  margin-bottom: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mv-hair) transparent;
+}
+
+.captions[data-reserve][data-scrolled] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 2.25rem);
 }
 
 .caption {
@@ -947,6 +983,7 @@
 }
 
 .stage[data-variant="compact"] {
+  --mv-captions-h: 12rem;
   border-radius: 22px;
 }
 

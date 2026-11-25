@@ -402,6 +402,39 @@ describe("demo script tool steps", () => {
       }
     }
   });
+
+  // Review finding correttezza/F7: scripts promised a callback time right after create_lead, which
+  // the tool tells the model never to do without the tenant's own words.
+  it("promise a time after a stored request only in the words the business gave for it", () => {
+    const TIMING = /Arbeitstag|Werktag|Öffnungstag|giorno lavorativo|giorno di apertura|working day|day the restaurant is open|jour ouvrable|jour d'ouverture/i;
+    for (const script of DEMO_SCRIPTS) {
+      const tenant = tenantOf(script);
+      for (const step of toolSteps(script)) {
+        if (step.name !== "create_lead" || step.outcome !== "ok" || !TIMING.test(step.line.text)) continue;
+        const task = tenant.tasks.find((candidate) => candidate.id === step.input.task);
+        const words = task?.followUp?.[script.locale] ?? tenant.handoff.written.promise?.[script.locale];
+        const knowledge = tenant.knowledge().sections.map((section) => section.content[script.locale] ?? "").join(" ");
+        assert.ok(words !== undefined || TIMING.test(knowledge), `${script.id}: promises a time the business never stated`);
+      }
+    }
+  });
+});
+
+// Review finding correttezza/F8: the holiday table listed 2027 only, so the demos took bookings
+// on Christmas Day 2026.
+describe("demo calendars at Christmas", () => {
+  it("are closed on Christmas Day and St Stephen's Day wherever public holidays close them", async () => {
+    for (const tenant of DEMO_TENANTS) {
+      if (!tenant.calendar || !tenant.answerPolicy.holidays || tenant.hours.holidays.length === 0) continue;
+      const calendar = createMemoryCalendar(tenant.calendar, tenant.hours);
+      for (const date of ["2026-12-25", "2026-12-26"]) {
+        const service = tenant.calendar.services[0].id;
+        const partySize = tenant.calendar.capacity.kind === "seats" ? 2 : undefined;
+        const result = await calendar.findSlots({ serviceId: service, date, partySize, now: new Date("2026-12-22T08:00:00Z") });
+        assert.deepEqual(result, { ok: false, code: "outside_hours" }, `${tenant.id} on ${date}`);
+      }
+    }
+  });
 });
 
 describe("scriptsFor", () => {

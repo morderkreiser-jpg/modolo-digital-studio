@@ -210,9 +210,11 @@ const PROJECT_REQUEST: TaskDefinition = {
       maxLength: 120,
     },
   ],
-  // Email and phone are both optional for the schema; the rules require at least one of them and
-  // let the caller choose which.
+  // Email and phone are each optional, so the caller chooses which; at least one of them is
+  // required, and the tool refuses a request without either (on the web there is no caller id, so
+  // Francesco could not answer it).
   contact: { name: "required", phone: "optional", email: "optional", company: "optional" },
+  contactAtLeastOne: ["phone", "email"],
 };
 
 // ---------------------------------------------------------------------------------------------

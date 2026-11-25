@@ -60,6 +60,8 @@ export interface VoiceStrings {
   handoff: { transfer: string; callback: string; written: string };
   timeLeft: string;
   timeLeftAnnounce: string;
+  /** Shown (and read out once) shortly before a long silence ends the conversation. */
+  silenceWarning: string;
   roleAssistant: string;
   roleCaller: string;
   roleYou: string;
@@ -154,6 +156,7 @@ const DE: VoiceStrings = {
   },
   timeLeft: "Noch {time}",
   timeLeftAnnounce: "Noch {seconds} Sekunden.",
+  silenceWarning: "Bist du noch da? Ohne Antwort endet das Gespräch in wenigen Sekunden.",
   roleAssistant: "KI-Assistent",
   roleCaller: "Anrufer",
   roleYou: "Du",
@@ -198,6 +201,7 @@ const DE: VoiceStrings = {
     upstream: "Die KI konnte gerade nicht antworten.",
     timeout: "Die Antwort hat zu lange gedauert.",
     refused: "Darauf kann die KI nicht antworten.",
+    turn_in_progress: "Die vorige Antwort ist noch nicht fertig. Versuch es gleich nochmals.",
     mic_denied:
       "Der Zugriff auf das Mikrofon wurde nicht erlaubt. Du kannst ihn in den Einstellungen des Browsers freigeben oder deine Fragen schreiben.",
     mic_unavailable: "Es wurde kein Mikrofon gefunden, oder ein anderes Programm benutzt es gerade.",
@@ -280,6 +284,7 @@ const IT: VoiceStrings = {
   },
   timeLeft: "Ancora {time}",
   timeLeftAnnounce: "Ancora {seconds} secondi.",
+  silenceWarning: "Ci sei ancora? Senza risposta la conversazione si chiude tra pochi secondi.",
   roleAssistant: "Assistente AI",
   roleCaller: "Chi chiama",
   roleYou: "Tu",
@@ -325,6 +330,7 @@ const IT: VoiceStrings = {
     upstream: "L'AI non è riuscita a rispondere.",
     timeout: "La risposta ha richiesto troppo tempo.",
     refused: "A questo l'AI non può rispondere.",
+    turn_in_progress: "La risposta precedente non è ancora finita. Riprova tra poco.",
     mic_denied:
       "L'accesso al microfono non è stato consentito. Puoi abilitarlo nelle impostazioni del browser oppure scrivere le domande.",
     mic_unavailable: "Non è stato trovato nessun microfono, oppure lo sta usando un altro programma.",
@@ -407,6 +413,7 @@ const EN: VoiceStrings = {
   },
   timeLeft: "{time} left",
   timeLeftAnnounce: "{seconds} seconds left.",
+  silenceWarning: "Are you still there? Without an answer the conversation ends in a few seconds.",
   roleAssistant: "AI assistant",
   roleCaller: "Caller",
   roleYou: "You",
@@ -451,6 +458,7 @@ const EN: VoiceStrings = {
     upstream: "The AI could not answer just now.",
     timeout: "The answer took too long.",
     refused: "The AI cannot answer that.",
+    turn_in_progress: "The previous answer is not finished yet. Try again in a moment.",
     mic_denied:
       "Access to the microphone was not allowed. You can allow it in your browser's settings or type your questions.",
     mic_unavailable: "No microphone was found, or another program is using it.",
@@ -534,6 +542,7 @@ const FR: VoiceStrings = {
   },
   timeLeft: "Encore {time}",
   timeLeftAnnounce: "Encore {seconds} secondes.",
+  silenceWarning: "Vous êtes toujours là ? Sans réponse, la conversation se termine dans quelques secondes.",
   roleAssistant: "Assistant IA",
   roleCaller: "Appelant",
   roleYou: "Vous",
@@ -580,6 +589,7 @@ const FR: VoiceStrings = {
     upstream: "L'IA n'a pas pu répondre pour le moment.",
     timeout: "La réponse a pris trop de temps.",
     refused: "L'IA ne peut pas répondre à cela.",
+    turn_in_progress: "La réponse précédente n'est pas encore terminée. Réessayez dans un instant.",
     mic_denied:
       "L'accès au micro n'a pas été autorisé. Vous pouvez l'autoriser dans les réglages du navigateur ou écrire vos questions.",
     mic_unavailable: "Aucun micro n'a été trouvé, ou un autre programme l'utilise.",

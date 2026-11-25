@@ -18,6 +18,7 @@ import {
   openSession,
 } from "@/lib/voice/server/session";
 import { loadState } from "@/lib/voice/server/state";
+import type { SendEmail } from "@/lib/voice/server/summary";
 import { MAX_EXPIRED_GRACE_SECONDS, verifySessionToken, type SessionClaims } from "@/lib/voice/server/token";
 import { MODOLO_VOICE_TENANT } from "@/lib/voice/tenants/modolo";
 import { createFakeStore } from "../assistant/fixtures";
@@ -61,7 +62,9 @@ describe("openSession", () => {
 
     const state = await loadState(deps.store, claims.sid);
     assert.equal(state?.reservation?.sessionId, claims.sid);
-    assert.equal(state?.reservation?.reservedSeconds, 180);
+    // One lease of minutes, not the whole call: an abandoned session must not keep three
+    // minutes of the day (review finding sicurezza/F4). Each turn extends it.
+    assert.equal(state?.reservation?.reservedSeconds, 60);
     assert.equal(state?.startedAt, T0);
   });
 
@@ -89,7 +92,7 @@ describe("closing", () => {
     const opened = await openSession(request(), sessionBody(), deps);
     assert.ok(opened.ok);
     const claims = await claimsOf(opened.grant.sessionToken);
-    assert.equal((await usageSnapshot(deps.store, "modolo", T0)).minutesToday, 3, "the worst case is reserved");
+    assert.equal((await usageSnapshot(deps.store, "modolo", T0)).minutesToday, 1, "one lease is reserved");
 
     const closed = await closeSession({ sessionToken: opened.grant.sessionToken, reason: "user" }, { ...deps, now: () => T0 + 42_000 });
     assert.deepEqual(closed, { ok: true, closed: true });
@@ -115,6 +118,31 @@ describe("closing", () => {
     assert.deepEqual(inGrace, { ok: true, closed: true });
     // Every route that starts work still refuses the expired token.
     assert.deepEqual(verifySessionToken(opened.grant.sessionToken, TEST_SECRET, exp + 60_000), { ok: false, reason: "expired" });
+  });
+
+  // An example's token is free to get: an end report for each must not write a marker per token
+  // into the accounting store (review finding sicurezza/F6).
+  it("ends an example without writing anything", async () => {
+    const { store, calls } = createFakeStore();
+    const deps = { store, accountingStore: store, now: () => T0, resend: null };
+    const opened = await openSession(request(), sessionBody({ mode: "scripted" }), deps);
+    assert.ok(opened.ok);
+    const before = calls.length;
+    assert.deepEqual(await closeSession({ sessionToken: opened.grant.sessionToken, reason: "user" }, deps), { ok: true, closed: false });
+    assert.equal(calls.length, before);
+  });
+
+  it("settles a session whose state was lost, from its token and the ledger", async () => {
+    const deps = testDeps({ now: () => T0 });
+    const opened = await openSession(request(), sessionBody(), deps);
+    assert.ok(opened.ok);
+    const claims = await claimsOf(opened.grant.sessionToken);
+    await deps.store.set(`mva:state:${claims.sid}`, "", 1); // gone, as on another instance
+    const closed = await closeSession({ sessionToken: opened.grant.sessionToken, reason: "user" }, { ...deps, now: () => T0 + 30_000 });
+    assert.deepEqual(closed, { ok: true, closed: true });
+    const usage = await usageSnapshot(deps.store, "modolo", T0 + 30_000);
+    assert.equal(usage.minutesToday, 30 / 60, "the unused lease came back");
+    assert.equal(usage.running, 0, "the slot is free");
   });
 
   it("closes a session exactly once even when two reports race", async () => {
@@ -154,17 +182,60 @@ describe("recovering and sinks", () => {
 
   it("refuses to take a live tenant's request that could never reach it", async () => {
     const withoutEmail = createSessionSinks(MODOLO_VOICE_TENANT, null);
-    assert.deepEqual(await withoutEmail.lead({} as never), { ok: false, ref: "" });
-    assert.deepEqual(await withoutEmail.callback({} as never), { ok: false });
-
-    const withEmail = createSessionSinks(MODOLO_VOICE_TENANT, RESEND);
-    const lead = await withEmail.lead({} as never);
-    assert.equal(lead.ok, true);
-    assert.match(lead.ref, /^LD-[2-9A-HJ-NP-Z]{4}$/);
+    assert.deepEqual(await withoutEmail.lead(LEAD), { ok: false, ref: "" });
+    assert.deepEqual(await withoutEmail.callback(CALLBACK), { ok: false });
 
     const demo = getDemoTenant("demo-maler");
     assert.ok(demo);
-    assert.equal((await createSessionSinks(demo, null).lead({} as never)).ok, true);
-    assert.deepEqual(await withEmail.transfer({ tenant: "modolo", sessionId: "x", targetId: "owner" }), { connected: false });
+    assert.equal((await createSessionSinks(demo, null).lead(LEAD)).ok, true);
+    assert.deepEqual(await withoutEmail.transfer({ tenant: "modolo", sessionId: "x", targetId: "owner" }), { connected: false });
+  });
+
+  // From the integration report: a request reached the business only with the end-of-session
+  // summary, so a call that never reported its end lost it although the caller heard "passed on".
+  // The sink with RESEND used to answer ok without sending anything; it now sends, and only an
+  // accepted email counts.
+  it("emails a live tenant's request at once, and says it was passed on only when the email was accepted", async () => {
+    const sent: Array<{ to: string; subject: string; text: string }> = [];
+    const accepting: SendEmail = async (email) => {
+      sent.push(email);
+      return true;
+    };
+    const withEmail = createSessionSinks(MODOLO_VOICE_TENANT, RESEND, { send: accepting, session: { channel: "web", startedAt: T0 } });
+    const lead = await withEmail.lead(LEAD);
+    assert.equal(lead.ok, true);
+    assert.match(lead.ref, /^LD-[2-9A-HJ-NP-Z]{4}$/);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].to, MODOLO_VOICE_TENANT.notifyEmail);
+    assert.ok(sent[0].subject.includes(lead.ref));
+    assert.match(sent[0].text, /während eines Gesprächs aufgenommen/);
+    assert.ok(sent[0].text.includes("anna@example.ch"));
+    assert.deepEqual(await withEmail.callback(CALLBACK), { ok: true });
+    assert.equal(sent.length, 2);
+    assert.ok(sent[1].text.includes("+41791234567"));
+
+    const refusing: SendEmail = async () => false;
+    const failing = createSessionSinks(MODOLO_VOICE_TENANT, RESEND, { send: refusing });
+    assert.deepEqual(await failing.lead(LEAD), { ok: false, ref: "" });
+    assert.deepEqual(await failing.callback(CALLBACK), { ok: false });
   });
 });
+
+const LEAD = {
+  tenant: "modolo",
+  sessionId: "sinkSession00000000001",
+  taskId: "project_request",
+  fields: {},
+  contact: { name: "Anna Muster", email: "anna@example.ch" },
+  summary: "Website für ein Café.",
+  locale: "de" as const,
+};
+
+const CALLBACK = {
+  tenant: "modolo",
+  sessionId: "sinkSession00000000001",
+  name: "Anna Muster",
+  phone: "+41791234567",
+  topic: "Website",
+  locale: "de" as const,
+};

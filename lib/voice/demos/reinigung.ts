@@ -118,6 +118,8 @@ export const REINIGUNG_TENANT: VoiceTenantConfig = {
         },
       ],
       contact: { name: "required", phone: "required", email: "optional", company: "optional" },
+      // What the knowledge says about requests; the tool hands exactly this to the model.
+      followUp: { de: "Wir rufen Sie am nächsten Arbeitstag zurück." },
     },
   ],
   tools: ["create_lead", "request_callback", "end_call"],

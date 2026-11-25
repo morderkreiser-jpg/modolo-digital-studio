@@ -9,10 +9,16 @@
 // Errors are short English sentences naming the detail, written for the model: execute.ts hands
 // them back so it can ask the caller again. They never echo the caller's values.
 //
+// Two checks need the call itself (ValidationOptions), and are skipped without it:
+//   - `locale`: a phone number without a country code is read as Swiss only in a German call. An
+//     Italian caller's Milan number "02 1234 5678" has the shape of a Lausanne number; in any other
+//     language the model must first ask whether the number is Swiss and then send it with +41.
+//   - `now`: a date a caller leaves with a request must not lie in the past (TaskField.allowPast).
+//
 // Pure: no I/O, safe to import from scripts and tests (the demo scripts are replayed through it).
 import { isVoiceToolName } from "@/lib/voice/types";
-import type { TaskDefinition, TaskField, VoiceTenantConfig, VoiceText } from "@/lib/voice/types";
-import { isValidDate, parseIsoInstant, toZonedIso, wallTimeToEpoch } from "@/lib/voice/hours";
+import type { TaskDefinition, TaskField, VoiceLocale, VoiceTenantConfig, VoiceText } from "@/lib/voice/types";
+import { isValidDate, parseIsoInstant, toZonedIso, wallTimeToEpoch, zonedParts } from "@/lib/voice/hours";
 import { normalizeBookingRef } from "@/lib/voice/calendar/memory";
 import {
   CONTACT_KEYS,
@@ -27,7 +33,34 @@ import {
 
 export type ToolValidation = { ok: true; value: Record<string, unknown> } | { ok: false; errors: string[] };
 
+/** What validation knows about the call (see the header). */
+export interface ValidationOptions {
+  /** Language of the call. */
+  locale?: VoiceLocale;
+  /** The call's clock. */
+  now?: Date;
+}
+
 type Input = Record<string, unknown>;
+
+interface Checks {
+  options: ValidationOptions;
+  timezone: string;
+}
+
+/**
+ * The Swiss numbering plan: the digits after the trunk zero of every number a caller can be
+ * reached on. Geographic codes, 058 (company networks), 051 (railways), mobile 075 to 079, and the
+ * free and shared-cost service numbers. Premium-rate numbers (090x) are left out on purpose: a
+ * business calling one back would pay for it.
+ */
+const SWISS_PREFIXES_2 = new Set([
+  "21", "22", "24", "26", "27", "31", "32", "33", "34", "41", "43", "44", "51", "52", "55", "56", "58",
+  "61", "62", "71", "75", "76", "77", "78", "79", "81", "91",
+]);
+const SWISS_PREFIXES_3 = new Set(["800", "840", "842", "844", "848", "878"]);
+/** Premium-rate numbers (0900, 0901, 0906, ...), after the trunk zero or the country code. */
+const PREMIUM_RATE = /^90/;
 
 const PART_OF_DAY = ["morning", "afternoon", "evening"] as const;
 const END_REASONS = ["caller_done", "no_response", "abuse", "limit"] as const;
@@ -43,20 +76,26 @@ const TOP_LEVEL_DOMAIN = /^(?:\p{L}{2,63}|xn--[a-z0-9-]{1,59})$/iu;
 // C0/C1 controls, zero-width characters and bidirectional overrides (they can disguise text).
 const INVISIBLE = /[\p{Cc}​-‏‪-‮⁠-⁤⁦-⁩﻿]+/gu;
 
-export function validateToolInput(tenant: VoiceTenantConfig, name: string, input: unknown): ToolValidation {
+export function validateToolInput(
+  tenant: VoiceTenantConfig,
+  name: string,
+  input: unknown,
+  options: ValidationOptions = {},
+): ToolValidation {
   if (!isVoiceToolName(name) || !enabledTools(tenant).includes(name)) {
     return { ok: false, errors: [`Unknown tool "${clip(String(name))}".`] };
   }
   if (!isPlainObject(input)) return { ok: false, errors: ["The input must be an object."] };
 
   const errors: string[] = [];
+  const checks: Checks = { options, timezone: tenant.hours?.timezone ?? "Europe/Zurich" };
   let value: Record<string, unknown>;
   switch (name) {
     case "check_availability":
       value = checkAvailability(tenant, input, errors);
       break;
     case "book_appointment":
-      value = bookAppointment(tenant, input, errors);
+      value = bookAppointment(tenant, input, errors, checks);
       break;
     case "cancel_appointment":
       value = cancelAppointment(input, errors);
@@ -65,10 +104,10 @@ export function validateToolInput(tenant: VoiceTenantConfig, name: string, input
       value = rescheduleAppointment(tenant, input, errors);
       break;
     case "create_lead":
-      value = createLead(tenant, input, errors);
+      value = createLead(tenant, input, errors, checks);
       break;
     case "request_callback":
-      value = requestCallback(input, errors);
+      value = requestCallback(input, errors, checks);
       break;
     case "transfer_call":
       value = transferCall(tenant, input, errors);
@@ -97,7 +136,7 @@ function checkAvailability(tenant: VoiceTenantConfig, input: Input, errors: stri
   return value;
 }
 
-function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[]): Record<string, unknown> {
+function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   const seats = usesSeats(tenant);
   const keys = ["service", "start", "name", "contact", "notes"];
   if (seats) keys.push("party_size");
@@ -106,7 +145,7 @@ function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string
     service: serviceId(tenant, input, errors),
     start: startValue(tenant, input, "start", errors),
     name: personName(input, "name", true, errors),
-    contact: contactValue(input, errors),
+    contact: contactValue(input, errors, checks),
   };
   if (seats) value.party_size = partySize(input, errors);
   const notes = freeText(input, "notes", TOOL_TEXT_LIMITS.notes, false, errors);
@@ -128,7 +167,7 @@ function rescheduleAppointment(tenant: VoiceTenantConfig, input: Input, errors: 
   };
 }
 
-function createLead(tenant: VoiceTenantConfig, input: Input, errors: string[]): Record<string, unknown> {
+function createLead(tenant: VoiceTenantConfig, input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   const contactKeys = leadContactKeys(tenant);
   onlyKeys(input, ["task", "fields", "summary", ...contactKeys], "", errors);
 
@@ -145,21 +184,27 @@ function createLead(tenant: VoiceTenantConfig, input: Input, errors: string[]): 
   } else {
     const knownIds = leadFieldIds(tenant);
     onlyKeys(fieldsInput, knownIds, "fields.", errors);
-    if (task) collectFields(task, fieldsInput, knownIds, fields, errors);
+    if (task) collectFields(task, fieldsInput, knownIds, fields, errors, checks);
   }
 
   const value: Record<string, unknown> = { task: taskId, fields };
   for (const key of CONTACT_KEYS) {
     if (!contactKeys.includes(key)) continue;
     const need = task?.contact?.[key] ?? "optional";
-    const given = contactDetail(input, key, errors);
-    // Data minimisation: a detail this task does not need is dropped, not stored.
+    // Data minimisation: a detail this task does not need is dropped, not stored, and not even
+    // checked, so a garbled detail nobody asked for cannot block the request.
     if (need === "none") continue;
+    const given = contactDetail(input, key, errors, checks);
     if (given === undefined) {
       if (need === "required" && task) errors.push(`"${key}" is required for this task.`);
       continue;
     }
     value[key] = given;
+  }
+  // Optional one by one, but not all of them: without a phone or an email nobody can answer.
+  const oneOf = (task?.contactAtLeastOne ?? []).filter((key) => contactKeys.includes(key) && task?.contact?.[key] !== "none");
+  if (oneOf.length > 0 && !oneOf.some((key) => value[key] !== undefined) && !oneOf.some((key) => input[key] !== undefined && input[key] !== null)) {
+    errors.push(`${oneOf.map((key) => `"${key}"`).join(" or ")} is required for this task: ask the caller for one of them.`);
   }
   value.summary = freeText(input, "summary", TOOL_TEXT_LIMITS.summary, true, errors);
   return value;
@@ -171,6 +216,7 @@ function collectFields(
   knownIds: readonly string[],
   out: Record<string, string>,
   errors: string[],
+  checks: Checks,
 ): void {
   const own = new Set((task.fields ?? []).map((field) => field.id));
   for (const key of Object.keys(input)) {
@@ -197,16 +243,26 @@ function collectFields(
       if (field.required) errors.push(`"${where}" (${labelOf(field.label, field.id)}) is required.`);
       continue;
     }
-    const normalised = fieldValue(field, text, where, errors);
+    const normalised = fieldValue(field, text, where, errors, checks);
     if (normalised !== null) out[field.id] = normalised;
+  }
+  // Date pairs: a departure before (or on) the arrival is a misheard date, not a stay.
+  for (const field of task.fields ?? []) {
+    if (field.type !== "date" || field.after === undefined) continue;
+    const later = out[field.id];
+    const earlier = out[field.after];
+    if (later !== undefined && earlier !== undefined && !(later > earlier)) {
+      errors.push(`"fields.${field.id}" must come after "fields.${clip(field.after)}". Ask the caller for both dates again.`);
+      delete out[field.id];
+    }
   }
 }
 
-function requestCallback(input: Input, errors: string[]): Record<string, unknown> {
+function requestCallback(input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   onlyKeys(input, ["name", "phone", "topic", "preferred_time"], "", errors);
   const value: Record<string, unknown> = {
     name: personName(input, "name", true, errors),
-    phone: phoneValue(input, "phone", true, errors),
+    phone: phoneValue(input, "phone", true, errors, checks),
     topic: freeText(input, "topic", TOOL_TEXT_LIMITS.topic, true, errors),
   };
   const preferred = freeText(input, "preferred_time", TOOL_TEXT_LIMITS.preferredTime, false, errors);
@@ -232,13 +288,13 @@ function endCall(input: Input, errors: string[]): Record<string, unknown> {
 // Task fields
 // ---------------------------------------------------------------------------------------------
 
-function fieldValue(field: TaskField, text: string, where: string, errors: string[]): string | null {
+function fieldValue(field: TaskField, text: string, where: string, errors: string[], checks: Checks): string | null {
   const max = field.maxLength ?? DEFAULT_FIELD_MAX_LENGTH;
   switch (field.type) {
     case "phone": {
-      const phone = normalizePhone(text);
-      if (phone === null) errors.push(`"${where}" must be a phone number with area code, e.g. 079 123 45 67.`);
-      return phone;
+      const phone = checkPhone(text, where, checks);
+      if (!phone.ok) errors.push(phone.error);
+      return phone.ok ? phone.value : null;
     }
     case "email": {
       if (!isValidEmail(text)) {
@@ -247,12 +303,19 @@ function fieldValue(field: TaskField, text: string, where: string, errors: strin
       }
       return text.toLowerCase();
     }
-    case "date":
+    case "date": {
       if (!isValidDate(text)) {
         errors.push(`"${where}" must be a date as YYYY-MM-DD.`);
         return null;
       }
+      const today = todayIn(checks);
+      // ISO dates compare as strings.
+      if (field.allowPast !== true && today !== null && text < today) {
+        errors.push(`"${where}" lies in the past (today is ${today}). Ask the caller for the date again.`);
+        return null;
+      }
       return text;
+    }
     case "time": {
       const match = TIME_INPUT.exec(text);
       const hours = match ? Number(match[1]) : -1;
@@ -445,31 +508,80 @@ function reference(input: Input, errors: string[]): string | undefined {
 }
 
 /** book_appointment's contact: an email when it has an "@", else a phone number. */
-function contactValue(input: Input, errors: string[]): string | undefined {
+function contactValue(input: Input, errors: string[], checks: Checks): string | undefined {
   const text = stringValue(input, "contact", true, errors);
   if (text === undefined) return undefined;
   if (text.includes("@")) {
     if (isValidEmail(text)) return text.toLowerCase();
-  } else {
-    const phone = normalizePhone(text);
-    if (phone !== null) return phone;
+    errors.push('"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.');
+    return undefined;
   }
-  errors.push('"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.');
+  const phone = checkPhone(text, "contact", checks);
+  if (phone.ok) return phone.value;
+  errors.push(phone.error);
   return undefined;
 }
 
-function phoneValue(input: Input, key: string, required: boolean, errors: string[]): string | undefined {
+function phoneValue(input: Input, key: string, required: boolean, errors: string[], checks: Checks): string | undefined {
   const text = stringValue(input, key, required, errors);
   if (text === undefined) return undefined;
+  const phone = checkPhone(text, key, checks);
+  if (!phone.ok) errors.push(phone.error);
+  return phone.ok ? phone.value : undefined;
+}
+
+/**
+ * A phone number given by the caller, checked for the call it was given in. A number in the Swiss
+ * national form ("079 ...", "044 ...") is only taken as Swiss in a German call; in any other
+ * language the model is told to ask, because the same digits are a number in Milan, Rome or Paris.
+ */
+function checkPhone(text: string, key: string, checks: Checks): { ok: true; value: string } | { ok: false; error: string } {
   const phone = normalizePhone(text);
-  if (phone === null) errors.push(`"${key}" must be a phone number with area code, e.g. 079 123 45 67.`);
-  return phone ?? undefined;
+  const national = isNationalForm(text);
+  if (phone === null) {
+    if (national && /^0\d{9}$/.test(text.replace(/\D/g, ""))) {
+      return {
+        ok: false,
+        error: `"${key}" is not a Swiss number. If it is from another country, ask the caller for the country code and send the number with it (for example +39 or +49 in front).`,
+      };
+    }
+    if (key === "contact") {
+      return { ok: false, error: '"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.' };
+    }
+    return { ok: false, error: `"${key}" must be a phone number with area code, e.g. 079 123 45 67.` };
+  }
+  const locale = checks.options.locale;
+  if (national && locale !== undefined && locale !== "de") {
+    return {
+      ok: false,
+      error: `"${key}" has no country code. Ask the caller whether it is a Swiss number: if it is, send it with +41 in front and without its first 0; if not, ask for the country code. Nothing was stored yet.`,
+    };
+  }
+  return { ok: true, value: phone };
+}
+
+/** "079 ...", "(044) ...": one trunk zero, no "+" and no "00" country prefix. */
+function isNationalForm(text: string): boolean {
+  if (text.includes("+")) return false;
+  const digits = text.replace(/\D/g, "");
+  return digits.startsWith("0") && !digits.startsWith("00");
+}
+
+/** Today in the tenant's zone, or null when the call's clock is unknown. */
+function todayIn(checks: Checks): string | null {
+  const now = checks.options.now;
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) return null;
+  try {
+    return zonedParts(now, checks.timezone).date;
+  } catch {
+    return null;
+  }
 }
 
 /** create_lead's name / phone / email / company, validated by kind. */
-function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[]): string | undefined {
+function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[], checks: Checks): string | undefined {
   if (key === "name") return personName(input, key, false, errors);
-  if (key === "phone") return phoneValue(input, key, false, errors);
+  if (key === "phone") return phoneValue(input, key, false, errors, checks);
   if (key === "email") {
     const text = stringValue(input, key, false, errors);
     if (text === undefined) return undefined;
@@ -493,10 +605,14 @@ function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors:
 
 /**
  * A phone number in E.164 ("+41791234567"), or null when it is not one.
- *   Swiss national forms: "079 123 45 67", "0791234567", "044 123 45 67"   -> +41 and 9 digits
- *   International: "+41 79 123 45 67", "0041 79 ...", "+41 (0)79 ...", "+41 079 ..." -> +41791234567
+ *   Swiss national forms: "079 123 45 67", "0791234567", "044 123 45 67"   -> +41 and 9 digits,
+ *     and only with a prefix of the Swiss numbering plan (SWISS_PREFIXES): "035 ..." or "0171 ..."
+ *     are numbers of another country written without their country code, not Swiss ones.
+ *   International: "+41 79 123 45 67", "0041 79 ...", "+41 (0)79 ...", "+41 079 ..." -> +41791234567;
+ *     premium rate ("+41 900 ...") is refused like "0900 ...".
  *   Other countries must start with + or 00; their digits are kept as given (7 to 15 in all).
  * Separators allowed: spaces, dots, dashes, slashes, brackets. Letters ("ext. 12") refuse it.
+ * Whether a national form may be read as Swiss at all depends on the call: see checkPhone().
  */
 export function normalizePhone(raw: string): string | null {
   if (typeof raw !== "string") return null;
@@ -514,7 +630,8 @@ export function normalizePhone(raw: string): string | null {
   } else if (digits.startsWith("00")) {
     digits = digits.slice(2);
   } else if (digits.startsWith("0")) {
-    return swiss(digits.slice(1));
+    const national = digits.slice(1);
+    return SWISS_PREFIXES_2.has(national.slice(0, 2)) || SWISS_PREFIXES_3.has(national.slice(0, 3)) ? swiss(national) : null;
   } else {
     return null;
   }
@@ -526,9 +643,14 @@ export function normalizePhone(raw: string): string | null {
   return /^[1-9]\d{6,14}$/.test(digits) ? `+${digits}` : null;
 }
 
-/** Swiss numbers have 9 digits after the trunk zero / country code, the first one not 0. */
+/**
+ * Swiss numbers have 9 digits after the trunk zero / country code, the first one not 0. Premium
+ * rate (090x) is refused in every form: "+41 900 ..." and "0041 906 ..." used to pass where
+ * "0900 ..." did not (review finding S2-9). With the country code any other Swiss prefix is
+ * fine: there it cannot be another country's number.
+ */
 function swiss(national: string): string | null {
-  return /^[1-9]\d{8}$/.test(national) ? `+41${national}` : null;
+  return /^[1-9]\d{8}$/.test(national) && !PREMIUM_RATE.test(national) ? `+41${national}` : null;
 }
 
 /**
@@ -548,6 +670,26 @@ export function isValidEmail(raw: string): boolean {
   const labels = domain.split(".");
   if (labels.length < 2 || !labels.every((label) => DOMAIN_LABEL.test(label))) return false;
   return TOP_LEVEL_DOMAIN.test(labels[labels.length - 1]);
+}
+
+/** A run that could be a phone number: digits with the separators people type between them. */
+const PHONE_LIKE_RUN = /\+?\d[\d\s().\/-]{4,}\d/g;
+
+/**
+ * `text` without anything that could be a phone number, for labels the model or the browser get
+ * (a transfer target written as "Inhaberin (052 123 45 67)" must not hand out the private line).
+ */
+export function withoutPhoneNumbers(text: string): string {
+  return text
+    .replace(PHONE_LIKE_RUN, "")
+    .replace(/\(\s*\)/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+/** True when `text` holds something that could be a phone number. */
+export function hasPhoneNumber(text: string): boolean {
+  return withoutPhoneNumbers(text) !== text.replace(/\s{2,}/g, " ").trim();
 }
 
 /** Single-line text: control and invisible characters removed, whitespace collapsed, trimmed. */

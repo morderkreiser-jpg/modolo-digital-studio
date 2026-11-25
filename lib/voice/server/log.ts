@@ -9,12 +9,15 @@
 //   - fields whose NAME suggests content, personal data or a secret are dropped (see below);
 //   - only strings, finite-or-not numbers, booleans and null pass: objects and arrays could carry
 //     anything and are dropped whole;
+//   - a STRING passes only in a field of STRING_FIELDS (codes and ids we set ourselves) and only
+//     when it looks like a code: letters, digits, "." "_" ":" "-", no spaces. A deny-list of names
+//     alone let "topic", "notes", "say" or a String(error) carry what a caller said;
 //   - strings are cut to MAX_STRING_CHARS, so a "reason" cannot smuggle a paragraph.
 // The number of dropped fields is logged (never their names or values), so a careless call shows
 // up in the logs as `dropped: n` and can be fixed.
 //
 // Consequence for callers: name counters without these words ("inTok", "turns", "chars"), not
-// "inputTokens", "messages" or "textLength".
+// "inputTokens", "messages" or "textLength"; a new string field needs its name in STRING_FIELDS.
 import { logEvent } from "@/lib/assistant/server/usage";
 
 export type VoiceLogValue = string | number | boolean | null | undefined;
@@ -40,16 +43,51 @@ const DENIED_SUBSTRINGS = [
   "cookie",
   "authorization",
   "iban",
+  "topic",
+  "note",
+  "summary",
+  "subject",
+  "preferred",
 ];
 
 /**
  * Dropped when one WORD of the name (camelCase, snake_case, kebab-case) is one of these. Short
  * words would match far too much as substrings ("ip" is in "description", "key" in "monkey").
  */
-const DENIED_WORDS = new Set(["ip", "ips", "key", "keys", "token", "body", "audio"]);
+const DENIED_WORDS = new Set(["ip", "ips", "key", "keys", "token", "body", "audio", "say", "err", "value", "detail", "details"]);
 
 /** Reviewed exceptions: these names carry a class or tool name, never a person's. */
 const ALLOWED_FIELDS = new Set(["errorName", "toolName"]);
+
+/** The only fields whose string values are logged: codes and ids the server sets itself. */
+const STRING_FIELDS = new Set([
+  "op",
+  "tenant",
+  "warn",
+  "rejected",
+  "mode",
+  "code",
+  "reason",
+  "provider",
+  "outcome",
+  "locale",
+  "stop",
+  "model",
+  "brain",
+  "asked",
+  "requested",
+  "store",
+  "type",
+  "requestId",
+  "errorName",
+  "toolName",
+  "delivery",
+  "kind",
+  "status",
+]);
+
+/** A code or an id: no spaces, no "@", nothing a sentence, a name or an address would need. */
+const CODE_VALUE = /^[A-Za-z0-9_.:-]+$/;
 
 /** Fields the logger sets itself; a caller cannot overwrite them. */
 const RESERVED_FIELDS = new Set(["evt", "ts", "route", "dropped"]);
@@ -79,6 +117,10 @@ export function sanitizeVoiceLogFields(fields: Record<string, unknown>): Record<
     if (value === null || typeof value === "boolean" || typeof value === "number") {
       clean[name] = value;
     } else if (typeof value === "string") {
+      if (!STRING_FIELDS.has(name) || !CODE_VALUE.test(value)) {
+        dropped += 1;
+        continue;
+      }
       clean[name] = value.length > MAX_STRING_CHARS ? `${value.slice(0, MAX_STRING_CHARS)}…` : value;
     } else {
       dropped += 1;

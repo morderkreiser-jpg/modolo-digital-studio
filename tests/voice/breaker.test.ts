@@ -145,11 +145,29 @@ describe("breaker: isolation and robustness", () => {
 
   it("repairs a trip slot that was still in use when the generation counter restarted", async () => {
     const { store, data } = createFakeStore();
-    // A leftover from an older generation 1: an old trip time, still in the store.
-    data.set(`mva:brk:${T}:${P}:trip:1`, String(NOW / 1000 - 30));
+    // A leftover from an older generation 1 of the same day: an old trip time, still in the store.
+    // (The generation is counted per UTC day now, so the day is part of the key.)
+    const day = Math.floor(NOW / 1000 / 86_400);
+    data.set(`mva:brk:${T}:${P}:trip:${day}:1`, String(NOW / 1000 - 30));
     assert.equal(await failAt(store, [0, 0, 0, 0, 0]), 1);
-    assert.equal(data.get(`mva:brk:${T}:${P}:trip:1`), String(NOW / 1000));
+    assert.equal(data.get(`mva:brk:${T}:${P}:trip:${day}:1`), String(NOW / 1000));
     assert.equal(await isOpen(store, T, P, at(BREAKER_OPEN_SECONDS - 1)), true);
     assert.equal(await isOpen(store, T, P, at(BREAKER_OPEN_SECONDS)), false);
+  });
+
+  // Review finding correttezza/F10: the generation counter kept the TTL of its first trip and could
+  // expire while the breaker was open, which read as "closed".
+  it("stays open across the generation counter's age, and across midnight", async () => {
+    const { store, data, calls } = createFakeStore();
+    // A generation counter of a long-gone day plays no part: only today's and yesterday's are read.
+    data.set(`mva:brk:${T}:${P}:gen:${Math.floor(NOW / 1000 / 86_400) - 7}`, "9");
+    const lateEvening = Date.UTC(2026, 10, 25, 23, 59, 0);
+    for (let i = 0; i < 5; i++) await recordFailure(store, T, P, lateEvening);
+    assert.equal(await isOpen(store, T, P, lateEvening + 90_000), true, "still open just after midnight");
+    assert.equal(await breakerState(store, T, P, lateEvening + (BREAKER_OPEN_SECONDS + 10) * 1000), "half_open");
+    // Every generation counter is written with a TTL of days, never a week.
+    for (const call of calls.filter((entry) => entry.op === "incrBy" && entry.key.includes(":gen:"))) {
+      assert.ok((call.ttlSeconds ?? 0) <= 3 * 86_400);
+    }
   });
 });

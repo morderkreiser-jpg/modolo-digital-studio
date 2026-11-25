@@ -96,6 +96,20 @@ describe("voice strings", () => {
     }
   });
 
+  it("ask whether the visitor is still there before a long silence ends the call", () => {
+    for (const locale of VOICE_LOCALES) {
+      const warning = getVoiceStrings(locale).silenceWarning;
+      assert.ok(warning.includes("?"), `${locale}: asks`);
+      assert.deepEqual(placeholders(warning), [], `${locale}: no number to get wrong`);
+    }
+  });
+
+  it("explain a turn refused because the previous answer is still running", () => {
+    for (const locale of VOICE_LOCALES) {
+      assert.ok(getVoiceStrings(locale).errors.turn_in_progress.trim().length > 20, locale);
+    }
+  });
+
   it("label the example as one, without sound", () => {
     assert.equal(getVoiceStrings("de").modeScripted, "Beispielgespräch, ohne Ton");
     assert.equal(getVoiceStrings("de").modeLocal, "Testmodus mit der Stimme des Browsers");

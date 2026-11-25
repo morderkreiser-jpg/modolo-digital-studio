@@ -3,9 +3,12 @@
 //
 // Order, cheapest and most fundamental first, stopping at the first refusal:
 //   1. the tool exists for THIS tenant (listed and usable)          else not_enabled
-//   2. per-session caps (tool calls, bookings, leads)                 else limit_reached
+//   2. the per-session cap on tool calls (a model looping stops)      else limit_reached
 //   3. validateToolInput: strict schema, tenant ids, normalisation    else invalid_input
-//   4. the action itself (calendar, sinks), whose failures are reported as failures.
+//   4. a repeat of something this session already did is answered from memory; only a genuinely
+//      new booking, lead or callback then takes a unit of its cap     else limit_reached
+//   5. the action itself (calendar, sinks), whose failures are reported as failures (and give the
+//      cap unit back).
 //
 // The `say` of every outcome is a short factual English line for the model. It states what did NOT
 // happen whenever something failed, so the model never tells a caller a booking, request or
@@ -14,7 +17,13 @@
 // Repeats are harmless: bookings and moves carry an idempotency key derived from the session, the
 // tool and the normalised input, so a model that repeats a call gets the same booking back instead
 // of a second one; a repeated lead or callback returns the first answer without reaching the sink
-// again; an outcome is recorded and counted once.
+// again; an outcome is recorded and counted once. A booking of the same service at the same time
+// with OTHER details (the caller corrected a phone number) is not a second booking either: the
+// model is told the time is already booked in this conversation and how to change it.
+//
+// The caps live in ctx.counters, one object per session. When the session is kept in a shared
+// store between requests, ctx.caps counts them atomically there as well, so requests of one
+// session running in parallel can never pass more actions than the caps allow.
 //
 // executeTool never throws: a bug or a throwing backend becomes an "unavailable" outcome.
 import { createHash } from "node:crypto";
@@ -26,6 +35,7 @@ import type {
   CalendarProvider,
   CalendarResult,
   CallSummary,
+  HandoffTarget,
   ToolCall,
   ToolErrorCode,
   ToolOutcome,
@@ -36,7 +46,7 @@ import type {
   VoiceText,
   VoiceToolName,
 } from "@/lib/voice/types";
-import { isOpenAt, parseIsoInstant, weekdayOf, zonedParts } from "@/lib/voice/hours";
+import { isHoliday, isOpenAt, parseIsoInstant, weekdayOf, zonedParts } from "@/lib/voice/hours";
 import { enabledTools, englishText } from "./definitions";
 import { normalizePhone, validateToolInput } from "./validate";
 
@@ -46,6 +56,23 @@ export interface SessionCounters {
   leads: number;
 }
 
+/**
+ * The per-session caps kept atomically in a store (lib/voice/server/limits.ts createSessionCaps).
+ * `take` takes one unit of `kind` when fewer than `max` were taken, else answers false.
+ */
+export interface SessionCaps {
+  take(kind: keyof SessionCounters, max: number): Promise<boolean>;
+  /** Gives back a unit taken for an action that did not happen. */
+  giveBack(kind: keyof SessionCounters): Promise<void>;
+}
+
+/**
+ * Where leads and callback wishes go. `idempotencyKey` is the tool call's own (the session, the
+ * tool and the normalised input): a sink that hands the record to a service passes it on, so the
+ * same request sent twice reaches the business once, and derives anything it answers with (the
+ * lead's ref) from it, so the second answer names what the business received. `uncertain`: the
+ * service did not say in time whether it took the record.
+ */
 export interface ToolSinks {
   lead(record: {
     tenant: string;
@@ -55,7 +82,8 @@ export interface ToolSinks {
     contact: Record<string, string>;
     summary: string;
     locale: VoiceLocale;
-  }): Promise<{ ok: boolean; ref: string }>;
+    idempotencyKey?: string;
+  }): Promise<{ ok: boolean; ref: string; uncertain?: boolean }>;
   callback(record: {
     tenant: string;
     sessionId: string;
@@ -64,7 +92,8 @@ export interface ToolSinks {
     topic: string;
     preferredTime?: string;
     locale: VoiceLocale;
-  }): Promise<{ ok: boolean }>;
+    idempotencyKey?: string;
+  }): Promise<{ ok: boolean; uncertain?: boolean }>;
   transfer(request: { tenant: string; sessionId: string; targetId: string }): Promise<{ connected: boolean }>;
 }
 
@@ -77,6 +106,8 @@ export interface ToolContext {
   limits: VoiceLimits;
   /** Mutated: one object for the whole session. */
   counters: SessionCounters;
+  /** The session's caps in a shared store; when given, they decide (counters mirror them). */
+  caps?: SessionCaps;
   calendar: CalendarProvider | null;
   sinks: ToolSinks;
   record(outcome: CallSummary["outcomes"][number]): void;
@@ -105,18 +136,29 @@ const MONTH_NAMES = [
   "December",
 ];
 
+/** An appointment this session booked or moved, as it stands now. */
+export interface SessionBooking {
+  serviceId: string;
+  start: string;
+  /** Idempotency key of the book_appointment call that made it ("" when it was only moved here). */
+  key: string;
+  status: "confirmed" | "cancelled";
+}
+
 // What one session has already done, for replays. Keyed by the session's counters object (one per
 // session, see ToolContext), so it disappears with the session.
 interface SessionMemory {
   recorded: Set<string>;
   replies: Map<string, ToolOutcome>;
+  /** By booking reference. */
+  bookings: Map<string, SessionBooking>;
 }
 const sessions = new WeakMap<SessionCounters, SessionMemory>();
 
 function memoryOf(counters: SessionCounters): SessionMemory {
   let memory = sessions.get(counters);
   if (memory === undefined) {
-    memory = { recorded: new Set(), replies: new Map() };
+    memory = { recorded: new Set(), replies: new Map(), bookings: new Map() };
     sessions.set(counters, memory);
   }
   return memory;
@@ -131,6 +173,8 @@ function memoryOf(counters: SessionCounters): SessionMemory {
 export interface ToolMemorySnapshot {
   recorded: string[];
   replies: Array<[string, ToolOutcome]>;
+  /** Absent in snapshots written before bookings were remembered. */
+  bookings?: Array<[string, SessionBooking]>;
 }
 
 /** Largest number of entries carried per list: far above any per-session tool cap. */
@@ -138,10 +182,11 @@ const MAX_MEMORY_ENTRIES = 200;
 
 export function exportToolMemory(counters: SessionCounters): ToolMemorySnapshot {
   const memory = sessions.get(counters);
-  if (memory === undefined) return { recorded: [], replies: [] };
+  if (memory === undefined) return { recorded: [], replies: [], bookings: [] };
   return {
     recorded: [...memory.recorded].slice(-MAX_MEMORY_ENTRIES),
     replies: [...memory.replies].slice(-MAX_MEMORY_ENTRIES),
+    bookings: [...memory.bookings].slice(-MAX_MEMORY_ENTRIES).map(([ref, booking]) => [ref, { ...booking }]),
   };
 }
 
@@ -152,7 +197,7 @@ export function exportToolMemory(counters: SessionCounters): ToolMemorySnapshot 
 export function importToolMemory(counters: SessionCounters, snapshot: unknown): void {
   if (typeof snapshot !== "object" || snapshot === null) return;
   const memory = memoryOf(counters);
-  const { recorded, replies } = snapshot as { recorded?: unknown; replies?: unknown };
+  const { recorded, replies, bookings } = snapshot as { recorded?: unknown; replies?: unknown; bookings?: unknown };
   if (Array.isArray(recorded)) {
     for (const key of recorded.slice(-MAX_MEMORY_ENTRIES)) if (typeof key === "string") memory.recorded.add(key);
   }
@@ -162,6 +207,22 @@ export function importToolMemory(counters: SessionCounters, snapshot: unknown): 
       const outcome = entry[1] as Partial<ToolOutcome> | null;
       if (outcome && typeof outcome === "object" && typeof outcome.ok === "boolean" && typeof outcome.say === "string") {
         memory.replies.set(entry[0], outcome as ToolOutcome);
+      }
+    }
+  }
+  if (Array.isArray(bookings)) {
+    for (const entry of bookings.slice(-MAX_MEMORY_ENTRIES)) {
+      if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string") continue;
+      const booking = entry[1] as Partial<SessionBooking> | null;
+      if (
+        booking &&
+        typeof booking === "object" &&
+        typeof booking.serviceId === "string" &&
+        typeof booking.start === "string" &&
+        typeof booking.key === "string" &&
+        (booking.status === "confirmed" || booking.status === "cancelled")
+      ) {
+        memory.bookings.set(entry[0], { serviceId: booking.serviceId, start: booking.start, key: booking.key, status: booking.status });
       }
     }
   }
@@ -186,10 +247,12 @@ async function run(ctx: ToolContext, call: ToolCall): Promise<ToolOutcome> {
   if (!isVoiceToolName(name) || !enabledTools(ctx.tenant).includes(name)) {
     return failure("not_enabled", "This action does not exist here. Do not try it again; tell the caller what you can do instead.");
   }
-  const capped = checkCaps(ctx, name);
+  const capped = await checkToolCallCap(ctx, name);
   if (capped !== null) return capped;
 
-  const checked = validateToolInput(ctx.tenant, name, call.input);
+  // The call's language and clock: a number without a country code is taken as Swiss only in a
+  // German call, and a date a caller leaves must not lie in the past.
+  const checked = validateToolInput(ctx.tenant, name, call.input, { locale: ctx.locale, now: ctx.now });
   if (!checked.ok) {
     return failure(
       "invalid_input",
@@ -218,31 +281,40 @@ async function run(ctx: ToolContext, call: ToolCall): Promise<ToolOutcome> {
 }
 
 /**
- * Per-session caps. end_call is exempt: ending a conversation must always work. Every other call
- * counts against toolCallsPerSession, invalid ones included (a model looping on bad input stops).
+ * The cap on tool calls. end_call is exempt: ending a conversation must always work. Every other
+ * call counts, invalid ones and repeats included (a model looping on bad input stops).
  */
-function checkCaps(ctx: ToolContext, name: VoiceToolName): ToolOutcome | null {
+async function checkToolCallCap(ctx: ToolContext, name: VoiceToolName): Promise<ToolOutcome | null> {
   if (name === "end_call") return null;
   const { counters, limits } = ctx;
-  if (counters.toolCalls >= limits.toolCallsPerSession) {
+  const allowed = ctx.caps ? await ctx.caps.take("toolCalls", limits.toolCallsPerSession) : counters.toolCalls < limits.toolCallsPerSession;
+  if (!allowed) {
     return failure("limit_reached", "No more actions are possible in this conversation. Tell the caller what was done so far.");
   }
   counters.toolCalls += 1;
-  // The wording keeps earlier successes intact: a capped repeat must not sound like "it was lost".
-  if (name === "book_appointment" && counters.bookings >= limits.bookingsPerSession) {
-    return failure(
-      "limit_reached",
-      "No more bookings are possible in this conversation; this one was not booked. Bookings confirmed earlier stand.",
-    );
-  }
-  // A callback request is a record handed to the business like a lead: same cap.
-  if ((name === "create_lead" || name === "request_callback") && counters.leads >= limits.leadsPerSession) {
-    return failure(
-      "limit_reached",
-      "No more requests can be passed on in this conversation; this one was not stored. Requests passed on earlier stand.",
-    );
-  }
   return null;
+}
+
+// The wording keeps earlier successes intact: a capped new action must not sound like "it was lost".
+const NO_MORE_BOOKINGS = "No more bookings are possible in this conversation; this one was not booked. Bookings confirmed earlier stand.";
+// A callback request is a record handed to the business like a lead: same cap.
+const NO_MORE_REQUESTS =
+  "No more requests can be passed on in this conversation; this one was not stored. Requests passed on earlier stand.";
+// The email service did not answer in time: the request may have arrived. Neither "passed on"
+// nor "lost" is true, and a second try with the same details cannot send it twice (the sink
+// passes the call's idempotency key on). Review finding S2-8.
+const UNCERTAIN_REQUEST =
+  "It is not certain that the request reached the team: the email service did not confirm it in time. Do not say it was passed on, and do not say it was lost. Offer to try once more; with the same details it is not sent twice.";
+
+/** Takes one unit of a booking or lead cap for a genuinely NEW action. */
+async function takeActionCap(ctx: ToolContext, kind: "bookings" | "leads"): Promise<boolean> {
+  const max = kind === "bookings" ? ctx.limits.bookingsPerSession : ctx.limits.leadsPerSession;
+  return ctx.caps ? ctx.caps.take(kind, max) : ctx.counters[kind] < max;
+}
+
+/** The action did not happen (or was not new): its unit goes back. */
+async function returnActionCap(ctx: ToolContext, kind: "bookings" | "leads"): Promise<void> {
+  if (ctx.caps) await ctx.caps.giveBack(kind);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -289,22 +361,47 @@ async function checkAvailability(ctx: ToolContext, input: Input): Promise<ToolOu
 
 async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutcome> {
   if (ctx.calendar === null) return calendarFailure(ctx, "book", "unavailable");
+  const memory = memoryOf(ctx.counters);
+  const key = idempotencyKey(ctx, "book_appointment", input);
+  const serviceId = input.service as string;
+  const start = input.start as string;
+
+  // The same appointment again. With the same details it is a repeat, and the calendar's
+  // idempotency hands the first booking back. With other details (a corrected phone number) a
+  // second booking would hold a second table, or meet the caller's own booking as "taken": tell
+  // the model what stands and how to change it instead.
+  const own = [...memory.bookings.entries()].find(
+    ([, booking]) => booking.status === "confirmed" && booking.serviceId === serviceId && booking.start === start,
+  );
+  if (own !== undefined && own[1].key !== key) return alreadyBooked(ctx, own[0], own[1]);
+  const repeat = own !== undefined;
+  if (!repeat && !(await takeActionCap(ctx, "bookings"))) return failure("limit_reached", NO_MORE_BOOKINGS);
+
   const result = await safely(
     ctx.calendar.book({
-      serviceId: input.service as string,
-      start: input.start as string,
+      serviceId,
+      start,
       name: input.name as string,
       contact: input.contact as string,
       partySize: input.party_size as number | undefined,
       notes: input.notes as string | undefined,
-      idempotencyKey: idempotencyKey(ctx, "book_appointment", input),
+      idempotencyKey: key,
       now: ctx.now,
     }),
   );
-  if (!result.ok) return calendarFailure(ctx, "book", result.code);
+  if (!result.ok) {
+    if (!repeat) await returnActionCap(ctx, "bookings");
+    return calendarFailure(ctx, "book", result.code);
+  }
 
   const booking = result.value;
-  if (recordOnce(ctx, `booking:${booking.ref}:${booking.start}`, { kind: "booking", booking })) ctx.counters.bookings += 1;
+  if (recordOnce(ctx, `booking:${booking.ref}`, { kind: "booking", booking })) {
+    ctx.counters.bookings += 1;
+  } else if (!repeat) {
+    // The calendar answered with a booking this session already has: nothing new was booked.
+    await returnActionCap(ctx, "bookings");
+  }
+  memory.bookings.set(booking.ref, { serviceId: booking.serviceId, start: booking.start, key, status: "confirmed" });
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   const party = booking.partySize === undefined ? "" : ` For ${booking.partySize} ${booking.partySize === 1 ? "person" : "people"}.`;
   return {
@@ -312,6 +409,18 @@ async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutc
     say: `Booked: ${date} at ${time}, reference ${booking.ref}.${party} Give the caller the reference.`,
     data: bookingData(booking),
   };
+}
+
+/** The say for a booking of this very appointment with other details (see bookAppointment). */
+function alreadyBooked(ctx: ToolContext, ref: string, booking: SessionBooking): ToolOutcome {
+  const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
+  const change = enabledTools(ctx.tenant).includes("cancel_appointment")
+    ? ` To change the name, contact, party size or notes, cancel reference ${ref} with cancel_appointment, then book again.`
+    : " Its details cannot be changed here; tell the caller the booking stands as it was made.";
+  return failure(
+    "conflict",
+    `This conversation already booked this time: ${date} at ${time}, reference ${ref}, with the details given then. Nothing new was booked and that booking was not changed.${change}`,
+  );
 }
 
 async function cancelAppointment(ctx: ToolContext, input: Input): Promise<ToolOutcome> {
@@ -323,6 +432,8 @@ async function cancelAppointment(ctx: ToolContext, input: Input): Promise<ToolOu
 
   const booking = result.value;
   recordOnce(ctx, `cancellation:${booking.ref}`, { kind: "cancellation", ref: booking.ref });
+  const own = memoryOf(ctx.counters).bookings.get(booking.ref);
+  if (own) own.status = "cancelled";
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   return {
     ok: true,
@@ -345,8 +456,14 @@ async function rescheduleAppointment(ctx: ToolContext, input: Input): Promise<To
   if (!result.ok) return calendarFailure(ctx, "move", result.code);
 
   const booking = result.value;
-  // The summary shows the booking at its new time; the reference stays the same.
-  recordOnce(ctx, `booking:${booking.ref}:${booking.start}`, { kind: "booking", booking });
+  // A move is its own outcome ("moved", not "booked"), and every move that changed the time is
+  // recorded, so the last one always says where the appointment is now (also after moving back).
+  // A repeat of the last move changes nothing and records nothing.
+  const memory = memoryOf(ctx.counters);
+  const known = memory.bookings.get(booking.ref);
+  if (known === undefined || known.start !== booking.start) safeRecord(ctx, { kind: "reschedule", booking });
+  if (known) known.start = booking.start;
+  else memory.bookings.set(booking.ref, { serviceId: booking.serviceId, start: booking.start, key: "", status: "confirmed" });
   const { date, time } = spokenStart(booking.start, ctx.tenant.hours.timezone);
   return {
     ok: true,
@@ -423,6 +540,7 @@ async function createLead(ctx: ToolContext, input: Input): Promise<ToolOutcome> 
   const key = idempotencyKey(ctx, "create_lead", input);
   const replay = memory.replies.get(key);
   if (replay !== undefined) return replay;
+  if (!(await takeActionCap(ctx, "leads"))) return failure("limit_reached", NO_MORE_REQUESTS);
 
   const taskId = input.task as string;
   const fields = input.fields as Record<string, string>;
@@ -430,7 +548,7 @@ async function createLead(ctx: ToolContext, input: Input): Promise<ToolOutcome> 
   for (const field of ["name", "phone", "email", "company"]) {
     if (typeof input[field] === "string") contact[field] = input[field] as string;
   }
-  let answer: { ok: boolean; ref: string } | null = null;
+  let answer: { ok: boolean; ref: string; uncertain?: boolean } | null = null;
   try {
     answer = await ctx.sinks.lead({
       tenant: ctx.tenant.id,
@@ -440,11 +558,18 @@ async function createLead(ctx: ToolContext, input: Input): Promise<ToolOutcome> 
       contact,
       summary: input.summary as string,
       locale: ctx.locale,
+      idempotencyKey: key,
     });
   } catch {
     answer = null;
   }
+  if (answer?.ok !== true && answer?.uncertain === true) {
+    // Not remembered: a repeat must reach the sink again, which sends it with the same key.
+    await returnActionCap(ctx, "leads");
+    return failure("unavailable", UNCERTAIN_REQUEST);
+  }
   if (answer?.ok !== true || typeof answer.ref !== "string" || answer.ref === "") {
+    await returnActionCap(ctx, "leads");
     return failure(
       "unavailable",
       `The request could not be stored. Nothing was passed on. Tell the caller it did not go through.${fallbackOffer(ctx, "written")}`,
@@ -453,9 +578,12 @@ async function createLead(ctx: ToolContext, input: Input): Promise<ToolOutcome> 
 
   ctx.counters.leads += 1;
   recordOnce(ctx, `lead:${answer.ref}`, { kind: "lead", taskId, ref: answer.ref, fields, contact });
+  // The task's own follow-up wording first: how a trade's office answers a job request is part
+  // of the business's knowledge, not of the written channel.
+  const task = ctx.tenant.tasks.find((candidate) => candidate.id === taskId);
   const outcome: ToolOutcome = {
     ok: true,
-    say: `Stored and passed on to the team, reference ${answer.ref}.${promiseLine(ctx, ctx.tenant.handoff.written.promise)}`,
+    say: `Stored and passed on to the team, reference ${answer.ref}.${promiseLine(ctx, task?.followUp ?? ctx.tenant.handoff.written.promise)}`,
     data: { reference: answer.ref },
   };
   memory.replies.set(key, outcome);
@@ -467,12 +595,13 @@ async function requestCallback(ctx: ToolContext, input: Input): Promise<ToolOutc
   const key = idempotencyKey(ctx, "request_callback", input);
   const replay = memory.replies.get(key);
   if (replay !== undefined) return replay;
+  if (!(await takeActionCap(ctx, "leads"))) return failure("limit_reached", NO_MORE_REQUESTS);
 
   const name = input.name as string;
   const phone = input.phone as string;
   const topic = input.topic as string;
   const preferredTime = input.preferred_time as string | undefined;
-  let answer: { ok: boolean } | null = null;
+  let answer: { ok: boolean; uncertain?: boolean } | null = null;
   try {
     answer = await ctx.sinks.callback({
       tenant: ctx.tenant.id,
@@ -482,11 +611,17 @@ async function requestCallback(ctx: ToolContext, input: Input): Promise<ToolOutc
       topic,
       ...(preferredTime === undefined ? {} : { preferredTime }),
       locale: ctx.locale,
+      idempotencyKey: key,
     });
   } catch {
     answer = null;
   }
+  if (answer?.ok !== true && answer?.uncertain === true) {
+    await returnActionCap(ctx, "leads");
+    return failure("unavailable", UNCERTAIN_REQUEST);
+  }
   if (answer?.ok !== true) {
+    await returnActionCap(ctx, "leads");
     return failure(
       "unavailable",
       `The callback request could not be passed on. Tell the caller it did not go through.${fallbackOffer(ctx, "callback")}`,
@@ -516,11 +651,7 @@ async function transferCall(ctx: ToolContext, input: Input): Promise<ToolOutcome
     return failure("forbidden", `Live transfer works only on phone calls; nobody was put through.${fallbackOffer(ctx)}`);
   }
   const label = localText(ctx, target.label) || target.id;
-  // A target with its own schedule (an on-call line) follows it; otherwise the opening hours.
-  const schedule: BusinessHours = target.available
-    ? { timezone: ctx.tenant.hours.timezone, weekly: target.available, holidays: [] }
-    : ctx.tenant.hours;
-  if (!isOpenAt(schedule, ctx.now)) {
+  if (!takesTransfers(ctx.tenant.hours, target, ctx.now)) {
     return failure("not_available", `${label} takes no calls at this time; nobody was put through.${fallbackOffer(ctx)}`);
   }
 
@@ -536,6 +667,23 @@ async function transferCall(ctx: ToolContext, input: Input): Promise<ToolOutcome
     return failure("not_available", `${label} did not answer; the caller was not put through.${fallbackOffer(ctx)}`);
   }
   return { ok: true, say: `Connecting the caller to ${label} now.`, data: { target: target.id } };
+}
+
+/**
+ * Whether a transfer target takes calls at `at`. Without its own schedule it follows the opening
+ * hours. With one, the tenant's calendar still applies: a holiday closes it and a day with special
+ * hours limits it to those hours, so a closed office never rings on Good Friday. Only an on-call
+ * line (`onCall`) follows its own schedule alone.
+ */
+export function takesTransfers(hours: BusinessHours, target: HandoffTarget, at: Date): boolean {
+  if (!target.available) return isOpenAt(hours, at);
+  const own: BusinessHours = { timezone: hours.timezone, weekly: target.available, holidays: [] };
+  if (target.onCall === true) return isOpenAt(own, at);
+  const date = zonedParts(at, hours.timezone).date;
+  // A day with its own hours wins over the holiday list (BusinessHours): both schedules apply.
+  if (hours.exceptions?.some((exception) => exception.date === date)) return isOpenAt(own, at) && isOpenAt(hours, at);
+  if (isHoliday(hours, date)) return false;
+  return isOpenAt(own, at);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -654,10 +802,16 @@ function fallbackOffer(ctx: ToolContext, exclude?: "callback" | "written"): stri
   return offers.length === 0 ? "" : ` Offer ${offers.join(" or ")} instead.`;
 }
 
-/** The tenant's own words about timing, so the model never invents a promise. */
+/**
+ * The tenant's own words about timing, so the model never invents a promise. Without them, the
+ * business information decides: it may state when the office answers a request (and then the
+ * assistant may say so), and when it states nothing, nothing is promised.
+ */
 function promiseLine(ctx: ToolContext, promise: VoiceText | undefined): string {
   const text = localText(ctx, promise);
-  return text === "" ? " Do not promise when the business will get back." : ` About timing, say only: "${text}"`;
+  return text === ""
+    ? " Do not promise when the business will get back, beyond what the business information states about requests."
+    : ` About timing, say only: "${text}"`;
 }
 
 /** A VoiceText in the caller's language, else the tenant's default, else any. */

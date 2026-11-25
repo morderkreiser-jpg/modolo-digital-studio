@@ -1,13 +1,17 @@
-// The voice widget's conversation machine (components/voice/voice-machine.ts), plus the pure
-// helpers the live transports feed it with: the turn-stream decoder (transports/http.ts) and the
-// speech text helpers (transports/speech-text.ts). No browser, no React, no network.
+// The voice widget's conversation machine (components/voice/voice-machine.ts) and the small pure
+// rules the stage reads from it (timer, silence warning, double-click guard). No browser, no
+// React, no network. The transports' helpers are tested in transport.test.ts.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ACTIVATION_GUARD_MS,
+  activationAllowed,
   initVoiceState,
   isActive,
   MAX_CAPTIONS,
   recoveryFor,
+  silenceWarningAt,
+  silenceWarningVisible,
   timerVisible,
   toEndRequestReason,
   VOICE_END_REASONS,
@@ -18,8 +22,6 @@ import {
   type VoiceEvent,
   type VoiceMachineState,
 } from "@/components/voice/voice-machine";
-import { createSseDecoder, isSessionGrant, isTurnStreamEvent } from "@/components/voice/transports/http";
-import { isEcho, MAX_UTTERANCE_CHARS, pickVoice, takeSentences, toSpeakable } from "@/components/voice/transports/speech-text";
 
 const LIMITS = { maxCallSeconds: 120, warnBeforeEndSeconds: 20, silenceTimeoutSeconds: 10, maxTurnChars: 300 };
 
@@ -407,131 +409,159 @@ describe("recovery", () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// What the live transports feed the machine with
+// Findings of the review (research/revisione/revisione-1.json)
 // ---------------------------------------------------------------------------------------------
 
-describe("turn stream decoding", () => {
-  it("decodes data frames, skips ping comments and survives frames split across chunks", () => {
-    const decoder = createSseDecoder();
-    const events = [
-      ...decoder.push(': ping\n\ndata: {"type":"start"}\n\ndata: {"type":"del'),
-      ...decoder.push('ta","text":"Grüezi"}\n'),
-      ...decoder.push('\n: ping\n\ndata: {"type":"done","ended":false,"remainingTurns":3,"remainingSeconds":95}\n\n'),
-      ...decoder.flush(),
-    ];
-    assert.deepEqual(events, [
-      { type: "start" },
-      { type: "delta", text: "Grüezi" },
-      { type: "done", ended: false, remainingTurns: 3, remainingSeconds: 95 },
-    ]);
+describe("the running tool (interfaccia F2)", () => {
+  it("is cleared when the caller interrupts: the tool's own end never arrives then", () => {
+    // The reviewer's replay: tool started, barge-in aborts the stream, the next turn runs.
+    let state = run(listeningLocal(), { type: "THINKING" }, { type: "SPEAKING" });
+    state = run(state, { type: "TOOL", name: "check_availability", status: "started" });
+    assert.equal(state.activeTool, "check_availability");
+    state = run(state, { type: "INTERRUPT" });
+    assert.equal(state.activeTool, null, "after INTERRUPT");
+    state = run(state, { type: "THINKING" }, { type: "LISTENING" });
+    assert.equal(state.activeTool, null, "and in the turns after it");
   });
 
-  it("accepts CRLF line ends, also split between chunks", () => {
-    const decoder = createSseDecoder();
-    const events = [...decoder.push('data: {"type":"start"}\r'), ...decoder.push('\n\r\n')];
-    assert.deepEqual(events, [{ type: "start" }]);
-  });
-
-  it("drops malformed JSON and events outside the contract", () => {
-    const decoder = createSseDecoder();
-    const events = decoder.push(
-      [
-        "data: not json",
-        'data: {"type":"tool","name":"rm_rf","status":"started"}',
-        'data: {"type":"error","code":"teapot"}',
-        'data: {"type":"tool","name":"check_availability","status":"ok"}',
-        'data: {"type":"error","code":"rate_limited","retryAfter":30}',
-      ].join("\n\n") + "\n\n",
+  it("is cleared when the caller's turn starts", () => {
+    const state = run(
+      listeningLocal(),
+      { type: "THINKING" },
+      { type: "TOOL", name: "create_lead", status: "started" },
+      { type: "SPEAKING" },
+      { type: "LISTENING" },
     );
-    assert.deepEqual(events, [
-      { type: "tool", name: "check_availability", status: "ok" },
-      { type: "error", code: "rate_limited", retryAfter: 30 },
-    ]);
+    assert.equal(state.activeTool, null);
   });
 
-  it("validates handoff events", () => {
-    assert.equal(isTurnStreamEvent({ type: "handoff", handoff: { kind: "transfer", targetLabel: "Team" } }), true);
-    assert.equal(isTurnStreamEvent({ type: "handoff", handoff: { kind: "transfer" } }), false);
-    assert.equal(isTurnStreamEvent({ type: "handoff", handoff: { kind: "written" } }), true);
-  });
-
-  it("recognises a session grant and nothing else", () => {
-    const grant = {
-      ok: true,
-      sessionToken: "t",
-      mode: "local",
-      locale: "de",
-      expiresAt: 1,
-      limits: { maxCallSeconds: 180, warnBeforeEndSeconds: 20, silenceTimeoutSeconds: 25, maxTurnChars: 600 },
-    };
-    assert.equal(isSessionGrant(grant), true);
-    assert.equal(isSessionGrant({ ...grant, sessionToken: "" }), false);
-    assert.equal(isSessionGrant({ ...grant, mode: "phone" }), false);
-    assert.equal(isSessionGrant({ ok: false, error: "busy" }), false);
+  it("stays while the reply that uses it goes on", () => {
+    const state = run(
+      listeningLocal(),
+      { type: "THINKING" },
+      { type: "TOOL", name: "check_availability", status: "started" },
+      { type: "SPEAKING" },
+    );
+    assert.equal(state.activeTool, "check_availability");
   });
 });
 
-describe("sentences for speech", () => {
-  it("speaks complete sentences as soon as they are there and keeps the rest", () => {
-    const { sentences, rest } = takeSentences("Grüezi, hier ist der Assistent. Wie kann ich hel", false);
-    assert.deepEqual(sentences, ["Grüezi, hier ist der Assistent."]);
-    assert.equal(rest, "Wie kann ich hel");
+describe("silence (interfaccia F8)", () => {
+  it("is not counted while the visitor muted the microphone", () => {
+    let state = run(listeningLocal(), { type: "MUTE", muted: true });
+    for (let second = 0; second < 30; second += 1) state = run(state, { type: "TICK" });
+    assert.equal(state.status, "listening", "a muted visitor is not hung up on for silence");
+    assert.equal(state.silentSeconds, 0);
+    assert.equal(state.secondsLeft, LIMITS.maxCallSeconds - 30, "the call clock still runs");
+    state = run(state, { type: "MUTE", muted: false });
+    for (let second = 0; second < LIMITS.silenceTimeoutSeconds; second += 1) state = run(state, { type: "TICK" });
+    assert.equal(state.endReason, "silence", "counting resumes after unmuting");
   });
 
-  it("does not cut after abbreviations, single letters, ordinals or times", () => {
-    const text = "Am 3. Dezember um 14.30 Uhr geht es, z. B. mit Dr. Muster usw. weiter. Passt das?";
-    const { sentences, rest } = takeSentences(text, false);
-    assert.deepEqual(sentences, ["Am 3. Dezember um 14.30 Uhr geht es, z. B. mit Dr. Muster usw. weiter."]);
-    assert.equal(rest, "Passt das?");
-    assert.deepEqual(takeSentences(rest, true).sentences, ["Passt das?"]);
+  it("warns a few seconds before the silence limit, and any activity takes the warning away", () => {
+    const warnAt = silenceWarningAt(LIMITS.silenceTimeoutSeconds);
+    assert.ok(warnAt > 0 && warnAt < LIMITS.silenceTimeoutSeconds);
+    let state = listeningLocal();
+    for (let second = 1; second < warnAt; second += 1) state = run(state, { type: "TICK" });
+    assert.equal(silenceWarningVisible(state), false);
+    state = run(state, { type: "TICK" });
+    assert.equal(silenceWarningVisible(state), true, `shown at ${warnAt} s`);
+    assert.equal(run(state, { type: "ACTIVITY" }).silentSeconds, 0);
+    assert.equal(silenceWarningVisible(run(state, { type: "ACTIVITY" })), false, "typing or speaking clears it");
+    assert.equal(silenceWarningVisible(run(state, { type: "MUTE", muted: true })), false, "muting pauses it");
+    assert.equal(silenceWarningVisible(run(state, { type: "THINKING" })), false, "not while the assistant thinks");
   });
 
-  it("waits for more text after a period at the very end", () => {
-    assert.deepEqual(takeSentences("Am 3.", false), { sentences: [], rest: "Am 3." });
+  it("gives the warning room with every allowed timeout", () => {
+    // The server allows 5..120 s (lib/voice/server/env.ts).
+    assert.equal(silenceWarningAt(25), 15);
+    assert.equal(silenceWarningAt(5), 3);
+    assert.equal(silenceWarningAt(120), 110);
+    for (let timeout = 5; timeout <= 120; timeout += 1) {
+      const at = silenceWarningAt(timeout);
+      assert.ok(at >= 1 && at < timeout, `${timeout}: ${at}`);
+    }
   });
 
-  it("splits long sentences for the synthesiser", () => {
-    const long = `${"Das ist ein sehr langer Satz, ".repeat(12)}und er endet hier.`;
-    const { sentences } = takeSentences(long, true);
-    assert.ok(sentences.length > 1);
-    for (const sentence of sentences) assert.ok(sentence.length <= MAX_UTTERANCE_CHARS, sentence);
-    assert.equal(sentences.join(" ").replace(/\s+/g, " "), long.replace(/\s+/g, " ").trim());
-  });
-
-  it("removes markdown and links before speaking", () => {
-    assert.equal(toSpeakable("**Gerne.** Mehr unter https://example.ch/x - danke"), "Gerne. Mehr unter - danke");
-  });
-});
-
-describe("voice choice", () => {
-  const voices = [
-    { lang: "en-US", name: "Samantha", default: true },
-    { lang: "de-DE", name: "Anna" },
-    { lang: "de_DE", name: "Google Deutsch" },
-    { lang: "de-CH", name: "Bubbles" },
-    { lang: "it-IT", name: "Alice" },
-    { lang: "fr-CA", name: "Amélie" },
-    { lang: "fr-FR", name: "Thomas" },
-  ];
-
-  it("prefers the Swiss tag, then the regions in order, skipping novelty voices", () => {
-    assert.equal(pickVoice(voices, "de")?.name, "Google Deutsch", "de-CH is a novelty voice: de-DE, the better one");
-    assert.equal(pickVoice(voices, "fr")?.name, "Thomas", "fr-FR comes before fr-CA");
-    assert.equal(pickVoice(voices, "it")?.name, "Alice");
-    assert.equal(pickVoice([{ lang: "de-CH", name: "Petra" }, ...voices], "de")?.name, "Petra");
-  });
-
-  it("returns null for a language without voices", () => {
-    assert.equal(pickVoice([{ lang: "en-GB", name: "Daniel" }], "it"), null);
+  it("never warns during an example", () => {
+    let state = playingScripted();
+    for (let second = 0; second < 60; second += 1) state = run(state, { type: "TICK" });
+    assert.equal(silenceWarningVisible(state), false);
   });
 });
 
-describe("echo filter", () => {
-  it("recognises the assistant's own words coming back", () => {
-    assert.equal(isEcho("am Dienstag um zehn", "Ich hätte am Dienstag um zehn Uhr noch etwas frei."), true);
+describe("time left announcement (interfaccia F9)", () => {
+  it("says the real number when the server cuts the time short", () => {
+    // Thinking: the assistant's turn, so the short silence limit of LIMITS does not end it first.
+    let state = run(listeningLocal(), { type: "THINKING" }, { type: "TICK", seconds: 10 });
+    assert.equal(state.timerAnnounced, null, "nothing to say yet");
+    state = run(state, { type: "REMAINING", seconds: 8 });
+    assert.equal(timerVisible(state), true);
+    assert.equal(state.timerAnnounced, 8, "not 30");
   });
 
-  it("lets the caller's own words through", () => {
-    assert.equal(isEcho("nein lieber am Freitag", "Ich hätte am Dienstag um zehn Uhr noch etwas frei."), false);
+  it("is captured once, when the countdown appears, not every second after", () => {
+    let state = run(listeningLocal(), { type: "REMAINING", seconds: 31 });
+    assert.equal(state.timerAnnounced, null);
+    state = run(state, { type: "TICK" });
+    assert.equal(state.timerAnnounced, 30);
+    state = run(state, { type: "TICK" }, { type: "THINKING" }, { type: "TICK" });
+    assert.equal(state.secondsLeft, 28);
+    assert.equal(state.timerAnnounced, 30, "unchanged while the countdown runs");
+  });
+
+  it("starts afresh with every conversation", () => {
+    const state = run(listeningLocal(), { type: "REMAINING", seconds: 12 }, { type: "END", reason: "user" }, { type: "RESET" });
+    assert.equal(state.timerAnnounced, null);
+  });
+
+  it("announces at once when the whole call is shorter than the countdown", () => {
+    const state = run(
+      fresh(),
+      { type: "START", mode: "local" },
+      { type: "CONSENT", input: "text" },
+      { type: "CONNECTED", limits: { maxCallSeconds: 20 } },
+    );
+    assert.equal(state.timerAnnounced, 20);
+  });
+});
+
+describe("double-click guard (interfaccia F11)", () => {
+  it("ignores the second click of a double-click", () => {
+    assert.equal(activationAllowed(null, 1), true, "a first click on a button that never changed");
+    assert.equal(activationAllowed(null, 2), false);
+    assert.equal(activationAllowed(5_000, 2), false, "a double-click is never a decision");
+  });
+
+  it("ignores a click right after the button changed what it does, keyboard included", () => {
+    assert.equal(activationAllowed(120, 1), false, "the example just started; this click meant 'play'");
+    assert.equal(activationAllowed(120, 0), false, "Enter pressed twice");
+    assert.equal(activationAllowed(ACTIVATION_GUARD_MS - 1, 1), false);
+    assert.equal(activationAllowed(ACTIVATION_GUARD_MS, 1), true);
+    assert.equal(activationAllowed(3_000, 0), true);
+  });
+});
+
+describe("limits from the server (sicurezza F12)", () => {
+  it("keeps an end warning of 0, which the server may send", () => {
+    const state = run(
+      fresh(),
+      { type: "START", mode: "local" },
+      { type: "CONSENT", input: "voice" },
+      { type: "MIC_GRANTED" },
+      { type: "CONNECTED", limits: { maxCallSeconds: 90, warnBeforeEndSeconds: 0 } },
+    );
+    assert.equal(state.limits.warnBeforeEndSeconds, 0);
+    assert.equal(state.limits.maxCallSeconds, 90);
+  });
+
+  it("still refuses a zero or negative call length, silence timeout or turn size", () => {
+    const state = run(
+      fresh(),
+      { type: "START", mode: "local" },
+      { type: "CONSENT", input: "text" },
+      { type: "CONNECTED", limits: { maxCallSeconds: 0, silenceTimeoutSeconds: -5, maxTurnChars: 0, warnBeforeEndSeconds: -1 } },
+    );
+    assert.deepEqual(state.limits, LIMITS);
   });
 });

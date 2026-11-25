@@ -6,17 +6,24 @@
 //
 // Order of a start, all after the visitor's consent click:
 //   unlock synthesis + create the AudioContext (inside the click: Safari needs the gesture)
-//   → getUserMedia (the permission prompt; the stream feeds the orb's level meter)
+//   → getUserMedia (the permission prompt; on desktop the stream feeds the orb's level meter)
 //   → POST session → CONNECTED → opening turn (the greeting) → listening ⇄ thinking ⇄ speaking
 // Typed input skips the microphone entirely. Without SpeechRecognition (Firefox) the transport
 // falls back to typed input by itself and says so.
 //
-// Barge-in: recognition keeps running while the assistant speaks; speech that is not an echo of
-// the assistant's own words cancels the synthesis and the rest of the streamed reply.
+// Barge-in: on desktop, recognition keeps running while the assistant speaks; speech that is not
+// an echo of the assistant's own words cancels the synthesis and the rest of the streamed reply.
+// Phones are handled more carefully (see platform.ts): no meter stream next to recognition, and
+// recognition waits until the reply has been read.
+//
+// When a reply has been spoken is decided by the speech queue (speech-queue.ts), never by a timer
+// started when a sentence was queued: a streamed reply queues all its sentences at once.
 import { VOICE_LANG_TAG, type TurnRequestBody, type TurnStreamEvent, type VoiceLocale } from "@/lib/voice/types";
 import { toEndRequestReason, type VoiceEndReason, type VoiceMachineLimits, type VoiceNoticeCode } from "../voice-machine";
-import { isEventStream, readFailure, readTurnStream, requestSession, sendEnd } from "./http";
-import { isEcho, pickVoice, takeSentences, toSpeakable, words } from "./speech-text";
+import { announcedLocale, isEventStream, readFailure, readTurnStream, requestSession, sendEnd } from "./http";
+import { speechPlatform } from "./platform";
+import { createSpeechQueue, type SpeechEngine } from "./speech-queue";
+import { detectReplyLocale, isEcho, pickVoice, takeSentences, toSpeakable, words } from "./speech-text";
 import { clamp01, createEmitter, nowMs, type VoiceTransport, type VoiceTransportOptions } from "./types";
 
 /** No byte for this long while a reply streams: the turn has failed (the server pings every 15 s). */
@@ -24,13 +31,27 @@ const TURN_IDLE_TIMEOUT_MS = 45_000;
 /** Recognition that ends this quickly, this many times in a row, is not working: type instead. */
 const QUICK_END_MS = 1_000;
 const QUICK_END_LIMIT = 5;
-/** An utterance that neither ends nor fails within its length at this pace plus a margin is stuck. */
-const SAFETY_CHARS_PER_SECOND = 9;
-const SAFETY_MARGIN_MS = 4_000;
 /** Interim speech over the assistant needs this many words to count as an interruption. */
 const BARGE_IN_MIN_WORDS = 2;
 /** Recognition finalises a moment after the sound stops: an echo can land just after the reply. */
 const ECHO_TAIL_MS = 1_500;
+/** Without a level meter, the orb pulses this long after recognition heard something. */
+const HEARD_PULSE_MS = 700;
+/** A reply this long without a clear language is read in the widget's language. */
+const LOCALE_SETTLE_WORDS = 12;
+/**
+ * How long a turn refused with "turn_in_progress" is sent again before the widget gives up: the
+ * server's own turn deadline (20 s) plus a margin, since a cut-off turn may run until then.
+ */
+const TURN_BUSY_MAX_WAIT_MS = 25_000;
+
+/** Pause before sending a refused turn again: the server's Retry-After when it gives one. */
+export function busyRetryDelay(retryAfterSeconds: number | undefined, attempt: number): number {
+  if (typeof retryAfterSeconds === "number" && Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+    return Math.min(5_000, Math.max(250, retryAfterSeconds * 1000));
+  }
+  return Math.min(2_000, 400 * Math.max(1, attempt));
+}
 
 // The parts of the Web Speech API used here. Declared locally: TypeScript's DOM library does not
 // cover the prefixed constructor, and the shapes differ slightly between engines.
@@ -94,22 +115,27 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
   const emit = emitter.emit;
   const Recognition = recognitionConstructor();
   const synth = hasSpeechSynthesis() ? window.speechSynthesis : null;
+  const platform = speechPlatform(typeof navigator !== "undefined" ? navigator : null);
 
   let locale: VoiceLocale = options.locale;
   let input = options.input;
   let started = false;
   let stopped = false;
+  /** Why stop() was called: also the reason given when a late session is handed back. */
+  let stopReason: VoiceEndReason = "unload";
   let muted = false;
   let phase: Phase = "idle";
   let token: string | null = null;
   let limits: VoiceMachineLimits = { ...config.limits };
-  const sessionRequest = new AbortController();
 
   // Microphone and level meter.
+  let micGranted = false;
   let audioContext: AudioContext | null = null;
   let stream: MediaStream | null = null;
   let analyser: AnalyserNode | null = null;
   let samples: Uint8Array<ArrayBuffer> | null = null;
+  /** When recognition last heard the caller (nowMs), for the orb when there is no meter. */
+  let heardAt = 0;
 
   // Recognition.
   let recognition: Recognition | null = null;
@@ -123,12 +149,8 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
 
   // Synthesis.
   let voices: SpeechSynthesisVoice[] = [];
-  let synthesisWorks = synth !== null;
-  let speechGeneration = 0;
-  let pendingUtterances = 0;
   let speakingSince = 0;
   let lastBoundary = 0;
-  const safetyTimers = new Set<ReturnType<typeof setTimeout>>();
 
   // The reply being streamed and spoken.
   let turnSeq = 0;
@@ -136,9 +158,14 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
   let replyId = "";
   let replyText = "";
   let sentenceBuffer = "";
+  /** The language the reply is read and captioned in (the model answers in the caller's). */
+  let replyLocale: VoiceLocale = locale;
+  let replyLocaleSettled = false;
   /** What the assistant has said in this reply (the echo filter compares against it). */
   let spokenText = "";
   let replyDone = false;
+  /** afterReply() ran for this reply: it must run once, whoever notices the end first. */
+  let replyClosed = false;
   /** When the last reply finished speaking (Date.now()), for the echo tail. */
   let replyEndedAt = 0;
   let pendingEnd: VoiceEndReason | null = null;
@@ -146,6 +173,57 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
   const onVoicesChanged = () => {
     if (synth) voices = synth.getVoices();
   };
+
+  /**
+   * The language an utterance is read in: the reply's, unless the device has voices but none for
+   * it (then the widget's own: a missing language can make an engine fail for good).
+   */
+  const speechLocale = (): VoiceLocale =>
+    replyLocale !== locale && voices.length > 0 && pickVoice(voices, replyLocale) === null ? locale : replyLocale;
+
+  const engine: SpeechEngine | null = synth
+    ? {
+        speak(text, callbacks) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          const spoken = speechLocale();
+          utterance.lang = VOICE_LANG_TAG[spoken];
+          const voice = pickVoice(voices, spoken);
+          if (voice) utterance.voice = voice;
+          utterance.onstart = () => callbacks.start();
+          utterance.onend = () => callbacks.end();
+          utterance.onerror = (event: SpeechSynthesisErrorEvent) => callbacks.error(event.error);
+          utterance.onboundary = () => callbacks.boundary();
+          // Chrome can be left paused by an earlier cancel; speaking into a paused queue is silent.
+          if (synth.paused) synth.resume();
+          synth.speak(utterance);
+        },
+        cancel() {
+          synth.cancel();
+        },
+        speaking() {
+          return synth.speaking;
+        },
+      }
+    : null;
+
+  const queue = engine
+    ? createSpeechQueue({
+        engine,
+        onStart: handleSpeechStart,
+        onBoundary: () => {
+          lastBoundary = nowMs();
+        },
+        onDrained: () => {
+          if (replyDone) afterReply();
+        },
+        onBroken: () => {
+          // The conversation goes on in captions.
+          if (!stopped) emit({ type: "NOTICE", notice: "no_synthesis" });
+        },
+      })
+    : null;
+
+  const pendingSpeech = () => queue?.pending() ?? 0;
 
   // ----- Start ---------------------------------------------------------------------------------
 
@@ -160,6 +238,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     if (input === "voice" && Recognition === null) {
       // Firefox and some in-app browsers: no recognition. No reason to ask for the microphone.
       input = "text";
+      closeAudio();
       emit({ type: "TYPED" });
       emit({ type: "NOTICE", notice: "recognition_unsupported" });
       emit({ type: "CONNECTING" });
@@ -183,10 +262,10 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
         unlock.volume = 0;
         synth.speak(unlock);
       } catch {
-        synthesisWorks = false;
+        // The first real sentence fails the same way and the queue reports it.
       }
     }
-    if (input === "voice") {
+    if (input === "voice" && platform.holdsMeterStream) {
       try {
         const Context =
           window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -215,8 +294,15 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
             granted.getTracks().forEach((track) => track.stop());
             return;
           }
-          stream = granted;
-          attachLevelMeter();
+          micGranted = true;
+          if (platform.holdsMeterStream) {
+            stream = granted;
+            attachLevelMeter();
+          } else {
+            // Phones: the stream only served the permission prompt. Recognition opens the
+            // microphone itself, and a second capture next to it may leave it deaf.
+            granted.getTracks().forEach((track) => track.stop());
+          }
           emit({ type: "MIC_GRANTED" });
           void connect();
         },
@@ -250,17 +336,22 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
 
   async function connect(): Promise<void> {
     phase = "connecting";
-    const result = await requestSession(
-      config.endpoints.session,
-      { tenant: config.tenant, locale, mode: "local", page: options.page, hp: options.hp ?? "" },
-      sessionRequest.signal,
-    );
-    if (result.ok && stopped) {
-      // The visitor left while the session was being opened: hand it back at once.
-      sendEnd(config.endpoints.end, { sessionToken: result.grant.sessionToken, reason: "unload" });
+    // Not aborted by stop(): see requestSession. The answer decides what has to be handed back.
+    const result = await requestSession(config.endpoints.session, {
+      tenant: config.tenant,
+      locale,
+      mode: "local",
+      page: options.page,
+      hp: options.hp ?? "",
+    });
+    if (stopped) {
+      // The visitor left while the session was being opened. An admitted session holds minutes,
+      // spend and a concurrency slot on the server: its token hands it back at once.
+      if (result.ok) {
+        sendEnd(config.endpoints.end, { sessionToken: result.grant.sessionToken, reason: toEndRequestReason(stopReason) });
+      }
       return;
     }
-    if (stopped) return;
     if (!result.ok) {
       emit({ type: "FAIL", code: result.code, retryAfter: result.retryAfter ?? null });
       return;
@@ -268,6 +359,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     token = result.grant.sessionToken;
     if (result.grant.mode !== "local") {
       // The server offers something else now (e.g. only the example): this transport cannot run it.
+      // The token stays, so stop() hands the session back.
       emit({ type: "FAIL", code: "mode_unavailable" });
       return;
     }
@@ -289,7 +381,10 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     replyText = "";
     sentenceBuffer = "";
     spokenText = "";
+    replyLocale = locale;
+    replyLocaleSettled = false;
     replyDone = false;
+    replyClosed = false;
     phase = "thinking";
     // One turn at a time: nothing is recognised while the reply is being prepared.
     stopRecognition();
@@ -299,27 +394,40 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
       ? { sessionToken: token, text: "", locale, opening: true }
       : { sessionToken: token, text, locale };
     let response: Response;
-    try {
-      response = await fetch(config.endpoints.turn, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-        body: JSON.stringify(body),
-        signal: request.signal,
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-    } catch {
+    let busyWaited = 0;
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        response = await fetch(config.endpoints.turn, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+          body: JSON.stringify(body),
+          signal: request.signal,
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+      } catch {
+        if (seq !== turnSeq || stopped) return;
+        emit({ type: "FAIL", code: isOffline() ? "offline" : "network" });
+        return;
+      }
       if (seq !== turnSeq || stopped) return;
-      emit({ type: "FAIL", code: navigator.onLine === false ? "offline" : "network" });
-      return;
-    }
-    if (seq !== turnSeq || stopped) return;
-    if (!response.ok || response.body === null || !isEventStream(response)) {
+      if (response.ok && response.body !== null && isEventStream(response)) break;
       const failure = await readFailure(response);
       if (seq !== turnSeq || stopped) return;
+      if (failure.code === "turn_in_progress" && busyWaited < TURN_BUSY_MAX_WAIT_MS) {
+        // The server runs one turn per session at a time, and the turn a barge-in cut off may
+        // still be finishing there. Not the caller's fault and not a reason to end the call:
+        // send the same turn again shortly (the widget keeps showing "thinking").
+        const delay = busyRetryDelay(failure.retryAfter, attempt);
+        busyWaited += delay;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        if (seq !== turnSeq || stopped) return;
+        continue;
+      }
       emit({ type: "FAIL", code: failure.code, retryAfter: failure.retryAfter ?? null });
       return;
     }
+    if (response.body === null) return;
 
     const outcome = await readTurnStream(
       response.body,
@@ -331,19 +439,20 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     if (seq !== turnSeq || stopped) return;
     if (turnRequest === request) turnRequest = null;
     if (outcome === "idle") emit({ type: "FAIL", code: "timeout" });
-    else if (outcome === "network") emit({ type: "FAIL", code: navigator.onLine === false ? "offline" : "network" });
+    else if (outcome === "network") emit({ type: "FAIL", code: isOffline() ? "offline" : "network" });
     else if (outcome === "eof") emit({ type: "FAIL", code: "upstream" });
   }
 
   function handleStreamEvent(event: TurnStreamEvent): void {
     switch (event.type) {
       case "start":
+        adoptLocale(announcedLocale(event));
         return;
       case "delta":
         replyText += event.text;
         sentenceBuffer += event.text;
-        emitReplyCaption(false);
         speakSentences(false);
+        emitReplyCaption(false);
         return;
       case "tool":
         emit({ type: "TOOL", name: event.name, status: event.status });
@@ -353,12 +462,14 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
         return;
       case "done":
         replyDone = true;
+        adoptLocale(announcedLocale(event));
+        settleReplyLocale(true);
         emitReplyCaption(true);
         emit({ type: "REMAINING", seconds: event.remainingSeconds });
         if (event.ended) pendingEnd = "assistant";
         else if (event.remainingTurns <= 0) pendingEnd = "limit";
         speakSentences(true);
-        if (pendingUtterances === 0) afterReply();
+        if (pendingSpeech() === 0) afterReply();
         return;
       case "error":
         replyDone = true;
@@ -368,15 +479,35 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     }
   }
 
+  /** The server said which language the reply is in: that beats any guess. */
+  function adoptLocale(announced: VoiceLocale | null): void {
+    if (announced === null) return;
+    replyLocale = announced;
+    replyLocaleSettled = true;
+  }
+
+  /** Guesses the reply's language from what has streamed so far, once it can tell. */
+  function settleReplyLocale(final: boolean): void {
+    if (replyLocaleSettled) return;
+    const guess = detectReplyLocale(replyText);
+    if (guess !== null) {
+      replyLocale = guess;
+      replyLocaleSettled = true;
+    } else if (final || words(replyText).length >= LOCALE_SETTLE_WORDS) {
+      replyLocaleSettled = true; // no clear signal: the widget's language
+    }
+  }
+
   function emitReplyCaption(final: boolean): void {
     const text = replyText.trim();
     if (!text) return;
-    emit({ type: "CAPTION", caption: { id: replyId, role: "assistant", text, final, locale } });
+    emit({ type: "CAPTION", caption: { id: replyId, role: "assistant", text, final, locale: replyLocale } });
   }
 
   /** The reply is complete and spoken: the caller's turn, or the end the server asked for. */
   function afterReply(): void {
-    if (stopped) return;
+    if (stopped || replyClosed) return;
+    replyClosed = true;
     if (pendingEnd !== null) {
       emit({ type: "END", reason: pendingEnd });
       return;
@@ -392,6 +523,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
   function speakSentences(final: boolean): void {
     const { sentences, rest } = takeSentences(sentenceBuffer, final);
     sentenceBuffer = rest;
+    if (sentences.length > 0) settleReplyLocale(final);
     for (const sentence of sentences) speak(sentence);
   }
 
@@ -399,86 +531,21 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     const text = toSpeakable(sentence);
     if (!text) return;
     spokenText = `${spokenText} ${text}`;
-    if (!synth || !synthesisWorks) return;
-    const generation = speechGeneration;
-    let utterance: SpeechSynthesisUtterance;
-    try {
-      utterance = new SpeechSynthesisUtterance(text);
-    } catch {
-      disableSynthesis();
-      return;
-    }
-    utterance.lang = VOICE_LANG_TAG[locale];
-    const voice = pickVoice(voices, locale);
-    if (voice) utterance.voice = voice;
-
-    let begun = false;
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(safety);
-      safetyTimers.delete(safety);
-      if (generation !== speechGeneration || stopped) return;
-      pendingUtterances = Math.max(0, pendingUtterances - 1);
-      if (pendingUtterances === 0 && replyDone) afterReply();
-    };
-    // Some engines never fire end or error (no voice installed, audio device gone). The reply
-    // must not hang there: after a generous estimate the utterance counts as done.
-    const safety = setTimeout(() => {
-      if (!begun) disableSynthesis();
-      finish();
-    }, (text.length / SAFETY_CHARS_PER_SECOND) * 1000 + SAFETY_MARGIN_MS);
-    safetyTimers.add(safety);
-
-    utterance.onstart = () => {
-      begun = true;
-      if (generation !== speechGeneration || stopped) return;
-      if (phase !== "speaking") {
-        phase = "speaking";
-        speakingSince = nowMs();
-        emit({ type: "SPEAKING" });
-        // Listening on while speaking is what makes interrupting possible.
-        if (input === "voice") startRecognition();
-      }
-    };
-    utterance.onboundary = () => {
-      lastBoundary = nowMs();
-    };
-    utterance.onend = finish;
-    utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
-      // "interrupted" and "canceled" are ours (barge-in, stop); the others mean no voice output.
-      if (event.error !== "interrupted" && event.error !== "canceled") disableSynthesis();
-      finish();
-    };
-    pendingUtterances += 1;
-    try {
-      // Chrome can be left paused by an earlier cancel; speaking into a paused queue is silent.
-      if (synth.paused) synth.resume();
-      synth.speak(utterance);
-    } catch {
-      disableSynthesis();
-      finish();
-    }
+    if (queue?.works()) queue.speak(text);
   }
 
-  function disableSynthesis(): void {
-    if (!synthesisWorks) return;
-    synthesisWorks = false;
-    // The conversation goes on in captions.
-    emit({ type: "NOTICE", notice: "no_synthesis" });
+  /** The first sentence of a reply started to play. */
+  function handleSpeechStart(): void {
+    if (stopped || phase !== "thinking") return;
+    phase = "speaking";
+    speakingSince = nowMs();
+    emit({ type: "SPEAKING" });
+    // Listening on while speaking is what makes interrupting possible (not on phones).
+    if (input === "voice" && platform.listensWhileSpeaking) startRecognition();
   }
 
   function cancelSpeech(): void {
-    speechGeneration += 1;
-    pendingUtterances = 0;
-    for (const timer of safetyTimers) clearTimeout(timer);
-    safetyTimers.clear();
-    try {
-      synth?.cancel();
-    } catch {
-      // Nothing to cancel.
-    }
+    queue?.cancel();
   }
 
   /** The caller spoke over the assistant: stop talking, drop the rest of the reply, listen. */
@@ -491,6 +558,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
       turnRequest = null;
       replyDone = true;
     }
+    replyClosed = true;
     emitReplyCaption(true);
     phase = "listening";
     emit({ type: "INTERRUPT" });
@@ -521,14 +589,14 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
   function startRecognition(): void {
     wantRecognition = true;
     if (stopped || muted || input !== "voice" || recognising) return;
-    const engine = ensureRecognition();
-    if (!engine) {
+    const recogniser = ensureRecognition();
+    if (!recogniser) {
       fallBackToTyping("recognition_unavailable");
       return;
     }
     try {
-      engine.lang = VOICE_LANG_TAG[locale];
-      engine.start();
+      recogniser.lang = VOICE_LANG_TAG[locale];
+      recogniser.start();
       recognising = true;
       lastRecognitionStart = Date.now();
     } catch {
@@ -586,6 +654,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     }
     if (phase !== "listening") return; // a straggler while the reply is prepared
 
+    heardAt = nowMs();
     emit({ type: "ACTIVITY" });
     if (callerCaption === null) {
       utteranceCount += 1;
@@ -620,7 +689,8 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
         fallBackToTyping("recognition_network");
         return;
       case "not-allowed":
-        if (stream) fallBackToTyping("recognition_unavailable");
+        // The visitor did allow the microphone (getUserMedia): it is recognition that is refused.
+        if (micGranted) fallBackToTyping("recognition_unavailable");
         else emit({ type: "FAIL", code: "mic_denied" });
         return;
       case "service-not-allowed":
@@ -669,14 +739,22 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
     return clamp01(rhythm + lift);
   }
 
+  /** No meter (phones, or no AudioContext): a short pulse each time recognition hears the caller. */
+  function heardLevel(now: number): number {
+    const since = now - heardAt;
+    if (heardAt === 0 || since < 0 || since > HEARD_PULSE_MS) return 0;
+    const syllable = 0.62 + 0.38 * Math.sin(2 * Math.PI * 4.2 * (now / 1000));
+    return clamp01(0.7 * (1 - since / HEARD_PULSE_MS) * syllable);
+  }
+
   return {
     mode: "local",
     start,
     stop(reason: VoiceEndReason) {
       if (stopped) return;
       stopped = true;
+      stopReason = reason;
       clearTimeout(restartTimer);
-      sessionRequest.abort();
       turnSeq += 1;
       turnRequest?.abort();
       turnRequest = null;
@@ -690,6 +768,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
       synth?.removeEventListener?.("voiceschanged", onVoicesChanged);
       closeAudio();
       emitter.clear();
+      // A session request still on its way is left to finish: connect() hands that session back.
       if (token !== null) sendEnd(config.endpoints.end, { sessionToken: token, reason: toEndRequestReason(reason) });
       token = null;
     },
@@ -705,7 +784,7 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
           emit({ type: "CAPTION", caption: { id: callerCaption.id, role: "caller", text: callerCaption.text, final: true, locale } });
           callerCaption = null;
         }
-      } else if (phase === "listening" || phase === "speaking") {
+      } else if (phase === "listening" || (phase === "speaking" && platform.listensWhileSpeaking)) {
         startRecognition();
       }
     },
@@ -747,7 +826,8 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
       if (stopped) return 0;
       const now = nowMs();
       if (phase === "speaking") return synthLevel(now);
-      if (muted || !analyser || !samples) return 0;
+      if (muted || input !== "voice") return 0;
+      if (!analyser || !samples) return heardLevel(now);
       try {
         analyser.getByteTimeDomainData(samples);
       } catch {
@@ -763,6 +843,10 @@ export function createLocalTransport(options: LocalTransportOptions): VoiceTrans
       return clamp01((rms - 0.015) * 7);
     },
   };
+}
+
+function isOffline(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
 function isDomException(value: unknown): boolean {

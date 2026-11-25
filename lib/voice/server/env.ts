@@ -16,8 +16,17 @@
 //   A live mode whose requirements are missing degrades to "scripted", never to the other one:
 //   "local" uses the browser's own speech recognition, which sends audio to the browser vendor,
 //   so it is never offered to visitors just because the realtime provider is missing.
+//   In production every live mode also needs the shared store (Upstash): "realtime" bills real
+//   money per minute and "local" real model tokens per turn, and per-instance memory counters
+//   would let every instance spend the budget again. The session lock, the turn cap and the
+//   conversation itself would live in one instance too (review finding S2-3).
+//   In production "local" also needs the real model: VOICE_BRAIN=mock answers "[Testantwort]" to
+//   visitors while its requests still reach the business by email (review finding S2-10).
+//   Demo tenants get live modes only with VOICE_LAB on (availableModes with the tenant): their
+//   live conversations exist to be shown on the owner's laptop, not to visitors of the public site.
 import { createHash, randomBytes } from "node:crypto";
 import { isValidEmail } from "@/lib/assistant/lead-schema";
+import { getAssistantEnv } from "@/lib/assistant/server/env";
 import { DEFAULT_VOICE_LIMITS, type VoiceLimits, type VoiceMode, type VoiceTenantConfig } from "@/lib/voice/types";
 import { logVoiceEvent } from "./log";
 import { MIN_WEBHOOK_SECRET_LENGTH } from "./webhook";
@@ -30,7 +39,15 @@ export const VOICE_PROVIDER_IDS = ["none", "mock"] as const;
 export type VoiceProviderId = (typeof VOICE_PROVIDER_IDS)[number];
 
 /** Why the requested VOICE_MODE could not be honoured (for one log line, never shown to visitors). */
-export type VoiceModeDegradation = "no_provider" | "no_provider_key" | "no_brain" | "no_secret";
+export type VoiceModeDegradation = "no_provider" | "no_provider_key" | "no_brain" | "no_secret" | "no_shared_store";
+
+/** Ceilings across ALL tenants together, checked in the same reservation as each tenant's own. */
+export interface VoiceGlobalLimits {
+  /** Conversation minutes per UTC day, every tenant together. */
+  minutesPerDay: number;
+  /** Estimated spend per UTC month in CHF, every tenant together. */
+  budgetChfPerMonth: number;
+}
 
 export interface VoiceEnv {
   /** VOICE_ENABLED is on. Off by default: the feature stays dark until it is switched on. */
@@ -62,6 +79,13 @@ export interface VoiceEnv {
   providerWebhookSecret: string | null;
   /** VOICE_COST_CHF_PER_MINUTE, or null for the per-mode default: see voiceCostChfPerMinute(). */
   costChfPerMinute: number | null;
+  /**
+   * VOICE_CHF_PER_USD: the fixed, conservative rate model costs (priced in USD) are charged at.
+   * Deliberately above the market rate: the spend counters must err high.
+   */
+  chfPerUsd: number;
+  /** VOICE_GLOBAL_MINUTES_PER_DAY and VOICE_GLOBAL_BUDGET_CHF_PER_MONTH. */
+  global: VoiceGlobalLimits;
   /** Where budget alerts go (server-only). */
   alertEmail: string | null;
   /** VOICE_LAB: the internal test page exists. */
@@ -83,14 +107,35 @@ export const DEFAULT_VOICE_MAX_OUTPUT_TOKENS = 400;
 const MIN_VOICE_OUTPUT_TOKENS = 100;
 const MAX_VOICE_OUTPUT_TOKENS = 1200;
 export const MIN_SESSION_SECRET_LENGTH = 32;
-/** Estimated CHF per conversation minute when VOICE_COST_CHF_PER_MINUTE is not set. */
+/**
+ * Estimated CHF per conversation minute when VOICE_COST_CHF_PER_MINUTE is not set. "local" has no
+ * minute price of its own: the browser's speech is free, and the model's real cost is charged per
+ * turn (limits.ts reserveTurnSpend), so a minute rate would count the model twice.
+ */
 export const DEFAULT_COST_CHF_PER_MINUTE: Readonly<Record<VoiceMode, number>> = {
   scripted: 0,
-  local: 0.02,
+  local: 0,
   realtime: 0.25,
 };
 // Anything above this per minute is a typo (no provider costs that much), not a price.
 const MAX_COST_CHF_PER_MINUTE = 10;
+/** CHF charged per USD of model cost. The franc has traded below 0.92 per dollar for years. */
+export const DEFAULT_CHF_PER_USD = 0.9;
+// Below this an exchange rate is a typo that would undercount the spend; above it, nonsense.
+const MIN_CHF_PER_USD = 0.5;
+const MAX_CHF_PER_USD = 2;
+/**
+ * Defaults of the ceilings across all tenants: room for Modolo's own receptionist (30 minutes a
+ * day, 30 CHF a month by default) and a little lab use, and no more.
+ */
+export const DEFAULT_VOICE_GLOBAL_LIMITS: Readonly<VoiceGlobalLimits> = {
+  minutesPerDay: 60,
+  budgetChfPerMonth: 50,
+};
+const GLOBAL_LIMIT_RANGES: Readonly<Record<keyof VoiceGlobalLimits, { min: number; max: number }>> = {
+  minutesPerDay: { min: 0, max: 100_000 },
+  budgetChfPerMonth: { min: 0, max: 100_000 },
+};
 
 /**
  * Sane range of every limit, applied after the tenant and env overrides. Zero is accepted where it
@@ -165,17 +210,29 @@ export function resolveVoiceLimits(tenant: Pick<VoiceTenantConfig, "limits">, en
   return limits;
 }
 
-/** Modes the server offers right now, best first. Always ends with "scripted". */
-export function availableModes(env: Pick<VoiceEnv, "mode">): VoiceMode[] {
-  return env.mode === "scripted" ? ["scripted"] : [env.mode, "scripted"];
+/**
+ * Modes the server offers right now, best first. Always ends with "scripted". With a tenant, the
+ * modes offered to THAT tenant: a demo business gets only "scripted" unless VOICE_LAB is on. The
+ * session route always passes the tenant; a page that shows a tenant's widget must too, or it
+ * offers a mode the session route then answers with "scripted".
+ */
+export function availableModes(
+  env: Pick<VoiceEnv, "mode"> & Partial<Pick<VoiceEnv, "lab">>,
+  tenant?: Pick<VoiceTenantConfig, "kind">,
+): VoiceMode[] {
+  if (env.mode === "scripted") return ["scripted"];
+  if (tenant?.kind === "demo" && env.lab !== true) return ["scripted"];
+  return [env.mode, "scripted"];
 }
 
 /**
  * Estimated CHF per minute of a session in `mode`, for the budget reservation. "scripted" costs
- * nothing; the live modes use VOICE_COST_CHF_PER_MINUTE or their default.
+ * nothing, and neither does a minute of "local": its only cost is the model's, charged per turn,
+ * so VOICE_COST_CHF_PER_MINUTE (the provider's price) applies to "realtime" only. Priced, the
+ * lease of every abandoned local session would sit on the month's spend (review finding S2-2).
  */
 export function voiceCostChfPerMinute(env: Pick<VoiceEnv, "costChfPerMinute">, mode: VoiceMode): number {
-  if (mode === "scripted") return 0;
+  if (mode !== "realtime") return 0;
   return env.costChfPerMinute ?? DEFAULT_COST_CHF_PER_MINUTE[mode];
 }
 
@@ -196,7 +253,9 @@ function readVoiceEnv(): VoiceEnv {
     secretOk: secret.value !== null,
     provider,
     providerKeyOk: KEYLESS_PROVIDERS.has(provider) || providerApiKey !== null,
-    brainOk: brain === "mock" || anthropicApiKey !== null,
+    // The mock brain is for tests and development only (see the header).
+    brainOk: brain === "mock" ? !production : anthropicApiKey !== null,
+    sharedStoreOk: !production || sharedStoreConfigured(),
   });
   const mode: VoiceMode = degradedReason === null ? requestedMode : "scripted";
   const enabled = readFlag("VOICE_ENABLED");
@@ -224,6 +283,8 @@ function readVoiceEnv(): VoiceEnv {
     providerApiKey,
     providerWebhookSecret: readWebhookSecret(),
     costChfPerMinute: readCost(),
+    chfPerUsd: readClampedDecimal("VOICE_CHF_PER_USD", MIN_CHF_PER_USD, MAX_CHF_PER_USD) ?? DEFAULT_CHF_PER_USD,
+    global: readGlobalLimits(),
     alertEmail: readEmail("VOICE_ALERT_EMAIL"),
     lab: readFlag("VOICE_LAB"),
     limits: readLimitOverrides(),
@@ -234,7 +295,7 @@ function readVoiceEnv(): VoiceEnv {
 
 function degradation(
   requested: VoiceMode,
-  state: { secretOk: boolean; provider: VoiceProviderId; providerKeyOk: boolean; brainOk: boolean },
+  state: { secretOk: boolean; provider: VoiceProviderId; providerKeyOk: boolean; brainOk: boolean; sharedStoreOk: boolean },
 ): VoiceModeDegradation | null {
   if (requested === "scripted") return null;
   if (requested === "realtime") {
@@ -244,7 +305,31 @@ function degradation(
     return "no_brain";
   }
   // Every live mode hands out signed session tokens.
-  return state.secretOk ? null : "no_secret";
+  if (!state.secretOk) return "no_secret";
+  // Every live mode spends real money and keeps its counters, its lock and its state in the store.
+  return state.sharedStoreOk ? null : "no_shared_store";
+}
+
+/** True when the chat's store configuration points at Upstash (the shared, persistent store). */
+function sharedStoreConfigured(): boolean {
+  try {
+    return getAssistantEnv().store.kind === "upstash";
+  } catch {
+    return false;
+  }
+}
+
+function readGlobalLimits(): VoiceGlobalLimits {
+  const read = (name: string, key: keyof VoiceGlobalLimits): number => {
+    // Like the per-tenant overrides: a negative amount is a typo and keeps the default.
+    const value = readNumber(name);
+    if (value === null || value < 0) return DEFAULT_VOICE_GLOBAL_LIMITS[key];
+    return clamp(value, GLOBAL_LIMIT_RANGES[key].min, GLOBAL_LIMIT_RANGES[key].max);
+  };
+  return {
+    minutesPerDay: Math.round(read("VOICE_GLOBAL_MINUTES_PER_DAY", "minutesPerDay")),
+    budgetChfPerMonth: read("VOICE_GLOBAL_BUDGET_CHF_PER_MONTH", "budgetChfPerMonth"),
+  };
 }
 
 /**
@@ -335,6 +420,11 @@ function readNumber(name: string): number | null {
 function readClamped(name: string, min: number, max: number): number | null {
   const value = readNumber(name);
   return value === null ? null : clamp(Math.round(value), min, max);
+}
+
+function readClampedDecimal(name: string, min: number, max: number): number | null {
+  const value = readNumber(name);
+  return value === null ? null : clamp(value, min, max);
 }
 
 function readEnum<T extends string>(name: string, allowed: readonly T[]): T | null {

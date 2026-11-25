@@ -102,7 +102,7 @@ export const HOTEL_TENANT: VoiceTenantConfig = {
       when: "The caller asks for a room for certain dates. Take it as a request: the reception confirms availability and price. Never say a room is booked.",
       fields: [
         { id: "arrival_date", label: { de: "Anreise" }, type: "date", required: true },
-        { id: "departure_date", label: { de: "Abreise" }, type: "date", required: true },
+        { id: "departure_date", label: { de: "Abreise" }, type: "date", required: true, after: "arrival_date" },
         { id: "guests", label: { de: "Anzahl Gäste" }, type: "integer", required: true, min: 1, max: 8 },
         {
           id: "room_type",

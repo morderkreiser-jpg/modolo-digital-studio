@@ -16,8 +16,12 @@
 // Limits of one turn: at most MAX_TOOL_ROUNDS tool rounds, a hard deadline of TURN_DEADLINE_MS for
 // everything, and env.maxOutputTokens per model call. Nothing here logs or throws content: the log
 // line has ids, codes, counts and token usage; failures end the turn with an "error" event.
+//
+// Money: the route reserves the turn's worst case (turnWorstCaseUsd) on the spend counters before
+// runTurn starts, and runTurn reports what the model calls really cost (settleSpend) before its
+// last event, so a turn that the budget cannot pay for never reaches the model.
 import Anthropic from "@anthropic-ai/sdk";
-import { estimateCostUsd, type UsageTokens } from "@/lib/assistant/server/costs";
+import { estimateCostUsd, estimateInputUsage, type UsageTokens } from "@/lib/assistant/server/costs";
 import { formatClockTime, isOpenAt, nextOpening, zonedParts } from "@/lib/voice/hours";
 import { pickVoiceText } from "@/lib/voice/knowledge";
 import { buildVoiceSystem } from "@/lib/voice/prompt";
@@ -26,9 +30,11 @@ import {
   executeTool,
   exportToolMemory,
   importToolMemory,
+  type SessionCaps,
   type ToolContext,
   type ToolSinks,
 } from "@/lib/voice/tools/execute";
+import { withoutPhoneNumbers } from "@/lib/voice/tools/validate";
 import {
   isVoiceToolName,
   type CalendarProvider,
@@ -231,9 +237,83 @@ export interface RunTurnArgs {
   sinks: ToolSinks;
   /** Caller turns left after this one (from admitTurn), reported in "done". */
   remainingTurns: number;
+  /** The session's tool caps in the shared store (atomic across parallel requests). */
+  caps?: SessionCaps;
+  /**
+   * Called once, before the last event, with what this turn's model calls cost (USD), so the
+   * route can settle the reservation it made. Awaited; a failure in it is ignored.
+   */
+  settleSpend?: (costUsd: number) => Promise<void>;
   signal?: AbortSignal;
   now?: () => number;
   deadlineMs?: number;
+}
+
+/**
+ * The system blocks of a turn, exactly as runTurn sends them: the static part is cached (tools
+ * render before it, so they are inside the cached prefix), the per-turn part follows the breakpoint.
+ */
+export function turnSystem(args: {
+  tenant: VoiceTenantConfig;
+  state: Pick<VoiceSessionState, "channel" | "outcomes">;
+  locale: VoiceLocale;
+  now: Date;
+  remainingSeconds: number;
+}): Anthropic.TextBlockParam[] {
+  const { tenant, now } = args;
+  const open = isOpenAt(tenant.hours, now);
+  const system = buildVoiceSystem({
+    tenant,
+    locale: args.locale,
+    channel: args.state.channel,
+    now,
+    isOpen: open,
+    nextOpeningText: open ? undefined : nextOpeningText(tenant, now),
+    remainingSeconds: args.remainingSeconds,
+    outcomesSoFar: describeOutcomes(args.state.outcomes, tenant),
+  });
+  return [
+    { type: "text", text: system.staticText, cache_control: { type: "ephemeral" } },
+    { type: "text", text: system.dynamicText },
+  ];
+}
+
+/** The tools of a turn, as the API takes them. */
+export function turnTools(tenant: VoiceTenantConfig): Anthropic.Tool[] {
+  return toolDefinitions(tenant).map(toAnthropicTool);
+}
+
+/**
+ * Tokens a tool round may add to the next call's input on top of the previous reply: its results
+ * (a list of free times is the longest, about 1'500 characters). Generous on purpose.
+ */
+const TOOL_RESULT_TOKENS_PER_ROUND = 1500;
+
+/**
+ * The most one turn can cost (USD): every call of the turn (MAX_TOOL_ROUNDS + 1) sends the whole
+ * prompt as a cache write (the dearest way to pay for it), the history and the utterance, and
+ * writes the whole output allowance; each tool round adds the previous reply and its results to
+ * the next call. Errs high, like the chat's reservation: the budget must never be passed.
+ */
+export function turnWorstCaseUsd(args: {
+  modelId: string;
+  maxOutputTokens: number;
+  system: readonly Anthropic.TextBlockParam[];
+  tools: readonly Anthropic.Tool[];
+  messages: readonly Anthropic.MessageParam[];
+}): number {
+  const input = estimateInputUsage({ system: args.system, messages: args.messages });
+  const toolTokens = Math.ceil(JSON.stringify(args.tools).length / 3);
+  const output = Number.isFinite(args.maxOutputTokens) && args.maxOutputTokens > 0 ? args.maxOutputTokens : 0;
+  const calls = MAX_TOOL_ROUNDS + 1;
+  // Call k carries k earlier rounds: 0 + 1 + ... + (calls - 1) rounds in all.
+  const growth = ((calls * (calls - 1)) / 2) * (output + TOOL_RESULT_TOKENS_PER_ROUND);
+  return estimateCostUsd(args.modelId, {
+    inputTokens: calls * input.inputTokens + growth,
+    outputTokens: calls * output,
+    cacheReadTokens: 0,
+    cacheWriteTokens: calls * (input.cacheWriteTokens + toolTokens),
+  });
 }
 
 /**
@@ -277,6 +357,7 @@ export async function* runTurn(args: RunTurnArgs): AsyncGenerator<TurnStreamEven
     now: new Date(startedAt),
     limits,
     counters,
+    ...(args.caps ? { caps: args.caps } : {}),
     calendar: args.calendar,
     sinks: args.sinks,
     record: (outcome) => {
@@ -301,27 +382,10 @@ export async function* runTurn(args: RunTurnArgs): AsyncGenerator<TurnStreamEven
 
   try {
     if (args.model === null) throw new BrainFailure("unavailable");
-    const nowDate = new Date(startedAt);
-    const open = isOpenAt(tenant.hours, nowDate);
-    const system = buildVoiceSystem({
-      tenant,
-      locale: args.locale,
-      channel: state.channel,
-      now: nowDate,
-      isOpen: open,
-      nextOpeningText: open ? undefined : nextOpeningText(tenant, nowDate),
-      remainingSeconds: remainingSeconds(),
-      outcomesSoFar: describeOutcomes(state.outcomes, tenant),
-    });
     const request = {
       model: args.modelId,
-      // The static part is cached (tools render before it, so they are inside the cached prefix);
-      // the per-turn part follows the breakpoint.
-      system: [
-        { type: "text" as const, text: system.staticText, cache_control: { type: "ephemeral" as const } },
-        { type: "text" as const, text: system.dynamicText },
-      ],
-      tools: toolDefinitions(tenant).map(toAnthropicTool),
+      system: turnSystem({ tenant, state, locale: args.locale, now: new Date(startedAt), remainingSeconds: remainingSeconds() }),
+      tools: turnTools(tenant),
       maxTokens: args.maxOutputTokens,
       signal,
     };
@@ -435,6 +499,15 @@ export async function* runTurn(args: RunTurnArgs): AsyncGenerator<TurnStreamEven
     state.turns += 1;
   }
   state.toolMemory = exportToolMemory(counters);
+  const costUsd = estimateCostUsd(servedModel, usage);
+  // Before the last event: the next turn's reservation must already see this turn's real cost.
+  if (args.settleSpend) {
+    try {
+      await args.settleSpend(costUsd);
+    } catch {
+      // The reservation then stays charged in full: the safe direction.
+    }
+  }
   logVoiceEvent({
     op: "turn",
     tenant: tenant.id,
@@ -449,7 +522,7 @@ export async function* runTurn(args: RunTurnArgs): AsyncGenerator<TurnStreamEven
     outTok: usage.outputTokens,
     cacheRead: usage.cacheReadTokens,
     cacheWrite: usage.cacheWriteTokens,
-    costUsd: Math.round(estimateCostUsd(servedModel, usage) * 1e8) / 1e8,
+    costUsd: Math.round(costUsd * 1e8) / 1e8,
     ms: clock() - startedAt,
     ttftMs: firstTextAt === null ? undefined : firstTextAt - startedAt,
   });
@@ -530,8 +603,9 @@ function handoffOf(name: string, outcome: ToolOutcome, tenant: VoiceTenantConfig
   if (name === "transfer_call") {
     const targetId = typeof outcome.data?.target === "string" ? outcome.data.target : "";
     const target = tenant.handoff.transfer.targets.find((candidate) => candidate.id === targetId);
-    // The label only: the number never leaves the server.
-    return { kind: "transfer", targetLabel: target ? pickVoiceText(target.label, locale, tenant.defaultLocale) || target.id : targetId };
+    // The label only: the number never leaves the server, not even inside a carelessly written label.
+    const label = target ? withoutPhoneNumbers(pickVoiceText(target.label, locale, tenant.defaultLocale)) || target.id : targetId;
+    return { kind: "transfer", targetLabel: label };
   }
   return null;
 }
@@ -561,6 +635,12 @@ export function describeOutcomes(outcomes: CallSummary["outcomes"], tenant: Voic
         const start = Date.parse(outcome.booking.start);
         const when = Number.isFinite(start) ? localStart(new Date(start), tenant) : outcome.booking.start;
         lines.push(`appointment ${outcome.booking.serviceId} booked for ${when}, reference ${outcome.booking.ref}`);
+        break;
+      }
+      case "reschedule": {
+        const start = Date.parse(outcome.booking.start);
+        const when = Number.isFinite(start) ? localStart(new Date(start), tenant) : outcome.booking.start;
+        lines.push(`appointment ${outcome.booking.ref} moved to ${when}`);
         break;
       }
       case "cancellation":

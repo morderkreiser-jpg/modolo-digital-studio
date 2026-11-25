@@ -172,6 +172,54 @@ function best<V extends VoiceLike>(voices: readonly V[]): V {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Language of a reply
+// ---------------------------------------------------------------------------------------------
+
+// Short, frequent words that mostly belong to one of the four languages. Compared after words()
+// (lower case, accents removed: "für" is "fur", "sì" is "si"). Words two of them share in writing
+// are left out on purpose: la, le, il, in, a, un, non, si, ai, on, du, des, alle, come, was, die.
+const LANGUAGE_MARKERS: Record<VoiceLocale, ReadonlySet<string>> = {
+  de: new Set(
+    "der das und ist ich nicht ein eine einen dem den mit fur auf wir haben habe gerne gern bitte danke uhr termin wie wann noch auch sind kann konnen ihnen ihr oder sie wird gibt leider morgen heute".split(" "),
+  ),
+  it: new Set(
+    "lo gli di che una per con sono mi ti ci ho della del alla grazie prego buongiorno quando ancora anche puo possiamo abbiamo appuntamento ore domani oggi purtroppo".split(" "),
+  ),
+  en: new Set(
+    "the and is you not to with for it we have has please thank thanks what when how can could your are be yes appointment of at would there".split(" "),
+  ),
+  fr: new Set(
+    "et est je vous ne pas une pour avec sur dans nous avez merci bonjour comment quand peut pouvez votre oui rendez demain aujourd hui au".split(" "),
+  ),
+};
+
+/**
+ * The language `text` is most likely written in, or null when it is too short or too mixed to
+ * tell. The model answers in the language the caller actually used, which need not be the
+ * widget's: the reply must then be read by a voice of that language and captioned with its lang.
+ * At least two marker words, and clearly more than any other language.
+ */
+export function detectReplyLocale(text: string): VoiceLocale | null {
+  const tokens = words(text);
+  let best: VoiceLocale | null = null;
+  let bestScore = 0;
+  let second = 0;
+  for (const locale of Object.keys(LANGUAGE_MARKERS) as VoiceLocale[]) {
+    const markers = LANGUAGE_MARKERS[locale];
+    const score = tokens.filter((token) => markers.has(token)).length;
+    if (score > bestScore) {
+      second = bestScore;
+      bestScore = score;
+      best = locale;
+    } else if (score > second) {
+      second = score;
+    }
+  }
+  if (best === null || bestScore < 2 || bestScore < second * 2) return null;
+  return best;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Echo and barge-in
 // ---------------------------------------------------------------------------------------------
 

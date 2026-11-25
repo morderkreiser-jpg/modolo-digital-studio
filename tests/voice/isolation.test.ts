@@ -16,7 +16,8 @@ const T0 = Date.UTC(2026, 11, 2, 9, 0, 0);
 let restoreEnv: () => void = () => undefined;
 beforeEach(() => {
   captureLogs();
-  restoreEnv = localEnv();
+  // Live sessions of demo businesses exist only in the lab (availableModes): these tests open them.
+  restoreEnv = localEnv({ VOICE_LAB: "true" });
 });
 afterEach(() => {
   restoreEnv();

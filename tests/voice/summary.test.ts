@@ -8,7 +8,9 @@ import { createSessionState, type VoiceSessionState } from "@/lib/voice/server/s
 import {
   buildCallSummary,
   canDeliverSummary,
+  deliverRequest,
   deliverSummary,
+  endOfCallSummary,
   renderSummaryEmail,
   type SendEmail,
 } from "@/lib/voice/server/summary";
@@ -159,5 +161,58 @@ describe("deliverSummary", () => {
     assert.equal(canDeliverSummary(MODOLO_VOICE_TENANT, null), false);
     assert.equal(canDeliverSummary(MODOLO_VOICE_TENANT, RESEND), true);
     assert.equal(canDeliverSummary({ ...MODOLO_VOICE_TENANT, notifyEmail: undefined }, RESEND), false);
+  });
+});
+
+// From the integration report: requests are emailed the moment they are taken (deliverRequest);
+// the summary at the end must not send them a second time.
+describe("deliverRequest and the end-of-call summary", () => {
+  it("sends one request at once, as a request taken during a call, without a call length", async () => {
+    const send = recorder();
+    const delivery = await deliverRequest({
+      outcome: LEAD as Extract<CallSummary["outcomes"][number], { kind: "lead" }>,
+      tenant: MODOLO_VOICE_TENANT,
+      session: { sessionId: "summaryTestSession0001", channel: "web", locale: "it", startedAt: STARTED },
+      resend: RESEND,
+      send,
+    });
+    assert.deepEqual(delivery, { sent: true });
+    assert.equal(send.sent[0].subject, "Sprachassistent Modolo Digital Studio – Anfrage: Projektanfrage, Referenz LD-7K2Q");
+    assert.match(send.sent[0].text, /^Der KI-Sprachassistent hat diese Anfrage während eines Gesprächs aufgenommen\./);
+    assert.doesNotMatch(send.sent[0].text, /Dauer:/);
+    assert.equal(send.sent[0].replyTo, "anna@example.ch");
+  });
+
+  it("leaves requests and callback wishes out of the summary at the end", () => {
+    const callback: CallSummary["outcomes"][number] = { kind: "callback", name: "Anna Muster", phone: "+41791234567", topic: "Offerte" };
+    const cancellation: CallSummary["outcomes"][number] = { kind: "cancellation", ref: "MV-2345" };
+    const summary = endOfCallSummary(sessionState([LEAD, callback, cancellation]), MODOLO_VOICE_TENANT, STARTED + 60_000);
+    assert.deepEqual(summary.outcomes, [cancellation]);
+    const onlyRequests = endOfCallSummary(sessionState([LEAD, callback]), MODOLO_VOICE_TENANT, STARTED + 60_000);
+    assert.deepEqual(onlyRequests.outcomes, []);
+  });
+
+  // Review finding correttezza/F4: a move was listed as a new booking.
+  it("names a moved appointment a move", () => {
+    const booking = {
+      ref: "MV-9VZ2",
+      serviceId: "table",
+      start: "2026-12-15T12:30:00+01:00",
+      end: "2026-12-15T14:30:00+01:00",
+      name: "Sarah Collins",
+      contact: "+41780000044",
+      partySize: 4,
+      status: "confirmed" as const,
+      createdAt: "2026-12-02T10:00:00+01:00",
+    };
+    const summary = buildCallSummary(
+      sessionState([{ kind: "booking", booking }, { kind: "reschedule", booking: { ...booking, start: "2026-12-16T12:30:00+01:00" } }]),
+      MODOLO_VOICE_TENANT,
+      STARTED,
+    );
+    const { text } = renderSummaryEmail(summary, MODOLO_VOICE_TENANT);
+    assert.match(text, /1\. Termin gebucht: table, Referenz MV-9VZ2/);
+    assert.match(text, /2\. Termin verschoben: table, Referenz MV-9VZ2/);
+    assert.match(text, /Beginn: 16\.12\.2026 12:30/);
   });
 });

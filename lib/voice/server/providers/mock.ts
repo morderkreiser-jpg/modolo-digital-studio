@@ -1,6 +1,8 @@
 // A fake realtime provider for tests and local development. It makes no network call, costs
 // nothing and hands out tokens that are obviously fake ("mock_" + session id), which no real SDK
 // accepts. It can be told to fail or to be slow, so the breaker and timeout paths can be tested.
+// It confirms calls by default (tests send its "started" and "ended" events themselves, signed);
+// `confirmsCalls: false` plays an adapter that cannot, whose sessions reserve their whole call.
 import type { VoiceLocale } from "@/lib/voice/types";
 import type { CreateWebSessionArgs, CreateWebSessionResult, RealtimeProvider } from "./types";
 
@@ -36,7 +38,7 @@ export const MOCK_TOKEN_TTL_SECONDS = 60;
 const MAX_RECORDED_CALLS = 100;
 
 export function createMockProvider(
-  options: { failWith?: MockFailure | null; delayMs?: number; now?: () => number } = {},
+  options: { failWith?: MockFailure | null; delayMs?: number; now?: () => number; confirmsCalls?: boolean } = {},
 ): MockRealtimeProvider {
   let failure: MockFailure | null = options.failWith ?? null;
   let delayMs = toDelay(options.delayMs);
@@ -46,6 +48,7 @@ export function createMockProvider(
 
   return {
     id: "mock",
+    confirmsCalls: options.confirmsCalls !== false,
     calls,
     ended,
     failWith(code) {

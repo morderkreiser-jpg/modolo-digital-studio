@@ -9,12 +9,18 @@
 //
 // No timers, no background work: the state lives in store counters and is computed from `now`
 // on every call, so it is shared by every instance (with Upstash) and tests can move time freely.
-//   mva:brk:<tenant>:<provider>:f:<slot>    failures in a 10-second slot (TTL 2 min)
-//   mva:brk:<tenant>:<provider>:gen         generation counter, +1 on every trip and every close
-//   mva:brk:<tenant>:<provider>:trip:<gen>  unix second the breaker opened in that generation
-// The current generation decides the state: no trip time → closed; trip time less than OPEN
+//   mva:brk:<tenant>:<provider>:f:<slot>              failures in a 10-second slot (TTL 2 min)
+//   mva:brk:<tenant>:<provider>:gen:<epoch>           generation counter of a UTC day, +1 on every
+//                                                     trip and every close
+//   mva:brk:<tenant>:<provider>:trip:<epoch>:<gen>    unix second the breaker opened then
+// The latest generation decides the state: no trip time → closed; trip time less than OPEN
 // seconds ago → open; then half-open, then closed. A success in half-open starts a new generation
 // that has no trip time, i.e. closes the breaker, without a delete (the store has none).
+//
+// Why per day: an increment keeps the key's first TTL, so one long-lived generation counter
+// expired a fixed time after its first trip, possibly while the breaker was open, which read as
+// "closed" and let a retry storm through (review finding correttezza/F10). A day's counter is
+// read on that day and the next (a whole open and half-open cycle lasts minutes) and lives three.
 //
 // The failure window is counted in 10-second slots: the current slot and the six before it, so
 // "inside 60 seconds" means inside the last 60 to 70 seconds. The breaker errs towards opening.
@@ -30,7 +36,8 @@ export type BreakerState = "closed" | "open" | "half_open";
 const SLOT_SECONDS = 10;
 const SLOTS = BREAKER_WINDOW_SECONDS / SLOT_SECONDS + 1;
 const FAILURE_TTL = 2 * BREAKER_WINDOW_SECONDS;
-const GENERATION_TTL = 7 * 86_400;
+const EPOCH_SECONDS = 86_400;
+const GENERATION_TTL = 3 * EPOCH_SECONDS;
 const TRIP_TTL = BREAKER_OPEN_SECONDS + BREAKER_HALF_OPEN_MAX_SECONDS + 60;
 
 /** The breaker's state now. */
@@ -40,8 +47,9 @@ export async function breakerState(
   providerId: string,
   now: number = Date.now(),
 ): Promise<BreakerState> {
-  const trippedAt = await lastTrip(store, prefix(tenantId, providerId));
-  return stateAt(trippedAt, toSeconds(now));
+  const nowSeconds = toSeconds(now);
+  const trippedAt = await lastTrip(store, prefix(tenantId, providerId), nowSeconds);
+  return stateAt(trippedAt, nowSeconds);
 }
 
 /** True while the provider must not be called (open). Half-open lets traffic through. */
@@ -66,7 +74,7 @@ export async function recordFailure(
 ): Promise<boolean> {
   const key = prefix(tenantId, providerId);
   const nowSeconds = toSeconds(now);
-  const state = stateAt(await lastTrip(store, key), nowSeconds);
+  const state = stateAt(await lastTrip(store, key, nowSeconds), nowSeconds);
   // Calls that started before the trip and fail now change nothing: it is already open.
   if (state === "open") return false;
   if (state === "half_open") {
@@ -95,9 +103,10 @@ export async function recordSuccess(
   now: number = Date.now(),
 ): Promise<void> {
   const key = prefix(tenantId, providerId);
-  if (stateAt(await lastTrip(store, key), toSeconds(now)) !== "half_open") return;
+  const nowSeconds = toSeconds(now);
+  if (stateAt(await lastTrip(store, key, nowSeconds), nowSeconds) !== "half_open") return;
   // A generation without a trip time reads as closed.
-  await store.incrBy(`${key}:gen`, 1, GENERATION_TTL);
+  await store.incrBy(generationKey(key, epochOf(nowSeconds)), 1, GENERATION_TTL);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -116,21 +125,39 @@ function stateAt(trippedAt: number | null, nowSeconds: number): BreakerState {
   return "closed";
 }
 
-async function lastTrip(store: KVStore, key: string): Promise<number | null> {
-  const generation = parseCount(await store.get(`${key}:gen`));
-  if (generation === 0) return null;
-  const trippedAt = parseCount(await store.get(`${key}:trip:${generation}`));
-  return trippedAt > 0 ? trippedAt : null;
+/** The trip time of the latest generation: today's, or yesterday's when today has none yet. */
+async function lastTrip(store: KVStore, key: string, nowSeconds: number): Promise<number | null> {
+  const today = epochOf(nowSeconds);
+  for (const epoch of [today, today - 1]) {
+    const generation = parseCount(await store.get(generationKey(key, epoch)));
+    if (generation === 0) continue;
+    const trippedAt = parseCount(await store.get(tripKey(key, epoch, generation)));
+    return trippedAt > 0 ? trippedAt : null;
+  }
+  return null;
+}
+
+function generationKey(key: string, epoch: number): string {
+  return `${key}:gen:${epoch}`;
+}
+
+function tripKey(key: string, epoch: number, generation: number): string {
+  return `${key}:trip:${epoch}:${generation}`;
+}
+
+function epochOf(nowSeconds: number): number {
+  return Math.floor(nowSeconds / EPOCH_SECONDS);
 }
 
 async function trip(store: KVStore, key: string, nowSeconds: number): Promise<void> {
-  const generation = await store.incrBy(`${key}:gen`, 1, GENERATION_TTL);
-  const tripKey = `${key}:trip:${generation}`;
-  const written = await store.incrBy(tripKey, nowSeconds, TRIP_TTL);
+  const epoch = epochOf(nowSeconds);
+  const generation = await store.incrBy(generationKey(key, epoch), 1, GENERATION_TTL);
+  const slot = tripKey(key, epoch, generation);
+  const written = await store.incrBy(slot, nowSeconds, TRIP_TTL);
   // Each generation has one writer, so the key was new. If it was not (the generation counter was
   // lost, e.g. evicted from the memory store, and restarted at a number still in use), correct the
   // sum to the trip time instead of leaving a timestamp far in the future.
-  if (written !== nowSeconds) await store.incrBy(tripKey, nowSeconds - written, TRIP_TTL);
+  if (written !== nowSeconds) await store.incrBy(slot, nowSeconds - written, TRIP_TTL);
 }
 
 function toSeconds(now: number): number {

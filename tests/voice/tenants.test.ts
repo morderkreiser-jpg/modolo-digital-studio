@@ -11,6 +11,7 @@ import { toVoicePublicConfig } from "@/lib/voice/server/public-config";
 import { DEFAULT_VOICE_TENANT_ID, getVoiceTenant, listVoiceTenantIds } from "@/lib/voice/tenants";
 import { MODOLO_VOICE_TENANT } from "@/lib/voice/tenants/modolo";
 import { disclosesAi, validateVoiceTenant } from "@/lib/voice/tenants/validate";
+import { validateToolInput } from "@/lib/voice/tools/validate";
 import {
   DEFAULT_VOICE_LIMITS,
   VOICE_END_ENDPOINT,
@@ -159,6 +160,24 @@ describe("validateVoiceTenant", () => {
     ["negative limit", (t) => (t.limits = { maxCallSeconds: -1 }), /limits.maxCallSeconds must be a number/],
     ["hours that end before they start", (t) => (t.hours.weekly.mon = [{ from: "18:00", to: "09:00" }]), /^hours: /],
     ["unknown time zone", (t) => (t.hours.timezone = "Mars/Olympus"), /^hours: /],
+    // Review finding sicurezza/F11: a label goes to the model and to the browser.
+    [
+      "transfer label with the number in it",
+      (t) => {
+        t.handoff.transfer = {
+          enabled: true,
+          ringSeconds: 20,
+          targets: [{ id: "owner", label: { de: "Inhaberin (044 123 45 67)" }, number: TRANSFER_NUMBER }],
+        };
+      },
+      /transfer target "owner": the de label contains a phone number/,
+    ],
+    ["follow-up missing a language", (t) => (task(t).followUp = { de: "Wir melden uns." }), /task "project_request": followUp is missing for "it"/],
+    ["at-least-one contact the task does not ask for", (t) => {
+      task(t).contact.phone = "none";
+      task(t).contactAtLeastOne = ["phone", "email"];
+    }, /contactAtLeastOne lists phone, which the task does not ask for/],
+    ["'after' naming no date field", (t) => (task(t).fields[2].after = "problem"), /"after" must name another date field of the task/],
   ];
 
   for (const [name, patch, expected] of cases) {
@@ -451,5 +470,22 @@ describe("toVoicePublicConfig", () => {
     });
     const json = JSON.stringify(toVoicePublicConfig(tenant, { locale: "de", limits: DEFAULT_VOICE_LIMITS, modes: [] }));
     assert.ok(!json.includes("server-only"));
+  });
+});
+
+// Review finding correttezza/F9: a project request with neither a phone nor an email was stored,
+// and on the web (no caller id) Francesco could not answer it.
+describe("MODOLO_VOICE_TENANT: a request needs a way back", () => {
+  const base = { task: "project_request", fields: { service: "website", problem: "Eine Website für ein Café" }, name: "Anna Muster", summary: "Website" };
+
+  it("refuses a request with neither a phone nor an email", () => {
+    const result = validateToolInput(modolo, "create_lead", base);
+    assert.equal(result.ok, false);
+    assert.match(result.ok ? "" : result.errors.join(" "), /"phone" or "email" is required for this task/);
+  });
+
+  it("takes one with either", () => {
+    assert.ok(validateToolInput(modolo, "create_lead", { ...base, email: "anna@example.ch" }).ok);
+    assert.ok(validateToolInput(modolo, "create_lead", { ...base, phone: "079 123 45 67" }).ok);
   });
 });

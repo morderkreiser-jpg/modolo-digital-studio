@@ -149,7 +149,9 @@ describe("POST /api/voice/session", () => {
   });
 
   it("refuses a session that the monthly budget cannot cover", async () => {
-    restoreEnv = localEnv({ VOICE_BUDGET_CHF_PER_MONTH: "0.01" });
+    // A local session no longer reserves a minute price (0.06 CHF for 3 minutes before): it is
+    // admitted when the month can pay for one model turn, which 0.001 CHF cannot.
+    restoreEnv = localEnv({ VOICE_BUDGET_CHF_PER_MONTH: "0.001" });
     const response = await handleSessionRequest(post("/api/voice/session", sessionBody()), testDeps({ now: () => T0 }));
     assert.equal(response.status, 503);
     assert.equal((await readError(response)).error, "budget_exhausted");
@@ -208,7 +210,10 @@ describe("POST /api/voice/turn", () => {
     assert.equal(logs.some((line) => line.includes("anna@example.ch") || line.includes("Anna Muster")), false, "no personal data in logs");
   });
 
-  it("takes a request, keeps it in the state and mails the summary once when the session ends", async () => {
+  // The request used to reach the business only with the summary at the end of the session, so a
+  // call that never reported its end lost it (integration report). It now goes out at once, and
+  // the end report sends it no second time.
+  it("takes a request, mails it at once, keeps it in the state and sends it only once", async () => {
     restoreEnv = localEnv();
     const send = emailRecorder();
     const deps = testDeps({ now: () => T0, resend: RESEND, sendEmail: send });
@@ -217,6 +222,8 @@ describe("POST /api/voice/turn", () => {
     const events = await readEvents(await handleTurnRequest(turnRequest(grant.sessionToken, LEAD_UTTERANCE), deps));
     assert.ok(events.some((event) => event.type === "handoff" && event.handoff.kind === "written"));
     assert.deepEqual(events[events.length - 1], { type: "done", ended: false, remainingTurns: 23, remainingSeconds: 180 });
+    assert.equal(send.sent.length, 1, "the request went out while the call ran");
+    assert.match(send.sent[0].text, /während eines Gesprächs aufgenommen/);
 
     const sid = JSON.parse(Buffer.from(grant.sessionToken.split(".")[0], "base64url").toString("utf8")).sid as string;
     const state = await loadState(deps.store, sid);
@@ -226,7 +233,7 @@ describe("POST /api/voice/turn", () => {
     const ended = await handleEndRequest(post("/api/voice/end", { sessionToken: grant.sessionToken, reason: "user" }), deps);
     assert.equal(ended.status, 200);
     assert.deepEqual(await ended.json(), { ok: true });
-    assert.equal(send.sent.length, 1);
+    assert.equal(send.sent.length, 1, "the end report did not send it again");
     assert.equal(send.sent[0].to, MODOLO_VOICE_TENANT.notifyEmail);
     assert.match(send.sent[0].subject, /Anfrage: Projektanfrage, Referenz LD-[2-9A-Z]{4}$/);
     assert.equal(await loadState(deps.store, sid), null, "the state is gone");
@@ -249,7 +256,7 @@ describe("POST /api/voice/turn", () => {
     await readEvents(await handleTurnRequest(turnRequest(grant.sessionToken, LEAD_UTTERANCE), deps));
     const events = await readEvents(await handleTurnRequest(turnRequest(grant.sessionToken, "Danke, tschüss"), deps));
     assert.deepEqual(events[events.length - 1], { type: "done", ended: true, remainingTurns: 22, remainingSeconds: 180 });
-    assert.equal(send.sent.length, 1, "the summary went out without waiting for the end report");
+    assert.equal(send.sent.length, 1, "the request went out, and the closing sent it no second time");
     assert.equal((await usageSnapshot(deps.store, "modolo", T0)).running, 0, "the concurrency slot is free");
     const report = await handleEndRequest(post("/api/voice/end", { sessionToken: grant.sessionToken, reason: "assistant" }), deps);
     assert.equal(report.status, 200);
@@ -347,6 +354,8 @@ describe("POST /api/voice/tool", () => {
       VOICE_PROVIDER: "mock",
       VOICE_SESSION_SECRET: TEST_SECRET,
       VOICE_PROVIDER_WEBHOOK_SECRET: WEBHOOK_SECRET,
+      // The test below runs a demo business live, which only the lab allows (availableModes).
+      VOICE_LAB: "true",
     });
   }
 

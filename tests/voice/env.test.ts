@@ -34,6 +34,13 @@ const ENV_KEYS = [
   "VOICE_MINUTES_PER_MONTH",
   "VOICE_BUDGET_CHF_PER_MONTH",
   "VOICE_MAX_CONCURRENT",
+  "VOICE_GLOBAL_MINUTES_PER_DAY",
+  "VOICE_GLOBAL_BUDGET_CHF_PER_MONTH",
+  "VOICE_CHF_PER_USD",
+  "KV_REST_API_URL",
+  "KV_REST_API_TOKEN",
+  "UPSTASH_REDIS_REST_URL",
+  "UPSTASH_REDIS_REST_TOKEN",
   "ANTHROPIC_API_KEY",
   "ASSISTANT_HASH_SALT",
   "NODE_ENV",
@@ -222,12 +229,16 @@ describe("getVoiceEnv: session secret", () => {
     assert.equal(warnings("voice_session_secret_generated").length, 0);
   });
 
-  it("in production works normally with a secret", () => {
+  // It used to pass without the shared store too: review finding S2-3 (see the test of
+  // no_shared_store below for what happens without it now).
+  it("in production works normally with a secret and the shared store", () => {
     const env = envWith({
       NODE_ENV: "production",
       VOICE_MODE: "local",
       ANTHROPIC_API_KEY: KEY,
       VOICE_SESSION_SECRET: SECRET,
+      KV_REST_API_URL: "https://kv.example.upstash.io",
+      KV_REST_API_TOKEN: "token-0123456789",
     });
     assert.equal(env.mode, "local");
     assert.deepEqual(availableModes(env), ["local", "scripted"]);
@@ -290,20 +301,99 @@ describe("getVoiceEnv: modes degrade to scripted", () => {
       assert.equal(modes[0], mode);
     }
   });
+
+  // Review finding sicurezza/F3: live conversations of the demo businesses are for the lab.
+  it("offers a demo business only scripted, unless VOICE_LAB is on", () => {
+    const env = envWith({ VOICE_MODE: "local", VOICE_BRAIN: "mock", VOICE_SESSION_SECRET: SECRET });
+    assert.deepEqual(availableModes(env, { kind: "demo" }), ["scripted"]);
+    assert.deepEqual(availableModes(env, { kind: "live" }), ["local", "scripted"]);
+    const lab = envWith({ VOICE_MODE: "local", VOICE_BRAIN: "mock", VOICE_SESSION_SECRET: SECRET, VOICE_LAB: "true" });
+    assert.deepEqual(availableModes(lab, { kind: "demo" }), ["local", "scripted"]);
+  });
+
+  // Review finding sicurezza/F6: per-instance memory counters cannot hold a provider's real spend.
+  it("in production, realtime needs the shared store, and degrades to scripted (logged once) without it", () => {
+    const base = { NODE_ENV: "production", VOICE_ENABLED: "true", VOICE_MODE: "realtime", VOICE_PROVIDER: "mock", VOICE_SESSION_SECRET: SECRET } as const;
+    const memory = envWith(base);
+    assert.equal(memory.mode, "scripted");
+    assert.equal(memory.degradedReason, "no_shared_store");
+    getVoiceEnv();
+    assert.equal(warnings("voice_mode_degraded").filter((line) => line.reason === "no_shared_store").length, 1);
+    const shared = envWith({ ...base, KV_REST_API_URL: "https://kv.example.upstash.io", KV_REST_API_TOKEN: "token-0123456789" });
+    assert.equal(shared.mode, "realtime");
+    // Outside production the mock provider still works on the memory store (tests, development).
+    assert.equal(envWith({ VOICE_MODE: "realtime", VOICE_PROVIDER: "mock", VOICE_SESSION_SECRET: SECRET }).mode, "realtime");
+  });
+
+  // Review finding S2-3: "local" spends real model money per turn, and its spend ceilings, turn
+  // cap, lock and conversation state were per instance without the shared store.
+  it("in production, local needs the shared store too", () => {
+    const base = { NODE_ENV: "production", VOICE_ENABLED: "true", VOICE_MODE: "local", ANTHROPIC_API_KEY: KEY, VOICE_SESSION_SECRET: SECRET } as const;
+    const memory = envWith(base);
+    assert.equal(memory.mode, "scripted");
+    assert.equal(memory.degradedReason, "no_shared_store");
+    assert.deepEqual(availableModes(memory), ["scripted"]);
+    assert.equal(warnings("voice_mode_degraded").filter((line) => line.reason === "no_shared_store").length, 1);
+    assert.equal(envWith({ ...base, UPSTASH_REDIS_REST_URL: "https://kv.example.upstash.io", UPSTASH_REDIS_REST_TOKEN: "token-0123456789" }).mode, "local");
+    // Outside production the memory store is fine (tests, development).
+    assert.equal(envWith({ VOICE_MODE: "local", ANTHROPIC_API_KEY: KEY, VOICE_SESSION_SECRET: SECRET }).mode, "local");
+  });
+
+  // Review finding S2-10: the mock brain answered visitors with "[Testantwort]" while its requests
+  // still reached the business by email, with no spend to stop them.
+  it("in production, the mock brain does not count as a brain", () => {
+    const shared = { KV_REST_API_URL: "https://kv.example.upstash.io", KV_REST_API_TOKEN: "token-0123456789" } as const;
+    const base = { NODE_ENV: "production", VOICE_MODE: "local", VOICE_BRAIN: "mock", VOICE_SESSION_SECRET: SECRET, ...shared } as const;
+    const env = envWith(base);
+    assert.equal(env.mode, "scripted");
+    assert.equal(env.degradedReason, "no_brain");
+    // Not even with a key next to it: the configuration asked for the mock, not for the model.
+    assert.equal(envWith({ ...base, ANTHROPIC_API_KEY: KEY }).mode, "scripted");
+    assert.equal(envWith({ ...base, VOICE_BRAIN: "anthropic", ANTHROPIC_API_KEY: KEY }).mode, "local");
+  });
+});
+
+describe("getVoiceEnv: ceilings across all tenants and the exchange rate", () => {
+  it("defaults to 60 minutes a day, 50 CHF a month and 0.90 CHF per USD", () => {
+    const env = envWith({});
+    assert.deepEqual(env.global, { minutesPerDay: 60, budgetChfPerMonth: 50 });
+    assert.equal(env.chfPerUsd, 0.9);
+  });
+
+  it("reads, clamps and ignores like the other numbers", () => {
+    const env = envWith({ VOICE_GLOBAL_MINUTES_PER_DAY: "120", VOICE_GLOBAL_BUDGET_CHF_PER_MONTH: "75.5", VOICE_CHF_PER_USD: "0.95" });
+    assert.deepEqual(env.global, { minutesPerDay: 120, budgetChfPerMonth: 75.5 });
+    assert.equal(env.chfPerUsd, 0.95);
+    const zero = envWith({ VOICE_GLOBAL_MINUTES_PER_DAY: "0", VOICE_GLOBAL_BUDGET_CHF_PER_MONTH: "0" });
+    assert.deepEqual(zero.global, { minutesPerDay: 0, budgetChfPerMonth: 0 }, "zero stops everything, on purpose");
+    const typos = envWith({ VOICE_GLOBAL_MINUTES_PER_DAY: "-5", VOICE_GLOBAL_BUDGET_CHF_PER_MONTH: "lots", VOICE_CHF_PER_USD: "1e3" });
+    assert.deepEqual(typos.global, { minutesPerDay: 60, budgetChfPerMonth: 50 });
+    assert.equal(typos.chfPerUsd, 0.9);
+    // A rate that would undercount the spend is raised to the floor, a silly one lowered.
+    assert.equal(envWith({ VOICE_CHF_PER_USD: "0.1" }).chfPerUsd, 0.5);
+    assert.equal(envWith({ VOICE_CHF_PER_USD: "9" }).chfPerUsd, 2);
+    assert.equal(envWith({ VOICE_GLOBAL_MINUTES_PER_DAY: "999999999" }).global.minutesPerDay, 100_000);
+  });
 });
 
 describe("voiceCostChfPerMinute", () => {
-  it("defaults to 0.25 for realtime, 0.02 for local and nothing for scripted", () => {
+  // "local" used to default to 0.02 CHF a minute as a stand-in for the model's cost. The model's
+  // real cost is now charged per turn (review finding sicurezza/F1), so a minute rate on top
+  // would count it twice: "local" has no minute rate of its own any more.
+  it("defaults to 0.25 for realtime and nothing for local and scripted", () => {
     const env = envWith({});
     assert.equal(voiceCostChfPerMinute(env, "realtime"), 0.25);
-    assert.equal(voiceCostChfPerMinute(env, "local"), 0.02);
+    assert.equal(voiceCostChfPerMinute(env, "local"), 0);
     assert.equal(voiceCostChfPerMinute(env, "scripted"), 0);
   });
 
-  it("uses the override for the live modes only", () => {
+  // The override used to price "local" minutes too. It is the provider's price: with it, the lease
+  // of every abandoned local session sat on the month's spend, and a few hundred empty sessions
+  // spent the month (review finding S2-2).
+  it("uses the override for realtime only", () => {
     const env = envWith({ VOICE_COST_CHF_PER_MINUTE: "0.1" });
     assert.equal(voiceCostChfPerMinute(env, "realtime"), 0.1);
-    assert.equal(voiceCostChfPerMinute(env, "local"), 0.1);
+    assert.equal(voiceCostChfPerMinute(env, "local"), 0);
     assert.equal(voiceCostChfPerMinute(env, "scripted"), 0);
   });
 });
@@ -455,6 +545,34 @@ describe("log guard", () => {
     assert.equal("skipped" in clean, false);
     assert.equal(clean.dropped, 4);
     assert.ok(typeof clean.reason === "string" && clean.reason.length <= 201);
+  });
+
+  // Review finding sicurezza/F10: free text passed under names the deny-list did not know.
+  it("logs a string only in a code field, and only when it looks like a code", () => {
+    const clean = sanitizeVoiceLogFields({
+      topic: "Mario Rossi, 079 123 45 67, Bahnhofstrasse 1",
+      err: "Error: booking for Hans Muster failed",
+      notes: "Allergie",
+      say: "Booked for Anna",
+      summary: "sent",
+      preferredTime: "morgen",
+      description: "Anna Muster wants a website",
+      reason: "Hans Muster",
+      outcome: "anna@example.ch",
+      requestId: "req_011CU7",
+      stop: "internal:TypeError",
+      tenant: "demo-umzug",
+      warn: "voice_state_missing",
+      ms: 12,
+    });
+    assert.deepEqual(clean, {
+      requestId: "req_011CU7",
+      stop: "internal:TypeError",
+      tenant: "demo-umzug",
+      warn: "voice_state_missing",
+      ms: 12,
+      dropped: 9,
+    });
   });
 
   it("does not let a caller overwrite the route or the event name", () => {

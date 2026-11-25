@@ -143,6 +143,13 @@ export const RESTAURANT_TENANT: VoiceTenantConfig = {
         },
       ],
       contact: { name: "required", phone: "required", email: "optional", company: "optional" },
+      // What the knowledge says about group requests; the tool hands exactly this to the model.
+      followUp: {
+        de: "Wir rufen Sie am nächsten Tag zurück, an dem das Restaurant geöffnet ist.",
+        it: "La richiamiamo il prossimo giorno di apertura del ristorante.",
+        en: "We will call you back on the next day the restaurant is open.",
+        fr: "Nous vous rappelons le prochain jour d'ouverture du restaurant.",
+      },
     },
   ],
   tools: [

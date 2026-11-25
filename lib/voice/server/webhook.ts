@@ -83,8 +83,23 @@ export function verifyWebhook(args: {
 export async function seenBefore(store: KVStore, id: string, ttlSeconds: number): Promise<boolean> {
   if (typeof id !== "string" || id === "") return true;
   const ttl = Number.isFinite(ttlSeconds) ? Math.min(MAX_SEEN_TTL, Math.max(MIN_SEEN_TTL, Math.ceil(ttlSeconds))) : MIN_SEEN_TTL;
-  const key = `mva:wh:${createHash("sha256").update(id).digest("hex").slice(0, 32)}`;
-  return (await store.incrBy(key, 1, ttl)) > 1;
+  return (await store.incrBy(seenKey(id), 1, ttl)) > 1;
+}
+
+/**
+ * True when seenBefore() already marked this id; marks nothing. For a delivery whose action must
+ * run before it counts as done: look with wasSeen() first, mark with seenBefore() after. Only
+ * race-free when something else (the session's lock) keeps two deliveries of the id apart. An
+ * empty id counts as seen, as in seenBefore().
+ */
+export async function wasSeen(store: KVStore, id: string): Promise<boolean> {
+  if (typeof id !== "string" || id === "") return true;
+  const value = await store.get(seenKey(id));
+  return value !== null && Number.parseInt(value, 10) > 0;
+}
+
+function seenKey(id: string): string {
+  return `mva:wh:${createHash("sha256").update(id).digest("hex").slice(0, 32)}`;
 }
 
 function tolerance(value: number | undefined): number {

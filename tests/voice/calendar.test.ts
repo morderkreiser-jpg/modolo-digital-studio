@@ -542,3 +542,44 @@ describe("getCalendar", () => {
     }
   });
 });
+
+// Review finding correttezza/F13: past maxBookings the oldest bookings were dropped, confirmed
+// future ones included, which freed their slots for a second guest.
+describe("a full calendar", () => {
+  it("never drops a confirmed future booking: it refuses the new one instead", async () => {
+    const calendar = createMemoryCalendar(SALON, HOURS, { maxBookings: 2, refSeed: "full" });
+    await book(calendar, "2026-12-03T10:00:00+01:00");
+    await book(calendar, "2026-12-03T11:00:00+01:00");
+    const third = await calendar.book({ serviceId: "cut", start: "2026-12-03T14:00:00+01:00", name: "Beat Keller", contact: "+41791234568", idempotencyKey: nextKey(), now: NOW });
+    assert.deepEqual(third, { ok: false, code: "unavailable" });
+    // The first booking still holds its slot.
+    assert.ok(!(await slots(calendar, "2026-12-03")).includes("2026-12-03T10:00:00+01:00"));
+  });
+
+  it("makes room by dropping cancelled bookings and bookings that are over, oldest first", async () => {
+    const calendar = createMemoryCalendar(SALON, HOURS, { maxBookings: 2, refSeed: "room" });
+    const cancelled = await book(calendar, "2026-12-03T10:00:00+01:00");
+    await book(calendar, "2026-12-03T11:00:00+01:00");
+    assert.ok((await calendar.cancel({ ref: cancelled.ref, name: "Anna Muster", now: NOW })).ok);
+    await book(calendar, "2026-12-03T14:00:00+01:00");
+    // Later, the bookings of the 3rd are over: they make room for new ones.
+    const later = new Date("2026-12-10T08:00:00Z");
+    const next = await calendar.book({ serviceId: "cut", start: "2026-12-11T10:00:00+01:00", name: "Beat Keller", contact: "+41791234568", idempotencyKey: nextKey(), now: later });
+    assert.ok(next.ok);
+  });
+
+  it("an old key whose booking was dropped never answers with another guest's booking", async () => {
+    const calendar = createMemoryCalendar(SALON, HOURS, { maxBookings: 1, refSeed: "same-seed" });
+    const key = nextKey();
+    const first = await calendar.book({ serviceId: "cut", start: "2026-12-03T10:00:00+01:00", name: "Anna Muster", contact: "+41791234567", idempotencyKey: key, now: NOW });
+    assert.ok(first.ok);
+    // Over: dropped for the next booking, whose reference may be the same code again.
+    const later = new Date("2026-12-04T08:00:00Z");
+    const other = await calendar.book({ serviceId: "cut", start: "2026-12-07T10:00:00+01:00", name: "Beat Keller", contact: "+41791234568", idempotencyKey: nextKey(), now: later });
+    assert.ok(other.ok);
+    // A retry with the first key books anew (if it can) or fails; it never hands out Beat Keller's booking.
+    const retry = await calendar.book({ serviceId: "cut", start: "2026-12-03T10:00:00+01:00", name: "Anna Muster", contact: "+41791234567", idempotencyKey: key, now: later });
+    assert.ok(!retry.ok || retry.value.name === "Anna Muster");
+    if (retry.ok) assert.notEqual(retry.value.ref, other.value.ref);
+  });
+});

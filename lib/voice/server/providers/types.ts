@@ -23,6 +23,12 @@
 //   6. Tool calls come back through toolWebhookUrl, signed by the provider: the receiving route
 //      verifies them with verifyWebhook() and seenBefore() before executing anything.
 //   7. Nothing personal in logs: ids, codes and timings only (logVoiceEvent applies a guard).
+//   8. confirmsCalls is true only when the adapter delivers, signed, through toolWebhookUrl, the
+//      session events "started" (the browser really connected) and "ended" with the seconds the
+//      provider bills (see handleToolRequest). Admission then charges nothing until "started",
+//      and "ended" settles the minutes to what was billed. An adapter that cannot deliver both
+//      leaves it unset: every session then reserves its whole call up front, because an unused
+//      token could not be told from a call (lib/voice/server/limits.ts, header).
 import type { VoiceLocale, VoiceToolDefinition } from "@/lib/voice/types";
 
 export interface CreateWebSessionArgs {
@@ -56,6 +62,8 @@ export type CreateWebSessionResult =
 export interface RealtimeProvider {
   /** Stable id: "mock", later the real providers. Used in breaker keys and logs. */
   readonly id: string;
+  /** The adapter reports calls that connect and their billed length (guarantee 8 above). */
+  readonly confirmsCalls?: boolean;
   createWebSession(args: CreateWebSessionArgs): Promise<CreateWebSessionResult>;
   /** Ends a running session on the provider's side (best effort, never throws). */
   endSession?(providerSessionId: string): Promise<void>;

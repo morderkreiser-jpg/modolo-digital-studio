@@ -28,6 +28,8 @@ import {
   type ComponentType,
   type CSSProperties,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
 import { formatVoiceString, getVoiceStrings, VOICE_LANGUAGE_NAMES, type VoiceStrings } from "@/lib/voice/i18n";
@@ -38,16 +40,18 @@ import {
   type VoiceMode,
   type VoicePublicConfig,
   type VoiceText,
+  type VoiceToolName,
 } from "@/lib/voice/types";
 import type { VoiceTransport } from "./transports/types";
 import {
+  activationAllowed,
   canMute,
   initVoiceState,
   isActive,
   isLiveMode,
   isTalking,
   recoveryFor,
-  TIMER_VISIBLE_FROM_SECONDS,
+  silenceWarningVisible,
   timerVisible,
   voiceReducer,
   type VoiceCaption,
@@ -202,8 +206,37 @@ function focusIsOurs(root: HTMLElement | null): boolean {
   return active === null || active === document.body || (root !== null && root.contains(active));
 }
 
-function statusText(state: VoiceMachineState, strings: VoiceStrings): string {
+/**
+ * The focused control was just removed (it fell back to <body>), or focus was nowhere in
+ * particular anyway: the stage must give it a place, or the next Tab starts at the top of the page.
+ */
+function focusWasDropped(): boolean {
+  const active = document.activeElement;
+  return active === null || active === document.body || !active.isConnected;
+}
+
+/** What the one primary button does right now; null while the consent card holds the buttons. */
+type PrimaryRole = "start" | "end" | "again" | "reset" | null;
+
+function primaryRoleOf(status: VoiceMachineState["status"]): PrimaryRole {
+  if (status === "idle") return "start";
+  if (status === "consent") return null;
+  if (status === "ended") return "again";
+  if (status === "error") return "reset";
+  return "end";
+}
+
+/**
+ * A tool's status stays on screen at least this long. Tools usually finish within milliseconds
+ * (the "started" and "done" events then arrive in one render), and a status nobody can read does
+ * not tell the caller that the request is being taken down.
+ */
+const TOOL_STATUS_MIN_MS = 1600;
+
+function statusText(state: VoiceMachineState, strings: VoiceStrings, recentTool: VoiceToolName | null): string {
   if (state.activeTool !== null && isTalking(state.status)) return strings.tools[state.activeTool];
+  // A tool that just ran, while the reply to it is prepared or spoken (not once it is the caller's turn).
+  if (recentTool !== null && (state.status === "thinking" || state.status === "speaking")) return strings.tools[recentTool];
   const base = strings.status[state.status];
   return state.muted && isActive(state.status) ? `${base} · ${strings.mutedStatus}` : base;
 }
@@ -301,6 +334,26 @@ function MicIcon({ muted }: { muted: boolean }) {
   );
 }
 
+/** A last word up to this long travels to the next line together with the badge. */
+const BADGE_TAIL_MAX = 16;
+
+function TitleWithBadge({ title, badge }: { title: string; badge: string }) {
+  // The badge follows the title's last word, never alone on a line of its own: the two are kept
+  // together (no wrap) when that word is short enough to never overflow a phone-wide stage.
+  const cut = title.trimEnd().lastIndexOf(" ");
+  const head = cut === -1 ? "" : title.slice(0, cut + 1);
+  const tail = cut === -1 ? title : title.slice(cut + 1);
+  return (
+    <span className={styles.titleText}>
+      {head}
+      <span className={tail.length <= BADGE_TAIL_MAX ? styles.titleTail : undefined}>
+        {tail}
+        <span className={styles.badge}>{badge}</span>
+      </span>
+    </span>
+  );
+}
+
 function CaptionLine({ caption, label }: { caption: VoiceCaption; label: string }) {
   // Lines still being recognised or streamed are shown but not announced; the final line is a
   // new node (keyed by the parent), so the live region reads each line once, complete.
@@ -343,6 +396,8 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [transcriptFailed, setTranscriptFailed] = useState(false);
   const [draft, setDraft] = useState("");
+  /** The last tool started, kept for TOOL_STATUS_MIN_MS (see statusText). */
+  const [recentTool, setRecentTool] = useState<{ name: VoiceToolName; at: number } | null>(null);
 
   const locale = state.locale;
   const strings = useMemo(() => getVoiceStrings(locale), [locale]);
@@ -353,10 +408,11 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
 
   const rootRef = useRef<HTMLElement>(null);
   const primaryRef = useRef<HTMLButtonElement>(null);
-  const consentRef = useRef<HTMLButtonElement>(null);
+  const consentCardRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
   const recoveryRef = useRef<HTMLDivElement>(null);
+  const captionsRef = useRef<HTMLDivElement>(null);
   const transportRef = useRef<VoiceTransport | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
   /** Bumped by every start, reset and end: a chunk that arrives late for an old attempt is ignored. */
@@ -364,11 +420,16 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   const lastInputRef = useRef<Input>("voice");
   const intentRef = useRef(false);
   const previousStatusRef = useRef(state.status);
+  /** What the primary button did at the last commit, and when that last changed (performance.now). */
+  const primaryRoleRef = useRef<PrimaryRole>(primaryRoleOf(state.status));
+  const roleChangedAtRef = useRef<number | null>(null);
 
   const titleId = useId();
   const transcriptId = useId();
   const inputId = useId();
   const introId = useId();
+  const consentTextId = useId();
+  const consentNoteId = useId();
 
   // ----- Lazy loading on intent ------------------------------------------------------------------
   const showIntent = useCallback(() => {
@@ -424,7 +485,10 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         return;
       }
       transportRef.current = transport;
-      unsubscribeRef.current = transport.onEvent((event) => dispatch(event));
+      unsubscribeRef.current = transport.onEvent((event) => {
+        dispatch(event);
+        if (event.type === "TOOL" && event.status === "started") setRecentTool({ name: event.name, at: Date.now() });
+      });
       transport.start();
     },
     [config, release, dispatch],
@@ -464,6 +528,12 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
       release("user");
     }
   }, [state.status, state.endReason, release]);
+
+  useEffect(() => {
+    if (recentTool === null) return;
+    const timer = setTimeout(() => setRecentTool(null), TOOL_STATUS_MIN_MS);
+    return () => clearTimeout(timer);
+  }, [recentTool]);
 
   useEffect(() => {
     transportRef.current?.setMuted(state.muted);
@@ -519,20 +589,33 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
     dispatch({ type: "END", reason: "user" });
   }, [dispatch]);
 
-  // Escape ends a running conversation wherever focus is (a live microphone is not something to
-  // hunt a button for). Escapes already handled elsewhere (the chat panel) arrive prevented.
+  // Escape ends a running conversation (or closes the consent card) when focus is inside the
+  // stage. Not page-wide: the site's chat panel also closes on Escape from anywhere, and one key
+  // press must never close one widget and end a call in the other. The stage keeps focus on its
+  // own controls for the whole conversation (see the focus effect), so Escape is at hand. Marked
+  // as handled, so the chat launcher's page-wide listener leaves it alone.
   const status = state.status;
-  useEffect(() => {
+  const onStageKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Escape" || event.defaultPrevented || event.nativeEvent.isComposing) return;
     if (!isActive(status)) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
-      event.preventDefault();
-      if (status === "consent") cancelConsent();
-      else endConversation();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [status, cancelConsent, endConversation]);
+    event.preventDefault();
+    if (status === "consent") cancelConsent();
+    else endConversation();
+  };
+
+  // When the primary button (or the consent card) changes what it does, note the time: a click
+  // that lands right after is the second half of a double-click, not a decision (activationAllowed).
+  const primaryRole = primaryRoleOf(status);
+  useLayoutEffect(() => {
+    if (primaryRoleRef.current === primaryRole) return;
+    primaryRoleRef.current = primaryRole;
+    roleChangedAtRef.current = performance.now();
+  }, [primaryRole]);
+  const deliberate = (event: ReactMouseEvent<HTMLElement>): boolean => {
+    const changedAt = roleChangedAtRef.current;
+    // event.timeStamp is on the same clock as performance.now() (both count from the time origin).
+    return activationAllowed(changedAt === null ? null : event.timeStamp - changedAt, event.detail);
+  };
 
   const start = () => {
     if (mode === null) return;
@@ -630,24 +713,58 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   const getLevel = useCallback(() => transportRef.current?.getLevel() ?? 0, []);
 
   // ----- Focus ------------------------------------------------------------------------------------
+  // Every change of state that removes the focused control gives focus a new place in the stage,
+  // so keyboard and screen-reader users never land back at the top of the page.
   const typedField = state.mode === "local" && (state.status === "connecting" || talking);
   useLayoutEffect(() => {
     const previous = previousStatusRef.current;
     previousStatusRef.current = status;
     if (previous === status) return;
     const root = rootRef.current;
+    // The typed field when typing (it is there from "connecting" on), else the primary button.
+    const conversationTarget = () => (state.typed && typedField ? inputRef.current : null) ?? primaryRef.current;
     if (status === "consent") {
-      consentRef.current?.focus();
+      // The card itself, not its "allow" button: a screen reader reads its title and what the
+      // visitor agrees to (aria-describedby) before any button can be pressed.
+      consentCardRef.current?.focus();
     } else if (previous === "consent" && status === "idle") {
       primaryRef.current?.focus();
     } else if (previous === "consent" && focusIsOurs(root)) {
       // The consent card is gone: the typed field when typing, else the end button.
-      (state.typed ? inputRef.current : primaryRef.current)?.focus();
+      conversationTarget()?.focus();
     } else if (status === "error" && focusIsOurs(root)) {
       // The first way forward; a disabled retry (counting down) is skipped.
       recoveryRef.current?.querySelector<HTMLElement>("button:not([disabled]), a[href]")?.focus();
+    } else if ((status === "ended" || previous === "error") && focusWasDropped()) {
+      // The conversation ended by itself (the typed field and the mute button are gone), or a
+      // recovery button of the error card started again (the card is gone). The primary button
+      // stays and now reads "new conversation" or "end". No scrolling: the visitor may be
+      // reading elsewhere on the page.
+      conversationTarget()?.focus({ preventScroll: true });
     }
-  }, [status, state.typed]);
+  }, [status, state.typed, typedField]);
+
+  // During a conversation the captions are a box of fixed height that scrolls (see the render):
+  // lines are only ever added below, and the box follows the newest one, unless the visitor has
+  // scrolled up to read an earlier line. Only the box scrolls, never the page.
+  const captions = state.captions;
+  const reserveCaptions = isActive(status) && status !== "consent" ? true : status === "ended" && captions.length > 0;
+  /** The box is (nearly) at its bottom: a new line scrolls it along. */
+  const followRef = useRef(true);
+  const onCaptionsScroll = useCallback(() => {
+    const box = captionsRef.current;
+    if (!box) return;
+    followRef.current = box.scrollHeight - box.scrollTop - box.clientHeight < 24;
+    // Faded top edge only once earlier lines are above it, so the first line is never dimmed.
+    box.toggleAttribute("data-scrolled", box.scrollTop > 0);
+  }, []);
+  useLayoutEffect(() => {
+    followRef.current = true; // every new conversation starts at its first line
+  }, [state.run]);
+  useLayoutEffect(() => {
+    const box = captionsRef.current;
+    if (box && reserveCaptions && followRef.current) box.scrollTop = box.scrollHeight;
+  }, [captions, reserveCaptions]);
 
   // Recognition gave up mid-call: the field takes over, so put the caret there.
   const typed = state.typed;
@@ -670,8 +787,9 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
   const callerLabel = state.mode === "scripted" || (state.status === "idle" && mode === "scripted") ? strings.roleCaller : strings.roleYou;
   const minutes = Math.max(1, Math.ceil(state.limits.maxCallSeconds / 60));
   const startLabel = mode === "scripted" ? strings.startScripted : strings.start;
+  // In the scrolling box (a conversation under way or just ended) every line; elsewhere the last few.
   const visibleCount = variant === "compact" ? 2 : 3;
-  const visibleCaptions = state.captions.slice(-visibleCount);
+  const visibleCaptions = reserveCaptions ? state.captions : state.captions.slice(-visibleCount);
   const showTimer = timerVisible(state);
 
   // One button that changes with the state (start → end → again), so keyboard focus stays on it
@@ -690,7 +808,9 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
             ? strings.newConversation
             : strings.end;
   const running = isActive(status) && status !== "consent";
-  const onPrimary = () => {
+  const onPrimary = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    // A double-click on "play the example" must not end it with its second click.
+    if (!deliberate(event)) return;
     if (status === "idle") start();
     else if (status === "ended") restart(lastMode, lastMode === "scripted" ? "voice" : lastInputRef.current);
     else if (status === "error") reset();
@@ -748,6 +868,27 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         ? formatVoiceString(strings.handoff.transfer, { target: state.handoff.targetLabel })
         : strings.handoff[state.handoff.kind];
 
+  // The other examples of this business. Before the start they come before the button (choose,
+  // then play); after an example they come after it, so "play again" stays where it was.
+  const scriptChooser =
+    shownMode === "scripted" && localeScripts.length > 1 ? (
+      <div className={styles.scripts} role="group" aria-label={strings.examplesLabel}>
+        {localeScripts.map((candidate) => (
+          <button
+            key={candidate.id}
+            type="button"
+            className={styles.scriptButton}
+            aria-pressed={candidate.id === script?.id}
+            lang={VOICE_LANG_TAG[candidate.locale]}
+            onClick={() => setScriptId(candidate.id)}
+          >
+            <span className={styles.scriptTitle}>{candidate.title}</span>
+            <span className={styles.scriptShows}>{candidate.shows}</span>
+          </button>
+        ))}
+      </div>
+    ) : null;
+
   return (
     <section
       ref={rootRef}
@@ -760,6 +901,10 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
       onPointerEnter={showIntent}
       onFocus={showIntent}
       onTouchStart={showIntent}
+      onKeyDown={onStageKeyDown}
+      // A click on a caption or the background focuses the stage instead of <body>: Escape (handled
+      // only inside the stage) keeps working mid-call. Never a tab stop.
+      tabIndex={-1}
       data-testid="voice-stage"
     >
       {/* The section is the size container; the layout inside reacts to its width, not the window's. */}
@@ -767,8 +912,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
       <div className={styles.head}>
         <p className={styles.kicker}>{modeLabel}</p>
         <Heading id={titleId} className={styles.title}>
-          <span className={styles.titleText}>{assistantTitle}</span>
-          <span className={styles.badge}>{strings.aiBadge}</span>
+          <TitleWithBadge title={assistantTitle} badge={strings.aiBadge} />
         </Heading>
         {config.kind === "demo" ? (
           <p className={styles.fictional}>{formatVoiceString(strings.fictional, { business: config.businessName })}</p>
@@ -795,7 +939,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         <div className={styles.statusRow}>
           <p className={styles.status} role="status">
             <span className={styles.statusMark} aria-hidden="true" />
-            {statusText(state, strings)}
+            {statusText(state, strings, recentTool?.name ?? null)}
           </p>
           {showTimer && state.secondsLeft !== null ? (
             <p className={styles.timer} aria-hidden="true">
@@ -810,8 +954,18 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         {preview}
 
         {/* Always rendered, empty before the first line: a live region that appears together with
-            its first text is often not read out. */}
-        <div className={styles.captions} role="log" aria-live="polite" aria-label={strings.captionsLabel}>
+            its first text is often not read out. From the start of a conversation it keeps a
+            fixed height (data-reserve) that scrolls to its newest line, so the controls under it do
+            not jump with every new line while the visitor may be reaching for "end". */}
+        <div
+          ref={captionsRef}
+          className={styles.captions}
+          role="log"
+          aria-live="polite"
+          aria-label={strings.captionsLabel}
+          data-reserve={reserveCaptions ? "" : undefined}
+          onScroll={reserveCaptions ? onCaptionsScroll : undefined}
+        >
           {visibleCaptions.map((caption) => (
             <CaptionLine
               key={`${caption.id}:${caption.final ? "f" : "i"}`}
@@ -824,31 +978,58 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
         {/* Always in the DOM: a live region inserted together with its text is often not read. */}
         <div className={styles.notice} aria-live="polite">
           {state.notice !== null ? <p>{strings.notices[state.notice]}</p> : null}
+          {/* Shortly before a long silence ends the call; any activity of the caller clears it. */}
+          {silenceWarningVisible(state) ? <p>{strings.silenceWarning}</p> : null}
           {status === "ended" && state.endReason !== null ? <p className={styles.endNote}>{strings.ended[state.endReason]}</p> : null}
         </div>
 
         {status === "consent" && state.mode !== null ? (
-          <div className={styles.card} role="group" aria-labelledby={`${titleId}-consent`}>
+          // Focused as a whole when it appears (tabIndex -1): a screen reader announces its title
+          // and the consent text (aria-describedby) before the visitor reaches any button.
+          <div
+            ref={consentCardRef}
+            className={styles.card}
+            role="group"
+            tabIndex={-1}
+            aria-labelledby={`${titleId}-consent`}
+            aria-describedby={state.mode === "local" ? `${consentTextId} ${consentNoteId}` : consentTextId}
+          >
             <p id={`${titleId}-consent`} className={styles.cardTitle}>
               {strings.consentTitle}
             </p>
-            <p className={styles.cardText}>{formatVoiceString(strings.consentText, { minutes })}</p>
-            {state.mode === "local" ? <p className={styles.cardNote}>{strings.consentLocalNote}</p> : null}
+            <p id={consentTextId} className={styles.cardText}>
+              {formatVoiceString(strings.consentText, { minutes })}
+            </p>
+            {state.mode === "local" ? (
+              <p id={consentNoteId} className={styles.cardNote}>
+                {strings.consentLocalNote}
+              </p>
+            ) : null}
             {state.mode === "local" && !hasRecognition() ? (
               <p className={styles.cardNote}>{strings.notices.recognition_unsupported}</p>
             ) : null}
             <div className={styles.actions}>
               {state.mode !== "local" || hasRecognition() ? (
-                <button ref={consentRef} type="button" className={styles.primary} onClick={() => consent("voice")}>
+                // Described by what it agrees to, also for a visitor who jumps straight to buttons.
+                <button
+                  type="button"
+                  className={styles.primary}
+                  aria-describedby={state.mode === "local" ? `${consentTextId} ${consentNoteId}` : consentTextId}
+                  onClick={(event) => {
+                    if (deliberate(event)) consent("voice");
+                  }}
+                >
                   {strings.consentAllow}
                 </button>
               ) : null}
               {state.mode === "local" ? (
                 <button
-                  ref={hasRecognition() ? undefined : consentRef}
                   type="button"
                   className={styles.secondary}
-                  onClick={() => consent("text")}
+                  aria-describedby={consentTextId}
+                  onClick={(event) => {
+                    if (deliberate(event)) consent("text");
+                  }}
                 >
                   {strings.consentTyped}
                 </button>
@@ -900,23 +1081,7 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
           </div>
         ) : null}
 
-        {shownMode === "scripted" && (status === "idle" || status === "ended") && localeScripts.length > 1 ? (
-          <div className={styles.scripts} role="group" aria-label={strings.examplesLabel}>
-            {localeScripts.map((candidate) => (
-              <button
-                key={candidate.id}
-                type="button"
-                className={styles.scriptButton}
-                aria-pressed={candidate.id === script?.id}
-                lang={VOICE_LANG_TAG[candidate.locale]}
-                onClick={() => setScriptId(candidate.id)}
-              >
-                <span className={styles.scriptTitle}>{candidate.title}</span>
-                <span className={styles.scriptShows}>{candidate.shows}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
+        {status === "idle" ? scriptChooser : null}
 
         {status === "idle" ? (
           <p id={introId} className={styles.intro}>
@@ -930,6 +1095,33 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
               </>
             ) : null}
           </p>
+        ) : null}
+
+        {/* The field sits right under the conversation it continues; "end" follows it. */}
+        {typedField ? (
+          <form className={styles.typed} onSubmit={submitTyped}>
+            <label htmlFor={inputId} className={styles.srOnly}>
+              {strings.typeLabel}
+            </label>
+            <input
+              ref={inputRef}
+              id={inputId}
+              className={styles.field}
+              type="text"
+              value={draft}
+              maxLength={state.limits.maxTurnChars}
+              placeholder={strings.typePlaceholder}
+              autoComplete="off"
+              enterKeyHint="send"
+              onChange={(event) => {
+                setDraft(event.target.value);
+                dispatch({ type: "ACTIVITY" });
+              }}
+            />
+            <button type="submit" className={styles.send} aria-disabled={draft.trim() === "" || state.status === "thinking"}>
+              {strings.send}
+            </button>
+          </form>
         ) : null}
 
         <div className={styles.controls}>
@@ -962,33 +1154,11 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
           ) : null}
         </div>
 
-        {typedField ? (
-          <form className={styles.typed} onSubmit={submitTyped}>
-            <label htmlFor={inputId} className={styles.srOnly}>
-              {strings.typeLabel}
-            </label>
-            <input
-              ref={inputRef}
-              id={inputId}
-              className={styles.field}
-              type="text"
-              value={draft}
-              maxLength={state.limits.maxTurnChars}
-              placeholder={strings.typePlaceholder}
-              autoComplete="off"
-              enterKeyHint="send"
-              onChange={(event) => {
-                setDraft(event.target.value);
-                dispatch({ type: "ACTIVITY" });
-              }}
-            />
-            <button type="submit" className={styles.send} aria-disabled={draft.trim() === "" || state.status === "thinking"}>
-              {strings.send}
-            </button>
-          </form>
-        ) : null}
+        {status === "ended" ? scriptChooser : null}
 
-        {state.captions.length > 0 ? (
+        {/* There from the start of a conversation, not from its first line: appearing later it
+            would push the controls down once more. Empty, it says so. */}
+        {running || state.captions.length > 0 ? (
           <div className={styles.transcriptBlock}>
             <button
               type="button"
@@ -1020,9 +1190,12 @@ function Stage({ config, scripts = [], variant = "stage", contactUrl, headingLev
       </div>
       </div>
 
-      {/* The last 30 seconds, said once (the visible countdown itself is not announced). */}
+      {/* The time left when the countdown appears, said once with the real number (the server can
+          cut it short); the visible countdown itself is not announced. */}
       <div className={styles.srOnly} aria-live="polite">
-        {showTimer ? formatVoiceString(strings.timeLeftAnnounce, { seconds: TIMER_VISIBLE_FROM_SECONDS }) : ""}
+        {showTimer && state.timerAnnounced !== null
+          ? formatVoiceString(strings.timeLeftAnnounce, { seconds: state.timerAnnounced })
+          : ""}
       </div>
 
       {/* Bot trap: off-screen, out of the tab order, hidden from assistive technology. */}

@@ -270,6 +270,21 @@ describe("buildVoiceSystem: tools, handoff and other tenants", () => {
     }
   });
 
+  // Review finding sicurezza/F11: a label typed with the number in it reached the model verbatim.
+  it("drops a number written into a transfer label", () => {
+    const leaky: VoiceTenantConfig = {
+      ...withTransfer(),
+      id: "modolo-leaky-label-fixture",
+      handoff: {
+        ...withTransfer().handoff,
+        transfer: { enabled: true, ringSeconds: 20, targets: [{ id: "owner", label: { de: "Francesco (044 123 45 67)" }, number: TRANSFER_NUMBER }] },
+      },
+    };
+    const phone = buildVoiceSystem(ctx({ tenant: leaky, channel: "phone" }));
+    assert.match(phone.staticText, /transfer_call to: owner = Francesco\./);
+    assert.ok(!phone.staticText.replace(/\s/g, "").includes("0441234567"));
+  });
+
   it("tells a demo tenant's model that the business is fictional", () => {
     const demo: VoiceTenantConfig = { ...tenant, id: "demo-fixture", kind: "demo", notifyEmail: undefined };
     assert.match(buildVoiceSystem(ctx({ tenant: demo })).staticText, /is a fictional business, made up to demonstrate this assistant/);

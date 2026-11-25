@@ -53,7 +53,7 @@ const DE: VoiceLandingContent = {
   },
   demo: {
     title: "Ein Anruf, von Anfang bis Ende",
-    lead: "Wähle einen Betrieb und lies mit, wie der Assistent das Gespräch führt: vom ersten Satz bis zur Zusammenfassung, die du danach bekommst.",
+    lead: "Wähle einen Betrieb und lies mit, wie der Assistent das Gespräch führt, vom ersten bis zum letzten Satz.",
     chooserLabel: "Beispiel wählen",
     note: "Das sind geschriebene Beispielgespräche, keine Aufnahmen. Die echte Stimme schalte ich bei den Pilotbetrieben ein.",
   },
@@ -313,7 +313,7 @@ const IT: VoiceLandingContent = {
   },
   demo: {
     title: "Una chiamata, dall'inizio alla fine",
-    lead: "Scegli un'attività e leggi come risponde l'assistente, dalla prima frase al riassunto che ricevi dopo.",
+    lead: "Scegli un'attività e leggi come risponde l'assistente, dalla prima all'ultima frase.",
     chooserLabel: "Scegli un esempio",
     note: "Sono conversazioni scritte come esempio, non registrazioni. La voce vera la attivo con le attività della fase pilota.",
   },
@@ -573,7 +573,7 @@ const EN: VoiceLandingContent = {
   },
   demo: {
     title: "One call, start to finish",
-    lead: "Pick a business and read how the assistant handles the call, from its first words to the summary you get afterwards.",
+    lead: "Pick a business and read how the assistant handles the call, from the first sentence to the last.",
     chooserLabel: "Choose an example",
     note: "These are written examples, not recordings. I'll switch on the real voice with the businesses in the pilot.",
   },
@@ -835,7 +835,7 @@ const FR: VoiceLandingContent = {
   },
   demo: {
     title: "Un appel, du début à la fin",
-    lead: "Choisissez une entreprise et lisez comment l'assistant mène la conversation, de la première phrase au résumé que vous recevez ensuite.",
+    lead: "Choisissez une entreprise et lisez comment l'assistant mène la conversation, de la première à la dernière phrase.",
     chooserLabel: "Choisir un exemple",
     note: "Ces conversations sont des exemples écrits, pas des enregistrements. J'active la vraie voix avec les entreprises du pilote.",
   },

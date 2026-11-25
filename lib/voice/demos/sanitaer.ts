@@ -306,7 +306,7 @@ export const SANITAER_SCRIPTS: DemoScript[] = [
       { role: "caller", text: "Sì. Sono a casa tutto il giorno." },
       {
         role: "assistant",
-        text: "Ho registrato la richiesta come urgente. Il nostro ufficio la richiama al più tardi il prossimo giorno lavorativo.",
+        text: "Ho registrato la richiesta come urgente e l'ho passata al nostro ufficio.",
         tool: step.lead({
           task: "service_request",
           fields: {
@@ -350,7 +350,7 @@ export const SANITAER_SCRIPTS: DemoScript[] = [
       { role: "caller", text: "Yes. Lunchtime is best." },
       {
         role: "assistant",
-        text: "Thank you. I've passed on your request for a heat pump service. Our office will call you back by the next working day at the latest, and I've noted that lunchtime suits you best.",
+        text: "Thank you. I've passed on your request for a heat pump service to our office, and I've noted that lunchtime suits you best.",
         tool: step.lead({
           task: "service_request",
           fields: {
@@ -396,7 +396,7 @@ export const SANITAER_SCRIPTS: DemoScript[] = [
       { role: "caller", text: "Oui, c'est juste. Je suis joignable toute la journée." },
       {
         role: "assistant",
-        text: "J'ai transmis votre demande comme urgente. Notre bureau vous rappelle au plus tard le jour ouvrable suivant.",
+        text: "J'ai transmis votre demande comme urgente à notre bureau.",
         tool: step.lead({
           task: "service_request",
           fields: {

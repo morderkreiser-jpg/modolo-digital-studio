@@ -217,13 +217,37 @@ export function createMemoryCalendar(
     return `${REF_PREFIX}${randomCode(REF_LENGTH * 2)}`;
   }
 
+  /**
+   * Room for one more booking. Only cancelled bookings and bookings that are over may go, oldest
+   * first: dropping a confirmed future booking would free its slot for a second guest. When the
+   * calendar is full of future bookings, the new one is refused instead. The idempotency keys of a
+   * dropped booking go with it, so a reference given out again can never answer an old key.
+   */
+  function makeRoom(nowMs: number): boolean {
+    if (entries.size < maxBookings) return true;
+    const dropped = new Set<string>();
+    for (const [ref, entry] of entries) {
+      if (entries.size < maxBookings) break;
+      if (entry.booking.status === "cancelled" || entry.spanEnd <= nowMs) {
+        entries.delete(ref);
+        dropped.add(ref);
+      }
+    }
+    if (dropped.size > 0) {
+      for (const map of [bookKeys, moveKeys]) {
+        for (const [key, value] of map) if (dropped.has(value.ref)) map.delete(key);
+      }
+    }
+    return entries.size < maxBookings;
+  }
+
   function remember(entry: Entry): void {
     entries.set(entry.booking.ref, entry);
-    while (entries.size > maxBookings) {
-      const oldest = entries.keys().next().value;
-      if (oldest === undefined) break;
-      entries.delete(oldest);
-    }
+  }
+
+  /** What identifies a booking request, apart from its time (a move changes the time). */
+  function identity(serviceId: string, name: string, contact: string, partySize: number | undefined, notes: string): string {
+    return JSON.stringify([serviceId, name, contact, partySize ?? null, notes]);
   }
 
   function rememberKey(map: Map<string, { fingerprint: string; ref: string }>, key: string, value: { fingerprint: string; ref: string }): void {
@@ -304,7 +328,12 @@ export function createMemoryCalendar(
       // The same key for a different request is a caller bug: refuse rather than guess.
       if (prior.fingerprint !== fingerprint) return fail("invalid");
       const entry = entries.get(prior.ref);
-      if (entry && entry.booking.status === "confirmed") return { ok: true, value: { ...entry.booking } };
+      // Only the very booking this key made: never one that took over its reference later.
+      const same =
+        entry !== undefined &&
+        identity(entry.booking.serviceId, entry.booking.name, entry.booking.contact, entry.booking.partySize, entry.booking.notes ?? "") ===
+          identity(service.id, name, contact, partySize, notes);
+      if (entry && same && entry.booking.status === "confirmed") return { ok: true, value: { ...entry.booking } };
       // Cancelled (or dropped) since: the key protects against duplicates, not against booking again.
       bookKeys.delete(key);
     }
@@ -312,6 +341,7 @@ export function createMemoryCalendar(
     const nowMs = nowOf(request.now);
     const code = evaluate(service, startMs, seats, nowMs, null);
     if (code !== null) return fail(code);
+    if (!makeRoom(nowMs)) return fail("unavailable");
 
     const span = spanFor(service, startMs);
     const booking: Booking = {

@@ -106,8 +106,26 @@ const HOLIDAYS_2027: Record<HolidayKey, { date: string; label: VoiceText }> = {
   },
 };
 
+const CHRISTMAS: VoiceText = { de: "Weihnachten", it: "Natale", en: "Christmas Day", fr: "Noël" };
+const ST_STEPHEN: VoiceText = { de: "Stephanstag", it: "Santo Stefano", en: "St Stephen's Day", fr: "Saint-Étienne" };
+
+// The demos are tried from December 2026 on, and their calendars book up to a few weeks ahead:
+// every business that closes on public holidays is closed at Christmas too, in both years, or a
+// visitor gets a haircut booked on Christmas Day.
+const CHRISTMAS_DAYS: ReadonlyArray<{ date: string; label: VoiceText }> = [
+  { date: "2026-12-25", label: CHRISTMAS },
+  { date: "2026-12-26", label: ST_STEPHEN },
+  { date: "2027-12-25", label: CHRISTMAS },
+  { date: "2027-12-26", label: ST_STEPHEN },
+];
+
+/** The listed 2027 holidays, plus Christmas Day and St Stephen's Day of 2026 and 2027. */
 export function holidays(...keys: HolidayKey[]): Array<{ date: string; label: VoiceText }> {
-  return keys.map((key) => ({ date: HOLIDAYS_2027[key].date, label: { ...HOLIDAYS_2027[key].label } }));
+  return [
+    ...CHRISTMAS_DAYS.filter((day) => day.date < "2027-01-01").map((day) => ({ date: day.date, label: { ...day.label } })),
+    ...keys.map((key) => ({ date: HOLIDAYS_2027[key].date, label: { ...HOLIDAYS_2027[key].label } })),
+    ...CHRISTMAS_DAYS.filter((day) => day.date >= "2027-01-01").map((day) => ({ date: day.date, label: { ...day.label } })),
+  ];
 }
 
 // ---------------------------------------------------------------------------------------------

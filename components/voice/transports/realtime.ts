@@ -14,19 +14,26 @@ import { createEmitter, type VoiceTransport, type VoiceTransportOptions } from "
 export function createRealtimeTransport(options: VoiceTransportOptions): VoiceTransport {
   const { config } = options;
   const emitter = createEmitter();
-  const request = new AbortController();
   let started = false;
   let stopped = false;
+  /** Why stop() was called: also the reason given when a late session is handed back. */
+  let stopReason: VoiceEndReason = "unload";
   let token: string | null = null;
 
   async function connect(): Promise<void> {
-    const result = await requestSession(
-      config.endpoints.session,
-      { tenant: config.tenant, locale: options.locale, mode: "realtime", page: options.page, hp: options.hp ?? "" },
-      request.signal,
-    );
+    // Not aborted by stop(): an admitted session must be handed back with the token in the answer
+    // (see requestSession in http.ts).
+    const result = await requestSession(config.endpoints.session, {
+      tenant: config.tenant,
+      locale: options.locale,
+      mode: "realtime",
+      page: options.page,
+      hp: options.hp ?? "",
+    });
     if (stopped) {
-      if (result.ok) sendEnd(config.endpoints.end, { sessionToken: result.grant.sessionToken, reason: "unload" });
+      if (result.ok) {
+        sendEnd(config.endpoints.end, { sessionToken: result.grant.sessionToken, reason: toEndRequestReason(stopReason) });
+      }
       return;
     }
     if (!result.ok) {
@@ -56,8 +63,9 @@ export function createRealtimeTransport(options: VoiceTransportOptions): VoiceTr
     stop(reason: VoiceEndReason) {
       if (stopped) return;
       stopped = true;
-      request.abort();
+      stopReason = reason;
       emitter.clear();
+      // A session request still on its way is left to finish: connect() hands that session back.
       if (token !== null) sendEnd(config.endpoints.end, { sessionToken: token, reason: toEndRequestReason(reason) });
       token = null;
     },

@@ -14,6 +14,7 @@ import {
   type TurnStreamEvent,
   type VoiceApiError,
   type VoiceErrorCode,
+  type VoiceLocale,
   type VoiceMode,
 } from "@/lib/voice/types";
 import { VOICE_SERVER_ERROR_CODES, type VoiceFailureCode } from "../voice-machine";
@@ -27,7 +28,15 @@ export type SessionResult =
   | { ok: true; grant: SessionGrant }
   | { ok: false; code: VoiceFailureCode; retryAfter?: number };
 
-/** POST config.endpoints.session. Resolves with the grant or a failure code; never throws. */
+/**
+ * POST config.endpoints.session. Resolves with the grant or a failure code; never throws.
+ *
+ * The live transports pass no `signal`: once sent, a session request runs to its answer even if
+ * the visitor stops meanwhile, because the server may already have admitted the session (minutes,
+ * spend and a concurrency slot reserved) and only the token in the answer can hand it back. Only
+ * the request's own deadline (SESSION_TIMEOUT_MS) cuts it short. An example (scripted) may abort:
+ * it reserves nothing.
+ */
 export async function requestSession(
   endpoint: string,
   body: SessionRequestBody,
@@ -217,19 +226,37 @@ export function sendEnd(endpoint: string, body: EndRequestBody): void {
 // Validation of what the server sends
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * A grant the widget can run. The limits are checked against what the server may really send
+ * (lib/voice/server/env.ts VOICE_LIMIT_RANGES): a call length, a silence timeout and a turn size
+ * above zero, and an end warning of zero or more (0 means "no warning"). Refusing a valid grant
+ * would be worse than useless: the session is already admitted, and without its token the widget
+ * could not even hand it back.
+ */
 export function isSessionGrant(value: unknown): value is SessionGrant {
   if (!isRecord(value) || value.ok !== true) return false;
   if (typeof value.sessionToken !== "string" || value.sessionToken === "") return false;
   if (typeof value.mode !== "string" || !(MODES as readonly string[]).includes(value.mode)) return false;
-  if (!isVoiceLocale(value.locale) || typeof value.expiresAt !== "number") return false;
+  if (!isVoiceLocale(value.locale) || !isFiniteNumber(value.expiresAt)) return false;
   const limits = value.limits;
   return (
     isRecord(limits) &&
     isPositive(limits.maxCallSeconds) &&
-    isPositive(limits.warnBeforeEndSeconds) &&
+    isFiniteNumber(limits.warnBeforeEndSeconds) &&
+    limits.warnBeforeEndSeconds >= 0 &&
     isPositive(limits.silenceTimeoutSeconds) &&
     isPositive(limits.maxTurnChars)
   );
+}
+
+/**
+ * The language the server says a reply is in, when it says so: an optional `locale` on the
+ * "start" or "done" event (not part of TurnStreamEvent yet; the decoder keeps extra fields).
+ */
+export function announcedLocale(event: TurnStreamEvent): VoiceLocale | null {
+  if (event.type !== "start" && event.type !== "done") return null;
+  const locale = (event as { locale?: unknown }).locale;
+  return isVoiceLocale(locale) ? locale : null;
 }
 
 export function isTurnStreamEvent(value: unknown): value is TurnStreamEvent {
@@ -279,15 +306,17 @@ function failureFrom(response: Response, payload: unknown): { ok: false; code: V
       ? "bad_request"
       : status === 403
         ? "forbidden"
-        : status === 413
-          ? "too_large"
-          : status === 429
-            ? "rate_limited"
-            : status === 503 || status === 404
-              ? "unavailable"
-              : status === 504
-                ? "timeout"
-                : "upstream";
+        : status === 409
+          ? "turn_in_progress"
+          : status === 413
+            ? "too_large"
+            : status === 429
+              ? "rate_limited"
+              : status === 503 || status === 404
+                ? "unavailable"
+                : status === 504
+                  ? "timeout"
+                  : "upstream";
   return { ok: false, code, retryAfter: headerRetry };
 }
 
@@ -308,6 +337,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 function isPositive(value: unknown): boolean {
-  return typeof value === "number" && Number.isFinite(value) && value > 0;
+  return isFiniteNumber(value) && value > 0;
 }

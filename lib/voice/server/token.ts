@@ -7,9 +7,10 @@
 // What a token is and is not:
 //   - It proves that OUR server admitted this session for this tenant, mode, locale and channel
 //     until `exp`. Changing any byte breaks the signature.
-//   - It is not a capability to spend: every turn still goes through admitTurn() (per-session
-//     turn cap, keyed by the session id), and the reservation made at admission caps the minutes.
-//     A leaked or replayed token therefore only reaches what is left of its own session, and only
+//   - It is not a capability to spend: every turn still goes through the session's lock,
+//     admitTurn() (per-session turn cap, keyed by the session id), the extension of its lease of
+//     minutes and the reservation of its model cost against the month's budget (limits.ts). A
+//     leaked or replayed token therefore only reaches what is left of its own session, and only
 //     until it expires.
 //   - It carries no personal data. `ip` is the salted hash of the rate-limit subject, so a route
 //     can refuse a token presented from somewhere else if it wants to.
