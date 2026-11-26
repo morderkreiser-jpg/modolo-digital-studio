@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:assistant": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs --test \"tests/assistant/*.test.ts\"",
     "test:voice": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs --test \"tests/voice/*.test.ts\"",
-    "voice:live": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs tests/voice/live/cli.ts"
+    "voice:live": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs tests/voice/live/cli.ts",
+    "voice:audio": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/assistant/register.mjs tests/voice/live/audio-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
