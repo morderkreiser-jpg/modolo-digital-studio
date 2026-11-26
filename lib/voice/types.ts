@@ -127,8 +127,11 @@ export interface HandoffRules {
    * Urgent or dangerous situations (gas smell, water spraying on electrics, a medical problem...).
    * The assistant gives the message, names the emergency numbers and offers a transfer if enabled.
    * It never diagnoses and never gives instructions beyond the message.
+   * `takesRequest`: after the message the assistant takes the caller's request at once, with as
+   * few questions as it can (a trade with an on-call service). Needs the create_lead tool and a
+   * task. Without it the message is all the assistant does about an emergency.
    */
-  emergency: { triggers: string[]; message: VoiceText };
+  emergency: { triggers: string[]; message: VoiceText; takesRequest?: boolean };
 }
 
 // ---------------------------------------------------------------------------------------------

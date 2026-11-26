@@ -1,15 +1,14 @@
 // Token prices and the cost arithmetic of the live run (tests/voice/live/cli.ts).
 //
-// CHECK THESE PRICES AGAINST THE ANTHROPIC PRICING PAGE BEFORE THE PAID RUN
-// (https://www.anthropic.com/pricing, section "API"; or https://docs.anthropic.com, "Pricing").
-// They were NOT looked up online when this file was written. Where they come from:
-//   - input and output: the model table of the Claude API reference that ships with Claude Code
-//     (cached 2026-11-03): claude-haiku-5-5 0.10 / 0.50 USD per million tokens, claude-sonnet-5-5
-//     2 / 10, claude-opus-5-5 4 / 20;
-//   - cache write and cache read: the site's own cost table, lib/assistant/server/costs.ts
-//     (MODEL_PRICES, "Nov 2026"), which uses the same input and output figures.
-// If the pricing page says otherwise, change the numbers here before running: the cost ceiling
-// (--tetto-chf) is enforced against them, not against Anthropic's invoice.
+// Read on Anthropic's pricing page on 2026-11-26
+// (https://platform.claude.com/docs/en/about-claude/pricing, table "Model pricing"), USD per
+// million tokens, as input / output / 5-minute cache write / cache read:
+//   - claude-haiku-5-5   0.10 / 0.50 / 0.125 / 0.01 (for prompts up to 100,000 tokens; a longer
+//     prompt costs more, and no scenario here comes near that length);
+//   - claude-sonnet-5-5  2 / 10 / 2.50 / 0.10;
+//   - claude-opus-5-5    4 / 20 / 5 / 0.20.
+// Prices change. CHECK THE PAGE AGAIN BEFORE A LATER PAID RUN and change the numbers here first:
+// the cost ceiling (--tetto-chf) is enforced against them, not against Anthropic's invoice.
 import { estimateInputUsage, type UsageTokens } from "@/lib/assistant/server/costs";
 import { DEFAULT_CHF_PER_USD } from "@/lib/voice/server/env";
 import type Anthropic from "@anthropic-ai/sdk";
@@ -25,7 +24,7 @@ export interface LivePrice {
   cacheRead: number;
 }
 
-/** See the header: to be checked against the pricing page before the paid run. */
+/** See the header: read on the pricing page on 2026-11-26, to be read again before a later run. */
 export const LIVE_PRICES_USD_PER_MTOK: Readonly<Record<string, LivePrice>> = {
   "claude-haiku-5-5": { input: 0.1, output: 0.5, cacheWrite: 0.125, cacheRead: 0.01 },
   "claude-sonnet-5-5": { input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.1 },
@@ -34,7 +33,7 @@ export const LIVE_PRICES_USD_PER_MTOK: Readonly<Record<string, LivePrice>> = {
 
 /** Where the prices come from, printed before the run and written into the index. */
 export const PRICE_SOURCE =
-  "tests/voice/live/prices.ts: riferimento API di Claude in Claude Code (cache 3.11.2026) per input e output, lib/assistant/server/costs.ts per la cache. DA VERIFICARE sulla pagina dei prezzi di Anthropic prima della prova a pagamento.";
+  "tests/voice/live/prices.ts: letti il 26.11.2026 sulla pagina dei prezzi di Anthropic (platform.claude.com/docs, «Pricing»). Da rileggere prima di una prova successiva.";
 
 /**
  * Francs per dollar for the ceiling: the voice module's own conservative rate (env.ts

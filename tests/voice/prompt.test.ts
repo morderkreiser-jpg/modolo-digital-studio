@@ -172,6 +172,134 @@ describe("buildVoiceSystem: the Modolo tenant", () => {
   });
 });
 
+// What the first conversations with the real model got wrong. Each rule here answers something
+// that happened: a request lost at the goodbye, an emergency that never reached the business, a
+// postcode asked three times, a number refused for its missing country code, «dîner» booked for
+// the evening.
+describe("buildVoiceSystem: rules from the conversations with the real model", () => {
+  /** Modolo without a single way to pass something on. */
+  function withoutRequests(): VoiceTenantConfig {
+    return { ...tenant, id: "modolo-no-requests-fixture", tools: ["end_call"] };
+  }
+
+  /** Modolo as a trade with an on-call service: emergencies become requests. */
+  function withEmergencyRequests(patch: Partial<VoiceTenantConfig> = {}): VoiceTenantConfig {
+    return {
+      ...tenant,
+      id: "modolo-emergency-fixture",
+      handoff: { ...tenant.handoff, emergency: { ...tenant.handoff.emergency, takesRequest: true } },
+      ...patch,
+    };
+  }
+
+  it("passes on a request the caller asked for when they say goodbye, instead of asking once more", () => {
+    const text = system().staticText;
+    // Only what the caller asked to leave: the studio tells callers that nothing else reaches it.
+    assert.match(text, /If the caller has asked you to take a request or a callback wish and says goodbye or wants to stop before you have stored it, ask nothing more\./);
+    // Which rule gives way is said: the read-back and the yes hold everywhere else.
+    assert.match(text, /This is the one case where you pass details on without the final yes/);
+    // Not when the caller took the request back, and the business learns what was not confirmed.
+    assert.match(text, /if they have not taken it back and you have the contact details it needs, pass it on now with what you have and note in it what the caller did not confirm/);
+    assert.match(text, /If you cannot, say in one sentence that nothing was stored\./);
+    // An uncertain delivery has its own wording in the tool answer: the rule must not overrule it.
+    assert.match(text, /If the tool does not answer ok, say what its answer tells you to say\./);
+    // The goodbye rule comes before the one that ends the call: store first, then end.
+    assert.ok(text.indexOf("ask nothing more") < text.indexOf("say a short goodbye and call end_call"));
+    assert.ok(!buildVoiceSystem(ctx({ tenant: withoutRequests() })).staticText.includes("before you have stored it"));
+  });
+
+  it("keeps the goodbye rule away from the calendar: no booking or cancelling without a yes", () => {
+    const caveat = "This holds for requests and callback wishes only: never book, move or cancel an appointment without the caller's clear yes.";
+    assert.ok(buildVoiceSystem(ctx({ tenant: withCalendar() })).staticText.includes(caveat));
+    // Modolo itself has no calendar: the sentence would only be noise there.
+    assert.ok(!system().staticText.includes(caveat));
+  });
+
+  it("takes one yes for a request, not two", () => {
+    const text = system().staticText;
+    assert.match(text, /sum up the request in one or two sentences, with the contact details read back, and get one yes; then call it once\./);
+    assert.match(text, /If the caller has already confirmed the details and asked you to take the request, that is the yes: don't ask again\./);
+  });
+
+  it("asks for a missing detail once and goes on without it", () => {
+    const text = system().staticText;
+    assert.match(text, /What the caller has already said settles a required detail, even in a few words/);
+    // Text details only: a date, a number or a choice cannot hold "not said".
+    assert.match(text, /Ask for a missing detail once; if the caller does not give it, go on, and in a text detail write that it was not said\./);
+    assert.match(text, /The contact details the request marks as required are always needed\./);
+    assert.match(text, /addresses with street, number and town, and the postcode when the caller gives it\./);
+  });
+
+  it("takes an emergency request fast, only for a tenant that takes emergency requests", () => {
+    const text = buildVoiceSystem(ctx({ tenant: withEmergencyRequests() })).staticText;
+    assert.match(text, /After that message, take the caller's request and be quick/);
+    assert.match(text, /pass the request on at once, without a summary and without other questions/);
+    // No guessing: what the caller said, the closest option, or "not said".
+    assert.match(text, /Take the other details from what the caller has already said; where they said nothing, choose the closest option, or write that it was not said\./);
+    // What is said afterwards comes from the tool answer (it carries the business's own promise).
+    assert.match(text, /Afterwards say what the tool answer tells you to say, and add no advice\./);
+    // After the emergency message, before the advice line.
+    assert.ok(text.indexOf("add nothing to it") < text.indexOf("be quick"));
+    assert.ok(text.indexOf("be quick") < text.indexOf("Decline health, legal, tax and financial advice"));
+    // The one question, in the tenant's address form: informal for Modolo, formal by default.
+    assert.match(text, /\(«Wie heisst du, und unter welcher Nummer bist du erreichbar\?»\)/);
+    const formal = withEmergencyRequests({ id: "modolo-emergency-formal-fixture", persona: { ...tenant.persona, formality: {} } });
+    assert.match(buildVoiceSystem(ctx({ tenant: formal })).staticText, /\(«Wie heissen Sie, und unter welcher Nummer sind Sie erreichbar\?»\)/);
+    // Modolo itself only says its message: it cannot help with urgent matters.
+    assert.ok(!system().staticText.includes("be quick"));
+    // The switch alone is not enough: there must be a request to take.
+    assert.ok(!buildVoiceSystem(ctx({ tenant: withEmergencyRequests({ id: "modolo-emergency-no-tool-fixture", tools: ["end_call"] }) })).staticText.includes("be quick"));
+  });
+
+  it("passes a phone number on as it was said, and says it is taken as Swiss while reading it back", () => {
+    const de = system({ locale: "de" }).staticText;
+    // The model never rewrites a number: with the real model a rewritten number lost a digit once
+    // and an Italian number its zero. The server completes it.
+    assert.match(de, /Pass a phone number on exactly as the caller said it: never add, drop or change a digit, and never put a country code in front yourself\./);
+    assert.match(de, /A number without a country code is taken as a Swiss number\./);
+    // One answer settles the digits and the country. No example phrase in a German prompt.
+    assert.match(de, /When the conversation is not in German, say so while you read it back, so that the caller can correct you in the same answer\./);
+    assert.match(system({ locale: "it" }).staticText, /say so while you read it back \(«un numero svizzero, giusto\?»\), so that the caller can correct you/);
+    assert.match(system({ locale: "en" }).staticText, /«a Swiss number, right\?»/);
+    assert.match(system({ locale: "fr" }).staticText, /«un numéro suisse, c'est bien ça \?»/);
+    assert.match(de, /A number from another country needs its country code: ask the caller for it and pass the number on as they then say it\./);
+  });
+
+  it("passes on only what the caller said: nothing made up, nothing completed", () => {
+    // Seen with the real model: an email address nobody had given, stored with the request.
+    assert.match(system().staticText, /Pass on only what the caller said in this conversation\. Never make up or complete a detail they did not give: no email address, no phone number, no name and no address of your own\./);
+  });
+
+  it("knows what «dîner» means in Swiss French, only where French is spoken and a time is arranged", () => {
+    const booking = buildVoiceSystem(ctx({ tenant: withCalendar() })).staticText;
+    assert.match(booking, /In Swiss French «dîner» is the midday meal and «souper» the evening meal/);
+    assert.match(booking, /ask whether they mean midday or the evening before you look for a time/);
+    const bookingDe: VoiceTenantConfig = { ...withCalendar(), id: "modolo-calendar-de-only-fixture", locales: ["de"] };
+    assert.ok(!buildVoiceSystem(ctx({ tenant: bookingDe })).staticText.includes("dîner"));
+    // Modolo speaks French but arranges no time of day.
+    assert.ok(!system().staticText.includes("dîner"));
+  });
+
+  it("says a few words before a tool call, so the caller does not wait in silence", () => {
+    assert.match(system({ locale: "de" }).staticText, /Before you call a tool, say a few words first so that the caller does not wait in silence \(«Einen Moment, bitte\.»\), and call the tool in the same turn\./);
+    assert.match(system({ locale: "it" }).staticText, /«Un attimo, per favore\.»/);
+    assert.match(system({ locale: "en" }).staticText, /«One moment, please\.»/);
+    assert.match(system({ locale: "fr" }).staticText, /«Un instant, s'il vous plaît\.»/);
+    // Nothing to wait for when the only tool ends the call.
+    assert.ok(!buildVoiceSystem(ctx({ tenant: withoutRequests() })).staticText.includes("does not wait in silence"));
+  });
+
+  it("stays in the language the caller switched to", () => {
+    assert.match(system().staticText, /Answer in the language the caller speaks, switch when they switch, and then stay in that language\./);
+  });
+
+  it("keeps the address form, says an email address in words and a reference without its hyphen", () => {
+    assert.match(system().staticText, /French 'vous'\. Keep to that form in every sentence\./);
+    assert.match(system().staticText, /email addresses in words, never with the @ sign, and spelled out where needed/);
+    assert.match(buildVoiceSystem(ctx({ tenant: withCalendar() })).staticText, /say the reference it returned, letter by letter and without the hyphen\./);
+  });
+});
+
 describe("buildVoiceSystem: caching and the dynamic part", () => {
   it("returns a byte-identical static text for the same tenant, locale and channel", () => {
     const reference = system().staticText;

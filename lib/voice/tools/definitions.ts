@@ -392,9 +392,9 @@ function typeHint(field: TaskField, fallback: VoiceLocale): string {
       return `One of these ids: ${choices}.`;
     }
     case "address":
-      return "Street and number, postcode and town.";
+      return "Street and number and town, with the postcode when the caller gave it.";
     case "locality":
-      return "Postcode and town.";
+      return "Town, with the postcode when the caller gave it.";
     default:
       return "Text.";
   }

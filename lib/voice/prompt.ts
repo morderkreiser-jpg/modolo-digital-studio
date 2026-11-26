@@ -62,9 +62,15 @@ interface Phrases {
   dontKnow: string;
   stillThere: Record<Formality, string>;
   spell: Record<Formality, string>;
+  /** The one question of an emergency, in the tenant's address form. */
+  askContact: Record<Formality, string>;
   amounts: string;
   ranges: string;
   phone: string;
+  /** Said while reading back a number that came without a country code. Empty in German, where such a number is Swiss. */
+  swissNumber: string;
+  /** Said before a tool call, so the caller does not wait in silence. */
+  moment: string;
   email: string;
   date: string;
   time: string;
@@ -76,9 +82,15 @@ const PHRASES: Record<VoiceLocale, Phrases> = {
     dontKnow: "«Das weiss ich leider nicht.»",
     stillThere: { informal: "«Bist du noch da?»", formal: "«Sind Sie noch da?»" },
     spell: { informal: "«Kannst du mir das buchstabieren?»", formal: "«Können Sie mir das buchstabieren?»" },
+    askContact: {
+      informal: "«Wie heisst du, und unter welcher Nummer bist du erreichbar?»",
+      formal: "«Wie heissen Sie, und unter welcher Nummer sind Sie erreichbar?»",
+    },
     amounts: "«250 Franken», «35 Franken im Monat»",
     ranges: "«ein bis zwei Wochen»",
     phone: "«null sieben neun, eins zwei drei, vier fünf, sechs sieben»",
+    swissNumber: "",
+    moment: "«Einen Moment, bitte.»",
     email: "«info at beispiel punkt ch»",
     date: "«Donnerstag, 3. Dezember»",
     time: "«14 Uhr 30»",
@@ -88,9 +100,15 @@ const PHRASES: Record<VoiceLocale, Phrases> = {
     dontKnow: "«Questo purtroppo non lo so.»",
     stillThere: { informal: "«Ci sei ancora?»", formal: "«È ancora in linea?»" },
     spell: { informal: "«Me lo puoi dire lettera per lettera?»", formal: "«Me lo può dire lettera per lettera?»" },
+    askContact: {
+      informal: "«Come ti chiami, e a quale numero sei raggiungibile?»",
+      formal: "«Come si chiama, e a quale numero è raggiungibile?»",
+    },
     amounts: "«250 franchi», «35 franchi al mese»",
     ranges: "«da una a due settimane»",
     phone: "«zero sette nove, uno due tre, quattro cinque, sei sette»",
+    swissNumber: "«un numero svizzero, giusto?»",
+    moment: "«Un attimo, per favore.»",
     email: "«info chiocciola esempio punto ch»",
     date: "«giovedì 3 dicembre»",
     time: "«alle 14 e 30»",
@@ -100,9 +118,15 @@ const PHRASES: Record<VoiceLocale, Phrases> = {
     dontKnow: "«I'm afraid I don't know that.»",
     stillThere: { informal: "«Are you still there?»", formal: "«Are you still there?»" },
     spell: { informal: "«Could you spell that for me?»", formal: "«Could you spell that for me?»" },
+    askContact: {
+      informal: "«What is your name, and on which number can you be reached?»",
+      formal: "«What is your name, and on which number can you be reached?»",
+    },
     amounts: "«250 francs», «35 francs a month»",
     ranges: "«one to two weeks»",
     phone: "«zero seven nine, one two three, four five, six seven»",
+    swissNumber: "«a Swiss number, right?»",
+    moment: "«One moment, please.»",
     email: "«info at example dot ch»",
     date: "«Thursday the 3rd of December»",
     time: "«fourteen thirty»",
@@ -112,9 +136,15 @@ const PHRASES: Record<VoiceLocale, Phrases> = {
     dontKnow: "«Malheureusement, je ne le sais pas.»",
     stillThere: { informal: "«Tu es toujours là ?»", formal: "«Vous êtes toujours là ?»" },
     spell: { informal: "«Tu peux me l'épeler ?»", formal: "«Pouvez-vous me l'épeler ?»" },
+    askContact: {
+      informal: "«Quel est ton nom, et à quel numéro es-tu joignable ?»",
+      formal: "«Quel est votre nom, et à quel numéro êtes-vous joignable ?»",
+    },
     amounts: "«250 francs», «35 francs par mois»",
     ranges: "«une à deux semaines»",
     phone: "«zéro sept neuf, un deux trois, quatre cinq, six sept»",
+    swissNumber: "«un numéro suisse, c'est bien ça ?»",
+    moment: "«Un instant, s'il vous plaît.»",
     email: "«info arobase exemple point ch»",
     date: "«jeudi 3 décembre»",
     time: "«14 h 30»",
@@ -243,14 +273,23 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
     .filter((code) => ADDRESS_FORMS[code] !== null)
     .map((code) => `${LANGUAGE_NAMES[code]} ${ADDRESS_FORMS[code]?.[formalityOf(tenant, code)]}`);
   const languageLines = [
-    `Answer in the language the caller speaks, and switch when they switch. You speak ${languages}; this conversation starts in ${LANGUAGE_NAMES[locale]}. If a caller speaks another language, say briefly, in a language you speak, which ones you can offer.`,
+    `Answer in the language the caller speaks, switch when they switch, and then stay in that language. You speak ${languages}; this conversation starts in ${LANGUAGE_NAMES[locale]}. If a caller speaks another language, say briefly, in a language you speak, which ones you can offer.`,
   ];
   if (tenant.locales.includes("de")) {
     languageLines.push(
       "Callers may speak Swiss German dialect: understand it, but always answer in Swiss Standard German, never in dialect: Swiss spelling with 'ss' (never 'ß') and Swiss words where natural («Offerte», «innert», «parkieren»).",
     );
   }
-  if (addressForms.length > 0) languageLines.push(`Address the caller with: ${addressForms.join(", ")}.`);
+  // Only where a time of day is arranged: a table, an appointment, a request with a time.
+  const arrangesTimes =
+    (tenant.calendar !== undefined && tenant.tools.some((tool) => CALENDAR_TOOLS.has(tool))) ||
+    tenant.tasks.some((task) => task.fields.some((field) => field.type === "time"));
+  if (tenant.locales.includes("fr") && arrangesTimes) {
+    languageLines.push(
+      "In Swiss French «dîner» is the midday meal and «souper» the evening meal, but some callers say «dîner» for the evening, as in France: when a caller says «dîner» without a time, ask whether they mean midday or the evening before you look for a time.",
+    );
+  }
+  if (addressForms.length > 0) languageLines.push(`Address the caller with: ${addressForms.join(", ")}. Keep to that form in every sentence.`);
   languageLines.push(...tenant.persona.style);
 
   const parts: string[] = [
@@ -264,7 +303,9 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
     ]),
     block("Language", languageLines),
     block("Details", [
-      `Read back every detail you will pass on, and wait for a clear yes: names (if you are unsure of the spelling, ask: ${phrases.spell[formality]}), phone numbers digit by digit in small groups (${phrases.phone}), email addresses spelled out where needed (${phrases.email}), dates with the weekday (${phrases.date}), times in 24-hour form (${phrases.time}), addresses with street, number, postcode and town.`,
+      `Read back every detail you will pass on, and wait for a clear yes: names (if you are unsure of the spelling, ask: ${phrases.spell[formality]}), phone numbers digit by digit in small groups (${phrases.phone}), email addresses in words, never with the @ sign, and spelled out where needed (${phrases.email}), dates with the weekday (${phrases.date}), times in 24-hour form (${phrases.time}), addresses with street, number and town, and the postcode when the caller gives it.`,
+      `Pass a phone number on exactly as the caller said it: never add, drop or change a digit, and never put a country code in front yourself. A number without a country code is taken as a Swiss number. When the conversation is not in German, say so while you read it back${phrases.swissNumber ? ` (${phrases.swissNumber})` : ""}, so that the caller can correct you in the same answer. A number from another country needs its country code: ask the caller for it and pass the number on as they then say it.`,
+      "Pass on only what the caller said in this conversation. Never make up or complete a detail they did not give: no email address, no phone number, no name and no address of your own.",
       `Never guess a detail you did not understand clearly: ask again. After two failed attempts at the same detail, stop and offer ${offer}.`,
     ]),
     block("Facts", [
@@ -282,7 +323,8 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
       block("Requests you take (tool create_lead)", [
         ...tenant.tasks.map((task) => taskLine(task, locale, fallback)),
         "Collect only what the request needs, one question at a time and in a natural order. Use what the caller has already said instead of asking again; infer choice fields from it and ask only when unclear, offering two or three options at most. Ask for optional fields only when the caller offers them or they clearly help, and for contact details only those the request lists. Never turn the call into a questionnaire.",
-        "Before you call create_lead, sum up the request in one or two sentences and get a yes; then call it once.",
+        "What the caller has already said settles a required detail, even in a few words: ask for more only when their wish is unclear. Ask for a missing detail once; if the caller does not give it, go on, and in a text detail write that it was not said. The contact details the request marks as required are always needed.",
+        "Before you call create_lead, sum up the request in one or two sentences, with the contact details read back, and get one yes; then call it once. If the caller has already confirmed the details and asked you to take the request, that is the yes: don't ask again.",
       ]),
     );
   }
@@ -304,7 +346,7 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
     }
     if (has(tenant, "book_appointment")) {
       lines.push(
-        "Before book_appointment, read back the service, the weekday and date, the time, the name and the contact, and get a yes. The appointment exists only when book_appointment answered ok; then say the reference it returned, letter by letter.",
+        "Before book_appointment, read back the service, the weekday and date, the time, the name and the contact, and get a yes. The appointment exists only when book_appointment answered ok; then say the reference it returned, letter by letter and without the hyphen.",
       );
     }
     if (has(tenant, "cancel_appointment")) {
@@ -323,6 +365,24 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
     'Never say that something is booked, stored, sent, passed on or transferred unless the tool answered ok. Every tool answer has a "say" line: tell the caller its content briefly, in their language.',
     `When a tool fails, say plainly that it did not work and offer ${offer}. Never repeat an action just to be sure; call it again only with details the caller has corrected and confirmed.`,
   ];
+  if (tenant.tools.some((tool) => tool !== "end_call")) {
+    // A tool call is a second model call: without these words the caller hears several seconds
+    // of nothing at the very moment something is stored or looked up.
+    toolLines.push(
+      `Before you call a tool, say a few words first so that the caller does not wait in silence (${phrases.moment}), and call the tool in the same turn. Not before end_call: there you say goodbye.`,
+    );
+  }
+  if (has(tenant, "create_lead") || has(tenant, "request_callback")) {
+    // A caller who hangs up must not cost the business the request they asked for: one more
+    // question at this point is a request lost. Only what the caller asked to leave is passed on.
+    toolLines.push(
+      `If the caller has asked you to take a request or a callback wish and says goodbye or wants to stop before you have stored it, ask nothing more. This is the one case where you pass details on without the final yes: if they have not taken it back and you have the contact details it needs, pass it on now with what you have and note in it what the caller did not confirm, then say in one sentence that it is passed on and say goodbye. If you cannot, say in one sentence that nothing was stored. If the tool does not answer ok, say what its answer tells you to say.${
+        tenant.calendar && calendarTools.length > 0
+          ? " This holds for requests and callback wishes only: never book, move or cancel an appointment without the caller's clear yes."
+          : ""
+      }`,
+    );
+  }
   if (has(tenant, "end_call")) {
     toolLines.push(
       "When the caller's request is settled and they say goodbye or need nothing more, say a short goodbye and call end_call. Never end the call while the caller is still speaking or asking.",
@@ -372,12 +432,18 @@ function staticPrompt(tenant: VoiceTenantConfig, kb: VoiceKnowledge, locale: Voi
 
   const triggers = handoff.emergency.triggers.map((trigger) => trigger.trim()).filter(Boolean);
   const emergencyMessage = inEveryLocale(tenant, handoff.emergency.message);
-  parts.push(
-    block("Emergencies and advice", [
-      `If the caller reports an emergency or a danger to people${triggers.length > 0 ? ` (for example: ${triggers.join("; ")})` : ""}, say this message at once, in the caller's language, and add nothing to it: ${emergencyMessage || "that they must call the emergency number 112"}. Never diagnose and never give instructions beyond the message.${options.transfer ? " Then offer the transfer." : ""}`,
-      "Decline health, legal, tax and financial advice in one sentence, then come back to what you can do.",
-    ]),
-  );
+  const emergencyLines = [
+    `If the caller reports an emergency or a danger to people${triggers.length > 0 ? ` (for example: ${triggers.join("; ")})` : ""}, say this message at once, in the caller's language, and add nothing to it: ${emergencyMessage || "that they must call the emergency number 112"}. Never diagnose and never give instructions beyond the message.${options.transfer ? " Then offer the transfer." : ""}`,
+  ];
+  if (handoff.emergency.takesRequest === true && has(tenant, "create_lead") && tenant.tasks.length > 0) {
+    // Only for a business that takes emergency requests (an on-call service). The caller may be
+    // gone in seconds: what reaches the business must not wait for every detail or a second yes.
+    emergencyLines.push(
+      `After that message, take the caller's request and be quick: ask only for their name and phone number (${phrases.askContact[formality]}) and the place (street and town are enough), read the number back, then pass the request on at once, without a summary and without other questions. Take the other details from what the caller has already said; where they said nothing, choose the closest option, or write that it was not said. Afterwards say what the tool answer tells you to say, and add no advice.`,
+    );
+  }
+  emergencyLines.push("Decline health, legal, tax and financial advice in one sentence, then come back to what you can do.");
+  parts.push(block("Emergencies and advice", emergencyLines));
 
   parts.push(
     block("Conversation", [

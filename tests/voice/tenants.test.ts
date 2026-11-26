@@ -156,6 +156,14 @@ describe("validateVoiceTenant", () => {
     ],
     ["recording on the demo plan", (t) => (t.privacy.recordAudio = true), /recordAudio must be false/],
     ["emergency message missing", (t) => delete t.handoff.emergency.message.it, /emergency message is missing for "it"/],
+    [
+      "emergency requests without a request to take them with",
+      (t) => {
+        t.handoff.emergency.takesRequest = true;
+        t.tools = ["request_callback", "end_call"];
+      },
+      /handoff\.emergency\.takesRequest needs the create_lead tool and a task/,
+    ],
     ["written promise missing a language", (t) => delete t.handoff.written.promise?.fr, /handoff.written.promise is missing for "fr"/],
     ["privacy notice missing", (t) => (t.privacy.noticeUrl = {}), /privacy.noticeUrl is empty/],
     ["privacy notice not a site path", (t) => (t.privacy.noticeUrl.fr = "javascript:alert(1)"), /noticeUrl for "fr" must be/],
@@ -191,6 +199,13 @@ describe("validateVoiceTenant", () => {
       );
     });
   }
+
+  it("accepts emergency requests where there is a request to take them with", () => {
+    const tenant = broken((t) => {
+      t.handoff.emergency.takesRequest = true;
+    });
+    assert.deepEqual(validateVoiceTenant(tenant), []);
+  });
 
   it("lets a paid live tenant record audio", () => {
     const tenant = broken((t) => {

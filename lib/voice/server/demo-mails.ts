@@ -105,7 +105,7 @@ function outcomeOf(
   tenant: VoiceTenantConfig,
   memory: Memory,
 ): Outcome | null {
-  const checked = validateToolInput(tenant, step.name, step.input, { locale: script.locale, now: EXAMPLE_DAY });
+  const checked = validateToolInput(tenant, step.name, step.input, { now: EXAMPLE_DAY });
   if (!checked.ok) return null;
   const input = checked.value;
   const ok = step.outcome === "ok";

@@ -88,6 +88,8 @@ export const ELEKTRO_TENANT: VoiceTenantConfig = {
       message: {
         de: "Wenn Menschen in Gefahr sind, legen Sie bitte auf und rufen Sie 112 an, die Feuerwehr 118 oder die Sanität 144. Ich gebe Ihre Meldung an unseren Pikettdienst weiter.",
       },
+      // The request goes to the on-call electrician: it is taken at once, with as few questions as possible.
+      takesRequest: true,
     },
   },
   tasks: [

@@ -95,7 +95,8 @@ describe("getVoiceEnv: defaults", () => {
     assert.equal(env.model, DEFAULT_VOICE_MODEL);
     assert.equal(env.model, "claude-haiku-5-5");
     assert.equal(env.maxOutputTokens, DEFAULT_VOICE_MAX_OUTPUT_TOKENS);
-    assert.equal(env.maxOutputTokens, 400);
+    // Room for the model's thinking and the reply together: 400 cut one call in twenty.
+    assert.equal(env.maxOutputTokens, 1500);
     assert.equal(env.provider, "none");
     assert.equal(env.providerApiKey, null);
     assert.equal(env.costChfPerMinute, null);
@@ -144,12 +145,13 @@ describe("getVoiceEnv: junk falls back to defaults", () => {
     assert.equal(envWith({ VOICE_MODEL: "claude-sonnet-5-5" }).model, "claude-sonnet-5-5");
   });
 
-  it("clamps the output tokens to 100-1200 and ignores non-numbers", () => {
-    assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: "50" }).maxOutputTokens, 100);
-    assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: "5000" }).maxOutputTokens, 1200);
+  it("clamps the output tokens to 400-2000 and ignores non-numbers", () => {
+    // Below 400 the model's thinking alone can use up the allowance, and nothing is said.
+    assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: "50" }).maxOutputTokens, 400);
+    assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: "5000" }).maxOutputTokens, 2000);
     assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: "600" }).maxOutputTokens, 600);
     for (const junk of ["abc", "1e3", "0x200", "12abc"]) {
-      assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: junk }).maxOutputTokens, 400, junk);
+      assert.equal(envWith({ VOICE_MAX_OUTPUT_TOKENS: junk }).maxOutputTokens, 1500, junk);
     }
   });
 

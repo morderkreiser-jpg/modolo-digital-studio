@@ -284,9 +284,8 @@ async function run(ctx: ToolContext, call: ToolCall): Promise<ToolOutcome> {
   const capped = await checkToolCallCap(ctx, name);
   if (capped !== null) return capped;
 
-  // The call's language and clock: a number without a country code is taken as Swiss only in a
-  // German call, and a date a caller leaves must not lie in the past.
-  const checked = validateToolInput(ctx.tenant, name, call.input, { locale: ctx.locale, now: ctx.now });
+  // The call's clock: a date a caller leaves must not lie in the past.
+  const checked = validateToolInput(ctx.tenant, name, call.input, { now: ctx.now });
   if (!checked.ok) {
     return failure(
       "invalid_input",
@@ -462,9 +461,16 @@ async function bookAppointment(ctx: ToolContext, input: Input): Promise<ToolOutc
   const party = booking.partySize === undefined ? "" : ` For ${booking.partySize} ${booking.partySize === 1 ? "person" : "people"}.`;
   return {
     ok: true,
-    say: `Booked: ${date} at ${time}, reference ${booking.ref}.${party} Give the caller the reference.`,
+    // The reference is given already spelled out: the model, left to spell "MV-YVPY" itself,
+    // once said only four of its six characters, and the caller needs it to cancel.
+    say: `Booked: ${date} at ${time}, reference ${booking.ref}.${party} Give the caller the reference, letter by letter: ${spelledOut(booking.ref)}.`,
     data: bookingData(booking),
   };
+}
+
+/** "MV-4R9U" -> "M V 4 R 9 U": one character at a time, without the hyphen. */
+export function spelledOut(reference: string): string {
+  return [...reference.replace(/[^\p{L}\p{N}]/gu, "")].join(" ");
 }
 
 /**
@@ -703,7 +709,8 @@ async function createLead(ctx: ToolContext, input: Input): Promise<ToolOutcome> 
   const task = ctx.tenant.tasks.find((candidate) => candidate.id === taskId);
   const outcome: ToolOutcome = {
     ok: true,
-    say: `Stored and passed on to the team, reference ${answer.ref}.${promiseLine(ctx, task?.followUp ?? ctx.tenant.handoff.written.promise)}`,
+    // Nothing the caller can do with this reference on the phone: it is for the written record.
+    say: `Stored and passed on to the team, reference ${answer.ref}. Read the reference out only if the caller asks for it.${promiseLine(ctx, task?.followUp ?? ctx.tenant.handoff.written.promise)}`,
     data: { reference: answer.ref },
   };
   memory.replies.set(key, outcome);

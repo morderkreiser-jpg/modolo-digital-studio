@@ -112,6 +112,8 @@ export const SANITAER_TENANT: VoiceTenantConfig = {
         "a heating failure with someone at risk from the cold",
       ],
       message: { ...EMERGENCY_MESSAGE },
+      // The request goes to the on-call technician: it is taken at once, with as few questions as possible.
+      takesRequest: true,
     },
   },
   tasks: [

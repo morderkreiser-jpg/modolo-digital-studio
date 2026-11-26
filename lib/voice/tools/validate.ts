@@ -9,15 +9,20 @@
 // Errors are short English sentences naming the detail, written for the model: execute.ts hands
 // them back so it can ask the caller again. They never echo the caller's values.
 //
-// Two checks need the call itself (ValidationOptions), and are skipped without it:
-//   - `locale`: a phone number without a country code is read as Swiss only in a German call. An
-//     Italian caller's Milan number "02 1234 5678" has the shape of a Lausanne number; in any other
-//     language the model must first ask whether the number is Swiss and then send it with +41.
+// One check needs the call itself (ValidationOptions), and is skipped without it:
 //   - `now`: a date a caller leaves with a request must not lie in the past (TaskField.allowPast).
+//
+// Phone numbers arrive as the caller said them and are completed here, never by the model: a
+// number without a country code is a Swiss one when it fits the Swiss numbering plan, in every
+// language. (It used to be refused outside German calls, so that the model would ask and then
+// send it with +41. With the real model that cost requests when the caller left before the
+// answer, and digits when the model rewrote the number: "+39 02 ..." lost its zero, "45" became
+// "46". That a Milan "02 1234 5678" has the shape of a Lausanne number is now covered by the
+// assistant saying "a Swiss number" while it reads the number back.)
 //
 // Pure: no I/O, safe to import from scripts and tests (the demo scripts are replayed through it).
 import { isVoiceToolName } from "@/lib/voice/types";
-import type { TaskDefinition, TaskField, VoiceLocale, VoiceTenantConfig, VoiceText } from "@/lib/voice/types";
+import type { TaskDefinition, TaskField, VoiceTenantConfig, VoiceText } from "@/lib/voice/types";
 import { isValidDate, parseIsoInstant, toZonedIso, wallTimeToEpoch, zonedParts } from "@/lib/voice/hours";
 import { normalizeBookingRef } from "@/lib/voice/calendar/memory";
 import {
@@ -35,8 +40,6 @@ export type ToolValidation = { ok: true; value: Record<string, unknown> } | { ok
 
 /** What validation knows about the call (see the header). */
 export interface ValidationOptions {
-  /** Language of the call. */
-  locale?: VoiceLocale;
   /** The call's clock. */
   now?: Date;
 }
@@ -95,7 +98,7 @@ export function validateToolInput(
       value = checkAvailability(tenant, input, errors);
       break;
     case "book_appointment":
-      value = bookAppointment(tenant, input, errors, checks);
+      value = bookAppointment(tenant, input, errors);
       break;
     case "cancel_appointment":
       value = cancelAppointment(input, errors);
@@ -107,7 +110,7 @@ export function validateToolInput(
       value = createLead(tenant, input, errors, checks);
       break;
     case "request_callback":
-      value = requestCallback(input, errors, checks);
+      value = requestCallback(input, errors);
       break;
     case "transfer_call":
       value = transferCall(tenant, input, errors);
@@ -136,7 +139,7 @@ function checkAvailability(tenant: VoiceTenantConfig, input: Input, errors: stri
   return value;
 }
 
-function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[], checks: Checks): Record<string, unknown> {
+function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[]): Record<string, unknown> {
   const seats = usesSeats(tenant);
   const keys = ["service", "start", "name", "contact", "notes"];
   if (seats) keys.push("party_size", "separate_party");
@@ -145,7 +148,7 @@ function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string
     service: serviceId(tenant, input, errors),
     start: startValue(tenant, input, "start", errors),
     name: personName(input, "name", true, errors),
-    contact: contactValue(input, errors, checks),
+    contact: contactValue(input, errors),
   };
   if (seats) value.party_size = partySize(input, errors);
   const notes = freeText(input, "notes", TOOL_TEXT_LIMITS.notes, false, errors);
@@ -206,7 +209,7 @@ function createLead(tenant: VoiceTenantConfig, input: Input, errors: string[], c
     // Data minimisation: a detail this task does not need is dropped, not stored, and not even
     // checked, so a garbled detail nobody asked for cannot block the request.
     if (need === "none") continue;
-    const given = contactDetail(input, key, errors, checks);
+    const given = contactDetail(input, key, errors);
     if (given === undefined) {
       if (need === "required" && task) errors.push(`"${key}" is required for this task.`);
       continue;
@@ -270,11 +273,11 @@ function collectFields(
   }
 }
 
-function requestCallback(input: Input, errors: string[], checks: Checks): Record<string, unknown> {
+function requestCallback(input: Input, errors: string[]): Record<string, unknown> {
   onlyKeys(input, ["name", "phone", "topic", "preferred_time"], "", errors);
   const value: Record<string, unknown> = {
     name: personName(input, "name", true, errors),
-    phone: phoneValue(input, "phone", true, errors, checks),
+    phone: phoneValue(input, "phone", true, errors),
     topic: freeText(input, "topic", TOOL_TEXT_LIMITS.topic, true, errors),
   };
   const preferred = freeText(input, "preferred_time", TOOL_TEXT_LIMITS.preferredTime, false, errors);
@@ -304,7 +307,7 @@ function fieldValue(field: TaskField, text: string, where: string, errors: strin
   const max = field.maxLength ?? DEFAULT_FIELD_MAX_LENGTH;
   switch (field.type) {
     case "phone": {
-      const phone = checkPhone(text, where, checks);
+      const phone = checkPhone(text, where);
       if (!phone.ok) errors.push(phone.error);
       return phone.ok ? phone.value : null;
     }
@@ -520,7 +523,7 @@ function reference(input: Input, errors: string[]): string | undefined {
 }
 
 /** book_appointment's contact: an email when it has an "@", else a phone number. */
-function contactValue(input: Input, errors: string[], checks: Checks): string | undefined {
+function contactValue(input: Input, errors: string[]): string | undefined {
   const text = stringValue(input, "contact", true, errors);
   if (text === undefined) return undefined;
   if (text.includes("@")) {
@@ -528,26 +531,26 @@ function contactValue(input: Input, errors: string[], checks: Checks): string | 
     errors.push('"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.');
     return undefined;
   }
-  const phone = checkPhone(text, "contact", checks);
+  const phone = checkPhone(text, "contact");
   if (phone.ok) return phone.value;
   errors.push(phone.error);
   return undefined;
 }
 
-function phoneValue(input: Input, key: string, required: boolean, errors: string[], checks: Checks): string | undefined {
+function phoneValue(input: Input, key: string, required: boolean, errors: string[]): string | undefined {
   const text = stringValue(input, key, required, errors);
   if (text === undefined) return undefined;
-  const phone = checkPhone(text, key, checks);
+  const phone = checkPhone(text, key);
   if (!phone.ok) errors.push(phone.error);
   return phone.ok ? phone.value : undefined;
 }
 
 /**
- * A phone number given by the caller, checked for the call it was given in. A number in the Swiss
- * national form ("079 ...", "044 ...") is only taken as Swiss in a German call; in any other
- * language the model is told to ask, because the same digits are a number in Milan, Rome or Paris.
+ * A phone number given by the caller. A number in the Swiss national form ("079 ...", "044 ...")
+ * is taken as Swiss when its prefix exists in the Swiss numbering plan; one that does not fit is
+ * refused, with the question to ask (see the header for why the call's language no longer counts).
  */
-function checkPhone(text: string, key: string, checks: Checks): { ok: true; value: string } | { ok: false; error: string } {
+function checkPhone(text: string, key: string): { ok: true; value: string } | { ok: false; error: string } {
   const phone = normalizePhone(text);
   const national = isNationalForm(text);
   if (phone === null) {
@@ -561,13 +564,6 @@ function checkPhone(text: string, key: string, checks: Checks): { ok: true; valu
       return { ok: false, error: '"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.' };
     }
     return { ok: false, error: `"${key}" must be a phone number with area code, e.g. 079 123 45 67.` };
-  }
-  const locale = checks.options.locale;
-  if (national && locale !== undefined && locale !== "de") {
-    return {
-      ok: false,
-      error: `"${key}" has no country code. Ask the caller whether it is a Swiss number: if it is, send it with +41 in front and without its first 0; if not, ask for the country code. Nothing was stored yet.`,
-    };
   }
   return { ok: true, value: phone };
 }
@@ -591,9 +587,9 @@ function todayIn(checks: Checks): string | null {
 }
 
 /** create_lead's name / phone / email / company, validated by kind. */
-function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[], checks: Checks): string | undefined {
+function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[]): string | undefined {
   if (key === "name") return personName(input, key, false, errors);
-  if (key === "phone") return phoneValue(input, key, false, errors, checks);
+  if (key === "phone") return phoneValue(input, key, false, errors);
   if (key === "email") {
     const text = stringValue(input, key, false, errors);
     if (text === undefined) return undefined;
@@ -624,7 +620,7 @@ function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors:
  *     premium rate ("+41 900 ...") is refused like "0900 ...".
  *   Other countries must start with + or 00; their digits are kept as given (7 to 15 in all).
  * Separators allowed: spaces, dots, dashes, slashes, brackets. Letters ("ext. 12") refuse it.
- * Whether a national form may be read as Swiss at all depends on the call: see checkPhone().
+ * A national form is read as Swiss when its prefix exists in the Swiss numbering plan: see checkPhone().
  */
 export function normalizePhone(raw: string): string | null {
   if (typeof raw !== "string") return null;

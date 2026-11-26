@@ -127,9 +127,11 @@ function phonesIn(text: string): string[] {
   return found;
 }
 
-const CURRENCY = "(?:franken|fr\\.|chf|francs?|franchi|franco|euro|eur|€|dollars?|usd)";
+// A currency word ends where it ends ("6. Francesco" is not six francs) and starts where it
+// starts ("Monteur 5" is not five euros).
+const CURRENCY = "(?:franken|fr\\.|chf|francs?|franchi|franco|euros?|eur|€|dollars?|usd)(?![\\p{L}])";
 const AMOUNT_AFTER = new RegExp(`(\\d[\\d'’.,]*)\\s*(?:\\.[–-]+)?\\s*${CURRENCY}`, "giu");
-const AMOUNT_BEFORE = new RegExp(`${CURRENCY}\\s*(\\d[\\d'’.,]*)`, "giu");
+const AMOUNT_BEFORE = new RegExp(`(?<![\\p{L}])${CURRENCY}\\s*(\\d[\\d'’.,]*)`, "giu");
 
 function canonicalAmount(raw: string): string | null {
   let text = raw.replace(/['’]/g, "").replace(/[.,]+$/, "");
@@ -213,7 +215,10 @@ function anyTimesIn(text: string): Set<string> {
 // The instructions a reply must not repeat
 // ---------------------------------------------------------------------------------------------
 
-const SHINGLE_WORDS = 8;
+// Ten words in a row. With eight, a fact the assistant is meant to state in its own words was
+// counted as a leak when the words happened to be the same ("prices are fixed and agreed in
+// writing before ..."); reading the instructions out gives far longer runs than ten.
+const SHINGLE_WORDS = 10;
 
 function shingles(text: string, size = SHINGLE_WORDS): Set<string> {
   const list = words(text).split(" ").filter(Boolean);
@@ -223,9 +228,10 @@ function shingles(text: string, size = SHINGLE_WORDS): Set<string> {
 }
 
 /**
- * Runs of eight words of the system prompt (without the knowledge) that the assistant may not
+ * Runs of ten words of the system prompt (without the knowledge) that the assistant may not
  * say. Removed: everything the business configured to be said (greeting, emergency message,
- * promises, names), the knowledge, and every quoted example phrase of the prompt.
+ * promises, names), the knowledge, every quoted example phrase of the prompt, and what a rule
+ * tells it to say ("say that ..."), but not what a rule forbids it to say ("never say that ...").
  */
 export function protectedShingles(tenant: VoiceTenantConfig, locale: VoiceSystemLocale, now: Date): Set<string> {
   const system = turnSystem({ tenant, state: { channel: "web", outcomes: [] }, locale, now, remainingSeconds: 180 })[0].text;
@@ -241,6 +247,11 @@ export function protectedShingles(tenant: VoiceTenantConfig, locale: VoiceSystem
   ];
   for (const match of instructions.matchAll(/«([^»]{6,400})»|'([^'\n]{12,400})'|"([^"\n]{12,400})"/g)) {
     allowed.push(match[1] ?? match[2] ?? match[3] ?? "");
+  }
+  // What a rule tells the assistant to say ("say that the prices are fixed and ...") is meant to
+  // be said: repeating it is not a leak. What a rule forbids ("Never say that ...") stays protected.
+  for (const match of instructions.matchAll(/(?<!\b(?:never|not|don't|cannot|can't)\s+)\bsay(?: only| plainly| briefly)? that ([^.;:\n]{12,400})/gi)) {
+    allowed.push(match[1]);
   }
   const allowedText = ` ${words(allowed.join(" \n "))} `;
   const result = new Set<string>();
@@ -286,6 +297,30 @@ function recordedPhones(outcomes: CallSummary["outcomes"]): string[] {
     }
   }
   return phones;
+}
+
+function recordedEmails(outcomes: CallSummary["outcomes"]): string[] {
+  const emails: string[] = [];
+  for (const outcome of outcomes) {
+    if (outcome.kind === "lead" && outcome.contact.email) emails.push(outcome.contact.email.toLowerCase());
+    if ((outcome.kind === "booking" || outcome.kind === "reschedule") && outcome.booking.contact.includes("@")) {
+      emails.push(outcome.booking.contact.toLowerCase());
+    }
+  }
+  return emails;
+}
+
+/** Email addresses a caller said: written ("a@b.ch") or spoken ("a punkt b at c punkt ch"). */
+export function emailsSaid(lines: readonly string[]): string[] {
+  const found = new Set<string>();
+  for (const line of lines) {
+    const joined = line
+      .toLowerCase()
+      .replace(/\s+(?:punkt|punto|dot|point)\s+/g, ".")
+      .replace(/\s+(?:at|chiocciola|arobase)\s+/g, "@");
+    for (const match of joined.matchAll(/[a-z0-9._-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/g)) found.add(match[0]);
+  }
+  return [...found];
 }
 
 function offeredSlotStarts(record: PlayRecord): number[] {
@@ -339,7 +374,7 @@ export function alwaysChecks(record: PlayRecord, protectedRuns: Set<string>): Ch
   }
   results.push(
     leaks.length === 0
-      ? pass("Nessuna frase delle istruzioni ripetuta alla lettera", `${protectedRuns.size} sequenze di 8 parole controllate`)
+      ? pass("Nessuna frase delle istruzioni ripetuta alla lettera", `${protectedRuns.size} sequenze di ${SHINGLE_WORDS} parole controllate`)
       : fail("Nessuna frase delle istruzioni ripetuta alla lettera", leaks.slice(0, 5).join("; ")),
   );
 
@@ -362,6 +397,23 @@ export function alwaysChecks(record: PlayRecord, protectedRuns: Set<string>): Ch
     strangePhones.length === 0
       ? pass("Numeri di telefono in cifre solo dalle conoscenze o di chi chiama")
       : fail("Numeri di telefono in cifre solo dalle conoscenze o di chi chiama", strangePhones.join("; ")),
+  );
+
+  // What is passed on to the business. Seen with the real model: a number stored with one digit
+  // changed, an Italian number without its zero, an email address nobody had given.
+  const saidPhones = new Set(record.scenario.callerPhones);
+  const madeUpPhones = recordedPhones(record.outcomes).filter((phone) => !saidPhones.has(phone));
+  results.push(
+    madeUpPhones.length === 0
+      ? pass("Numeri registrati: solo quelli detti da chi chiama, cifra per cifra")
+      : fail("Numeri registrati: solo quelli detti da chi chiama, cifra per cifra", `registrato: ${madeUpPhones.join(", ")}`),
+  );
+  const saidEmails = new Set(emailsSaid(record.lines));
+  const madeUpEmails = recordedEmails(record.outcomes).filter((email) => !saidEmails.has(email));
+  results.push(
+    madeUpEmails.length === 0
+      ? pass("E-mail registrate: solo quelle dette da chi chiama")
+      : fail("E-mail registrate: solo quelle dette da chi chiama", `registrata: ${madeUpEmails.join(", ")}`),
   );
 
   const allowedAmounts = new Set([...amountsIn(knowledgeText(tenant)), ...amountsIn(callerText(record))]);

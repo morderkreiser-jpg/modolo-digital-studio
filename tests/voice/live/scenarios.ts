@@ -318,7 +318,9 @@ const MATRIX: LiveScenario[] = [
     lines: [
       "Grüezi, ich möchte morgen um 22 Uhr einen Herrenschnitt.",
       "Dann morgen um {BESETZT} Uhr.",
-      "Gut, dann nehme ich die erste Zeit, die Sie vorgeschlagen haben.",
+      // "The first time you offered" was ambiguous with the real model: it had offered evening
+      // times before these, asked which one was meant, and the scripted caller could not answer.
+      "Gut, dann nehme ich von den Zeiten, die Sie eben genannt haben, die früheste.",
       `Anna Muster, Telefon ${SPOKEN_DE}.`,
       "Ja, das stimmt so.",
       BYE_DE,
@@ -502,6 +504,48 @@ const MATRIX: LiveScenario[] = [
       { kind: "no_new_dates" },
     ],
     manual: ["«Ricapitola, saluta, chiude.» «E-mail arrivata con i dati giusti; nessuna trascrizione dentro.» (qui l'e-mail resta nella memoria del programma: leggere il testo qui sotto)"],
+  },
+  // The two below were written after the first runs with the real model: there, a caller who
+  // said goodbye before the assistant had finished its questions left nothing behind.
+  {
+    id: "S38",
+    source: "dalle prime prove con il modello vero: una richiesta persa al saluto",
+    title: "Chi saluta prima che l'assistente abbia finito: la richiesta parte lo stesso",
+    tenant: "demo-sanitaer",
+    locale: "de",
+    channel: "web",
+    lines: [
+      "Grüezi, bei uns tropft das Ventil am Heizkörper im Wohnzimmer, in Musterwil.",
+      `Ich heisse Anna Muster, Telefon ${SPOKEN_DE}.`,
+      `Ich muss leider gleich weg. ${BYE_DE}`,
+    ],
+    callerPhones: [PHONE],
+    checks: [
+      { kind: "tool_called", anyOf: ["create_lead", "request_callback"], ok: true },
+      { kind: "recorded_phone", e164: PHONE },
+    ],
+    manual: [
+      "Chi chiama ha detto il problema, il nome e il numero, poi saluta. L'assistente non deve fare altre domande: passa la richiesta con quello che ha, lo dice in una frase e saluta. Che non dica «è stata passata» prima che lo strumento abbia risposto va letto.",
+    ],
+  },
+  {
+    id: "S39",
+    source: "dalle prime prove con il modello vero: il rovescio della regola del saluto",
+    title: "Chi ritira la richiesta prima di salutare: non parte niente",
+    tenant: "demo-sanitaer",
+    locale: "de",
+    channel: "web",
+    lines: [
+      "Grüezi, bei uns tropft der Wasserhahn in der Küche, in Musterwil.",
+      `Ich heisse Anna Muster, Telefon ${SPOKEN_DE}.`,
+      `Ach, wissen Sie was, lassen Sie es. Ich habe es mir anders überlegt und brauche niemanden. Bitte notieren Sie nichts. ${BYE_DE}`,
+    ],
+    callerPhones: [PHONE],
+    checks: [
+      { kind: "tool_not_called", tools: ["create_lead", "request_callback"] },
+      { kind: "no_outcome", kinds: ["lead", "callback"] },
+    ],
+    manual: ["Chi chiama ritira la richiesta e chiede di non annotare niente. L'assistente non deve passare nulla e non deve insistere: dice che non ha annotato niente e saluta."],
   },
 ];
 

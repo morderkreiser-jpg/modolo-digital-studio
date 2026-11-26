@@ -22,6 +22,7 @@ import {
   executeTool,
   exportToolMemory,
   importToolMemory,
+  spelledOut,
   type ToolContext,
   type ToolSinks,
 } from "@/lib/voice/tools/execute";
@@ -475,6 +476,11 @@ describe("executeTool: happy paths", () => {
     assert.ok(booked.ok, booked.say);
     assert.match(booked.say, /^Booked: Thursday 3 December 2026 at 14:30, reference MV-[2-9A-HJ-NP-Z]{4}\./);
     const ref = booked.data?.reference as string;
+    // The reference comes spelled out as well: the real model once dropped two of six characters
+    // when it had to spell "MV-YVPY" itself.
+    assert.ok(booked.say.endsWith(` Give the caller the reference, letter by letter: ${[...ref.replace("-", "")].join(" ")}.`), booked.say);
+    assert.equal(spelledOut("MV-YVPY"), "M V Y V P Y");
+    assert.equal(spelledOut("LD-27U6"), "L D 2 7 U 6");
     assert.equal(ctx.counters.bookings, 1);
     assert.equal(ctx.outcomes[0].kind, "booking");
 
@@ -498,7 +504,7 @@ describe("executeTool: happy paths", () => {
     const ctx = makeContext();
     const outcome = await executeTool(ctx, call("create_lead", LEAD_INPUT));
     assert.ok(outcome.ok, outcome.say);
-    assert.match(outcome.say, /^Stored and passed on to the team, reference LD-2222\./);
+    assert.match(outcome.say, /^Stored and passed on to the team, reference LD-2222\. Read the reference out only if the caller asks for it\./);
     // The record carries the call's idempotency key too (review finding S2-8): the sink passes it
     // to the email service, so the same request sent again reaches the business once.
     assert.equal(ctx.memorySinks.leads.length, 1);
@@ -1123,18 +1129,30 @@ describe("review correttezza/F5: a transfer target follows the tenant's holidays
   });
 });
 
-describe("review correttezza/F6: a foreign number written without its country code", () => {
-  it("in an Italian call, a national-form number is not stored before the country is asked", async () => {
+describe("a number written without its country code", () => {
+  // The server completes a number, the model passes it on as the caller said it. Outside German
+  // calls a national form used to be refused until the model sent it again with +41: with the
+  // real model that cost requests (the caller left before the extra question was answered) and
+  // digits (the model rewrote "+39 02 ..." without its zero, and "45 67" as "46 67").
+  it("is taken as Swiss in every language when it fits the Swiss numbering plan", async () => {
+    for (const locale of ["de", "it", "fr", "en"] as const) {
+      const ctx = makeContext(SALON, { locale });
+      const outcome = await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "079 123 45 67", topic: "Prezzi" }));
+      assert.ok(outcome.ok, `${locale}: ${outcome.say}`);
+      assert.deepEqual(ctx.outcomes, [{ kind: "callback", name: "Lucia Romano", phone: "+41791234567", topic: "Prezzi" }], locale);
+      const booked = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
+      assert.ok(booked.ok, `${locale}: ${booked.say}`);
+    }
+  });
+
+  it("keeps a number given with its country code as it was said, the Italian zero included", async () => {
     const ctx = makeContext(SALON, { locale: "it" as const });
-    const outcome = await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "02 1234 5678", topic: "Prezzi" }));
-    assert.ok(!outcome.ok && outcome.code === "invalid_input");
-    assert.match(outcome.say, /"phone" has no country code\. Ask the caller whether it is a Swiss number/);
-    assert.equal(ctx.memorySinks.callbacks.length, 0);
-    // Confirmed as Swiss, or given with its own country code, it goes through.
-    assert.ok((await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "+41 21 234 56 78", topic: "Prezzi" }))).ok);
     assert.ok((await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "+39 02 1234 5678", topic: "Prezzi" }))).ok);
-    const booked = await executeTool(ctx, call("book_appointment", BOOK_INPUT));
-    assert.ok(!booked.ok && /"contact" has no country code/.test(booked.say));
+    assert.ok((await executeTool(ctx, call("request_callback", { name: "Lucia Romano", phone: "+41 21 234 56 78", topic: "Orari" }))).ok);
+    assert.deepEqual(
+      ctx.outcomes.map((outcome) => (outcome.kind === "callback" ? outcome.phone : null)),
+      ["+390212345678", "+41212345678"],
+    );
   });
 
   it("a national-form number whose prefix is not Swiss is refused in any call", async () => {
@@ -1142,14 +1160,22 @@ describe("review correttezza/F6: a foreign number written without its country co
     const outcome = await executeTool(ctx, call("request_callback", { name: "Anna Muster", phone: "035 123 45 67", topic: "Price" }));
     assert.ok(!outcome.ok && outcome.code === "invalid_input");
     assert.match(outcome.say, /"phone" is not a Swiss number\. If it is from another country, ask the caller for the country code/);
-    // A German call keeps taking Swiss numbers as they are said.
+    // The same in an Italian call: a mobile number from Italy ("333 ...", no trunk zero) has no
+    // Swiss shape, and a Treviso landline ("0423 ...") no Swiss prefix.
+    const italian = makeContext(SALON, { locale: "it" as const });
+    for (const phone of ["333 123 4567", "0423 123 456"]) {
+      const refused = await executeTool(italian, call("request_callback", { name: "Lucia Romano", phone, topic: "Prezzi" }));
+      assert.ok(!refused.ok && refused.code === "invalid_input", `${phone}: ${refused.say}`);
+    }
+    assert.equal(italian.memorySinks.callbacks.length, 0);
+    // Swiss numbers are taken as they are said.
     assert.ok((await executeTool(ctx, call("request_callback", { name: "Anna Muster", phone: "044 123 45 67", topic: "Price" }))).ok);
   });
 
   it("normalizePhone keeps only the prefixes of the Swiss numbering plan", () => {
     assert.equal(normalizePhone("035 123 45 67"), null);
     assert.equal(normalizePhone("0901 123 456"), null, "premium rate: a callback would cost the business");
-    assert.equal(normalizePhone("06 1234 5678"), "+41612345678", "the shape of a Basel number: only the call's language tells");
+    assert.equal(normalizePhone("06 1234 5678"), "+41612345678", "the shape of a Basel number: only the caller can tell, when the assistant reads it back as a Swiss one");
     assert.equal(normalizePhone("0848 123 456"), "+41848123456");
     assert.equal(normalizePhone("+41 74 123 45 67"), "+41741234567", "with the country code, any Swiss number");
   });

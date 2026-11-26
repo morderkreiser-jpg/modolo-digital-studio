@@ -208,6 +208,9 @@ function checkHandoff(tenant: VoiceTenantConfig, locales: VoiceLocale[], problem
   for (const locale of locales) {
     if (!text(emergency.message, locale)) problems.push(`emergency message is missing for "${locale}"`);
   }
+  if (emergency.takesRequest === true && !(tenant.tools.includes("create_lead") && tenant.tasks.length > 0)) {
+    problems.push("handoff.emergency.takesRequest needs the create_lead tool and a task");
+  }
 }
 
 function checkUnsafe(tenant: VoiceTenantConfig): string[] {

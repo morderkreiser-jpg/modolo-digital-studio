@@ -179,7 +179,6 @@ describe("Modolo: a callback taken is recorded and delivered like a request", ()
   });
 
   it("says it did not go through, and offers the written request, when the e-mail is refused", async () => {
-    // In English a number needs its country code (a caller outside Switzerland is likelier).
     const ctx = context(async () => false, "en");
     const outcome = await executeTool(ctx, call("request_callback", { name: "Anna Muster", phone: "+41 79 123 45 67", topic: "Website" }));
     assert.equal(outcome.ok, false);

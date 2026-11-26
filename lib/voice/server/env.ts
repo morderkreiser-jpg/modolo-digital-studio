@@ -108,10 +108,15 @@ export interface VoiceEnv {
 }
 
 export const DEFAULT_VOICE_MODEL = "claude-haiku-5-5";
-export const DEFAULT_VOICE_MAX_OUTPUT_TOKENS = 400;
-// Spoken replies are short; the ceiling bounds the cost and the latency of one turn.
-const MIN_VOICE_OUTPUT_TOKENS = 100;
-const MAX_VOICE_OUTPUT_TOKENS = 1200;
+// The allowance of one model call. It holds the model's thinking as well as the spoken reply and
+// the tool input: the model thinks before it answers, and what it thinks counts as output. With
+// 400 tokens, about one call in twenty of the first conversations with the real model ended at
+// the limit, with the reply cut in the middle or with nothing said at all. The reply itself stays
+// short because the prompt asks for it; the ceiling bounds the cost and the wait of one call.
+// The longest call of the later runs used 910 tokens, hence a default well above that.
+export const DEFAULT_VOICE_MAX_OUTPUT_TOKENS = 1500;
+const MIN_VOICE_OUTPUT_TOKENS = 400;
+const MAX_VOICE_OUTPUT_TOKENS = 2000;
 export const MIN_SESSION_SECRET_LENGTH = 32;
 /**
  * Estimated CHF per conversation minute when VOICE_COST_CHF_PER_MINUTE is not set. "local" has no
