@@ -1,0 +1,1341 @@
+/* The sales page of Modolo Voice AI (components/voice/landing/*): the site's own look. Warm cream
+   and bone fields, espresso ink, gold only as hairlines, ticks and small labels, Space Grotesk for
+   display and Poppins for text. Two espresso rooms bookend the page (hero and contact), like the
+   homepage film; the demo stage brings its own dark field. Hairlines instead of boxes.
+
+   Self-contained on purpose: the layout does not depend on which Tailwind utilities the build
+   emits (see .mds-split-* in app/globals.css for why).
+
+   Contrast, computed: ink on cream 16.4:1, on bone 14.9:1; muted ink (.74) 7.5:1 on cream and
+   7.1:1 on bone; soft ink (.66) 5.7 / 5.5:1; gilt #7e5d24 5.4 / 4.9:1. On espresso: cream at .86
+   12.3:1, at .74 9.3:1, gold #e8c877 11.4:1. */
+
+.page {
+  --v-ink: #17130e;
+  --v-paper: var(--ink-bg, #f6f1e7);
+  --v-bone: var(--ink-panel, #efe6d6);
+  --v-muted: rgb(23 19 14 / 0.74);
+  --v-soft: rgb(23 19 14 / 0.66);
+  --v-line: rgb(31 27 22 / 0.12);
+  --v-line-strong: rgb(31 27 22 / 0.2);
+  --v-gilt: var(--gilt, #7e5d24);
+  --v-cream: #f6f1e7;
+  --v-cream-text: rgb(246 241 231 / 0.86);
+  --v-cream-muted: rgb(246 241 231 / 0.74);
+  --v-gold-hi: #e8c877;
+  --v-hair-dark: rgb(246 241 231 / 0.16);
+  --v-gutter: 20px;
+  --v-pad: clamp(4.25rem, 9vw, 8rem);
+  --v-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+  overflow-x: clip;
+  background: var(--v-paper);
+  color: var(--v-ink);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+/* The skip link focuses <main>; it is not a control, so no ring around the whole page. */
+.page:focus,
+.page:focus-visible {
+  outline: none;
+}
+
+/* Long German compounds («Sanitärinstallateure») break with a hyphen in running text, never in
+   headings, buttons or links. Only long words, and never a stub of fewer than four letters: at
+   desktop widths "ru-fen" or "Na-men" looked like a cramped column (browsers without
+   hyphenate-limit-chars keep hyphenating every word, as before). */
+.page :where(p, li) {
+  overflow-wrap: break-word;
+  hyphens: auto;
+  hyphenate-limit-chars: 10 4 4;
+}
+
+.page :where(h1, h2, h3, a, label, legend, summary) {
+  hyphens: manual;
+}
+
+@media (min-width: 400px) {
+  .page {
+    --v-gutter: 24px;
+  }
+}
+
+@media (min-width: 640px) {
+  .page {
+    --v-gutter: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    --v-gutter: 64px;
+  }
+}
+
+/* ----- Fields and containers ----------------------------------------------------------------- */
+
+.section {
+  position: relative;
+  padding-block: var(--v-pad);
+}
+
+.paper {
+  --v-surface: var(--v-paper);
+  background: var(--v-paper);
+}
+
+.bone {
+  --v-surface: var(--v-bone);
+  background: var(--v-bone);
+}
+
+/* Two fields of the same colour in a row: a hairline marks the turn. */
+.paper + .paper,
+.bone + .bone {
+  border-top: 1px solid var(--v-line);
+}
+
+.dark {
+  --v-surface: var(--v-ink);
+  background: var(--v-ink);
+  color: var(--v-cream);
+}
+
+/* The site's gilt ring disappears on espresso: the bright gold, as on the homepage film. */
+.dark :focus-visible {
+  outline: 2px solid var(--v-gold-hi);
+  outline-offset: 3px;
+}
+
+.inner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: var(--v-gutter);
+}
+
+/* The two espresso rooms (hero, contact): dark sheets set into the cream page, with the radius of
+   the homepage's cream sheet and of the voice stage. The inset keeps the site's translucent cream
+   nav on cream at the top of the page (over espresso it turns grey). The text inside still lines
+   up with every other section: the inner box loses on each side exactly what the room is inset. */
+.room {
+  --v-room-inset: 8px;
+  width: calc(100% - 2 * var(--v-room-inset));
+  margin-inline: auto;
+  border-radius: var(--sheet-radius, 20px);
+}
+
+.room > .inner {
+  max-width: calc(1400px - 2 * var(--v-room-inset));
+  padding-inline: calc(var(--v-gutter) - var(--v-room-inset));
+}
+
+@media (min-width: 640px) {
+  .room {
+    --v-room-inset: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .room {
+    --v-room-inset: 24px;
+  }
+}
+
+.roomLast {
+  margin-bottom: var(--v-room-inset);
+}
+
+/* Heading left, content right from 960 px; the content side is a size container, so the lists in
+   it choose their columns by the room they really have. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+}
+
+.splitHead,
+.splitBody {
+  min-width: 0;
+}
+
+.splitBody {
+  container-type: inline-size;
+}
+
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(3rem, 6vw, 6.5rem);
+  }
+}
+
+/* Heading and lead side by side, the lead aligned to the heading's last line. */
+.headRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+@media (min-width: 960px) {
+  .headRow {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: clamp(3rem, 6vw, 6.5rem);
+    align-items: end;
+  }
+
+  .headRow .lead {
+    margin-top: 0;
+  }
+}
+
+/* ----- Type ---------------------------------------------------------------------------------- */
+
+/* The site's measure: a short gold rule above every section heading. */
+.rule {
+  display: block;
+  width: 40px;
+  height: 1px;
+  margin: 0 0 1.5rem;
+  background: var(--v-gilt);
+}
+
+.dark .rule {
+  background: var(--v-gold-hi);
+}
+
+.h2 {
+  max-width: 22ch;
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.875rem, 3.6vw, 3rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 56ch;
+  margin: 1.25rem 0 0;
+  color: var(--v-muted);
+  font-size: clamp(1.0625rem, 1.25vw, 1.1875rem);
+  line-height: 1.65;
+}
+
+.dark .lead {
+  color: var(--v-cream-text);
+}
+
+.h3 {
+  margin: 0;
+  color: var(--v-ink);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.body {
+  max-width: 56ch;
+  margin: 0.625rem 0 0;
+  color: var(--v-muted);
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A language code next to an example that is not in the page's language («DE»). */
+.langTag {
+  flex: none;
+  padding: 0 7px;
+  border: 1px solid var(--v-line-strong);
+  border-radius: 999px;
+  color: var(--v-soft);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0.14em;
+}
+
+/* «Pilotphase» / «Geplant»: the words carry the status; the dot (full or empty) only repeats it. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0.5rem 0 0;
+  color: var(--v-ink);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--v-gilt);
+  border-radius: 50%;
+  background: var(--v-gilt);
+}
+
+.status[data-status="planned"] {
+  color: var(--v-soft);
+}
+
+.status[data-status="planned"]::before {
+  border-color: var(--v-soft);
+  background: transparent;
+}
+
+/* ----- Buttons and links --------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0.8rem 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s var(--v-ease);
+}
+
+/* Hover: a thin ring at a small distance, the field's own colour in between (as on the stage). */
+.btn:hover {
+  box-shadow:
+    0 0 0 3px var(--v-surface, transparent),
+    0 0 0 4px var(--v-ring, currentColor);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btnInk {
+  --v-ring: var(--v-gilt);
+  background: var(--v-ink);
+  color: var(--v-cream);
+}
+
+.btnCream {
+  --v-ring: var(--v-gold-hi);
+  background: var(--v-cream);
+  color: var(--v-ink);
+}
+
+.btnIcon {
+  flex: none;
+  width: 19px;
+  height: 19px;
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--v-ink);
+  font-size: 15.5px;
+  line-height: 1.35;
+  text-decoration: underline;
+  text-decoration-color: var(--v-line-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+.textLink:hover {
+  text-decoration-color: var(--v-gilt);
+}
+
+.dark .textLink {
+  color: var(--v-cream-text);
+  text-decoration-color: rgb(246 241 231 / 0.45);
+}
+
+.dark .textLink:hover {
+  color: var(--v-cream);
+  text-decoration-color: var(--v-gold-hi);
+}
+
+.linkIcon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: var(--v-gilt);
+}
+
+.dark .linkIcon {
+  color: var(--v-gold-hi);
+}
+
+/* ----- Hero (espresso) ----------------------------------------------------------------------- */
+
+.hero {
+  margin-top: calc(var(--nav-h, 80px) + var(--v-room-inset, 8px));
+  padding-top: clamp(1rem, 3vw, 2.5rem);
+  padding-bottom: clamp(3.25rem, 7vw, 6.5rem);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--v-gold-hi);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.back:hover {
+  color: var(--v-cream);
+}
+
+.backIcon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.25s var(--v-ease);
+}
+
+.back:hover .backIcon {
+  transform: translateX(-3px);
+}
+
+.eyebrow {
+  margin: clamp(2rem, 5vw, 3.75rem) 0 0;
+  color: var(--v-gold-hi);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.h1 {
+  max-width: 15ch;
+  margin: 1.25rem 0 0;
+  color: var(--v-cream);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(2.375rem, 6.4vw, 5.25rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+/* The measure under the title: a hairline across the room, its first stretch in gold. */
+.heroRule {
+  position: relative;
+  height: 1px;
+  margin-top: clamp(2.25rem, 5vw, 4rem);
+  background: var(--v-hair-dark);
+}
+
+.heroRule::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 72px;
+  background: var(--v-gold-hi);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.25rem;
+  margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+@media (min-width: 900px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    column-gap: clamp(3rem, 7vw, 7.5rem);
+  }
+}
+
+.heroMain {
+  min-width: 0;
+}
+
+.heroLead {
+  max-width: 56ch;
+  margin: 0;
+  color: var(--v-cream-text);
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.75rem;
+  margin-top: 2rem;
+}
+
+.heroNote {
+  max-width: 40ch;
+  margin: 0;
+  padding: 0.2rem 0 0.2rem 1.25rem;
+  border-left: 1px solid rgb(232 200 119 / 0.55);
+  color: var(--v-cream-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* ----- Demo: chooser + stage ----------------------------------------------------------------- */
+
+/* Phones: intro, chooser, the note, the stage. From 1024 px the stage takes the right side and
+   the rest stacks on the left, the note right next to it. */
+.demoGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "intro"
+    "chooser"
+    "note"
+    "stage";
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .demoGrid {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "intro stage"
+      "chooser stage"
+      "note stage";
+    column-gap: clamp(2.5rem, 4.5vw, 4.5rem);
+    row-gap: 2.25rem;
+    align-items: start;
+  }
+}
+
+.demoIntro {
+  grid-area: intro;
+  min-width: 0;
+}
+
+.chooser {
+  grid-area: chooser;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.chooserLegend {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  color: var(--v-gilt);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Two columns on a phone, three on a tablet; beside the stage one column, then two from 1280 px,
+   where the wide stage is about as tall as two columns of six trades. */
+.choiceList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1rem;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--v-line-strong);
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .choiceList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .choiceList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .choiceList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The anchor of a trade link (#demo-hotel) lands below the fixed nav. */
+.choiceItem {
+  min-width: 0;
+  scroll-margin-top: calc(var(--nav-h, 80px) + 24px);
+  border-bottom: 1px solid var(--v-line);
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  cursor: pointer;
+}
+
+/* The native radio stays in place for the keyboard and screen readers, invisible, over the whole
+   row, so a tap anywhere on the row is a tap on it. */
+.choiceInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choiceBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 0.7rem 0 0.7rem 1.25rem;
+  border-radius: 6px;
+  color: var(--v-muted);
+  font-size: 15px;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+/* The tick: a short hairline that turns into a gold mark on the chosen trade. */
+.choiceBody::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: var(--v-line-strong);
+  transition:
+    width 0.25s var(--v-ease),
+    background-color 0.2s ease;
+}
+
+/* Two columns at 320 px leave about 110 px: «Elektroinstallationen» needs a real hyphen. */
+.choiceLabel {
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.choice:hover .choiceBody {
+  color: var(--v-ink);
+}
+
+.choiceInput:checked + .choiceBody {
+  color: var(--v-ink);
+}
+
+.choiceInput:checked + .choiceBody::before {
+  width: 14px;
+  height: 2px;
+  margin-top: -0.5px;
+  background: var(--v-gilt);
+}
+
+/* The ring of the focused trade. WebKit moves the focus on an arrow key without :focus-visible:
+   while the chooser is used with keys (data-keys, demo-chooser.tsx) :focus draws it as well
+   (browser check R3-B5). */
+.choiceInput:focus-visible + .choiceBody,
+.chooser[data-keys] .choiceInput:focus + .choiceBody {
+  outline: 2px solid var(--color-gold-ink, #7e5d24);
+  outline-offset: 2px;
+}
+
+/* Phones: one row of chips that scrolls sideways, running to the screen edge so the cut-off chip
+   shows there is more. Twelve trades in two columns were six rows (about 300 px, longer with
+   hyphenated names at 320 px) between the intro and the stage. */
+@media (max-width: 639.98px) {
+  .choiceList {
+    display: flex;
+    gap: 8px;
+    margin-inline: calc(-1 * var(--v-gutter));
+    padding: 4px var(--v-gutter) 8px;
+    border-top: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--v-gutter);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .choiceList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .choiceItem {
+    flex: none;
+    border-bottom: 0;
+    scroll-snap-align: start;
+  }
+
+  .choiceBody {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--v-line-strong);
+    border-radius: 999px;
+    white-space: nowrap;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .choiceBody::before {
+    display: none;
+  }
+
+  .choiceLabel {
+    hyphens: manual;
+  }
+
+  .choiceInput:checked + .choiceBody {
+    border-color: var(--v-ink);
+    background: var(--v-ink);
+    color: var(--v-cream);
+  }
+
+  .choiceInput:checked + .choiceBody .langTag {
+    border-color: var(--v-hair-dark);
+    color: var(--v-cream-muted);
+  }
+
+  .choiceInput:focus-visible + .choiceBody,
+  .chooser[data-keys] .choiceInput:focus + .choiceBody {
+    outline-offset: 2px;
+  }
+}
+
+.demoNote {
+  grid-area: note;
+  max-width: 46ch;
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 1px solid var(--v-gilt);
+  color: var(--v-muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.stageSlot {
+  grid-area: stage;
+  min-width: 0;
+}
+
+.stageLang {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 0.875rem;
+  color: var(--v-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ----- Problem: four scenes ------------------------------------------------------------------ */
+
+.scenes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .scenes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .scenes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.scene {
+  min-width: 0;
+  padding: 1.5rem 0 1.75rem;
+  border-top: 1px solid var(--v-line-strong);
+}
+
+.scene .h3 {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- How it works: three numbered steps ---------------------------------------------------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(2rem, 4vw, 3.5rem);
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 860px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.step {
+  min-width: 0;
+  padding: 1.75rem 0 2rem;
+  border-top: 1px solid var(--v-line-strong);
+}
+
+.stepNum {
+  display: block;
+  margin-bottom: 1.25rem;
+  color: var(--v-gilt);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Features: eight, with their status ---------------------------------------------------- */
+
+.features {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(1.75rem, 3vw, 2.75rem);
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 680px) {
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .features {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.feature {
+  min-width: 0;
+  padding: 1.5rem 0 1.75rem;
+  border-top: 1px solid var(--v-line-strong);
+}
+
+/* Not there yet: the title steps back too (the status word says why). */
+.feature[data-status="planned"] .h3,
+.row[data-status="planned"] .h3 {
+  color: var(--v-muted);
+}
+
+/* ----- Sectors: the twelve trades, each a link to its example -------------------------------- */
+
+.sectorList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 2rem;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--v-line-strong);
+  list-style: none;
+}
+
+@container (min-width: 520px) {
+  .sectorList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sectorItem {
+  min-width: 0;
+  border-bottom: 1px solid var(--v-line-strong);
+}
+
+.sectorLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0.75rem 0;
+  color: var(--v-ink);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.0625rem, 1.3vw, 1.1875rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.sectorName {
+  min-width: 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.sectorLink:hover .sectorName {
+  text-decoration-color: var(--v-gilt);
+}
+
+.sectorMeta {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  color: var(--v-gilt);
+}
+
+.arrow {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.25s var(--v-ease);
+}
+
+.sectorLink:hover .arrow {
+  transform: translateY(-2px);
+}
+
+/* ----- Integrations: five rows --------------------------------------------------------------- */
+
+.rows {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--v-line-strong);
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name status"
+    "text text";
+  gap: 0.5rem 1rem;
+  padding: 1.25rem 0 1.4rem;
+  border-bottom: 1px solid var(--v-line-strong);
+}
+
+/* The status column has one width for every row (an auto column took each row's own label width,
+   so the descriptions of the "planned" rows started a few pixels further right). */
+@container (min-width: 640px) {
+  .row {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) 9.5rem;
+    grid-template-areas: "name text status";
+    column-gap: 2rem;
+    align-items: baseline;
+  }
+}
+
+.rowName {
+  grid-area: name;
+}
+
+.rowText {
+  grid-area: text;
+  margin: 0;
+  color: var(--v-muted);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+.rowStatus {
+  grid-area: status;
+  justify-self: end;
+}
+
+.rowStatus .status {
+  margin: 0;
+}
+
+/* ----- Limits: what it does not do ----------------------------------------------------------- */
+
+.limits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.limit {
+  position: relative;
+  padding: 1.25rem 0 1.35rem 2.25rem;
+  border-top: 1px solid var(--v-line-strong);
+  color: var(--v-ink);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.limit:last-child {
+  border-bottom: 1px solid var(--v-line-strong);
+}
+
+/* A short gold dash on the first line of each statement. */
+.limit::before {
+  content: "";
+  position: absolute;
+  top: calc(1.25rem + 0.72em);
+  left: 0;
+  width: 14px;
+  height: 1px;
+  background: var(--v-gilt);
+}
+
+/* ----- Pilot ---------------------------------------------------------------------------------- */
+
+.pilotLists {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.75rem clamp(2rem, 5vw, 5rem);
+  margin-top: clamp(2.75rem, 5vw, 4rem);
+}
+
+@media (min-width: 860px) {
+  .pilotLists {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pilotList {
+  min-width: 0;
+}
+
+.ticks {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tick {
+  position: relative;
+  padding: 0.95rem 0 0.95rem 1.75rem;
+  border-top: 1px solid var(--v-line-strong);
+  color: var(--v-ink);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.tick::before {
+  content: "";
+  position: absolute;
+  top: calc(0.95rem + 0.8em);
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: var(--v-gilt);
+}
+
+.pilotFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+  margin-top: clamp(2.75rem, 5vw, 3.75rem);
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--v-line-strong);
+}
+
+.priceNote {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--v-muted);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+/* ----- Plans (only with VOICE_LANDING_SHOW_PLANS) -------------------------------------------- */
+
+.plansNote {
+  margin: 1rem 0 0;
+  color: var(--v-gilt);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(1.75rem, 3vw, 2.75rem);
+  margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .plans {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.plan {
+  min-width: 0;
+  padding: 1.5rem 0 1.75rem;
+  border-top: 1px solid var(--v-line-strong);
+}
+
+.planPrice {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.planFacts {
+  margin: 1rem 0 0;
+  padding: 0;
+  color: var(--v-ink);
+  font-size: 15px;
+  line-height: 1.7;
+  list-style: none;
+}
+
+/* ----- Privacy -------------------------------------------------------------------------------- */
+
+.points {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@container (min-width: 560px) {
+  .points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.point {
+  min-width: 0;
+  padding: 1.25rem 0 1.4rem;
+  border-top: 1px solid var(--v-line-strong);
+  color: var(--v-ink);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.afterList {
+  margin-top: 1.5rem;
+}
+
+/* ----- FAQ: native disclosure ----------------------------------------------------------------- */
+
+.faq {
+  border-bottom: 1px solid var(--v-line-strong);
+}
+
+.faqItem {
+  border-top: 1px solid var(--v-line-strong);
+}
+
+.faqSummary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 44px;
+  padding: 1.25rem 0;
+  border-radius: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari draws its own triangle unless told not to. */
+.faqSummary::-webkit-details-marker {
+  display: none;
+}
+
+.faqQ {
+  margin: 0;
+  color: var(--v-ink);
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.faqSummary:hover .faqQ {
+  color: var(--v-gilt);
+}
+
+/* Plus that turns into a minus. */
+.faqIcon {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 0.42em;
+}
+
+.faqIcon::before,
+.faqIcon::after {
+  content: "";
+  position: absolute;
+  background: var(--v-gilt);
+}
+
+.faqIcon::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.faqIcon::after {
+  top: 0;
+  left: 50%;
+  width: 1.5px;
+  height: 100%;
+  transform: translateX(-50%);
+  transition: transform 0.25s var(--v-ease);
+}
+
+.faqItem[open] .faqIcon::after {
+  transform: translateX(-50%) scaleY(0);
+}
+
+.faqA {
+  max-width: 64ch;
+  margin: 0;
+  padding: 0 2.5rem 1.5rem 0;
+  color: var(--v-muted);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+/* ----- Contact (espresso) --------------------------------------------------------------------- */
+
+.contactActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .contactActions {
+    padding-top: 2.75rem;
+  }
+}
+
+.contactLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ----- Modes ---------------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .back,
+  .backIcon,
+  .arrow,
+  .choiceBody,
+  .choiceBody::before,
+  .faqIcon::after {
+    transition: none;
+  }
+
+  .btn:active,
+  .back:hover .backIcon,
+  .sectorLink:hover .arrow {
+    transform: none;
+  }
+}
+
+/* Windows high contrast: fills and dots would vanish; the chosen trade keeps a visible frame. */
+@media (forced-colors: active) {
+  .btn {
+    border: 1px solid ButtonText;
+  }
+
+  .choiceInput:checked + .choiceBody {
+    outline: 1px solid CanvasText;
+  }
+
+  .status::before,
+  .rule,
+  .heroRule::before {
+    forced-color-adjust: none;
+  }
+}
