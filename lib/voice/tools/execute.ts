@@ -114,6 +114,11 @@ export interface ToolContext {
   caps?: SessionCaps;
   calendar: CalendarProvider | null;
   sinks: ToolSinks;
+  /**
+   * The tools are used by a speech model: its texts carry no example number, which such a model
+   * may repeat aloud. Absent: a text model, whose texts keep the example.
+   */
+  speech?: boolean;
   record(outcome: CallSummary["outcomes"][number]): void;
 }
 
@@ -285,7 +290,7 @@ async function run(ctx: ToolContext, call: ToolCall): Promise<ToolOutcome> {
   if (capped !== null) return capped;
 
   // The call's clock: a date a caller leaves must not lie in the past.
-  const checked = validateToolInput(ctx.tenant, name, call.input, { now: ctx.now });
+  const checked = validateToolInput(ctx.tenant, name, call.input, { now: ctx.now, speech: ctx.speech === true });
   if (!checked.ok) {
     return failure(
       "invalid_input",

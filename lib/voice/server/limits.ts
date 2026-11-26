@@ -442,9 +442,31 @@ export async function confirmRealtimeCall(args: {
   const now = args.now ?? Date.now();
   if (await isSettled(store, r)) return null;
   if ((await store.incrBy(confirmedKey(r.sessionId), 1, LEDGER_TTL)) !== 1) return null;
+  // Once more right before the charge: a settlement that ran while this confirmation waited for
+  // the store has already freed the slot, and charging now would keep a whole call after it.
+  if (await isSettled(store, r)) return null;
   const spend = await chargeUpTo(store, r, callSeconds(limits.maxCallSeconds));
   await registerUntil(store, r, r.at + sessionLifetimeSeconds(limits) * 1000, now);
   return spend;
+}
+
+/**
+ * A realtime call our own server is about to create (/api/voice/call): registers the session as
+ * running until the end of its life BEFORE the provider's call exists, so the concurrency cap
+ * counts every call that may be billed, whether or not it is ever confirmed. Charges nothing and
+ * never refuses, like the registration of confirmRealtimeCall(); a failed create frees the slot
+ * again through settleReportedCall() with 0 seconds.
+ */
+export async function holdRealtimeCall(args: {
+  store: KVStore;
+  reservation: SessionReservation;
+  limits: Pick<VoiceLimits, "maxCallSeconds">;
+  now?: number;
+}): Promise<void> {
+  const r = parseSessionReservation(args.reservation);
+  if (r === null || r.mode !== "realtime") return;
+  const now = args.now ?? Date.now();
+  await registerUntil(args.store, r, r.at + sessionLifetimeSeconds(args.limits) * 1000, now);
 }
 
 /** The tenant's month spend before and after a charge (CHF), for spendThresholdsCrossed(). */

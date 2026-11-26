@@ -1,12 +1,13 @@
 // Shared helpers of the voice integration tests (brain, session, routes, isolation, summary):
-// a fully controlled environment, Request builders and a reader for the turn stream.
+// a fully controlled environment, Request builders, readers for the turn and call streams, and the
+// placeholder data of the realtime tests.
 import { register } from "node:module";
 import { mock } from "node:test";
 import { createMemoryStore, type KVStore } from "@/lib/assistant/server/store";
 import { resetCalendarsForTests } from "@/lib/voice/calendar";
 import { resetVoiceEnvForTests } from "@/lib/voice/server/env";
 import type { VoiceDeps } from "@/lib/voice/server/handlers";
-import type { SessionGrant, TurnStreamEvent, VoiceApiError } from "@/lib/voice/types";
+import type { CallStreamEvent, SessionGrant, TurnStreamEvent, VoiceApiError } from "@/lib/voice/types";
 
 /** Every variable the voice module and the summary email read. */
 export const VOICE_TEST_ENV_KEYS = [
@@ -30,6 +31,22 @@ export const VOICE_TEST_ENV_KEYS = [
   "VOICE_GLOBAL_MINUTES_PER_DAY",
   "VOICE_GLOBAL_BUDGET_CHF_PER_MONTH",
   "VOICE_CHF_PER_USD",
+  "OPENAI_API_KEY",
+  "VOICE_OPENAI_MODEL",
+  "VOICE_OPENAI_HOST",
+  "VOICE_OPENAI_VOICE",
+  "VOICE_OPENAI_TURN",
+  "VOICE_OPENAI_VAD_SILENCE_MS",
+  "VOICE_OPENAI_VAD_THRESHOLD",
+  "VOICE_OPENAI_VAD_PREFIX_MS",
+  "VOICE_OPENAI_EAGERNESS",
+  "VOICE_OPENAI_REASONING",
+  "VOICE_OPENAI_TRANSCRIBE",
+  "VOICE_OPENAI_NOISE",
+  "VOICE_OPENAI_SPEED",
+  "VOICE_OPENAI_MAX_OUTPUT_TOKENS",
+  "VOICE_OPENAI_MAX_RESPONSES",
+  "VOICE_OPENAI_MAX_CALL_USD",
   "ANTHROPIC_API_KEY",
   "ANTHROPIC_BASE_URL",
   "ASSISTANT_HASH_SALT",
@@ -46,6 +63,14 @@ export type VoiceTestEnvKey = (typeof VOICE_TEST_ENV_KEYS)[number];
 export const TEST_SECRET = "voice-test-secret-0123456789-abcdefghijklmnop";
 export const WEBHOOK_SECRET = "webhook-test-secret-0123456789";
 export const SITE = "https://site.example";
+
+// Placeholder data of the realtime tests: no real person, number, key or call behind any of them.
+export const TEST_PERSON = "Testperson Eins";
+export const TEST_PHONE = "+41780000044";
+/** TEST_PHONE as a caller says it. */
+export const TEST_PHONE_SPOKEN = "078 000 00 44";
+export const TEST_OPENAI_KEY = "test-key-not-real";
+export const TEST_CALL_ID = "rtc_u0_TEST000000000000000000000000001";
 
 // Next types NODE_ENV as read-only; tests write through a plain view.
 const mutableEnv: Record<string, string | undefined> = process.env;
@@ -121,7 +146,9 @@ let routeHooksRegistered = false;
  * Node resolves only with the hook in next-hooks.mjs: it is registered on the first call, so the
  * route has to be imported here, dynamically, not with a static import.
  */
-export async function importVoiceRoute(name: "session" | "tool" | "turn" | "end"): Promise<VoiceRouteModule> {
+export async function importVoiceRoute(
+  name: "session" | "tool" | "turn" | "end" | "call" | "ready",
+): Promise<VoiceRouteModule> {
   if (!routeHooksRegistered) {
     register("./next-hooks.mjs", import.meta.url);
     routeHooksRegistered = true;
@@ -151,19 +178,28 @@ export async function readError(response: Response): Promise<VoiceApiError> {
   return (await response.json()) as VoiceApiError;
 }
 
-/** Every event of a turn stream (comment frames skipped). */
-export async function readEvents(response: Response): Promise<TurnStreamEvent[]> {
-  const text = await response.text();
-  const events: TurnStreamEvent[] = [];
+/** The JSON payloads of an event stream's frames, in order (comment frames such as ": ping" skipped). */
+function streamPayloads(text: string): unknown[] {
+  const payloads: unknown[] = [];
   for (const frame of text.split("\n\n")) {
     const data = frame
       .split("\n")
       .filter((line) => line.startsWith("data:"))
       .map((line) => line.slice(5).trim())
       .join("\n");
-    if (data) events.push(JSON.parse(data) as TurnStreamEvent);
+    if (data) payloads.push(JSON.parse(data));
   }
-  return events;
+  return payloads;
+}
+
+/** Every event of a turn stream (comment frames skipped). */
+export async function readEvents(response: Response): Promise<TurnStreamEvent[]> {
+  return streamPayloads(await response.text()) as TurnStreamEvent[];
+}
+
+/** Every event of a /api/voice/call stream, read to its end (": ping" comments skipped). */
+export async function readCallEvents(response: Response): Promise<CallStreamEvent[]> {
+  return streamPayloads(await response.text()) as CallStreamEvent[];
 }
 
 /** The text of the delta events, joined. */

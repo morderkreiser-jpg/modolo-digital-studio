@@ -34,9 +34,42 @@ import { MIN_WEBHOOK_SECRET_LENGTH } from "./webhook";
 export const VOICE_BRAINS = ["anthropic", "mock"] as const;
 export type VoiceBrain = (typeof VOICE_BRAINS)[number];
 
-/** Realtime voice providers. Real ones (with their API key) are added next to "mock". */
-export const VOICE_PROVIDER_IDS = ["none", "mock"] as const;
+/**
+ * Realtime voice providers. "none" and "mock" work without a key; every real one ("openai") needs
+ * its API key, or "realtime" degrades to "scripted" (no_provider_key).
+ */
+export const VOICE_PROVIDER_IDS = ["none", "mock", "openai"] as const;
 export type VoiceProviderId = (typeof VOICE_PROVIDER_IDS)[number];
+
+// The OpenAI realtime settings (VOICE_OPENAI_*). The first entry of each list is the default where
+// the list has one: the large model is the default, as it keeps to the steps of a conversation
+// more reliably; the mini model is the cheaper choice.
+export const OPENAI_REALTIME_MODELS = ["gpt-realtime-2.1", "gpt-realtime-2.1-mini"] as const;
+export const OPENAI_HOSTS = ["api.openai.com", "eu.api.openai.com"] as const;
+export const OPENAI_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse", "marin", "cedar"] as const;
+export const OPENAI_TRANSCRIBE_MODELS = ["gpt-transcribe", "gpt-4o-mini-transcribe"] as const;
+export type OpenAiRealtimeModel = (typeof OPENAI_REALTIME_MODELS)[number];
+
+/**
+ * How the OpenAI provider runs a call. Always parsed, used only by the openai provider. A null
+ * field is not sent to OpenAI at all (its own default applies), or, for transcribe and noise,
+ * switched off.
+ */
+export interface OpenAiSettings {
+  model: OpenAiRealtimeModel;
+  host: (typeof OPENAI_HOSTS)[number];
+  voice: (typeof OPENAI_VOICES)[number];
+  turn:
+    | { type: "server_vad"; silenceMs: number; threshold: number | null; prefixMs: number | null }
+    | { type: "semantic_vad"; eagerness: "low" | "medium" | "high" | "auto" | null };
+  reasoning: "minimal" | "low" | "medium" | "high" | "xhigh" | null;
+  transcribe: (typeof OPENAI_TRANSCRIBE_MODELS)[number] | null;
+  noise: "near_field" | "far_field" | null;
+  speed: number | null;
+  maxOutputTokens: number;
+  maxResponses: number;
+  maxCallUsd: number;
+}
 
 /** Why the requested VOICE_MODE could not be honoured (for one log line, never shown to visitors). */
 export type VoiceModeDegradation = "no_provider" | "no_provider_key" | "no_brain" | "no_secret" | "no_shared_store";
@@ -69,8 +102,13 @@ export interface VoiceEnv {
   sessionSecret: string | null;
   sessionSecretSource: "env" | "generated" | "missing";
   provider: VoiceProviderId;
-  /** VOICE_PROVIDER_API_KEY, for the real providers. Server only: never serialize, never log. */
+  /**
+   * VOICE_PROVIDER_API_KEY, for the real providers; with provider "openai" and no such key,
+   * OPENAI_API_KEY (read for that provider only). Server only: never serialize, never log.
+   */
   providerApiKey: string | null;
+  /** VOICE_OPENAI_*: always parsed, used only by the openai provider. */
+  openai: OpenAiSettings;
   /**
    * VOICE_PROVIDER_WEBHOOK_SECRET: the secret a voice provider signs its tool calls with (see
    * webhook.ts), at least MIN_WEBHOOK_SECRET_LENGTH characters. null = the tool webhook route does
@@ -147,6 +185,35 @@ const GLOBAL_LIMIT_RANGES: Readonly<Record<keyof VoiceGlobalLimits, { min: numbe
   minutesPerDay: { min: 0, max: 100_000 },
   budgetChfPerMonth: { min: 0, max: 100_000 },
 };
+
+// Defaults of the OpenAI settings. Semantic turn detection with low eagerness kept a dictated
+// number with a pause in one turn, where a fixed silence split it; the fixed silence (for
+// server_vad, when chosen) is long enough to keep a spelled name together.
+export const DEFAULT_OPENAI_VAD_SILENCE_MS = 1200;
+// About 45 seconds of speech: enough for any answer, short of a monologue.
+export const DEFAULT_OPENAI_MAX_OUTPUT_TOKENS = 1024;
+export const DEFAULT_OPENAI_MAX_RESPONSES = 80;
+/** The cost cap of one call in USD when VOICE_OPENAI_MAX_CALL_USD is not set, per model. */
+export const DEFAULT_OPENAI_MAX_CALL_USD: Readonly<Record<OpenAiRealtimeModel, number>> = {
+  "gpt-realtime-2.1": 2,
+  "gpt-realtime-2.1-mini": 1,
+};
+// Ranges of the numeric OpenAI settings; a value outside is clamped, junk keeps the default.
+const OPENAI_NUMBER_RANGES = {
+  silenceMs: { min: 200, max: 2000 },
+  threshold: { min: 0.1, max: 0.9 },
+  prefixMs: { min: 0, max: 1000 },
+  speed: { min: 0.25, max: 1.5 },
+  maxOutputTokens: { min: 256, max: 4096 },
+  maxResponses: { min: 10, max: 400 },
+  maxCallUsd: { min: 0.05, max: 20 },
+} as const;
+const OPENAI_TURN_TYPES = ["semantic_vad", "server_vad"] as const;
+const OPENAI_EAGERNESS = ["low", "medium", "high", "auto"] as const;
+const OPENAI_REASONING = ["minimal", "low", "medium", "high", "xhigh"] as const;
+const OPENAI_NOISE = ["near_field", "far_field"] as const;
+// "off" switches transcription or noise reduction off; it is a value, not a typo.
+const OFF = "off";
 
 /**
  * Sane range of every limit, applied after the tenant and env overrides. Zero is accepted where it
@@ -256,7 +323,12 @@ function readVoiceEnv(): VoiceEnv {
   const anthropicApiKey = readString("ANTHROPIC_API_KEY");
   const brain = readEnum("VOICE_BRAIN", VOICE_BRAINS) ?? "anthropic";
   const provider = readEnum("VOICE_PROVIDER", VOICE_PROVIDER_IDS) ?? "none";
-  const providerApiKey = readString("VOICE_PROVIDER_API_KEY");
+  // OPENAI_API_KEY is read for the openai provider only: a key meant for something else on the
+  // same deployment never becomes the key of another provider.
+  const providerApiKey =
+    readString("VOICE_PROVIDER_API_KEY") ?? (provider === "openai" ? readString("OPENAI_API_KEY") : null);
+  const ignoredSettings: string[] = [];
+  const openai = readOpenAiSettings(ignoredSettings);
   const requestedMode = readEnum("VOICE_MODE", MODES) ?? "scripted";
   const secret = readSessionSecret(production);
 
@@ -281,6 +353,10 @@ function readVoiceEnv(): VoiceEnv {
     logVoiceEvent({ warn: "voice_mode_degraded", requested: requestedMode, mode, reason: degradedReason });
   }
   if (devOutboxAsked) logVoiceEvent({ warn: production ? "voice_dev_outbox_ignored" : "voice_dev_outbox_on" });
+  // A setting that could not be read runs on its default: one line per variable, its name only.
+  if (enabled) {
+    for (const name of ignoredSettings) logVoiceEvent({ warn: "voice_setting_ignored", kind: name });
+  }
 
   return {
     enabled,
@@ -297,6 +373,7 @@ function readVoiceEnv(): VoiceEnv {
     sessionSecretSource: secret.source,
     provider,
     providerApiKey,
+    openai,
     providerWebhookSecret: readWebhookSecret(),
     costChfPerMinute: readCost(),
     chfPerUsd: readClampedDecimal("VOICE_CHF_PER_USD", MIN_CHF_PER_USD, MAX_CHF_PER_USD) ?? DEFAULT_CHF_PER_USD,
@@ -334,6 +411,62 @@ function sharedStoreConfigured(): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * VOICE_OPENAI_*. A value that is set but cannot be read keeps its default (or stays unset) and its
+ * variable name is added to `ignored`; a number out of range is clamped, which is not a typo.
+ * Every variable is read whatever the turn type, so a typo in a setting of the other type is
+ * reported too, even though it changes nothing.
+ */
+function readOpenAiSettings(ignored: string[]): OpenAiSettings {
+  const choice = <T extends string>(name: string, allowed: readonly T[]): T | null => {
+    const value = readEnum(name, allowed);
+    if (value === null && readString(name) !== null) ignored.push(name);
+    return value;
+  };
+  const amount = (name: string, range: { min: number; max: number }, integer: boolean): number | null => {
+    if (readString(name) === null) return null;
+    const value = integer ? readClamped(name, range.min, range.max) : readClampedDecimal(name, range.min, range.max);
+    if (value === null) ignored.push(name);
+    return value;
+  };
+  const ranges = OPENAI_NUMBER_RANGES;
+
+  const model = choice("VOICE_OPENAI_MODEL", OPENAI_REALTIME_MODELS) ?? OPENAI_REALTIME_MODELS[0];
+  const host = choice("VOICE_OPENAI_HOST", OPENAI_HOSTS) ?? "api.openai.com";
+  const voice = choice("VOICE_OPENAI_VOICE", OPENAI_VOICES) ?? "marin";
+  const turnType = choice("VOICE_OPENAI_TURN", OPENAI_TURN_TYPES) ?? "semantic_vad";
+  const silenceMs = amount("VOICE_OPENAI_VAD_SILENCE_MS", ranges.silenceMs, true) ?? DEFAULT_OPENAI_VAD_SILENCE_MS;
+  const threshold = amount("VOICE_OPENAI_VAD_THRESHOLD", ranges.threshold, false);
+  const prefixMs = amount("VOICE_OPENAI_VAD_PREFIX_MS", ranges.prefixMs, true);
+  const eagerness = choice("VOICE_OPENAI_EAGERNESS", OPENAI_EAGERNESS) ?? "low";
+  const reasoning = choice("VOICE_OPENAI_REASONING", OPENAI_REASONING);
+  const transcribe = choice("VOICE_OPENAI_TRANSCRIBE", [...OPENAI_TRANSCRIBE_MODELS, OFF]) ?? "gpt-transcribe";
+  const noise = choice("VOICE_OPENAI_NOISE", [...OPENAI_NOISE, OFF]) ?? "near_field";
+  const speed = amount("VOICE_OPENAI_SPEED", ranges.speed, false);
+  const maxOutputTokens =
+    amount("VOICE_OPENAI_MAX_OUTPUT_TOKENS", ranges.maxOutputTokens, true) ?? DEFAULT_OPENAI_MAX_OUTPUT_TOKENS;
+  const maxResponses = amount("VOICE_OPENAI_MAX_RESPONSES", ranges.maxResponses, true) ?? DEFAULT_OPENAI_MAX_RESPONSES;
+  // The cap follows the model unless it is set: the large model costs several times more a minute.
+  const maxCallUsd = amount("VOICE_OPENAI_MAX_CALL_USD", ranges.maxCallUsd, false) ?? DEFAULT_OPENAI_MAX_CALL_USD[model];
+
+  return {
+    model,
+    host,
+    voice,
+    turn:
+      turnType === "server_vad"
+        ? { type: "server_vad", silenceMs, threshold, prefixMs }
+        : { type: "semantic_vad", eagerness },
+    reasoning,
+    transcribe: transcribe === OFF ? null : transcribe,
+    noise: noise === OFF ? null : noise,
+    speed,
+    maxOutputTokens,
+    maxResponses,
+    maxCallUsd,
+  };
 }
 
 function readGlobalLimits(): VoiceGlobalLimits {

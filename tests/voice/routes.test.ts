@@ -178,6 +178,23 @@ describe("POST /api/voice/session", () => {
     // Only the successful session still counts as running.
     assert.equal((await usageSnapshot(deps.store, "modolo", T0)).running, 1);
   });
+
+  it("hands the provider the speech model's tool texts: no example phone number", async () => {
+    restoreEnv = setVoiceEnv({ VOICE_ENABLED: "true", VOICE_MODE: "realtime", VOICE_PROVIDER: "mock", VOICE_SESSION_SECRET: TEST_SECRET });
+    const mock = createMockProvider({ now: () => T0 });
+    const handed: string[] = [];
+    const provider: typeof mock = {
+      ...mock,
+      createWebSession: (args) => {
+        handed.push(JSON.stringify(args.tools));
+        return mock.createWebSession(args);
+      },
+    };
+    await open(testDeps({ now: () => T0, provider }), sessionBody({ mode: "realtime" }));
+    assert.equal(handed.length, 1);
+    assert.ok(handed[0].includes("a Swiss number with its area code (ten digits, starting with 0) or in the +41 form"), handed[0]);
+    assert.equal(handed[0].includes("079"), false, handed[0]);
+  });
 });
 
 describe("POST /api/voice/turn", () => {

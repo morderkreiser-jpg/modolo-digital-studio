@@ -8,7 +8,10 @@
 // constants: it carries no secret even if it were bundled, and the server-only guard lives in
 // the server component that calls it ("server-only" cannot be loaded by the node:test runner).
 import {
+  VOICE_CALL_ENDPOINT,
   VOICE_END_ENDPOINT,
+  VOICE_READY_ENDPOINT,
+  VOICE_REALTIME_CALL_MAX_SECONDS,
   VOICE_SESSION_ENDPOINT,
   VOICE_TURN_ENDPOINT,
   type VoiceLimits,
@@ -39,6 +42,12 @@ export function toVoicePublicConfig(
   const locales = [...tenant.locales];
   // Unknown modes are dropped and duplicates collapse; the order (best first) is kept.
   const modes = [...new Set(options.modes.filter((mode) => MODES.has(mode)))];
+  const realtime = modes.includes("realtime");
+  // A realtime call is cut at what the call route can hold, so the consent card's minutes match
+  // the server's call length (the same formula as call.ts, callSecondsFor).
+  const maxCallSeconds = realtime
+    ? Math.max(30, Math.min(options.limits.maxCallSeconds, VOICE_REALTIME_CALL_MAX_SECONDS))
+    : options.limits.maxCallSeconds;
   return {
     tenant: tenant.id,
     kind: tenant.kind,
@@ -50,12 +59,17 @@ export function toVoicePublicConfig(
     greeting: copyText(tenant.greeting, locales),
     privacyUrl: copyText(tenant.privacy.noticeUrl, locales),
     limits: {
-      maxCallSeconds: options.limits.maxCallSeconds,
+      maxCallSeconds,
       warnBeforeEndSeconds: options.limits.warnBeforeEndSeconds,
       silenceTimeoutSeconds: options.limits.silenceTimeoutSeconds,
       maxTurnChars: options.limits.maxTurnChars,
     },
     modes,
-    endpoints: { session: VOICE_SESSION_ENDPOINT, turn: VOICE_TURN_ENDPOINT, end: VOICE_END_ENDPOINT },
+    endpoints: {
+      session: VOICE_SESSION_ENDPOINT,
+      turn: VOICE_TURN_ENDPOINT,
+      end: VOICE_END_ENDPOINT,
+      ...(realtime ? { call: VOICE_CALL_ENDPOINT, ready: VOICE_READY_ENDPOINT } : {}),
+    },
   };
 }

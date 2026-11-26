@@ -404,6 +404,55 @@ describe("validateToolInput", () => {
     assert.equal(valueOf(validateToolInput(SALON, "cancel_appointment", { reference: "mv 7k2q", name: "Anna Muster" })).reference, "MV-7K2Q");
     assert.match(errorsOf(validateToolInput(SALON, "cancel_appointment", { reference: "?", name: "Anna Muster" })), /"reference" must be a booking reference/);
   });
+
+  it("names an example number for a text model, and none for a speech model", () => {
+    const cases = [
+      {
+        name: "book_appointment",
+        input: { ...BOOK_INPUT, contact: "call me" },
+        text: '"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.',
+        speech: '"contact" must be a phone number with area code (ten digits, starting with 0) or an email address.',
+      },
+      {
+        name: "book_appointment",
+        input: { ...BOOK_INPUT, contact: "anna@nowhere" },
+        text: '"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.',
+        speech: '"contact" must be a phone number with area code (ten digits, starting with 0) or an email address.',
+      },
+      {
+        name: "request_callback",
+        input: { name: "Anna Muster", phone: "12345", topic: "Price" },
+        text: '"phone" must be a phone number with area code, e.g. 079 123 45 67.',
+        speech: '"phone" must be a phone number with area code (ten digits, starting with 0).',
+      },
+      {
+        name: "create_lead",
+        input: { ...LEAD_INPUT, phone: "12345" },
+        text: '"phone" must be a phone number with area code, e.g. 079 123 45 67.',
+        speech: '"phone" must be a phone number with area code (ten digits, starting with 0).',
+      },
+    ];
+    for (const { name, input, text, speech } of cases) {
+      for (const options of [undefined, {}, { now: NOW }, { speech: false }]) {
+        const errors = errorsOf(validateToolInput(SALON, name, input, options)).split("\n");
+        assert.ok(errors.includes(text), `${name} ${JSON.stringify(options)}: ${errors.join(" | ")}`);
+      }
+      const errors = errorsOf(validateToolInput(SALON, name, input, { now: NOW, speech: true })).split("\n");
+      assert.ok(errors.includes(speech), `${name}: ${errors.join(" | ")}`);
+      assert.ok(errors.every((error) => !error.includes("079")), errors.join(" | "));
+    }
+  });
+
+  it("executeTool words the errors for the model the context names", async () => {
+    const input = { name: "Anna Muster", phone: "12345", topic: "Price" };
+    const text = await executeTool(makeContext(), call("request_callback", input));
+    assert.ok(!text.ok && text.code === "invalid_input");
+    assert.ok(text.say.includes('"phone" must be a phone number with area code, e.g. 079 123 45 67.'), text.say);
+    const speech = await executeTool(makeContext(SALON, { speech: true }), call("request_callback", input));
+    assert.ok(!speech.ok && speech.code === "invalid_input");
+    assert.ok(speech.say.includes('"phone" must be a phone number with area code (ten digits, starting with 0).'), speech.say);
+    assert.equal(speech.say.includes("079"), false, speech.say);
+  });
 });
 
 describe("normalizePhone", () => {

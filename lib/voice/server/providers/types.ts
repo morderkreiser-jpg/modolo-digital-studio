@@ -29,6 +29,17 @@
 //      and "ended" settles the minutes to what was billed. An adapter that cannot deliver both
 //      leaves it unset: every session then reserves its whole call up front, because an unused
 //      token could not be told from a call (lib/voice/server/limits.ts, header).
+//
+// THE "CALL" KIND (RealtimeCallProvider)
+//
+//   Our server creates the call itself: the browser sends its SDP offer to /api/voice/call, the
+//   server passes it to the provider with the session configuration and the API key, and hands the
+//   answer back. The server then holds a control connection of its own to the call (ControlSocket):
+//   it sends the greeting and the tool outputs, and sees every event of the conversation. Such a
+//   provider confirms and settles its calls through OUR call controller (confirmRealtimeCall and
+//   settleReportedCall), not through toolWebhookUrl: guarantee 8 does not apply to it, guarantees
+//   1, 3, 4 and 7 do (the key never leaves the server, every network call is bounded and honours
+//   `signal`, nothing throws, nothing personal is logged).
 import type { VoiceLocale, VoiceToolDefinition } from "@/lib/voice/types";
 
 export interface CreateWebSessionArgs {
@@ -67,4 +78,78 @@ export interface RealtimeProvider {
   createWebSession(args: CreateWebSessionArgs): Promise<CreateWebSessionResult>;
   /** Ends a running session on the provider's side (best effort, never throws). */
   endSession?(providerSessionId: string): Promise<void>;
+}
+
+/** Call ids of the "call" kind as OpenAI issues them (rtc_u0_… seen; '-' allowed in case of base64url). */
+export const CALL_ID_RE = /^rtc_[A-Za-z0-9_-]{6,120}$/;
+
+/** Opaque JSON event of the provider's control connection. */
+export type ControlEvent = Record<string, unknown>;
+
+/** The server-held control connection of one call (OpenAI: the "sideband" WebSocket). */
+export interface ControlSocket {
+  /** False when the socket is not open (the event was not sent). Never throws. */
+  send(event: ControlEvent): boolean;
+  /** Idempotent. Never throws. Does not wait for the close to complete. */
+  close(code?: number): void;
+  onEvent(listener: (event: ControlEvent) => void): void;
+  /** Called once, whatever closed it. */
+  onClose(listener: (info: { code: number }) => void): void;
+}
+
+/** Time source of the call controller; tests pass a fake one. */
+export interface ControllerClock {
+  now(): number;
+  setTimeout(fn: () => void, ms: number): unknown;
+  clearTimeout(handle: unknown): void;
+}
+
+export interface CreateCallArgs {
+  tenantId: string;
+  sessionId: string;
+  locale: VoiceLocale;
+  /** The provider's session configuration (built by the adapter's own builder; opaque here). */
+  session: Record<string, unknown>;
+  /** Validated and normalised SDP offer (CRLF line ends). */
+  offerSdp: string;
+  signal?: AbortSignal;
+}
+
+export type CreateCallResult =
+  | { ok: true; callId: string; answerSdp: string }
+  | {
+      ok: false;
+      /** bad_request: the provider refused the OFFER (not its fault, not counted by the breaker). */
+      code: "unavailable" | "upstream" | "timeout" | "busy" | "bad_request";
+      /** A failed create may still have created a call: the caller hangs it up. */
+      callId?: string;
+      retryAfter?: number;
+      /** HTTP status of the provider's answer, for the log only. */
+      httpStatus?: number;
+      /** The provider's own error code of a refused request (4xx), for the log only. */
+      providerCode?: string;
+    };
+
+export type OpenControlResult = { ok: true; socket: ControlSocket } | { ok: false; code: "timeout" | "upstream" | "no_websocket" };
+
+/**
+ * A provider whose calls our server creates and controls ("call" kind). Guarantees: the API key
+ * never leaves the server; every network call is bounded and honours `signal`; nothing throws;
+ * confirmsCalls is true because OUR controller confirms and settles the call (it calls
+ * confirmRealtimeCall and settleReportedCall itself; guarantee 8 of RealtimeProvider does not apply).
+ */
+export interface RealtimeCallProvider {
+  readonly id: string;
+  readonly kind: "call";
+  readonly confirmsCalls: true;
+  createCall(args: CreateCallArgs): Promise<CreateCallResult>;
+  openControl(callId: string, options: { signal?: AbortSignal; timeoutMs: number }): Promise<OpenControlResult>;
+  /** Best effort, never throws, gives up after timeoutMs (404 counts as done). */
+  hangUp(callId: string, options: { timeoutMs: number }): Promise<{ ok: boolean; httpStatus?: number }>;
+}
+
+export type VoiceProvider = RealtimeProvider | RealtimeCallProvider;
+
+export function isCallProvider(provider: VoiceProvider | null | undefined): provider is RealtimeCallProvider {
+  return provider !== null && provider !== undefined && (provider as { kind?: unknown }).kind === "call";
 }

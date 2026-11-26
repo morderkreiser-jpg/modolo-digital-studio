@@ -1,14 +1,29 @@
 // Picks the realtime provider for the configuration, and opens provider sessions behind the
 // circuit breaker and a timeout. Server-only. Routes call openProviderSession(), never an
-// adapter directly, so the guarantees of ./types.ts hold for every provider.
+// adapter directly, so the guarantees of ./types.ts hold for every provider. getVoiceProvider()
+// also returns providers of the "call" kind (OpenAI), whose calls our own server creates.
 import type { KVStore } from "@/lib/assistant/server/store";
 import type { VoiceEnv } from "../env";
 import { isOpen, recordFailure, recordSuccess } from "../breaker";
 import { logVoiceEvent } from "../log";
 import { createMockProvider, type MockRealtimeProvider } from "./mock";
-import type { CreateWebSessionArgs, CreateWebSessionResult, RealtimeProvider } from "./types";
+import { createOpenAiProvider } from "./openai";
+import type { CreateWebSessionArgs, CreateWebSessionResult, RealtimeCallProvider, RealtimeProvider, VoiceProvider } from "./types";
 
-export type { CreateWebSessionArgs, CreateWebSessionResult, RealtimeProvider } from "./types";
+export type {
+  ControlEvent,
+  ControllerClock,
+  ControlSocket,
+  CreateCallArgs,
+  CreateCallResult,
+  CreateWebSessionArgs,
+  CreateWebSessionResult,
+  OpenControlResult,
+  RealtimeCallProvider,
+  RealtimeProvider,
+  VoiceProvider,
+} from "./types";
+export { CALL_ID_RE, isCallProvider } from "./types";
 
 /** How long a provider may take to mint a session token before we give up. */
 export const PROVIDER_TIMEOUT_MS = 8_000;
@@ -23,6 +38,25 @@ let mock: MockRealtimeProvider | null = null;
 export function getRealtimeProvider(env: VoiceEnv): RealtimeProvider | null {
   if (env.provider === "mock") return (mock ??= createMockProvider());
   return null;
+}
+
+// The OpenAI provider, with the key and the settings it was built from: a changed key or setting
+// (tests, a reloaded configuration) builds a new one instead of keeping the old values.
+let openai: { provider: RealtimeCallProvider; apiKey: string; settings: string } | null = null;
+
+/**
+ * The provider VOICE_PROVIDER names, of either kind: the mock (the same instance as
+ * getRealtimeProvider's), the OpenAI provider when its key is set, else null.
+ */
+export function getVoiceProvider(env: VoiceEnv): VoiceProvider | null {
+  if (env.provider === "mock") return getRealtimeProvider(env);
+  if (env.provider !== "openai" || env.providerApiKey === null) return null;
+  const apiKey = env.providerApiKey;
+  const settings = JSON.stringify(env.openai);
+  if (openai === null || openai.apiKey !== apiKey || openai.settings !== settings) {
+    openai = { provider: createOpenAiProvider({ apiKey, settings: env.openai }), apiKey, settings };
+  }
+  return openai.provider;
 }
 
 /**

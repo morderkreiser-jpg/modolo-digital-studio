@@ -5,6 +5,8 @@
 //
 // Every answer carries Cache-Control: no-store. Failures are JSON VoiceApiError bodies; once the
 // turn stream has started they are "error" events instead. Nothing a caller said is ever logged.
+// The realtime call and ready endpoints live in call.ts and reuse the helpers exported here
+// (the tool path runToolCall, the body reader, the JSON answers).
 import type { KVStore } from "@/lib/assistant/server/store";
 import { getCalendar } from "@/lib/voice/calendar";
 import { getVoiceTenant } from "@/lib/voice/tenants";
@@ -12,6 +14,8 @@ import { executeTool, exportToolMemory, importToolMemory, type ToolContext } fro
 import {
   isVoiceLocale,
   isVoiceToolName,
+  type ToolCall,
+  type ToolOutcome,
   type TurnStreamEvent,
   type VoiceApiError,
   type VoiceErrorCode,
@@ -84,10 +88,11 @@ const SESSION_BODY_BYTES = 4 * 1024;
 const TURN_BODY_BYTES = 24 * 1024;
 const END_BODY_BYTES = 4 * 1024;
 const TOOL_BODY_BYTES = 32 * 1024;
-// A comment frame keeps the stream alive while the model thinks; decoders skip it.
-const HEARTBEAT_MS = 15_000;
-const HEARTBEAT_FRAME = ": ping\n\n";
-const SSE_CONTENT_TYPE = "text/event-stream; charset=utf-8";
+// A comment frame keeps the stream alive while the model thinks; decoders skip it. Shared with the
+// call stream (call.ts).
+export const HEARTBEAT_MS = 15_000;
+export const HEARTBEAT_FRAME = ": ping\n\n";
+export const SSE_CONTENT_TYPE = "text/event-stream; charset=utf-8";
 
 /** Headers of the tool webhook (our neutral names; a provider adapter maps its own onto them). */
 export const TOOL_TIMESTAMP_HEADER = "x-voice-timestamp";
@@ -104,7 +109,7 @@ export async function handleSessionRequest(request: Request, deps: VoiceDeps = {
   return guarded("session", async () => {
     // The switch first: a dark feature does not even read the body.
     if (!getVoiceEnv().enabled) return errorResponse(refuse(503, "unavailable"));
-    const body = await readJson(request, SESSION_BODY_BYTES);
+    const body = await readJsonBody(request, SESSION_BODY_BYTES);
     if (!body.ok) return errorResponse(refuse(body.status, body.code));
     const outcome = await openSession(request, body.value, deps);
     return outcome.ok ? json(outcome.grant) : errorResponse(outcome);
@@ -121,7 +126,7 @@ export async function handleSessionRequest(request: Request, deps: VoiceDeps = {
  */
 export async function handleEndRequest(request: Request, deps: VoiceDeps = {}): Promise<Response> {
   return guarded("end", async () => {
-    const body = await readJson(request, END_BODY_BYTES);
+    const body = await readJsonBody(request, END_BODY_BYTES);
     if (!body.ok) return errorResponse(refuse(body.status, body.code));
     const outcome = await closeSession(body.value, deps);
     return outcome.ok ? json({ ok: true }) : errorResponse(outcome);
@@ -148,7 +153,7 @@ export async function handleTurnRequest(request: Request, deps: VoiceDeps = {}):
     const clock = deps.now ?? Date.now;
     const now = clock();
     if (!env.enabled || env.sessionSecret === null) return errorResponse(refuse(503, "unavailable"));
-    const body = await readJson(request, TURN_BODY_BYTES);
+    const body = await readJsonBody(request, TURN_BODY_BYTES);
     if (!body.ok) return errorResponse(refuse(body.status, body.code));
     const raw = body.value;
     if (!isRecord(raw)) return errorResponse(refuse(400, "bad_request"));
@@ -590,36 +595,7 @@ export async function handleToolRequest(request: Request, deps: VoiceDeps = {}):
       const deliveryKey = `tool:${delivery}`;
       if (await wasSeen(shared, deliveryKey)) return errorResponse(refuse(409, "bad_request"));
 
-      const limits = resolveVoiceLimits(tenant, env);
-      const ttl = stateTtlSeconds(limits);
-      const state = await loadOrRecoverState(store, claims);
-      const late = lateOutcomes({ state, tenant, since: state.outcomes.length, deps });
-      // A call the provider signed is a connected call.
-      const reservation = state.reservation ?? reservationFromClaims(claims, voiceCostChfPerMinute(env, "realtime"));
-      const spend = reservation ? await confirmRealtimeCall({ store, reservation, limits, now }) : null;
-      await reportCharge({ store, tenantId: tenant.id, spend, limits, env, deps });
-      const counters = state.counters;
-      importToolMemory(counters, state.toolMemory);
-      const ctx: ToolContext = {
-        tenant,
-        sessionId: claims.sid,
-        locale: claims.loc,
-        channel: claims.ch,
-        now: new Date(now),
-        limits,
-        counters,
-        caps: createSessionCaps(store, claims.sid, ttl),
-        calendar: (deps.calendar ?? getCalendar)(tenant),
-        sinks: deps.sinks
-          ? deps.sinks(tenant)
-          : createSessionSinks(tenant, deps.resend, { send: deps.sendEmail, session: { channel: claims.ch, startedAt: state.startedAt } }),
-        record: (outcome) => {
-          state.outcomes.push(outcome);
-        },
-      };
-      const result = await executeTool(ctx, { id: call.id, name: call.name, input: call.input });
-      state.toolMemory = exportToolMemory(counters);
-      await persistUnlessEnded(store, state, ttl, late);
+      const { result } = await runToolCall({ claims, tenant, env, deps, store, now, call: { id: call.id, name: call.name, input: call.input } });
       // Done: from now on this delivery is a replay.
       await seenBefore(shared, deliveryKey, 2 * DEFAULT_WEBHOOK_TOLERANCE_SECONDS);
       logVoiceEvent({
@@ -634,6 +610,66 @@ export async function handleToolRequest(request: Request, deps: VoiceDeps = {}):
       await lock.release();
     }
   });
+}
+
+export interface RunToolCallArgs {
+  claims: SessionClaims;
+  tenant: VoiceTenantConfig;
+  env: VoiceEnv;
+  deps: VoiceDeps;
+  /** The accounting store. */
+  store: KVStore;
+  now: number;
+  call: ToolCall;
+  /**
+   * The call length the confirmation charges and registers. Default the tenant's limits (the
+   * webhook); a call our server holds passes its capped length (call.ts, callSecondsFor).
+   */
+  callLimits?: Pick<VoiceLimits, "maxCallSeconds">;
+}
+
+/**
+ * One tool call of a realtime session: the webhook's (handleToolRequest) and the call
+ * controller's (call.ts), one code path. The CALLER holds the session lock and checked it is not
+ * closed. A tool call proves the call is connected, so it charges the whole call if nothing did yet
+ * (confirmRealtimeCall: a no-op once the call was confirmed). The state is saved unless the end of
+ * the session no longer waits for it (persistUnlessEnded).
+ */
+export async function runToolCall(args: RunToolCallArgs): Promise<{ result: ToolOutcome; state: VoiceSessionState }> {
+  const { claims, tenant, env, deps, store, now, call } = args;
+  const limits = resolveVoiceLimits(tenant, env);
+  const ttl = stateTtlSeconds(limits);
+  const state = await loadOrRecoverState(store, claims);
+  const late = lateOutcomes({ state, tenant, since: state.outcomes.length, deps });
+  // A call the provider signed is a connected call.
+  const reservation = state.reservation ?? reservationFromClaims(claims, voiceCostChfPerMinute(env, "realtime"));
+  const spend = reservation ? await confirmRealtimeCall({ store, reservation, limits: args.callLimits ?? limits, now }) : null;
+  await reportCharge({ store, tenantId: tenant.id, spend, limits, env, deps });
+  const counters = state.counters;
+  importToolMemory(counters, state.toolMemory);
+  const ctx: ToolContext = {
+    tenant,
+    sessionId: claims.sid,
+    locale: claims.loc,
+    channel: claims.ch,
+    now: new Date(now),
+    limits,
+    counters,
+    caps: createSessionCaps(store, claims.sid, ttl),
+    calendar: (deps.calendar ?? getCalendar)(tenant),
+    sinks: deps.sinks
+      ? deps.sinks(tenant)
+      : createSessionSinks(tenant, deps.resend, { send: deps.sendEmail, session: { channel: claims.ch, startedAt: state.startedAt } }),
+    // A realtime session's tools are used by its speech model.
+    speech: true,
+    record: (outcome) => {
+      state.outcomes.push(outcome);
+    },
+  };
+  const result = await executeTool(ctx, { id: call.id, name: call.name, input: call.input });
+  state.toolMemory = exportToolMemory(counters);
+  await persistUnlessEnded(store, state, ttl, late);
+  return { result, state };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -652,7 +688,7 @@ function parseProviderEvent(event: Record<string, unknown>): ProviderEvent | nul
 }
 
 /** The spend alerts of a realtime charge (alerts.ts), when it charged anything. */
-async function reportCharge(args: {
+export async function reportCharge(args: {
   store: KVStore;
   tenantId: string;
   spend: SpendChange | null;
@@ -685,7 +721,7 @@ async function realtimeReservation(store: KVStore, claims: SessionClaims, env: V
 }
 
 /** A bug in our own code or data becomes a 500 "unavailable"; only the error's name is logged. */
-async function guarded(op: string, handler: () => Promise<Response>): Promise<Response> {
+export async function guarded(op: string, handler: () => Promise<Response>): Promise<Response> {
   try {
     return await handler();
   } catch (error) {
@@ -694,7 +730,7 @@ async function guarded(op: string, handler: () => Promise<Response>): Promise<Re
   }
 }
 
-function tokenRefusal(reason: "malformed" | "bad_signature" | "expired" | "not_yet_valid"): Refusal {
+export function tokenRefusal(reason: "malformed" | "bad_signature" | "expired" | "not_yet_valid"): Refusal {
   return reason === "expired" ? refuse(401, "expired") : refuse(403, "forbidden");
 }
 
@@ -732,7 +768,8 @@ async function readText(request: Request, maxBytes: number): Promise<BodyText> {
   return { ok: true, text: new TextDecoder().decode(bytes) };
 }
 
-async function readJson(request: Request, maxBytes: number): Promise<BodyJson> {
+/** A JSON body of at most `maxBytes` (readText), parsed; 400 "bad_request" when it is not JSON. */
+export async function readJsonBody(request: Request, maxBytes: number): Promise<BodyJson> {
   const body = await readText(request, maxBytes);
   if (!body.ok) return body;
   try {
@@ -742,11 +779,11 @@ async function readJson(request: Request, maxBytes: number): Promise<BodyJson> {
   }
 }
 
-function json(value: unknown, status = 200): Response {
+export function json(value: unknown, status = 200): Response {
   return Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-function errorResponse(refusal: Refusal): Response {
+export function errorResponse(refusal: Refusal): Response {
   const body: VoiceApiError =
     refusal.retryAfter === undefined ? { ok: false, error: refusal.error } : { ok: false, error: refusal.error, retryAfter: refusal.retryAfter };
   const headers = new Headers({ "Cache-Control": "no-store" });

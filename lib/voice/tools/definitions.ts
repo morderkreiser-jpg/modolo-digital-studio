@@ -4,10 +4,13 @@
 // carry it out (no calendar, no calendar tools; transfer off, no transfer_call...). The model never
 // learns about the others, and validate.ts / execute.ts refuse them all the same.
 //
-// toolDefinitions() is deterministic: the same tenant always gives byte-identical output, because
-// it becomes part of a cached prompt prefix. No clock, no randomness, no object-key order that
-// depends on anything but the tenant data. Descriptions are English (they are for the model) and
-// never contain transfer numbers, only the labels of the targets.
+// toolDefinitions() is deterministic: the same tenant (and options) always gives byte-identical
+// output, because it becomes part of a cached prompt prefix. No clock, no randomness, no
+// object-key order that depends on anything but the tenant data. Descriptions are English (they
+// are for the model) and never contain transfer numbers, only the labels of the targets.
+//
+// The phone texts depend on the model: a text model gets an example number, which guides the
+// digits it writes; a speech model ({ speech: true }) gets none, because it may say it aloud.
 import { VOICE_LOCALES, VOICE_TOOLS } from "@/lib/voice/types";
 import type {
   TaskDefinition,
@@ -115,24 +118,39 @@ export function englishText(text: VoiceText | undefined, fallback: VoiceLocale):
 // Definitions
 // ---------------------------------------------------------------------------------------------
 
-export function toolDefinitions(tenant: VoiceTenantConfig): VoiceToolDefinition[] {
-  return enabledTools(tenant).map((name) => define(tenant, name));
+export interface ToolDefinitionOptions {
+  /** The tools are for a speech model: no example phone number in their texts (see the header). */
+  speech?: boolean;
 }
 
-function define(tenant: VoiceTenantConfig, name: VoiceToolName): VoiceToolDefinition {
+export function toolDefinitions(tenant: VoiceTenantConfig, options: ToolDefinitionOptions = {}): VoiceToolDefinition[] {
+  const speech = options.speech === true;
+  return enabledTools(tenant).map((name) => define(tenant, name, speech));
+}
+
+/**
+ * How a Swiss number looks, for the phone descriptions: an example for a text model, words for a
+ * speech model. `short` is the example without the +41 form (the task fields' wording).
+ */
+function swissNumber(speech: boolean, short = false): string {
+  if (speech) return "a Swiss number with its area code (ten digits, starting with 0) or in the +41 form";
+  return short ? "e.g. 079 123 45 67" : "e.g. 079 123 45 67 or +41 79 123 45 67";
+}
+
+function define(tenant: VoiceTenantConfig, name: VoiceToolName, speech: boolean): VoiceToolDefinition {
   switch (name) {
     case "check_availability":
       return checkAvailability(tenant);
     case "book_appointment":
-      return bookAppointment(tenant);
+      return bookAppointment(tenant, speech);
     case "cancel_appointment":
       return cancelAppointment();
     case "reschedule_appointment":
       return rescheduleAppointment();
     case "create_lead":
-      return createLead(tenant);
+      return createLead(tenant, speech);
     case "request_callback":
-      return requestCallback(tenant);
+      return requestCallback(tenant, speech);
     case "transfer_call":
       return transferCall(tenant);
     case "end_call":
@@ -207,7 +225,7 @@ function checkAvailability(tenant: VoiceTenantConfig): VoiceToolDefinition {
   );
 }
 
-function bookAppointment(tenant: VoiceTenantConfig): VoiceToolDefinition {
+function bookAppointment(tenant: VoiceTenantConfig, speech: boolean): VoiceToolDefinition {
   const seats = usesSeats(tenant);
   const properties: Record<string, unknown> = {
     service: serviceProperty(tenant),
@@ -217,7 +235,7 @@ function bookAppointment(tenant: VoiceTenantConfig): VoiceToolDefinition {
     },
     name: personName("The caller's first and last name."),
     contact: text(
-      "A phone number (e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code, e.g. +39 ...) or an email address where the business can reach the caller.",
+      `A phone number (${swissNumber(speech)}; a number from another country always with its country code, e.g. +39 ...) or an email address where the business can reach the caller.`,
       TOOL_TEXT_LIMITS.contact,
     ),
   };
@@ -282,7 +300,7 @@ function rescheduleAppointment(): VoiceToolDefinition {
   );
 }
 
-function createLead(tenant: VoiceTenantConfig): VoiceToolDefinition {
+function createLead(tenant: VoiceTenantConfig, speech: boolean): VoiceToolDefinition {
   const tasks = tenant.tasks;
   const fallback = tenant.defaultLocale;
   const taskLines = tasks.map((task) => `- ${task.id}: ${task.when} ${describeTask(task, fallback)}`).join("\n");
@@ -295,8 +313,8 @@ function createLead(tenant: VoiceTenantConfig): VoiceToolDefinition {
     const maxLength = Math.max(...uses.map(({ field }) => field.maxLength ?? DEFAULT_FIELD_MAX_LENGTH));
     const description =
       uses.length === 1
-        ? describeField(uses[0].field, fallback)
-        : uses.map(({ task, field }) => `For ${task.id}: ${describeField(field, fallback)}`).join(" ");
+        ? describeField(uses[0].field, fallback, speech)
+        : uses.map(({ task, field }) => `For ${task.id}: ${describeField(field, fallback, speech)}`).join(" ");
     fieldProperties[id] = { type: "string", maxLength, description };
   }
 
@@ -315,7 +333,7 @@ function createLead(tenant: VoiceTenantConfig): VoiceToolDefinition {
   };
   const contactDescriptions: Record<ContactKey, Record<string, unknown>> = {
     name: personName("The caller's first and last name."),
-    phone: text("The caller's phone number, e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code.", 40),
+    phone: text(`The caller's phone number, ${swissNumber(speech)}; a number from another country always with its country code.`, 40),
     email: text("The caller's email address.", 254),
     company: text("The caller's company, if they call for one.", TOOL_TEXT_LIMITS.company),
   };
@@ -352,20 +370,20 @@ function describeTask(task: TaskDefinition, fallback: VoiceLocale): string {
   return parts.join(" ");
 }
 
-function describeField(field: TaskField, fallback: VoiceLocale): string {
+function describeField(field: TaskField, fallback: VoiceLocale, speech: boolean): string {
   const label = englishText(field.label, fallback) || field.id;
   const confirm = field.confirm ? " Read it back and get a yes." : "";
-  return `${label}. ${typeHint(field, fallback)}${confirm}`;
+  return `${label}. ${typeHint(field, fallback, speech)}${confirm}`;
 }
 
-function typeHint(field: TaskField, fallback: VoiceLocale): string {
+function typeHint(field: TaskField, fallback: VoiceLocale, speech: boolean): string {
   switch (field.type) {
     case "text":
       return "Free text.";
     case "name":
       return "A person's name.";
     case "phone":
-      return "A phone number, e.g. 079 123 45 67; a number from another country always with its country code.";
+      return `A phone number, ${swissNumber(speech, true)}; a number from another country always with its country code.`;
     case "email":
       return "An email address.";
     case "date":
@@ -400,7 +418,7 @@ function typeHint(field: TaskField, fallback: VoiceLocale): string {
   }
 }
 
-function requestCallback(tenant: VoiceTenantConfig): VoiceToolDefinition {
+function requestCallback(tenant: VoiceTenantConfig, speech: boolean): VoiceToolDefinition {
   const when = tenant.handoff.callback.onlyWhenAsked === true
     ? "only when the caller asks to be called back or says they prefer the phone."
     : "when the caller wants a person and no transfer is possible, or for a question you cannot answer.";
@@ -411,7 +429,7 @@ function requestCallback(tenant: VoiceTenantConfig): VoiceToolDefinition {
       "time beyond the wording this tool gives you.",
     {
       name: personName("The caller's first and last name."),
-      phone: text("The number to call back, e.g. 079 123 45 67 or +41 79 123 45 67; a number from another country always with its country code.", 40),
+      phone: text(`The number to call back, ${swissNumber(speech)}; a number from another country always with its country code.`, 40),
       topic: text("What the call back is about, in a few words.", TOOL_TEXT_LIMITS.topic),
       preferred_time: {
         type: "string",

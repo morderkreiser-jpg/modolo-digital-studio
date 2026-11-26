@@ -546,7 +546,8 @@ export interface VoicePublicConfig {
   limits: Pick<VoiceLimits, "maxCallSeconds" | "warnBeforeEndSeconds" | "silenceTimeoutSeconds" | "maxTurnChars">;
   /** Modes the server offers right now, best first. */
   modes: VoiceMode[];
-  endpoints: { session: string; turn: string; end: string };
+  /** `call` and `ready` are set only when the modes include "realtime". */
+  endpoints: { session: string; turn: string; end: string; call?: string; ready?: string };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -559,14 +560,22 @@ export interface VoicePublicConfig {
  *              network, no model. Always labelled as an example.
  *   local    — the browser's own speech recognition and speech synthesis around our text brain.
  *              A development and test harness: free, but not the product's voice quality.
- *   realtime — the real product: streaming audio to a voice provider over WebRTC, with a
- *              short-lived token minted by our server. Needs a provider account.
+ *   realtime — the real product: streaming audio to a voice provider over WebRTC, either with a
+ *              short-lived token minted by our server or through a call our server creates and
+ *              controls (RealtimeGrant). Needs a provider account.
  */
 export type VoiceMode = "scripted" | "local" | "realtime";
 
 export const VOICE_SESSION_ENDPOINT = "/api/voice/session";
 export const VOICE_TURN_ENDPOINT = "/api/voice/turn";
 export const VOICE_END_ENDPOINT = "/api/voice/end";
+export const VOICE_CALL_ENDPOINT = "/api/voice/call";
+export const VOICE_READY_ENDPOINT = "/api/voice/ready";
+/**
+ * Longest realtime call our server can hold (seconds): the call route's maxDuration (300) minus
+ * the setup reserve (12) and the end reserve (36). lib/voice/server/call.ts pins the arithmetic.
+ */
+export const VOICE_REALTIME_CALL_MAX_SECONDS = 252;
 
 export type VoiceErrorCode =
   | "bad_request"
@@ -610,9 +619,67 @@ export interface SessionGrant {
   /** Unix ms. After this the token is refused. */
   expiresAt: number;
   limits: Pick<VoiceLimits, "maxCallSeconds" | "warnBeforeEndSeconds" | "silenceTimeoutSeconds" | "maxTurnChars">;
-  /** Present in "realtime" mode only: what the provider SDK needs. Never an API key. */
-  realtime?: { provider: string; token: string; expiresAt: number; params?: Record<string, string> };
+  /** Present in "realtime" mode only: what the browser needs to connect. Never an API key. */
+  realtime?: RealtimeGrant;
 }
+
+/** What the browser needs to connect a realtime session. Never an API key. */
+export type RealtimeGrant =
+  /** The provider's own browser SDK connects with a short-lived token (the mock provider). */
+  | { connect?: "token"; provider: string; token: string; expiresAt: number; params?: Record<string, string> }
+  /** Our server creates the call: the browser POSTs its SDP offer to endpoints.call before expiresAt. */
+  | { connect: "call"; provider: string; expiresAt: number; token?: undefined; params?: undefined };
+
+/** POST /api/voice/call */
+export interface CallRequestBody {
+  sessionToken: string;
+  /** The browser's SDP offer: one audio section, no data channel, no video. */
+  sdp: string;
+}
+
+/** POST /api/voice/ready: the peer connection of this session is connected and plays. */
+export interface ReadyRequestBody {
+  sessionToken: string;
+}
+
+/** Why the server ended a realtime call (a subset of the widget's VoiceEndReason). */
+export type CallEndReason = "assistant" | "timeout" | "silence" | "user" | "error" | "limit";
+
+/**
+ * Frames of the /api/voice/call stream ("data: <json>\n\n"; ": ping" comments every 15 s).
+ * Caption ids are ours, never the provider's item ids: "a-<n>" for the assistant, "c-<n>" for the
+ * caller, one counter per role per call starting at 1.
+ */
+export type CallStreamEvent =
+  /** Always first, exactly once. maxSeconds: whole seconds until the server ends the call. */
+  | { type: "answer"; sdp: string; maxSeconds: number }
+  /** Who has the turn: listening (caller), thinking (caller done or a tool runs, no audio), speaking. */
+  | { type: "status"; status: "listening" | "thinking" | "speaking" }
+  /** The caller spoke over the assistant; its audio was cut. */
+  | { type: "interrupted" }
+  /** The caller started or stopped speaking (the widget does not count silence while they speak). */
+  | { type: "activity"; speech: "started" | "stopped" }
+  /**
+   * A caption line. `text` is the whole line so far. `before`: id of a line already sent that this
+   * NEW line must be shown above (the caller's transcription arrives after the reply started).
+   * A final update with empty text removes the line.
+   */
+  | {
+      type: "caption";
+      id: string;
+      role: "assistant" | "caller";
+      text: string;
+      final: boolean;
+      before?: string;
+      locale?: VoiceLocale;
+    }
+  | { type: "tool"; name: VoiceToolName; status: "started" | "ok" | "failed" }
+  | { type: "handoff"; handoff: HandoffNotice }
+  | { type: "remaining"; seconds: number }
+  /** Sent once, as the call ends on the server; the stream closes after it. */
+  | { type: "ended"; reason: CallEndReason }
+  /** Instead of "ended" when the call broke; the stream closes after it. */
+  | { type: "error"; code: VoiceErrorCode; retryAfter?: number };
 
 /** POST /api/voice/turn (mode "local"): one caller utterance in, the reply as Server-Sent Events. */
 export interface TurnRequestBody {

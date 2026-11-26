@@ -11,6 +11,9 @@
 //
 // One check needs the call itself (ValidationOptions), and is skipped without it:
 //   - `now`: a date a caller leaves with a request must not lie in the past (TaskField.allowPast).
+// And one option changes only the wording of the errors:
+//   - `speech`: the errors go to a speech model, so they carry no example phone number (such a
+//     model may repeat it aloud); a text model gets the example, which guides its digits.
 //
 // Phone numbers arrive as the caller said them and are completed here, never by the model: a
 // number without a country code is a Swiss one when it fits the Swiss numbering plan, in every
@@ -42,6 +45,8 @@ export type ToolValidation = { ok: true; value: Record<string, unknown> } | { ok
 export interface ValidationOptions {
   /** The call's clock. */
   now?: Date;
+  /** The errors go to a speech model: no example phone number in them (see the header). */
+  speech?: boolean;
 }
 
 type Input = Record<string, unknown>;
@@ -98,7 +103,7 @@ export function validateToolInput(
       value = checkAvailability(tenant, input, errors);
       break;
     case "book_appointment":
-      value = bookAppointment(tenant, input, errors);
+      value = bookAppointment(tenant, input, errors, checks);
       break;
     case "cancel_appointment":
       value = cancelAppointment(input, errors);
@@ -110,7 +115,7 @@ export function validateToolInput(
       value = createLead(tenant, input, errors, checks);
       break;
     case "request_callback":
-      value = requestCallback(input, errors);
+      value = requestCallback(input, errors, checks);
       break;
     case "transfer_call":
       value = transferCall(tenant, input, errors);
@@ -139,7 +144,7 @@ function checkAvailability(tenant: VoiceTenantConfig, input: Input, errors: stri
   return value;
 }
 
-function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[]): Record<string, unknown> {
+function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   const seats = usesSeats(tenant);
   const keys = ["service", "start", "name", "contact", "notes"];
   if (seats) keys.push("party_size", "separate_party");
@@ -148,7 +153,7 @@ function bookAppointment(tenant: VoiceTenantConfig, input: Input, errors: string
     service: serviceId(tenant, input, errors),
     start: startValue(tenant, input, "start", errors),
     name: personName(input, "name", true, errors),
-    contact: contactValue(input, errors),
+    contact: contactValue(input, errors, checks),
   };
   if (seats) value.party_size = partySize(input, errors);
   const notes = freeText(input, "notes", TOOL_TEXT_LIMITS.notes, false, errors);
@@ -209,7 +214,7 @@ function createLead(tenant: VoiceTenantConfig, input: Input, errors: string[], c
     // Data minimisation: a detail this task does not need is dropped, not stored, and not even
     // checked, so a garbled detail nobody asked for cannot block the request.
     if (need === "none") continue;
-    const given = contactDetail(input, key, errors);
+    const given = contactDetail(input, key, errors, checks);
     if (given === undefined) {
       if (need === "required" && task) errors.push(`"${key}" is required for this task.`);
       continue;
@@ -273,11 +278,11 @@ function collectFields(
   }
 }
 
-function requestCallback(input: Input, errors: string[]): Record<string, unknown> {
+function requestCallback(input: Input, errors: string[], checks: Checks): Record<string, unknown> {
   onlyKeys(input, ["name", "phone", "topic", "preferred_time"], "", errors);
   const value: Record<string, unknown> = {
     name: personName(input, "name", true, errors),
-    phone: phoneValue(input, "phone", true, errors),
+    phone: phoneValue(input, "phone", true, errors, checks),
     topic: freeText(input, "topic", TOOL_TEXT_LIMITS.topic, true, errors),
   };
   const preferred = freeText(input, "preferred_time", TOOL_TEXT_LIMITS.preferredTime, false, errors);
@@ -307,7 +312,7 @@ function fieldValue(field: TaskField, text: string, where: string, errors: strin
   const max = field.maxLength ?? DEFAULT_FIELD_MAX_LENGTH;
   switch (field.type) {
     case "phone": {
-      const phone = checkPhone(text, where);
+      const phone = checkPhone(text, where, checks);
       if (!phone.ok) errors.push(phone.error);
       return phone.ok ? phone.value : null;
     }
@@ -523,24 +528,24 @@ function reference(input: Input, errors: string[]): string | undefined {
 }
 
 /** book_appointment's contact: an email when it has an "@", else a phone number. */
-function contactValue(input: Input, errors: string[]): string | undefined {
+function contactValue(input: Input, errors: string[], checks: Checks): string | undefined {
   const text = stringValue(input, "contact", true, errors);
   if (text === undefined) return undefined;
   if (text.includes("@")) {
     if (isValidEmail(text)) return text.toLowerCase();
-    errors.push('"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.');
+    errors.push(phoneShapeError("contact", checks));
     return undefined;
   }
-  const phone = checkPhone(text, "contact");
+  const phone = checkPhone(text, "contact", checks);
   if (phone.ok) return phone.value;
   errors.push(phone.error);
   return undefined;
 }
 
-function phoneValue(input: Input, key: string, required: boolean, errors: string[]): string | undefined {
+function phoneValue(input: Input, key: string, required: boolean, errors: string[], checks: Checks): string | undefined {
   const text = stringValue(input, key, required, errors);
   if (text === undefined) return undefined;
-  const phone = checkPhone(text, key);
+  const phone = checkPhone(text, key, checks);
   if (!phone.ok) errors.push(phone.error);
   return phone.ok ? phone.value : undefined;
 }
@@ -550,7 +555,7 @@ function phoneValue(input: Input, key: string, required: boolean, errors: string
  * is taken as Swiss when its prefix exists in the Swiss numbering plan; one that does not fit is
  * refused, with the question to ask (see the header for why the call's language no longer counts).
  */
-function checkPhone(text: string, key: string): { ok: true; value: string } | { ok: false; error: string } {
+function checkPhone(text: string, key: string, checks: Checks): { ok: true; value: string } | { ok: false; error: string } {
   const phone = normalizePhone(text);
   const national = isNationalForm(text);
   if (phone === null) {
@@ -560,12 +565,22 @@ function checkPhone(text: string, key: string): { ok: true; value: string } | { 
         error: `"${key}" is not a Swiss number. If it is from another country, ask the caller for the country code and send the number with it (for example +39 or +49 in front).`,
       };
     }
-    if (key === "contact") {
-      return { ok: false, error: '"contact" must be a phone number with area code (e.g. 079 123 45 67) or an email address.' };
-    }
-    return { ok: false, error: `"${key}" must be a phone number with area code, e.g. 079 123 45 67.` };
+    return { ok: false, error: phoneShapeError(key, checks) };
   }
   return { ok: true, value: phone };
+}
+
+/**
+ * The error for a number that is not a phone number: with an example number for a text model
+ * (it guides the digits it sends), without one for a speech model (it may say it aloud).
+ */
+function phoneShapeError(key: string, checks: Checks): string {
+  const shape = checks.options.speech === true
+    ? " (ten digits, starting with 0)"
+    : key === "contact" ? " (e.g. 079 123 45 67)" : ", e.g. 079 123 45 67";
+  return key === "contact"
+    ? `"contact" must be a phone number with area code${shape} or an email address.`
+    : `"${key}" must be a phone number with area code${shape}.`;
 }
 
 /** "079 ...", "(044) ...": one trunk zero, no "+" and no "00" country prefix. */
@@ -587,9 +602,9 @@ function todayIn(checks: Checks): string | null {
 }
 
 /** create_lead's name / phone / email / company, validated by kind. */
-function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[]): string | undefined {
+function contactDetail(input: Input, key: (typeof CONTACT_KEYS)[number], errors: string[], checks: Checks): string | undefined {
   if (key === "name") return personName(input, key, false, errors);
-  if (key === "phone") return phoneValue(input, key, false, errors);
+  if (key === "phone") return phoneValue(input, key, false, errors, checks);
   if (key === "email") {
     const text = stringValue(input, key, false, errors);
     if (text === undefined) return undefined;

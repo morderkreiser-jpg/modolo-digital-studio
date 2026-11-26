@@ -259,6 +259,8 @@ export function turnSystem(args: {
   locale: VoiceLocale;
   now: Date;
   remainingSeconds: number;
+  /** The prompt variant of a live speech-to-speech session (lib/voice/prompt.ts). */
+  realtime?: boolean;
 }): Anthropic.TextBlockParam[] {
   const { tenant, now } = args;
   const open = isOpenAt(tenant.hours, now);
@@ -271,6 +273,7 @@ export function turnSystem(args: {
     nextOpeningText: open ? undefined : nextOpeningText(tenant, now),
     remainingSeconds: args.remainingSeconds,
     outcomesSoFar: describeOutcomes(args.state.outcomes, tenant),
+    realtime: args.realtime,
   });
   return [
     { type: "text", text: system.staticText, cache_control: { type: "ephemeral" } },
@@ -590,13 +593,13 @@ function toStoredTurn(messages: readonly Anthropic.MessageParam[]): StoredTurn {
 }
 
 /** What the model reads back from a tool: the outcome as compact JSON (its "say" is the key line). */
-function toolResultText(outcome: ToolOutcome): string {
+export function toolResultText(outcome: ToolOutcome): string {
   return outcome.ok
     ? JSON.stringify({ ok: true, say: outcome.say, ...(outcome.data ? { data: outcome.data } : {}) })
     : JSON.stringify({ ok: false, code: outcome.code, say: outcome.say });
 }
 
-function handoffOf(name: string, outcome: ToolOutcome, tenant: VoiceTenantConfig, locale: VoiceLocale): HandoffNotice | null {
+export function handoffOf(name: string, outcome: ToolOutcome, tenant: VoiceTenantConfig, locale: VoiceLocale): HandoffNotice | null {
   if (!outcome.ok) return null;
   if (name === "create_lead") return { kind: "written" };
   if (name === "request_callback") return { kind: "callback" };

@@ -8,7 +8,8 @@
 // closeSession: token (a late end report gets a short grace) → once per session (marked closed
 //   at once, so no new turn starts) → the running turn may finish → settle the reservation (from
 //   the ledger, even when the state is gone) → summary of what was not sent yet (live tenants
-//   only) → state removed.
+//   only) → state removed. A realtime call our server created (call.ts) is hung up from its
+//   recorded id at the same time.
 //
 // The tenant always comes from the SIGNED token once a session exists, never from a request body:
 // a token of one business can never act for another. A request without an Origin header (not a
@@ -26,6 +27,7 @@ import { toolDefinitions } from "@/lib/voice/tools/definitions";
 import type { ToolSinks } from "@/lib/voice/tools/execute";
 import {
   isVoiceLocale,
+  VOICE_REALTIME_CALL_MAX_SECONDS,
   type CalendarProvider,
   type CallSummary,
   type SessionGrant,
@@ -49,7 +51,8 @@ import {
 } from "./limits";
 import { reportCeilingRefusal, reportSpend, type AlertDelivery } from "./alerts";
 import { logVoiceEvent } from "./log";
-import { getRealtimeProvider, openProviderSession, type RealtimeProvider } from "./providers";
+import { getVoiceProvider, isCallProvider, openProviderSession, type ControllerClock, type VoiceProvider } from "./providers";
+import { CALL_OPEN_WINDOW_SECONDS, clearCallId, readCallId } from "./realtime/keys";
 import { clearState, createSessionState, loadState, saveState, stateTtlSeconds, type VoiceSessionState } from "./state";
 import { voiceStores } from "./stores";
 import {
@@ -101,7 +104,14 @@ export interface VoiceDeps {
   calendar?: (tenant: VoiceTenantConfig) => CalendarProvider | null;
   sinks?: (tenant: VoiceTenantConfig) => ToolSinks;
   /** undefined = the configured one (VOICE_PROVIDER). */
-  provider?: RealtimeProvider | null;
+  provider?: VoiceProvider | null;
+  /**
+   * Time source of a realtime call's controller and its stream (tests pass a fake clock).
+   * Default: the real timers, with `now`.
+   */
+  timers?: ControllerClock;
+  /** Tests only: the bound of a realtime call's create (ms). Default CALL_CREATE_TIMEOUT_MS (call.ts). */
+  createTimeoutMs?: number;
   /** undefined = the site's configuration (RESEND_API_KEY). */
   resend?: ResendConfig | null;
   sendEmail?: SendEmail;
@@ -146,11 +156,18 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
   const mode: VoiceMode = offered.includes(requested as VoiceMode) ? (requested as VoiceMode) : "scripted";
 
   // The provider first: whether it confirms calls decides what admission charges (limits.ts).
-  const provider = mode !== "realtime" ? null : deps.provider === undefined ? getRealtimeProvider(env) : deps.provider;
+  const provider = mode !== "realtime" ? null : deps.provider === undefined ? getVoiceProvider(env) : deps.provider;
   if (mode === "realtime" && provider === null) return refuse(503, "unavailable", tenant.id);
 
   const { shared, accounting } = voiceStores(deps);
   const limits = resolveVoiceLimits(tenant, env);
+  // A call our server holds is cut at what the call route can hold (call.ts, callSecondsFor: the
+  // same formula, a test checks that both agree), so admission makes room for that call, not more.
+  // The token's lifetime still follows the tenant's limits.
+  const callGrant = isCallProvider(provider);
+  const admitted: VoiceLimits = callGrant
+    ? { ...limits, maxCallSeconds: Math.max(30, Math.min(limits.maxCallSeconds, VOICE_REALTIME_CALL_MAX_SECONDS)) }
+    : limits;
   const ip = clientIp(request);
   // IPv6 visitors are counted per /64 (rateLimitSubject); only the salted hash is ever stored.
   const ipHash = ip ? hashId(rateLimitSubject(ip), env.hashSalt) : null;
@@ -161,7 +178,7 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
     store: accounting,
     ipStore: shared,
     tenantId: tenant.id,
-    limits,
+    limits: admitted,
     global: env.global,
     ipHash,
     mode,
@@ -177,7 +194,7 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
       await reportCeilingRefusal({
         store: accounting,
         tenantId: tenant.id,
-        roomChf: mode === "local" ? headroomMicro / 1e6 : (costChfPerMinute * limits.maxCallSeconds) / 60,
+        roomChf: mode === "local" ? headroomMicro / 1e6 : (costChfPerMinute * admitted.maxCallSeconds) / 60,
         budgetChf: limits.budgetChfPerMonth,
         globalBudgetChf: env.global.budgetChfPerMonth,
         now,
@@ -208,7 +225,11 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
   const giveBack = (): Promise<void> => cancelReservation(accounting, reservation, now);
 
   let realtime: SessionGrant["realtime"];
-  if (provider !== null) {
+  // A provider of the "call" kind is not called here: the browser sends its offer to
+  // /api/voice/call within the open window, and that route creates the call (call.ts).
+  if (provider !== null && isCallProvider(provider)) {
+    realtime = { connect: "call", provider: provider.id, expiresAt: now + CALL_OPEN_WINDOW_SECONDS * 1000 };
+  } else if (provider !== null && !isCallProvider(provider)) {
     // The prompt of the text-turn mode, opening hours included: "open now" or "closed now, next
     // opening ..." as of this moment (review finding S2-5). One builder, so the two modes cannot
     // drift apart.
@@ -225,7 +246,8 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
         maxSeconds: limits.maxCallSeconds,
         systemPrompt: system.map((block) => block.text).join("\n\n"),
         greeting: pickVoiceText(tenant.greeting, locale, tenant.defaultLocale),
-        tools: toolDefinitions(tenant),
+        // For the provider's speech model: no example phone number in the texts.
+        tools: toolDefinitions(tenant, { speech: true }),
         toolWebhookUrl: new URL(VOICE_TOOL_ENDPOINT, request.url).href,
       },
     });
@@ -271,7 +293,8 @@ export async function openSession(request: Request, body: unknown, deps: VoiceDe
       locale,
       expiresAt: claims.exp * 1000,
       limits: {
-        maxCallSeconds: limits.maxCallSeconds,
+        // The call length the admission made room for (see above). The token's lifetime is unchanged.
+        maxCallSeconds: admitted.maxCallSeconds,
         warnBeforeEndSeconds: limits.warnBeforeEndSeconds,
         silenceTimeoutSeconds: limits.silenceTimeoutSeconds,
         maxTurnChars: limits.maxTurnChars,
@@ -321,8 +344,35 @@ export async function closeSession(body: unknown, deps: VoiceDeps = {}): Promise
   const verified = verifySessionToken(body.sessionToken, env.sessionSecret, now, { acceptExpiredForSeconds: END_GRACE_SECONDS });
   if (!verified.ok) return verified.reason === "expired" ? { ok: true, closed: false } : refuse(403, "forbidden");
   const reason = typeof body.reason === "string" && END_REASONS.has(body.reason) ? body.reason : "unknown";
-  const closed = await finishSession({ claims: verified.claims, reason, env, deps, now });
+  const claims = verified.claims;
+  // A call our server created is hung up here too, from the id it recorded (realtime/keys.ts): the
+  // instance that holds the call may be another one, and it only sees the closed marker on its
+  // next poll. Side by side with the end, so the end route still fits its maxDuration.
+  const hangUpRecorded = claims.mode === "realtime" ? hangUpRecordedCall(claims, env, deps) : Promise.resolve();
+  const [closed] = await Promise.all([finishSession({ claims, reason, env, deps, now }), hangUpRecorded]);
   return { ok: true, closed };
+}
+
+/** How long the end route waits for the hang-up of a recorded call. */
+export const END_HANGUP_TIMEOUT_MS = 1_500;
+
+/**
+ * Hangs up the call recorded for a session, if any. Its id is forgotten only once the hang-up
+ * succeeded: after a failed one it stays recorded, so a later end report can try again (the
+ * record's own lifetime ends it otherwise). Never throws.
+ */
+async function hangUpRecordedCall(claims: SessionClaims, env: VoiceEnv, deps: VoiceDeps): Promise<void> {
+  const sessionId = claims.sid;
+  try {
+    const { accounting } = voiceStores(deps);
+    const callId = await readCallId(accounting, sessionId);
+    const provider = deps.provider !== undefined ? deps.provider : getVoiceProvider(env);
+    if (callId === null || !isCallProvider(provider)) return;
+    const result = await provider.hangUp(callId, { timeoutMs: END_HANGUP_TIMEOUT_MS });
+    if (result?.ok === true) await clearCallId(accounting, sessionId);
+  } catch (error) {
+    logVoiceEvent({ warn: "call_step_failed", tenant: claims.tid, kind: "hangup", errorName: error instanceof Error ? error.name : typeof error });
+  }
 }
 
 /**
