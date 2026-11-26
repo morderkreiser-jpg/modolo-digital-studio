@@ -51,6 +51,12 @@ export interface VoiceStrings {
   consentTitle: string;
   consentText: string;
   consentLocalNote: string;
+  /** Consent of the realtime mode: the voice goes to the provider; what the business receives. */
+  consentTextRealtime: string;
+  /** The same for an example business, which receives nothing. */
+  consentTextRealtimeDemo: string;
+  /** Visually hidden, read with the consent: why the captions are not read out during a call. */
+  realtimeCaptionsNote: string;
   consentAllow: string;
   consentTyped: string;
   cancel: string;
@@ -75,7 +81,11 @@ export interface VoiceStrings {
   send: string;
   ended: Record<VoiceEndReason, string>;
   notices: Record<VoiceNoticeCode, string>;
+  /** The button inside the audio_blocked notice: retries playback. */
+  resumeAudio: string;
   errors: Record<VoiceFailureCode, string>;
+  /** In realtime mode these win over `errors` (no typed fallback to offer there). */
+  realtimeErrors: { mic_denied: string; unsupported: string };
   tryLater: string;
   retry: string;
   retryIn: string;
@@ -138,6 +148,11 @@ const DE: VoiceStrings = {
     "Dein Browser fragt gleich nach dem Mikrofon. Was du sagst, wird in Text umgewandelt und an die KI geschickt. Ein Gespräch dauert höchstens {minutes} Minuten.",
   consentLocalNote:
     "Im Testmodus macht dein Browser die Spracherkennung, je nach Browser über die Server seines Anbieters.",
+  consentTextRealtime:
+    "Dein Browser fragt gleich nach dem Mikrofon. Deine Stimme geht direkt an OpenAI, einen Anbieter aus den USA. Dort hört die KI zu, wandelt das Gespräch automatisch in Text um und antwortet. Wir nehmen keinen Ton auf. Was du für einen Rückruf oder Termin angibst, geht per E-Mail an den Betrieb. Ein Gespräch dauert höchstens {minutes} Minuten.",
+  consentTextRealtimeDemo:
+    "Dein Browser fragt gleich nach dem Mikrofon. Deine Stimme geht direkt an OpenAI, einen Anbieter aus den USA. Dort hört die KI zu, wandelt das Gespräch automatisch in Text um und antwortet. Wir nehmen keinen Ton auf. Das hier ist ein Beispielbetrieb: Was du angibst, wird an niemanden weitergeleitet. Ein Gespräch dauert höchstens {minutes} Minuten.",
+  realtimeCaptionsNote: "Die Untertitel werden während des Gesprächs nicht vorgelesen, damit das Mikrofon sie nicht hört.",
   consentAllow: "Mikrofon einschalten",
   consentTyped: "Lieber schreiben",
   cancel: "Abbrechen",
@@ -201,7 +216,12 @@ const DE: VoiceStrings = {
     audio_capture:
       "Das Mikrofon liefert keinen Ton. Prüf, ob ein anderes Programm es benutzt, oder schreib deine Fragen unten ins Feld.",
     no_synthesis: "Dein Browser kann nicht vorlesen. Die Antworten erscheinen nur als Text.",
+    audio_blocked: "Dein Browser hat den Ton blockiert.",
+    mic_paused: "Das Mikrofon ist gerade unterbrochen.",
+    connection_weak: "Die Verbindung stockt gerade. Einen Moment.",
+    mic_off_long: "Das Mikrofon ist aus. Ohne Ton endet das Gespräch bald.",
   },
+  resumeAudio: "Ton einschalten",
   errors: {
     bad_request: "Das Gespräch konnte nicht gestartet werden.",
     too_large: "Diese Nachricht ist zu lang.",
@@ -225,6 +245,14 @@ const DE: VoiceStrings = {
     not_available_yet: "Das Live-Gespräch ist noch nicht verfügbar.",
     mode_unavailable: "Diese Art von Gespräch wird gerade nicht angeboten.",
     load_failed: "Der Sprachassistent konnte nicht geladen werden. Prüf die Verbindung und versuch es nochmals.",
+    connection_failed: "Die Verbindung kam nicht zustande. Versuch es nochmals, am besten in einem anderen Netz.",
+    connection_lost: "Die Verbindung ist abgebrochen. Starte ein neues Gespräch.",
+    in_app_browser: "In dieser App klappt das Gespräch nicht. Öffne die Seite in Safari oder Chrome.",
+  },
+  realtimeErrors: {
+    mic_denied:
+      "Der Zugriff auf das Mikrofon wurde nicht erlaubt. Du kannst ihn in den Einstellungen des Browsers freigeben.",
+    unsupported: "Dein Browser kann dieses Gespräch nicht führen. Versuch es mit einem aktuellen Chrome, Safari, Edge oder Firefox.",
   },
   tryLater: "Versuch es bitte später nochmals.",
   retry: "Nochmals versuchen",
@@ -273,6 +301,11 @@ const IT: VoiceStrings = {
     "Tra poco il browser ti chiede l'accesso al microfono. Quello che dici viene trasformato in testo e inviato all'AI. Una conversazione dura al massimo {minutes} minuti.",
   consentLocalNote:
     "In modalità di prova il riconoscimento vocale lo fa il browser, a seconda del browser tramite i server del suo fornitore.",
+  consentTextRealtime:
+    "Tra poco il browser ti chiede il microfono. La tua voce va direttamente a OpenAI, un fornitore statunitense. Lì l'AI ascolta, trascrive automaticamente la conversazione e risponde. Noi non registriamo l'audio. Quello che lasci per una richiamata o un appuntamento arriva per e-mail all'attività. Una conversazione dura al massimo {minutes} minuti.",
+  consentTextRealtimeDemo:
+    "Tra poco il browser ti chiede il microfono. La tua voce va direttamente a OpenAI, un fornitore statunitense. Lì l'AI ascolta, trascrive automaticamente la conversazione e risponde. Noi non registriamo l'audio. Questa è un'attività di esempio: quello che dici non viene inoltrato a nessuno. Una conversazione dura al massimo {minutes} minuti.",
+  realtimeCaptionsNote: "I sottotitoli non vengono letti durante la conversazione, perché il microfono non li senta.",
   consentAllow: "Accendi il microfono",
   consentTyped: "Preferisco scrivere",
   cancel: "Annulla",
@@ -337,7 +370,12 @@ const IT: VoiceStrings = {
     audio_capture:
       "Il microfono non trasmette audio. Controlla che non lo stia usando un altro programma, oppure scrivi nel campo qui sotto.",
     no_synthesis: "Il tuo browser non sa leggere ad alta voce. Le risposte compaiono solo come testo.",
+    audio_blocked: "Il browser ha bloccato l'audio.",
+    mic_paused: "Il microfono è interrotto.",
+    connection_weak: "La connessione è instabile. Un momento.",
+    mic_off_long: "Il microfono è spento. Senza audio la conversazione finisce presto.",
   },
+  resumeAudio: "Attiva l'audio",
   errors: {
     bad_request: "Non è stato possibile avviare la conversazione.",
     too_large: "Il messaggio è troppo lungo.",
@@ -361,6 +399,14 @@ const IT: VoiceStrings = {
     not_available_yet: "La conversazione dal vivo non è ancora disponibile.",
     mode_unavailable: "Questo tipo di conversazione al momento non è disponibile.",
     load_failed: "Non è stato possibile caricare l'assistente vocale. Controlla la connessione e riprova.",
+    connection_failed: "La connessione non è riuscita. Riprova, se puoi da un'altra rete.",
+    connection_lost: "La connessione si è interrotta. Inizia una nuova conversazione.",
+    in_app_browser: "In questa app la conversazione non funziona. Apri la pagina in Safari o Chrome.",
+  },
+  realtimeErrors: {
+    mic_denied: "L'accesso al microfono non è stato permesso. Puoi attivarlo nelle impostazioni del browser.",
+    unsupported:
+      "Il tuo browser non può gestire questa conversazione. Prova con una versione recente di Chrome, Safari, Edge o Firefox.",
   },
   tryLater: "Riprova più tardi.",
   retry: "Riprova",
@@ -409,6 +455,11 @@ const EN: VoiceStrings = {
     "Your browser will ask for the microphone in a moment. What you say is turned into text and sent to the AI. A conversation lasts {minutes} minutes at most.",
   consentLocalNote:
     "In test mode your browser does the speech recognition, depending on the browser through its maker's servers.",
+  consentTextRealtime:
+    "Your browser will ask for the microphone in a moment. Your voice goes straight to OpenAI, a US provider. There the AI listens, turns the conversation into text automatically and answers. We do not record any audio. What you leave for a callback or booking is e-mailed to the business. A conversation lasts {minutes} minutes at most.",
+  consentTextRealtimeDemo:
+    "Your browser will ask for the microphone in a moment. Your voice goes straight to OpenAI, a US provider. There the AI listens, turns the conversation into text automatically and answers. We do not record any audio. This is an example business: what you say is not passed on to anyone. A conversation lasts {minutes} minutes at most.",
+  realtimeCaptionsNote: "Captions are not read out during the call, so the microphone does not pick them up.",
   consentAllow: "Switch on the microphone",
   consentTyped: "I'd rather type",
   cancel: "Cancel",
@@ -472,7 +523,12 @@ const EN: VoiceStrings = {
     audio_capture:
       "The microphone gives no sound. Check whether another program is using it, or type your questions in the field below.",
     no_synthesis: "Your browser cannot read aloud. The answers appear as text only.",
+    audio_blocked: "Your browser blocked the sound.",
+    mic_paused: "The microphone is paused.",
+    connection_weak: "The connection is unstable. One moment.",
+    mic_off_long: "Your microphone is off. Without sound the call ends soon.",
   },
+  resumeAudio: "Turn on sound",
   errors: {
     bad_request: "The conversation could not be started.",
     too_large: "This message is too long.",
@@ -496,6 +552,13 @@ const EN: VoiceStrings = {
     not_available_yet: "The live conversation is not available yet.",
     mode_unavailable: "This kind of conversation is not offered right now.",
     load_failed: "The voice assistant could not be loaded. Check your connection and try again.",
+    connection_failed: "The connection could not be made. Try again, ideally on another network.",
+    connection_lost: "The connection dropped. Start a new conversation.",
+    in_app_browser: "This won't work inside this app. Open the page in Safari or Chrome.",
+  },
+  realtimeErrors: {
+    mic_denied: "Access to the microphone was not allowed. You can turn it on in your browser's settings.",
+    unsupported: "Your browser cannot hold this conversation. Try a recent Chrome, Safari, Edge or Firefox.",
   },
   tryLater: "Please try again later.",
   retry: "Try again",
@@ -544,6 +607,11 @@ const FR: VoiceStrings = {
     "Votre navigateur va demander l'accès au micro. Ce que vous dites est transformé en texte et envoyé à l'IA. Une conversation dure au maximum {minutes} minutes.",
   consentLocalNote:
     "En mode test, la reconnaissance vocale est faite par votre navigateur, selon le navigateur via les serveurs de son fournisseur.",
+  consentTextRealtime:
+    "Votre navigateur va demander l'accès au micro. Votre voix part directement chez OpenAI, un prestataire américain. Là, l'IA écoute, transcrit automatiquement la conversation et répond. Nous n'enregistrons aucun son. Ce que vous laissez pour un rappel ou un rendez-vous est envoyé par e-mail à l'entreprise. Une conversation dure au maximum {minutes} minutes.",
+  consentTextRealtimeDemo:
+    "Votre navigateur va demander l'accès au micro. Votre voix part directement chez OpenAI, un prestataire américain. Là, l'IA écoute, transcrit automatiquement la conversation et répond. Nous n'enregistrons aucun son. Ceci est une entreprise d'exemple : ce que vous dites n'est transmis à personne. Une conversation dure au maximum {minutes} minutes.",
+  realtimeCaptionsNote: "Les sous-titres ne sont pas lus pendant l'appel, pour que le micro ne les capte pas.",
   consentAllow: "Allumer le micro",
   consentTyped: "Je préfère écrire",
   cancel: "Annuler",
@@ -609,7 +677,12 @@ const FR: VoiceStrings = {
     audio_capture:
       "Le micro ne transmet aucun son. Vérifiez qu'aucun autre programme ne l'utilise, ou écrivez dans le champ ci-dessous.",
     no_synthesis: "Votre navigateur ne sait pas lire à voix haute. Les réponses s'affichent uniquement en texte.",
+    audio_blocked: "Votre navigateur a bloqué le son.",
+    mic_paused: "Le micro est interrompu.",
+    connection_weak: "La connexion est instable. Un instant.",
+    mic_off_long: "Le micro est coupé. Sans son, l'appel se termine bientôt.",
   },
+  resumeAudio: "Activer le son",
   errors: {
     bad_request: "La conversation n'a pas pu démarrer.",
     too_large: "Ce message est trop long.",
@@ -633,6 +706,14 @@ const FR: VoiceStrings = {
     not_available_yet: "La conversation en direct n'est pas encore disponible.",
     mode_unavailable: "Ce type de conversation n'est pas proposé pour le moment.",
     load_failed: "L'assistant vocal n'a pas pu être chargé. Vérifiez votre connexion et réessayez.",
+    connection_failed: "La connexion n'a pas pu s'établir. Réessayez, si possible depuis un autre réseau.",
+    connection_lost: "La connexion a été coupée. Commencez une nouvelle conversation.",
+    in_app_browser: "Cela ne fonctionne pas dans cette application. Ouvrez la page dans Safari ou Chrome.",
+  },
+  realtimeErrors: {
+    mic_denied: "L'accès au micro n'a pas été autorisé. Vous pouvez l'activer dans les réglages du navigateur.",
+    unsupported:
+      "Votre navigateur ne peut pas mener cette conversation. Essayez une version récente de Chrome, Safari, Edge ou Firefox.",
   },
   tryLater: "Veuillez réessayer plus tard.",
   retry: "Réessayer",

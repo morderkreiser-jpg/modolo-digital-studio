@@ -56,6 +56,9 @@ export const VOICE_CLIENT_ERROR_CODES = [
   "not_available_yet", // realtime: the grant came, the provider connection is not built yet
   "mode_unavailable", // the server answered with a mode the widget did not ask for
   "load_failed", // a lazy chunk (transport) could not be fetched
+  "connection_failed", // realtime: the call could not be connected
+  "connection_lost", // realtime: it broke off after it was connected
+  "in_app_browser", // an app's built-in browser that does not allow the call
 ] as const;
 export type VoiceClientErrorCode = (typeof VOICE_CLIENT_ERROR_CODES)[number];
 
@@ -83,7 +86,8 @@ export const VOICE_FAILURE_CODES: readonly VoiceFailureCode[] = [...VOICE_SERVER
 
 /**
  * Transient hints that do NOT end the conversation (the visitor can carry on, often by typing).
- * Cleared by the next caller activity or by NOTICE null.
+ * Cleared by the next caller activity or by NOTICE null; the realtime ones (STICKY_NOTICES) only
+ * by NOTICE.
  */
 export const VOICE_NOTICE_CODES = [
   "no_speech",
@@ -92,8 +96,20 @@ export const VOICE_NOTICE_CODES = [
   "recognition_unavailable",
   "audio_capture",
   "no_synthesis",
+  "audio_blocked", // the browser did not let the answer play
+  "mic_paused", // the system interrupted the microphone
+  "connection_weak", // the connection is unstable
+  "mic_off_long", // muted for a long time; the call will end soon
 ] as const;
 export type VoiceNoticeCode = (typeof VOICE_NOTICE_CODES)[number];
+
+/** Notices whose cause a barge-in does not remove: INTERRUPT keeps them. */
+const STICKY_NOTICES: ReadonlySet<VoiceNoticeCode> = new Set<VoiceNoticeCode>([
+  "audio_blocked",
+  "mic_paused",
+  "connection_weak",
+  "mic_off_long",
+]);
 
 export type VoiceMachineLimits = Pick<
   VoiceLimits,
@@ -148,7 +164,8 @@ export type VoiceEvent =
   | { type: "CONSENT"; input: "voice" | "text" }
   | { type: "CANCEL" }
   | { type: "MIC_GRANTED" }
-  | { type: "MIC_FAILED"; code: "mic_denied" | "mic_unavailable" }
+  /** in_app_browser: either failure inside an app's built-in browser (realtime). */
+  | { type: "MIC_FAILED"; code: "mic_denied" | "mic_unavailable" | "in_app_browser" }
   /** The transport goes on without the microphone (typed input, or a mode that does not need it yet). */
   | { type: "CONNECTING" }
   | { type: "CONNECTED"; limits?: Partial<VoiceMachineLimits> }
@@ -157,7 +174,11 @@ export type VoiceEvent =
   | { type: "SPEAKING" }
   /** The caller spoke over the assistant (barge-in). */
   | { type: "INTERRUPT" }
-  | { type: "CAPTION"; caption: VoiceCaption }
+  /**
+   * A caption line, new or updated. `before`: the id of a line already shown that a NEW line goes
+   * above (ignored for updates). A final update with empty text removes the line.
+   */
+  | { type: "CAPTION"; caption: VoiceCaption; before?: string }
   | { type: "TOOL"; name: VoiceToolName; status: "started" | "ok" | "failed" }
   | { type: "HANDOFF"; handoff: HandoffNotice }
   | { type: "NOTICE"; notice: VoiceNoticeCode | null }
@@ -323,6 +344,16 @@ export function recoveryFor(
       if (canType) actions.push("type_instead");
       if (example) actions.push("watch_example");
       break;
+    case "in_app_browser":
+      // Trying again in the same app cannot help: the text says to open the page in a browser.
+      if (example) actions.push("watch_example");
+      break;
+    case "connection_failed":
+      actions.push("retry");
+      break;
+    case "connection_lost":
+      actions.push("new_conversation");
+      break;
     case "network":
     case "offline":
     case "busy":
@@ -437,8 +468,13 @@ function step(state: VoiceMachineState, event: VoiceEvent): VoiceMachineState {
         ...state,
         status: "listening",
         limits,
-        // The clock only runs for a real conversation; an example plays at its own pace.
-        secondsLeft: isLiveMode(state.mode) ? limits.maxCallSeconds : null,
+        // The clock only runs for a real conversation; an example plays at its own pace. A count
+        // the server already sent (REMAINING before the connection) is lower and stays.
+        secondsLeft: !isLiveMode(state.mode)
+          ? null
+          : state.secondsLeft === null
+            ? limits.maxCallSeconds
+            : Math.min(state.secondsLeft, limits.maxCallSeconds),
         silentSeconds: 0,
       };
     }
@@ -461,11 +497,18 @@ function step(state: VoiceMachineState, event: VoiceEvent): VoiceMachineState {
     case "INTERRUPT":
       if (state.status !== "speaking") return state;
       // The reply was cut, its stream with it: a tool it had started will never report back.
-      return { ...state, status: "listening", silentSeconds: 0, notice: null, activeTool: null };
+      // A notice whose cause is still there (blocked sound, paused microphone...) stays.
+      return {
+        ...state,
+        status: "listening",
+        silentSeconds: 0,
+        notice: state.notice !== null && STICKY_NOTICES.has(state.notice) ? state.notice : null,
+        activeTool: null,
+      };
 
     case "CAPTION": {
       if (!acceptsTransportEvents(state.status)) return state;
-      const captions = upsertCaption(state.captions, event.caption);
+      const captions = upsertCaption(state.captions, event.caption, event.before);
       if (captions === state.captions) return state;
       const fromCaller = event.caption.role === "caller";
       return {
@@ -578,14 +621,24 @@ function finalizeCaptions(captions: VoiceCaption[]): VoiceCaption[] {
     .map((caption) => (caption.final ? caption : { ...caption, final: true }));
 }
 
-function upsertCaption(captions: VoiceCaption[], caption: VoiceCaption): VoiceCaption[] {
+/**
+ * Adds or updates one line. A NEW line with text goes above the line named by `before` when that
+ * line is on screen (a caller's words transcribed after the reply had started), else at the end.
+ * An update never moves a line; a final update with empty text removes it (a transcription that
+ * failed after its first words were shown).
+ */
+function upsertCaption(captions: VoiceCaption[], caption: VoiceCaption, before?: string): VoiceCaption[] {
   const index = captions.findIndex((existing) => existing.id === caption.id);
   if (index === -1) {
     if (caption.text.trim() === "") return captions;
-    const next = [...captions, caption];
+    const at = before === undefined ? -1 : captions.findIndex((existing) => existing.id === before);
+    const next = at === -1 ? [...captions, caption] : [...captions.slice(0, at), caption, ...captions.slice(at)];
     return next.length > MAX_CAPTIONS ? next.slice(next.length - MAX_CAPTIONS) : next;
   }
   const existing = captions[index];
+  if (caption.final && caption.text.trim() === "") {
+    return [...captions.slice(0, index), ...captions.slice(index + 1)];
+  }
   // A late interim result must not reopen a finished line.
   if (existing.final && !caption.final) return captions;
   if (existing.text === caption.text && existing.final === caption.final && existing.locale === caption.locale) {

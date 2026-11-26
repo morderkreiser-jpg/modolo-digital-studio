@@ -113,6 +113,20 @@ describe("starting a conversation", () => {
   it("runs no clock for an example", () => {
     assert.equal(playingScripted().secondsLeft, null);
   });
+
+  it("keeps a lower count the server sent before CONNECTED, and never raises it", () => {
+    const connecting = run(fresh(), { type: "START", mode: "realtime" }, { type: "CONSENT", input: "voice" }, { type: "MIC_GRANTED" });
+    const early = run(connecting, { type: "REMAINING", seconds: 200 });
+    assert.equal(early.status, "connecting");
+    assert.equal(early.secondsLeft, 200);
+    const lower = run(early, { type: "CONNECTED", limits: { maxCallSeconds: 240 } });
+    assert.equal(lower.status, "listening");
+    assert.equal(lower.secondsLeft, 200, "the server's own count stays");
+    const shorter = run(early, { type: "CONNECTED", limits: { maxCallSeconds: 150 } });
+    assert.equal(shorter.secondsLeft, 150, "the smaller of the two");
+    const none = run(connecting, { type: "CONNECTED", limits: { maxCallSeconds: 240 } });
+    assert.equal(none.secondsLeft, 240, "no earlier count: the call length");
+  });
 });
 
 describe("turn-taking", () => {
@@ -539,6 +553,114 @@ describe("double-click guard (interfaccia F11)", () => {
     assert.equal(activationAllowed(ACTIVATION_GUARD_MS - 1, 1), false);
     assert.equal(activationAllowed(ACTIVATION_GUARD_MS, 1), true);
     assert.equal(activationAllowed(3_000, 0), true);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The realtime call (captions placed by the server, notices, recovery)
+// ---------------------------------------------------------------------------------------------
+
+/** A realtime call, connected, the assistant speaking its reply (line a-1 on screen). */
+function speakingRealtime(): VoiceMachineState {
+  return run(
+    fresh(),
+    { type: "START", mode: "realtime" },
+    { type: "CONSENT", input: "voice" },
+    { type: "MIC_GRANTED" },
+    { type: "CONNECTED" },
+    { type: "THINKING" },
+    { type: "SPEAKING" },
+    caption("a-1", "assistant", "Guten Tag", false),
+  );
+}
+
+const placed = (id: string, role: VoiceCaption["role"], text: string, before: string, final = true): VoiceEvent => ({
+  type: "CAPTION",
+  caption: { id, role, text, final, locale: "de" },
+  before,
+});
+
+describe("realtime captions", () => {
+  it("a caption may be placed above an earlier line", () => {
+    let state = run(speakingRealtime(), caption("a-2", "assistant", "Gerne", false));
+    state = run(state, placed("c-1", "caller", "Ich hätte eine Frage", "a-2"));
+    assert.deepEqual(
+      state.captions.map((line) => line.id),
+      ["a-1", "c-1", "a-2"],
+    );
+    assert.equal(state.silentSeconds, 0);
+  });
+
+  it("a placed caption ignores a missing target and is appended", () => {
+    const state = run(speakingRealtime(), placed("c-1", "caller", "Hallo", "a-9"));
+    assert.deepEqual(
+      state.captions.map((line) => line.id),
+      ["a-1", "c-1"],
+    );
+  });
+
+  it("an update never moves a line", () => {
+    let state = run(speakingRealtime(), caption("c-1", "caller", "Hallo", false), caption("a-2", "assistant", "Ja", false));
+    state = run(state, placed("c-1", "caller", "Hallo zusammen", "a-1"));
+    assert.deepEqual(
+      state.captions.map((line) => line.id),
+      ["a-1", "c-1", "a-2"],
+    );
+    assert.equal(state.captions[1].text, "Hallo zusammen");
+    assert.equal(state.captions[1].final, true);
+    // An empty new line stays away, wherever it was meant to go.
+    assert.equal(run(state, placed("c-2", "caller", "  ", "a-2")).captions.length, 3);
+  });
+
+  it("an empty final update removes the line", () => {
+    let state = run(speakingRealtime(), caption("c-1", "caller", "Ich", false), caption("a-2", "assistant", "Ja"));
+    state = run(state, caption("c-1", "caller", " ", true));
+    assert.deepEqual(
+      state.captions.map((line) => line.id),
+      ["a-1", "a-2"],
+    );
+    // Also a line that was already final.
+    state = run(state, caption("a-2", "assistant", "", true));
+    assert.deepEqual(
+      state.captions.map((line) => line.id),
+      ["a-1"],
+    );
+  });
+});
+
+describe("realtime notices", () => {
+  it("an interruption keeps the audio_blocked notice", () => {
+    for (const notice of ["audio_blocked", "mic_paused", "connection_weak", "mic_off_long"] as const) {
+      const state = run(speakingRealtime(), { type: "NOTICE", notice }, { type: "INTERRUPT" });
+      assert.equal(state.status, "listening");
+      assert.equal(state.notice, notice, `${notice} stays: its cause has not gone away`);
+    }
+    const hint = run(speakingRealtime(), { type: "NOTICE", notice: "no_speech" }, { type: "INTERRUPT" });
+    assert.equal(hint.notice, null, "the other notices are still cleared");
+  });
+
+  it("a caller caption clears only the no-speech hint", () => {
+    const state = run(speakingRealtime(), { type: "NOTICE", notice: "audio_blocked" }, caption("c-1", "caller", "Hallo"));
+    assert.equal(state.notice, "audio_blocked");
+  });
+
+  it("an app's built-in browser may fail the microphone step", () => {
+    const state = run(fresh(), { type: "START", mode: "realtime" }, { type: "CONSENT", input: "voice" }, { type: "MIC_FAILED", code: "in_app_browser" });
+    assert.equal(state.status, "error");
+    assert.equal(state.errorCode, "in_app_browser");
+  });
+});
+
+describe("realtime recovery", () => {
+  it("recovery offers retry for connection_failed, a new conversation for connection_lost, and never retry first for an in-app browser", () => {
+    const realtime = { mode: "realtime", hasScripts: true, hasContact: true } as const;
+    assert.deepEqual(recoveryFor("connection_failed", realtime), ["retry", "contact"]);
+    assert.deepEqual(recoveryFor("connection_lost", realtime), ["new_conversation", "contact"]);
+    assert.deepEqual(recoveryFor("in_app_browser", realtime), ["watch_example", "contact"]);
+    assert.deepEqual(recoveryFor("in_app_browser", { ...realtime, hasScripts: false }), ["contact"]);
+    assert.deepEqual(recoveryFor("in_app_browser", { ...realtime, hasContact: false }), ["watch_example"]);
+    // With neither, the last resort stays: the card is never empty.
+    assert.deepEqual(recoveryFor("in_app_browser", { mode: "realtime", hasScripts: false, hasContact: false }), ["retry"]);
   });
 });
 

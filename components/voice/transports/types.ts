@@ -1,6 +1,6 @@
 // The one interface the voice widget talks to, whatever carries the conversation: a written
 // example on timers (scripted.ts), the browser's own speech engines around our text endpoint
-// (local.ts), or later a voice provider over WebRTC (realtime.ts).
+// (local.ts), or a voice provider over WebRTC (realtime.ts).
 //
 // Transports report through events that are machine events (voice-machine.ts), so the stage
 // feeds them straight into the reducer and illegal or late ones are dropped there.
@@ -32,6 +32,11 @@ export interface VoiceTransport {
   onEvent(listener: VoiceTransportListener): () => void;
   /** Loudness 0..1 for the orb, polled once per animation frame: cheap and never throws. */
   getLevel(): number;
+  /**
+   * The visitor pressed the turn-on-sound button: retry playback inside this gesture. Never
+   * throws. Only transports whose playback a browser can block implement it (realtime).
+   */
+  resumeAudio?(): void;
 }
 
 export interface VoiceTransportOptions {

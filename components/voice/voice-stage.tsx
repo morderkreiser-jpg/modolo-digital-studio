@@ -560,6 +560,7 @@ function Stage({
   const honeypotRef = useRef<HTMLInputElement>(null);
   const recoveryRef = useRef<HTMLDivElement>(null);
   const captionsRef = useRef<HTMLDivElement>(null);
+  const resumeRef = useRef<HTMLButtonElement>(null);
   const transportRef = useRef<VoiceTransport | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
   /** Bumped by every start, reset and end: a chunk that arrives late for an old attempt is ignored. */
@@ -965,6 +966,26 @@ function Stage({
     if (typed && typedField && focusIsOurs(rootRef.current)) inputRef.current?.focus();
   }, [typed, typedField]);
 
+  // The browser blocked the answer's sound: when focus is inside the stage, it moves to the
+  // button that turns the sound on, so a keyboard or screen-reader visitor has it at hand.
+  const notice = state.notice;
+  useEffect(() => {
+    if (notice !== "audio_blocked") return;
+    const root = rootRef.current;
+    const active = document.activeElement;
+    if (root !== null && active !== null && root.contains(active)) resumeRef.current?.focus();
+  }, [notice]);
+  // The sound came on: the button is gone, and with it the focus it had. Before the browser paints,
+  // focus moves to the primary button (it ends the call; Escape works again), without scrolling.
+  const previousNoticeRef = useRef(notice);
+  useLayoutEffect(() => {
+    const previous = previousNoticeRef.current;
+    previousNoticeRef.current = notice;
+    if (previous === "audio_blocked" && notice !== "audio_blocked" && focusWasDropped()) {
+      primaryRef.current?.focus({ preventScroll: true });
+    }
+  }, [notice]);
+
   // ----- Render -----------------------------------------------------------------------------------
   if (firstMode === null) return null;
 
@@ -1047,9 +1068,32 @@ function Stage({
     }
   }
 
+  // A realtime call reads its own consent: the voice goes to the provider, and an example
+  // business passes nothing on. Its length is the one the public config already caps for realtime.
+  const realtime = state.mode === "realtime";
+  const consentText = realtime
+    ? formatVoiceString(config.kind === "demo" ? strings.consentTextRealtimeDemo : strings.consentTextRealtime, {
+        minutes: Math.max(1, Math.ceil(config.limits.maxCallSeconds / 60)),
+      })
+    : formatVoiceString(strings.consentText, { minutes });
+  const consentDescribedBy = state.mode === "local" || realtime ? `${consentTextId} ${consentNoteId}` : consentTextId;
+  // While a realtime call runs, the microphone is open and the caller may speak over the
+  // assistant: a screen reader reading captions or each turn aloud would be heard as the caller.
+  // The captions stay visible (the transcript button reads them on demand), the status region
+  // says "listening" once, and notices and alerts are read as always.
+  const quietCaptions = realtime && status !== "idle" && status !== "consent";
+  const quietStatus = realtime && talking;
+  const shownStatus = statusText(state, strings, recentTool?.name ?? null);
+
+  const errorText =
+    state.errorCode === null
+      ? ""
+      : realtime && (state.errorCode === "mic_denied" || state.errorCode === "unsupported")
+        ? strings.realtimeErrors[state.errorCode]
+        : strings.errors[state.errorCode];
   const errorMessage =
     state.errorCode !== null
-      ? `${strings.errors[state.errorCode]}${
+      ? `${errorText}${
           LATER_CODES.has(state.errorCode) || (state.retryAfter !== null && state.retryAfter > 60) ? ` ${strings.tryLater}` : ""
         }`
       : "";
@@ -1116,7 +1160,7 @@ function Stage({
             locales={localeOptions}
             value={locale}
             label={strings.languageLabel}
-            disabled={shownMode === "scripted" && isActive(status)}
+            disabled={(shownMode === "scripted" || state.mode === "realtime") && isActive(status)}
             onChange={(next) => dispatch({ type: "SET_LOCALE", locale: next })}
           />
         ) : null}
@@ -1133,7 +1177,15 @@ function Stage({
         <div className={styles.statusRow}>
           <p className={styles.status} role="status">
             <span className={styles.statusMark} aria-hidden="true" />
-            {statusText(state, strings, recentTool?.name ?? null)}
+            {quietStatus ? (
+              <>
+                {/* Seen, not read out: a screen reader's voice would reach the open microphone. */}
+                <span aria-hidden="true">{shownStatus}</span>
+                <span className={styles.srOnly}>{strings.status.listening}</span>
+              </>
+            ) : (
+              shownStatus
+            )}
           </p>
           {showTimer && state.secondsLeft !== null ? (
             <p className={styles.timer} aria-hidden="true">
@@ -1160,7 +1212,7 @@ function Stage({
           data-empty={visibleCaptions.length === 0 && !scriptedEnd ? "" : undefined}
           onScroll={reserveCaptions ? onCaptionsScroll : undefined}
         >
-          <div className={styles.log} role="log" aria-live="polite" aria-label={strings.captionsLabel}>
+          <div className={styles.log} role="log" aria-live={quietCaptions ? "off" : "polite"} aria-label={strings.captionsLabel}>
             {visibleCaptions.map((caption) => (
               <CaptionLine
                 key={`${caption.id}:${caption.final ? "f" : "i"}`}
@@ -1192,7 +1244,25 @@ function Stage({
 
         {/* Always in the DOM: a live region inserted together with its text is often not read. */}
         <div className={styles.notice} aria-live="polite">
-          {state.notice !== null ? <p>{strings.notices[state.notice]}</p> : null}
+          {state.notice !== null ? (
+            <p>
+              {strings.notices[state.notice]}
+              {state.notice === "audio_blocked" ? (
+                <>
+                  {" "}
+                  {/* Playback may only be retried inside a gesture: this click is one. */}
+                  <button
+                    ref={resumeRef}
+                    type="button"
+                    className={styles.secondary}
+                    onClick={() => transportRef.current?.resumeAudio?.()}
+                  >
+                    {strings.resumeAudio}
+                  </button>
+                </>
+              ) : null}
+            </p>
+          ) : null}
           {/* Shortly before a long silence ends the call; any activity of the caller clears it. */}
           {silenceWarningVisible(state) ? <p>{strings.silenceWarning}</p> : null}
           {/* A written example says it in its box (above); a live conversation says it here. */}
@@ -1210,17 +1280,23 @@ function Stage({
             role="group"
             tabIndex={-1}
             aria-labelledby={`${titleId}-consent`}
-            aria-describedby={state.mode === "local" ? `${consentTextId} ${consentNoteId}` : consentTextId}
+            aria-describedby={consentDescribedBy}
           >
             <p id={`${titleId}-consent`} className={styles.cardTitle}>
               {strings.consentTitle}
             </p>
             <p id={consentTextId} className={styles.cardText}>
-              {formatVoiceString(strings.consentText, { minutes })}
+              {consentText}
             </p>
             {state.mode === "local" ? (
               <p id={consentNoteId} className={styles.cardNote}>
                 {strings.consentLocalNote}
+              </p>
+            ) : null}
+            {state.mode === "realtime" ? (
+              // For screen readers only: why the captions go quiet once the call runs.
+              <p id={consentNoteId} className={styles.srOnly}>
+                {strings.realtimeCaptionsNote}
               </p>
             ) : null}
             {state.mode === "local" && !hasRecognition() ? (
@@ -1232,7 +1308,7 @@ function Stage({
                 <button
                   type="button"
                   className={styles.primary}
-                  aria-describedby={state.mode === "local" ? `${consentTextId} ${consentNoteId}` : consentTextId}
+                  aria-describedby={consentDescribedBy}
                   onClick={(event) => {
                     if (deliberate(event)) consent("voice");
                   }}

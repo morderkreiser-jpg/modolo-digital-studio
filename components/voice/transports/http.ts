@@ -1,14 +1,19 @@
 // Network code shared by the live transports: the session request, the turn stream (Server-Sent
-// Events) and the end report. Every function here resolves instead of throwing, so a transport
-// never has an unhandled rejection between it and the widget.
+// Events), the realtime call stream, the ready signal and the end report. Every function here
+// resolves instead of throwing, so a transport never has an unhandled rejection between it and
+// the widget.
 //
-// Wire format of the turn stream (see TurnStreamEvent in lib/voice/types.ts): frames separated by
-// a blank line, each "data: <json>"; lines starting with ":" are comments (": ping" keep-alives
-// while the model thinks) and are skipped.
+// Wire format of both streams (TurnStreamEvent and CallStreamEvent in lib/voice/types.ts): frames
+// separated by a blank line, each "data: <json>"; lines starting with ":" are comments (": ping"
+// keep-alives while the model thinks or the call runs) and are skipped.
 import {
   isVoiceLocale,
   isVoiceToolName,
+  type CallEndReason,
+  type CallRequestBody,
+  type CallStreamEvent,
   type EndRequestBody,
+  type ReadyRequestBody,
   type SessionGrant,
   type SessionRequestBody,
   type TurnStreamEvent,
@@ -23,6 +28,14 @@ const MODES: readonly VoiceMode[] = ["scripted", "local", "realtime"];
 /** A frame larger than this is not ours: the decoder drops it instead of growing without end. */
 const MAX_FRAME_CHARS = 256 * 1024;
 const SESSION_TIMEOUT_MS = 15_000;
+/** The call route answers with its headers once the provider created the call (about a second). */
+const CALL_OPEN_TIMEOUT_MS = 20_000;
+const READY_TIMEOUT_MS = 5_000;
+/** A browser's answer SDP is a few kilobytes; anything far larger is not one. */
+const MAX_ANSWER_SDP_CHARS = 20_000;
+const CALL_END_REASONS: readonly CallEndReason[] = ["assistant", "timeout", "silence", "user", "error", "limit"];
+/** Our caption ids: "a-<n>" for the assistant, "c-<n>" for the caller. */
+const CAPTION_ID_RE = /^[ac]-\d{1,6}$/;
 
 export type SessionResult =
   | { ok: true; grant: SessionGrant }
@@ -94,9 +107,36 @@ export async function readTurnStream(
   onEvent: (event: TurnStreamEvent) => void,
   options: { signal: AbortSignal; idleTimeoutMs: number },
 ): Promise<StreamOutcome> {
+  return readStream(body, onEvent, options, isTurnStreamEvent, (event) =>
+    event.type === "done" ? "done" : event.type === "error" ? "error" : null,
+  );
+}
+
+/**
+ * Reads the body of a realtime call (POST /api/voice/call) as readTurnStream reads a turn: it
+ * ends with "done" after an `ended` event and with "error" after an `error` event; the other
+ * outcomes are the same. Never throws.
+ */
+export async function readCallStream(
+  body: ReadableStream<Uint8Array>,
+  onEvent: (event: CallStreamEvent) => void,
+  options: { signal: AbortSignal; idleTimeoutMs: number },
+): Promise<StreamOutcome> {
+  return readStream(body, onEvent, options, isCallStreamEvent, (event) =>
+    event.type === "ended" ? "done" : event.type === "error" ? "error" : null,
+  );
+}
+
+async function readStream<T>(
+  body: ReadableStream<Uint8Array>,
+  onEvent: (event: T) => void,
+  options: { signal: AbortSignal; idleTimeoutMs: number },
+  isEvent: (value: unknown) => value is T,
+  settles: (event: T) => StreamOutcome | null,
+): Promise<StreamOutcome> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
-  const sse = createSseDecoder();
+  const sse = createSseDecoder(isEvent);
   let idle = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const armIdle = () => {
@@ -111,11 +151,11 @@ export async function readTurnStream(
   };
   options.signal.addEventListener("abort", onAbort, { once: true });
 
-  const deliver = (events: TurnStreamEvent[]): StreamOutcome | null => {
+  const deliver = (events: T[]): StreamOutcome | null => {
     for (const event of events) {
       onEvent(event);
-      if (event.type === "done") return "done";
-      if (event.type === "error") return "error";
+      const settled = settles(event);
+      if (settled) return settled;
     }
     return null;
   };
@@ -146,12 +186,15 @@ export async function readTurnStream(
 
 /**
  * Incremental SSE decoder: push text as it arrives, get back the complete events. Comment
- * frames, unknown fields, malformed JSON and events outside the contract are skipped.
+ * frames, unknown fields, malformed JSON and events outside the contract (`isEvent`, the turn
+ * stream's by default) are skipped.
  */
-export function createSseDecoder(): { push: (chunk: string) => TurnStreamEvent[]; flush: () => TurnStreamEvent[] } {
+export function createSseDecoder<T = TurnStreamEvent>(
+  isEvent: (value: unknown) => value is T = isTurnStreamEvent as never,
+): { push: (chunk: string) => T[]; flush: () => T[] } {
   let buffer = "";
 
-  const decodeFrame = (frame: string, events: TurnStreamEvent[]) => {
+  const decodeFrame = (frame: string, events: T[]) => {
     const data: string[] = [];
     for (const line of frame.split("\n")) {
       if (line.startsWith(":")) continue; // comment, e.g. ": ping"
@@ -163,7 +206,7 @@ export function createSseDecoder(): { push: (chunk: string) => TurnStreamEvent[]
     if (data.length === 0) return;
     try {
       const parsed: unknown = JSON.parse(data.join("\n"));
-      if (isTurnStreamEvent(parsed)) events.push(parsed);
+      if (isEvent(parsed)) events.push(parsed);
     } catch {
       // Not JSON: not one of ours.
     }
@@ -176,7 +219,7 @@ export function createSseDecoder(): { push: (chunk: string) => TurnStreamEvent[]
       // across two chunks: it waits for the next chunk.
       const held = buffer.endsWith("\r") ? "\r" : "";
       let text = (held ? buffer.slice(0, -1) : buffer).replace(/\r\n?/g, "\n");
-      const events: TurnStreamEvent[] = [];
+      const events: T[] = [];
       let boundary = text.indexOf("\n\n");
       while (boundary !== -1) {
         decodeFrame(text.slice(0, boundary), events);
@@ -187,13 +230,88 @@ export function createSseDecoder(): { push: (chunk: string) => TurnStreamEvent[]
       return events;
     },
     flush() {
-      const events: TurnStreamEvent[] = [];
+      const events: T[] = [];
       const rest = buffer.replace(/\r\n?/g, "\n").trim();
       buffer = "";
       if (rest) decodeFrame(rest, events);
       return events;
     },
   };
+}
+
+export type CallOpenResult =
+  | { ok: true; body: ReadableStream<Uint8Array> }
+  | { ok: false; code: VoiceFailureCode; retryAfter?: number };
+
+/**
+ * POST config.endpoints.call with the browser's SDP offer. Resolves with the event stream's body
+ * once the headers are there, or a failure code; never throws. Our own deadline covers only the
+ * wait for the headers (CALL_OPEN_TIMEOUT_MS): the body is the whole call and runs until the
+ * server ends it or `signal` aborts.
+ */
+export async function openCall(endpoint: string, body: CallRequestBody, signal: AbortSignal): Promise<CallOpenResult> {
+  if (isOffline()) return { ok: false, code: "offline" };
+  const request = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    request.abort();
+  }, CALL_OPEN_TIMEOUT_MS);
+  // Stays attached for the life of the body: aborting `signal` also cuts the running stream.
+  const onAbort = () => request.abort();
+  if (signal.aborted) request.abort();
+  else signal.addEventListener("abort", onAbort, { once: true });
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify(body),
+      signal: request.signal,
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    clearTimeout(timer);
+    if (response.ok && isEventStream(response) && response.body) return { ok: true, body: response.body };
+    signal.removeEventListener("abort", onAbort);
+    return failureFrom(response, await readJson(response));
+  } catch {
+    clearTimeout(timer);
+    signal.removeEventListener("abort", onAbort);
+    if (signal.aborted) return { ok: false, code: "network" };
+    if (timedOut) return { ok: false, code: "timeout" };
+    return { ok: false, code: isOffline() ? "offline" : "network" };
+  }
+}
+
+/**
+ * Tells the ready endpoint that the call's audio is connected and plays. A keepalive fetch whose
+ * short deadline (READY_TIMEOUT_MS) covers only the wait for the answer's headers: once they are
+ * there the request is never aborted, and the body is read and discarded. Fire and forget; never
+ * throws.
+ */
+export function sendReady(endpoint: string, body: ReadyRequestBody): void {
+  try {
+    const request = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = request ? setTimeout(() => request.abort(), READY_TIMEOUT_MS) : undefined;
+    void fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      keepalive: true,
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: request?.signal,
+    })
+      .then((response) => {
+        clearTimeout(timer);
+        return response.arrayBuffer();
+      })
+      .catch(() => {
+        clearTimeout(timer);
+      });
+  } catch {
+    // The server greets after its own fallback wait instead.
+  }
 }
 
 /**
@@ -268,12 +386,8 @@ export function isTurnStreamEvent(value: unknown): value is TurnStreamEvent {
       return typeof value.text === "string";
     case "tool":
       return isVoiceToolName(value.name) && (value.status === "started" || value.status === "ok" || value.status === "failed");
-    case "handoff": {
-      const handoff = value.handoff;
-      if (!isRecord(handoff)) return false;
-      if (handoff.kind === "transfer") return typeof handoff.targetLabel === "string";
-      return handoff.kind === "callback" || handoff.kind === "written";
-    }
+    case "handoff":
+      return isHandoff(value.handoff);
     case "done":
       return (
         typeof value.ended === "boolean" &&
@@ -285,6 +399,54 @@ export function isTurnStreamEvent(value: unknown): value is TurnStreamEvent {
     default:
       return false;
   }
+}
+
+/** One frame of the realtime call stream, exactly as CallStreamEvent describes it. */
+export function isCallStreamEvent(value: unknown): value is CallStreamEvent {
+  if (!isRecord(value) || typeof value.type !== "string") return false;
+  switch (value.type) {
+    case "answer":
+      return (
+        typeof value.sdp === "string" &&
+        value.sdp.length <= MAX_ANSWER_SDP_CHARS &&
+        isFiniteNumber(value.maxSeconds) &&
+        value.maxSeconds > 0
+      );
+    case "status":
+      return value.status === "listening" || value.status === "thinking" || value.status === "speaking";
+    case "interrupted":
+      return true;
+    case "activity":
+      return value.speech === "started" || value.speech === "stopped";
+    case "caption":
+      return (
+        typeof value.id === "string" &&
+        CAPTION_ID_RE.test(value.id) &&
+        (value.role === "assistant" || value.role === "caller") &&
+        typeof value.text === "string" &&
+        typeof value.final === "boolean" &&
+        (value.before === undefined || (typeof value.before === "string" && CAPTION_ID_RE.test(value.before))) &&
+        (value.locale === undefined || isVoiceLocale(value.locale))
+      );
+    case "tool":
+      return isVoiceToolName(value.name) && (value.status === "started" || value.status === "ok" || value.status === "failed");
+    case "handoff":
+      return isHandoff(value.handoff);
+    case "remaining":
+      return isFiniteNumber(value.seconds) && value.seconds >= 0;
+    case "ended":
+      return typeof value.reason === "string" && (CALL_END_REASONS as readonly string[]).includes(value.reason);
+    case "error":
+      return isServerErrorCode(value.code) && (value.retryAfter === undefined || typeof value.retryAfter === "number");
+    default:
+      return false;
+  }
+}
+
+function isHandoff(handoff: unknown): boolean {
+  if (!isRecord(handoff)) return false;
+  if (handoff.kind === "transfer") return typeof handoff.targetLabel === "string";
+  return handoff.kind === "callback" || handoff.kind === "written";
 }
 
 function isServerErrorCode(value: unknown): value is VoiceErrorCode {

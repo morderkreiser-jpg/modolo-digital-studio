@@ -1,20 +1,25 @@
 // What the voice widget's transports are built from, tested without a browser: the turn-stream
 // decoder and the grant check (transports/http.ts), the speech text helpers (speech-text.ts), the
 // speech queue on a fake engine and a fake clock (speech-queue.ts), the phone defaults
-// (platform.ts), the live transports against a fake fetch (local.ts, realtime.ts: what they
-// send and what they hand back), and the orb's loop pacing (orb-motion.ts).
+// (platform.ts), the local transport against a fake fetch (local.ts: what it sends and what it
+// hands back), and the orb's loop pacing (orb-motion.ts). The realtime transport has its own
+// file (realtime-transport.test.ts).
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { afterEach, describe, it } from "node:test";
 import {
   announcedLocale,
   createSseDecoder,
   isSessionGrant,
   isTurnStreamEvent,
+  openCall,
+  readCallStream,
   readFailure,
+  sendReady,
 } from "@/components/voice/transports/http";
 import { busyRetryDelay, createLocalTransport } from "@/components/voice/transports/local";
 import { speechPlatform } from "@/components/voice/transports/platform";
-import { createRealtimeTransport } from "@/components/voice/transports/realtime";
 import {
   createSpeechQueue,
   SPEECH_TIMING,
@@ -32,7 +37,7 @@ import {
 } from "@/components/voice/transports/speech-text";
 import { easeLook, lookSettled, orbCadence, targetLook } from "@/components/voice/orb-motion";
 import type { VoiceTransportEvent } from "@/components/voice/voice-machine";
-import type { VoicePublicConfig } from "@/lib/voice/types";
+import type { CallStreamEvent, VoicePublicConfig } from "@/lib/voice/types";
 
 // ---------------------------------------------------------------------------------------------
 // Stream decoding and the session grant
@@ -750,36 +755,8 @@ describe("one turn at a time", () => {
   });
 });
 
-describe("realtime transport", () => {
-  const realFetch = globalThis.fetch;
-  afterEach(() => {
-    globalThis.fetch = realFetch;
-  });
-
-  it("hands back a session the server admits after the visitor stopped (sicurezza F8)", async () => {
-    const server = fakeServer();
-    const transport = createRealtimeTransport({ config: { ...CONFIG, modes: ["realtime", "scripted"] }, locale: "de" });
-    transport.start();
-    transport.stop("user");
-    assert.equal(server.calls[0].signal?.aborted, false);
-    server.answerSession(json(grant({ mode: "realtime" })));
-    await settle();
-    assert.deepEqual(server.ends(), [{ sessionToken: "token-1", reason: "user" }]);
-  });
-
-  it("hands the session back once when the connection cannot be made yet", async () => {
-    const server = fakeServer();
-    const transport = createRealtimeTransport({ config: { ...CONFIG, modes: ["realtime", "scripted"] }, locale: "de" });
-    const events = collect(transport);
-    transport.start();
-    server.answerSession(json(grant({ mode: "realtime" })));
-    await settle();
-    assert.deepEqual(events.map((event) => event.type), ["CONNECTING", "FAIL"]);
-    transport.stop("error");
-    transport.stop("error");
-    assert.deepEqual(server.ends(), [{ sessionToken: "token-1", reason: "error" }]);
-  });
-});
+// The realtime transport's cases (sicurezza F8, the token grant) live in realtime-transport.test.ts,
+// on the WebRTC fakes.
 
 // ---------------------------------------------------------------------------------------------
 // The orb's loop (interfaccia F10)
@@ -811,5 +788,269 @@ describe("orb pacing", () => {
     }
     assert.ok(frames < 60 * 5, `settled after ${frames} frames`);
     assert.equal(lookSettled(look, goal, 0.3), false, "a level still dying down keeps it running");
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The realtime call's network code (transports/http.ts): the call stream, the call request, ready
+// ---------------------------------------------------------------------------------------------
+
+/** A body the test writes text into, chunk by chunk. */
+function chunkedBody() {
+  const encoder = new TextEncoder();
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    start(c) {
+      controller = c;
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  return {
+    body,
+    write(text: string) {
+      if (!cancelled) controller.enqueue(encoder.encode(text));
+    },
+    end() {
+      if (!cancelled) controller.close();
+    },
+    cancelled: () => cancelled,
+  };
+}
+
+async function settleRounds(): Promise<void> {
+  for (let round = 0; round < 20; round += 1) await new Promise((resolve) => setImmediate(resolve));
+}
+
+/** Tracks whether a promise has settled yet, and with what. */
+function watch<T>(promise: Promise<T>) {
+  const state: { done: boolean; value: T | undefined } = { done: false, value: undefined };
+  void promise.then((value) => {
+    state.done = true;
+    state.value = value;
+  });
+  return state;
+}
+
+const abortError = () => new DOMException("aborted", "AbortError");
+
+/** A fetch that never answers on its own: it rejects when its signal aborts. */
+function hangingFetch(seen: RequestInit[]): typeof fetch {
+  return (async (_input: unknown, init?: RequestInit) => {
+    seen.push(init ?? {});
+    return new Promise<Response>((_resolve, reject) => {
+      if (init?.signal?.aborted) reject(abortError());
+      init?.signal?.addEventListener("abort", () => reject(abortError()));
+    });
+  }) as typeof fetch;
+}
+
+describe("call stream decoding", () => {
+  it("decodes a frame split across chunks with CRLF line ends, and skips unknown frames and comments", async () => {
+    const stream = chunkedBody();
+    const events: CallStreamEvent[] = [];
+    const reading = readCallStream(stream.body, (event) => events.push(event), {
+      signal: new AbortController().signal,
+      idleTimeoutMs: 60_000,
+    });
+    const frame = `data: ${JSON.stringify({ type: "remaining", seconds: 90 })}\r\n\r\n`;
+    // The second chunk ends on the CR of a split CRLF: the frame is not complete yet.
+    stream.write(frame.slice(0, 10));
+    await settleRounds();
+    stream.write(frame.slice(10, frame.length - 1));
+    await settleRounds();
+    assert.deepEqual(events, []);
+    stream.write(frame.slice(frame.length - 1));
+    await settleRounds();
+    assert.deepEqual(events, [{ type: "remaining", seconds: 90 }], "decoded once, when its blank line is complete");
+    stream.write('data: {"type":"weird"}\n\n: ping\n\ndata: not json\n\ndata: {"type":"interrupted"}\n\n');
+    stream.end();
+    assert.equal(await reading, "eof");
+    assert.deepEqual(events, [{ type: "remaining", seconds: 90 }, { type: "interrupted" }]);
+  });
+
+  it("drops a frame larger than any of ours and decodes the next one", async () => {
+    const stream = chunkedBody();
+    const events: CallStreamEvent[] = [];
+    const reading = readCallStream(stream.body, (event) => events.push(event), {
+      signal: new AbortController().signal,
+      idleTimeoutMs: 60_000,
+    });
+    const huge = JSON.stringify({ type: "caption", id: "a-1", role: "assistant", text: "x".repeat(300_000), final: true });
+    stream.write(`data: ${huge.slice(0, 280_000)}`);
+    await settleRounds();
+    stream.write(`${huge.slice(280_000)}\n\ndata: {"type":"interrupted"}\n\n`);
+    stream.end();
+    assert.equal(await reading, "eof");
+    assert.deepEqual(events, [{ type: "interrupted" }]);
+  });
+
+  it("ends with done after an ended frame, hands nothing on after it, and lets the body go", async () => {
+    const stream = chunkedBody();
+    const events: CallStreamEvent[] = [];
+    const reading = readCallStream(stream.body, (event) => events.push(event), {
+      signal: new AbortController().signal,
+      idleTimeoutMs: 60_000,
+    });
+    stream.write('data: {"type":"ended","reason":"assistant"}\n\ndata: {"type":"interrupted"}\n\n');
+    assert.equal(await reading, "done");
+    assert.deepEqual(events, [{ type: "ended", reason: "assistant" }]);
+    assert.equal(stream.cancelled(), true);
+  });
+
+  it("ends with idle when no byte arrives in time, and with aborted when its signal aborts", async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const quiet = chunkedBody();
+    const idle = watch(readCallStream(quiet.body, () => undefined, { signal: new AbortController().signal, idleTimeoutMs: 45_000 }));
+    await settleRounds();
+    t.mock.timers.tick(44_000);
+    await settleRounds();
+    assert.equal(idle.done, false);
+    quiet.write(": ping\n\n"); // a keep-alive rearms the wait
+    await settleRounds();
+    t.mock.timers.tick(44_000);
+    await settleRounds();
+    assert.equal(idle.done, false);
+    t.mock.timers.tick(1_000);
+    await settleRounds();
+    assert.equal(idle.value, "idle");
+    assert.equal(quiet.cancelled(), true);
+
+    const cut = chunkedBody();
+    const controller = new AbortController();
+    const aborted = watch(readCallStream(cut.body, () => undefined, { signal: controller.signal, idleTimeoutMs: 45_000 }));
+    await settleRounds();
+    controller.abort();
+    await settleRounds();
+    assert.equal(aborted.value, "aborted");
+  });
+});
+
+describe("call request", () => {
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+  const body = { sessionToken: "token-1", sdp: "v=0" };
+
+  it("gives up with timeout when the headers do not come within 20 seconds", async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const seen: RequestInit[] = [];
+    globalThis.fetch = hangingFetch(seen);
+    const result = watch(openCall("/api/voice/call", body, new AbortController().signal));
+    await settleRounds();
+    t.mock.timers.tick(19_999);
+    await settleRounds();
+    assert.equal(result.done, false);
+    t.mock.timers.tick(1);
+    await settleRounds();
+    assert.deepEqual(result.value, { ok: false, code: "timeout" });
+    assert.equal(seen[0].signal?.aborted, true);
+  });
+
+  it("judges an HTML error page by its status, keeping a Retry-After header", async () => {
+    globalThis.fetch = (async () =>
+      new Response("<html>Bad gateway</html>", { status: 502, headers: { "content-type": "text/html" } })) as typeof fetch;
+    const bad = await openCall("/api/voice/call", body, new AbortController().signal);
+    assert.equal(bad.ok, false);
+    assert.equal(!bad.ok && bad.code, "upstream");
+    globalThis.fetch = (async () =>
+      new Response("<html>Busy</html>", { status: 503, headers: { "content-type": "text/html", "retry-after": "30" } })) as typeof fetch;
+    const busy = await openCall("/api/voice/call", body, new AbortController().signal);
+    assert.equal(!busy.ok && busy.code, "unavailable");
+    assert.equal(!busy.ok && busy.retryAfter, 30);
+    globalThis.fetch = (async () => new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } })) as typeof fetch;
+    const notAStream = await openCall("/api/voice/call", body, new AbortController().signal);
+    assert.equal(notAStream.ok, false, "a 200 that is not an event stream is no call");
+  });
+
+  it("aborted before the headers: no call; aborted after them: the running body is cut, and the deadline no longer applies", async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const seen: RequestInit[] = [];
+    globalThis.fetch = hangingFetch(seen);
+    const early = new AbortController();
+    early.abort();
+    assert.deepEqual(await openCall("/api/voice/call", body, early.signal), { ok: false, code: "network" });
+    assert.equal(seen[0].signal?.aborted, true);
+
+    const stream = chunkedBody();
+    let requestSignal: AbortSignal | null = null;
+    globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+      requestSignal = init?.signal ?? null;
+      return new Response(stream.body, { status: 200, headers: { "content-type": "text/event-stream" } });
+    }) as typeof fetch;
+    const late = new AbortController();
+    const opened = await openCall("/api/voice/call", body, late.signal);
+    assert.equal(opened.ok, true);
+    t.mock.timers.tick(30_000);
+    assert.equal((requestSignal as AbortSignal | null)?.aborted, false, "the call runs longer than the header deadline");
+    late.abort();
+    assert.equal((requestSignal as AbortSignal | null)?.aborted, true);
+  });
+});
+
+describe("ready signal", () => {
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  it("never aborts a request whose answer has arrived, and reads the answer's body", async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const seen: RequestInit[] = [];
+    let answer: Response | null = null;
+    globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+      seen.push(init ?? {});
+      answer = new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } });
+      return answer;
+    }) as typeof fetch;
+    sendReady("/api/voice/ready", { sessionToken: "token-1" });
+    await settleRounds();
+    t.mock.timers.tick(10_000);
+    await settleRounds();
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].keepalive, true);
+    assert.deepEqual(JSON.parse(String(seen[0].body)), { sessionToken: "token-1" });
+    assert.equal(seen[0].signal?.aborted, false, "the answer came: nothing to abort");
+    assert.equal((answer as Response | null)?.bodyUsed, true, "the body is read and discarded");
+  });
+
+  it("aborts a request still without an answer after five seconds, and never throws", async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    const seen: RequestInit[] = [];
+    globalThis.fetch = hangingFetch(seen);
+    sendReady("/api/voice/ready", { sessionToken: "token-1" });
+    await settleRounds();
+    t.mock.timers.tick(4_999);
+    await settleRounds();
+    assert.equal(seen[0].signal?.aborted, false);
+    t.mock.timers.tick(1);
+    await settleRounds();
+    assert.equal(seen[0].signal?.aborted, true);
+
+    globalThis.fetch = (() => {
+      throw new TypeError("no fetch");
+    }) as typeof fetch;
+    assert.doesNotThrow(() => sendReady("/api/voice/ready", { sessionToken: "token-1" }));
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The stage's focus when the sound comes on (voice-stage.tsx; no DOM here: read from the source)
+// ---------------------------------------------------------------------------------------------
+
+describe("stage focus after the turn-on-sound button", () => {
+  it("moves the focus to the primary button, without scrolling, in a layout effect, when the button goes away", () => {
+    const source = readFileSync(path.join(process.cwd(), "components", "voice", "voice-stage.tsx"), "utf8");
+    const condition = source.indexOf('previous === "audio_blocked" && notice !== "audio_blocked" && focusWasDropped()');
+    assert.ok(condition > 0, "the notice leaving audio_blocked with the focus dropped is handled");
+    const effectStart = source.lastIndexOf("useLayoutEffect(", condition);
+    assert.ok(effectStart > 0, "in a layout effect");
+    assert.equal(source.slice(effectStart, condition).includes("useEffect("), false, "the nearest effect is the layout one");
+    const effectEnd = source.indexOf("}, [notice]);", condition);
+    assert.ok(effectEnd > condition);
+    assert.match(source.slice(condition, effectEnd), /primaryRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   });
 });
